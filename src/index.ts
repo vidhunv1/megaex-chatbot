@@ -1,8 +1,11 @@
-const TelegramBot = require('node-telegram-bot-api');
+import * as TelegramBot from 'node-telegram-bot-api';
 const TOKEN = '533091025:AAEYbCc7meRtZN2DJlIYDyZ37BQSAJuGm5c'
 const options = {
   webHook: {
-    port: 88
+    port: 88,
+    key: '',
+    cert: '',
+    pfx: ''
   }
 };
 
