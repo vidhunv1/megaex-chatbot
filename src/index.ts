@@ -1,4 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api';
+import * as Express from 'express'
 const TOKEN = '533091025:AAEYbCc7meRtZN2DJlIYDyZ37BQSAJuGm5c'
 const options = {
   webHook: {
@@ -18,3 +19,11 @@ bot.setWebHook(`${url}/bot${TOKEN}`);
 bot.on('message', function onMessage(msg) {
   bot.sendMessage(msg.chat.id, 'Hello World');
 });
+
+// load balancer ping test
+var app = Express()
+app.get('/ping', function (req, res) {
+  res.send('pong')
+})
+
+app.listen(89)
