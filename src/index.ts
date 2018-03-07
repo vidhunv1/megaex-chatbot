@@ -22,7 +22,7 @@ bot.on('message', function onMessage(msg) {
 
 // load balancer ping test
 var app = Express()
-app.get('/ping', function (req, res) {
+app.get('/', function (req, res) {
   res.send('pong')
 })
 
