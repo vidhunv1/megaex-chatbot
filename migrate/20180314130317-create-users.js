@@ -14,7 +14,7 @@ module.exports = {
       currencyCode: {
         type: Sequelize.STRING(10)
       },
-      userId: {
+      accountId: {
         type: Sequelize.STRING
       },
       createdAt: {

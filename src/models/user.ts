@@ -1,4 +1,4 @@
-import {Table, Column, Model, PrimaryKey, AllowNull, AutoIncrement, HasOne} from 'sequelize-typescript';
+import {Table, Column, Model, PrimaryKey, AllowNull, AutoIncrement, HasOne, Unique, Default} from 'sequelize-typescript';
 import TelegramUser from './telegram_user'
 
 @Table({timestamps: true, tableName: 'Users'})
@@ -15,6 +15,18 @@ export default class User extends Model<User> {
   @Column
   language!: string;
 
+  @Unique
+  @Column
+  accountId!: string;
+
   @Column
   currencyCode!: string;
+
+  @Default(false)
+  @Column
+  isTermsAccepted!: boolean;
+
+  @Default(0)
+  @Column
+  messageCount!: number
 }
