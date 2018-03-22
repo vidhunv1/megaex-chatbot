@@ -8,13 +8,13 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.BIGINT
       },
-      language: {
-        type: Sequelize.STRING(10)
-      },
-      currencyCode: {
+      locale: {
+        allowNull: false,
+        default: 'en',
         type: Sequelize.STRING(10)
       },
       accountId: {
+        unique: true,
         type: Sequelize.STRING
       },
       createdAt: {

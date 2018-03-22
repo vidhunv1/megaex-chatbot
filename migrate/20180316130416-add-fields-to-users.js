@@ -1,39 +1,36 @@
 'use strict';
-
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface
-      .addColumn('Users', 'messageCount', {
-        type: Sequelize.INTEGER,
-        field: 'messageCount',
-        allowNull: false,
-        defaultValue: 0,
-      })
-      .then(a => {
-        return queryInterface.addColumn('Users', 'isTermsAccepted', {
-          type: Sequelize.BOOLEAN,
-          field: 'isTermsAccepted',
-          allowNull: false,
-          defaultValue: false,
-        })
-        .then(a => {
-          return queryInterface.addColumn('Users', 'isVerified', {
-            type: Sequelize.BOOLEAN,
-            field: 'isVerified',
-            allowNull: false,
-            defaultValue: false,
-          })          
-        })
-      })
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.addColumn('Users', 'messageCount', {
+      type: Sequelize.INTEGER,
+      field: 'messageCount',
+      allowNull: false,
+      defaultValue: 0,
+    })
+    await queryInterface.addColumn('Users', 'isTermsAccepted', {
+      type: Sequelize.BOOLEAN,
+      field: 'isTermsAccepted',
+      allowNull: false,
+      defaultValue: false,
+    })
+    await queryInterface.addColumn('Users', 'isVerified', {
+      type: Sequelize.BOOLEAN,
+      field: 'isVerified',
+      allowNull: false,
+      defaultValue: false,
+    })
+    return await queryInterface.addColumn('Users', 'currencyCode', {
+      type: Sequelize.STRING,
+      field: 'currencyCode',
+      defaultValue: 'usd',
+      allowNull: false,
+    })
   },
 
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.removeColumn('Users', 'messageCount')
-      .then(a => {
-        return queryInterface.removeColumn('Users', 'isTermsAccepted')
-          .then(a => {
-            return queryInterface.removeColumn('Users', 'isVerified') 
-          })
-      });
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.removeColumn('Users', 'messageCount')
+    await queryInterface.removeColumn('Users', 'isTermsAccepted')
+    await queryInterface.removeColumn('Users', 'isVerified')
+    return await queryInterface.removeColumn('Users', 'currencyCode')
   }
 };

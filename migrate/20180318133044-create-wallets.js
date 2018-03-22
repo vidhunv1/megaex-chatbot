@@ -1,27 +1,40 @@
 'use strict';
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('TelegramUsers', {
+    return queryInterface.createTable('Wallets', {
       id: {
         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.BIGINT
+        type: Sequelize.INTEGER
       },
       userId: {
         type: Sequelize.BIGINT,
         allowNull: false,
         references: { model: 'Users', key: 'id' }
       },
-      firstName: {
-        type: Sequelize.STRING
+      availableBalance: {
+        allowNull: false,
+        defaultValue: 0.0,
+        type: Sequelize.FLOAT
       },
-      lastName: {
-        type: Sequelize.STRING
+      unconfirmedBalance: {
+        allowNull: false,
+        defaultValue: 0.0,
+        type: Sequelize.FLOAT
       },
-      languageCode: {
+      blockedBalance: {
+        allowNull: false,
+        defaultValue: 0.0,
+        type: Sequelize.FLOAT
+      },
+      currencyCode: {
+        allowNull: false,
         type: Sequelize.STRING(10)
       },
-      username: {
+      address: {
+        allowNull: false,
         type: Sequelize.STRING
       },
       createdAt: {
@@ -34,7 +47,8 @@ module.exports = {
       }
     });
   },
+
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('TelegramUsers');
+    return queryInterface.dropTable('Wallets');
   }
 };

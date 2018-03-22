@@ -1,5 +1,8 @@
-import {Table, Column, Model, PrimaryKey, AllowNull, AutoIncrement, HasOne, Unique, Default} from 'sequelize-typescript';
+import {Table, Column, Model, PrimaryKey, AllowNull, AutoIncrement, HasOne, Unique, Default, HasMany} from 'sequelize-typescript';
 import TelegramUser from './telegram_user'
+import Wallet from './wallet';
+import Transaction from './transaction';
+import I18n from '../helpers/i18n'
 
 @Table({timestamps: true, tableName: 'Users'})
 export default class User extends Model<User> {
@@ -12,21 +15,40 @@ export default class User extends Model<User> {
   @HasOne(() => TelegramUser, 'userId')
   telegramUser!: TelegramUser;
 
+  @HasMany(() => Wallet, 'userId')
+  wallets!: Wallet[];
+
+  @HasMany(() => Transaction, 'userId')
+  transactions!: Transaction[];
+
+  @Default('en')
   @Column
-  language!: string;
+  locale!: string;
 
   @Unique
   @Column
   accountId!: string;
 
-  @Column
-  currencyCode!: string;
-
   @Default(false)
   @Column
   isTermsAccepted!: boolean;
 
+  @Default(false)
+  @Column
+  isVerified!: boolean;
+
+  @Default('usd')
+  @Column
+  currencyCode!: string
+
   @Default(0)
   @Column
   messageCount!: number
+
+  __(...args:any[]):string {
+    let locale = this.locale ? this.locale : 'en';
+    let i18n = (new I18n()).getI18n();
+    args[0] = {phrase: args[0], locale: locale}
+    return i18n.__.apply(null, args);
+  }
 }

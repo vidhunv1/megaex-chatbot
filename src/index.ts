@@ -1,23 +1,41 @@
 import * as TelegramBot from 'node-telegram-bot-api';
 import * as Express from 'express'
 import { Sequelize } from 'sequelize-typescript';
+import TelegramBotApi from './helpers/telegram-bot-api'
+import MessageQueue from './helpers/message-queue';
+
 import User from './models/user'
 import TelegramUser from './models/telegram_user'
+import Wallet from './models/wallet'
 
 import * as DatabaseConfig from '../config/database.json'
-import * as AppConfig from '../config/app.json'
-import { redisKeys } from './keys'
+import CacheKeys from './cache-keys'
 import Store from './helpers/store';
+import Logger from './helpers/logger'
+import TelegramHandler from './helpers/t-message-handler' 
 
-var env = process.env.NODE_ENV || 'development';
-var sequelize = new Sequelize((<any>DatabaseConfig)[env]);
+let env = process.env.NODE_ENV || 'development';
+
+let logger = (new Logger()).getLogger();
+logger.info('Starting app...');
+
+// ****** Initialize Sequelize database with Postgres ******
+logger.info('Initializing database');
+let sequelize = new Sequelize({
+  ...(<any>DatabaseConfig)[env], logging: function (sql:any, _sequelizeObject:any) {
+    logger.info(sql);
+  }
+});
 sequelize.addModels([__dirname + '/models/']);
 
+// ****** Initialize Redis client ******
 let redisStore = new Store();
 const redisClient: any = redisStore.getClient();
 
+/* ***** DEBUG ***** */
 const { exec } = require('child_process');
 exec(`telegram-send --pre "reload ${(new Date()).toLocaleTimeString()}"`);
+/* ***** DEBUG ***** */
 
 // load balancer ping test
 var app = Express()
@@ -26,73 +44,66 @@ app.get('/', function (_, res) {
 })
 app.listen(89)
 
-const bot = new TelegramBot((<any>AppConfig)["telegram_access_token"], {
-  webHook: {
-    port: (<any>AppConfig)["telegram_bot_port"],
-    key: '',
-    cert: '',
-    pfx: ''
+let tBot = (new TelegramBotApi()).getBot();
+let messageQueue = new MessageQueue();
+let tMessageHandler = new TelegramHandler();
+
+
+tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
+  let rKeys = (new CacheKeys(msg.chat.id)).getKeys();
+  if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
+    tBot.sendChatAction(msg.chat.id, 'typing');
+
+    let userCache = (await redisClient.getAsync(rKeys.telegramUser.key));
+    if (userCache) { //user exists in redis cache
+      let cache:TelegramUser = JSON.parse(userCache);
+      let tU:TelegramUser = new TelegramUser(cache);
+      tU.user = new User(cache.user);
+      tMessageHandler.handleMessage(msg, tU.user, tU);
+    } else { // no user data available in cache
+      //check if user exists
+      let tUser = await TelegramUser.findById(msg.from.id, { include: [{ model: User }] });
+      if (!tUser) { // new user, create account & load cache
+        let newT = new TelegramUser({ id: msg.from.id, firstName: msg.from.first_name, lastName: msg.from.last_name, languageCode: msg.from.language_code, username: msg.from.username })
+        try {
+          logger.info("Creating new account...")
+          tUser = await newT.create();
+        } catch (e) {
+          logger.error("Error creating account: TelegramUser.create: " + JSON.stringify(e));
+          tBot.sendMessage(msg.chat.id, (new User()).__('error_unknown'));
+          return;
+        }
+
+        //create all wallets for user
+        let btcWallet = new Wallet({ userId: tUser.user.id });
+        btcWallet.create();
+
+        tMessageHandler.handleMessage(msg, tUser.user, tUser);
+      } else { // user account exists, load data to cache in next step
+        tMessageHandler.handleMessage(msg, tUser.user, tUser);
+        // tBot.sendMessage(msg.chat.id, tUser.user.__());
+      }
+      await redisClient.setAsync(rKeys.telegramUser.key, JSON.stringify(tUser), 'EX', rKeys.telegramUser.expiry);
+    }
+
+    if ((await redisClient.existsAsync(rKeys.messageCounter.shadowKey) == 1)) {
+      await redisClient.incrAsync(rKeys.messageCounter.key);
+    } else {
+      await redisClient.setAsync(rKeys.messageCounter.key, 1);
+      await redisClient.setAsync(rKeys.messageCounter.shadowKey, '', 'EX', rKeys.messageCounter.expiry);
+    }
+  } else if (msg.chat.type === 'group') {
+    tBot.sendMessage(msg.chat.id, 'Group conversations are temporarily disabled.');
+  } else {
+    tBot.sendMessage(msg.chat.id, 'An error occured. Please try again later.');
   }
 });
 
-bot.setWebHook(`${(<any>AppConfig)["telegram_bot_url"] + ':' + (<any>AppConfig)["telegram_bot_port"]}/bot${(<any>AppConfig)["telegram_access_token"]}`);
-
-bot.on('message', async function onMessage(msg: TelegramBot.Message) {
-  if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
-    try {
-      bot.sendChatAction(msg.chat.id, 'typing');
-      // let counterKey = msg.from.id + ':' + RedisKeys.messageCounter.key;
-      // let userHMKey = msg.from.id + ':' + RedisKeys.userHM.key;
-
-      let firstName = (await redisClient.hmgetAsync(redisKeys(msg.from.id).userHM.key, redisKeys(msg.from.id).userHM.firstName))[0];
-      if (firstName) { //user exists in redis cache
-        bot.sendMessage(msg.chat.id, `Welcome back ${firstName}!`);
-      } else { // no user data available in cache
-
-        //check if user exists
-        let tUser = await TelegramUser.findById(msg.from.id, { include: [{ model: User }] });
-        if (!tUser) { // new user, create account & load cache
-          let newT = new TelegramUser({ id: msg.from.id, firstName: msg.from.first_name, lastName: msg.from.last_name, languageCode: msg.from.language_code, username: msg.from.username })
-          tUser = await newT.create();
-          bot.sendMessage(msg.chat.id, `Hello ${tUser.firstName}. Get started with megaex bot for trading bitcoins.`);
-        } else { // user account exists, load data to cache in next step
-          bot.sendMessage(msg.chat.id, `Welcome back ${tUser.firstName}!`);
-        }
-        let fromId = msg.from.id;
-        //Load user data to cache
-        var values: string[] = [];
-        if (tUser.firstName)
-          values.push(redisKeys(msg.from.id).userHM.firstName, tUser.firstName);
-        if (tUser.lastName)
-          values.push(redisKeys(msg.from.id).userHM.lastName, tUser.lastName);
-        if (tUser.username)
-          values.push(redisKeys(msg.from.id).userHM.telegramUsername, tUser.username);
-        if (tUser.user.accountId)
-          values.push(redisKeys(msg.from.id).userHM.accountId, tUser.user.accountId);
-        if (tUser.user.language)
-          values.push(redisKeys(msg.from.id).userHM.language, tUser.user.language);
-        if (tUser.user.currencyCode)
-          values.push(redisKeys(msg.from.id).userHM.currencyCode, tUser.user.currencyCode);
-        redisClient.hmsetAsync(redisKeys(msg.from.id).userHM.key, values)
-          .then((_: any, __: any) => {
-            redisClient.expireAsync(redisKeys(fromId).userHM.key, redisKeys(fromId).userHM.expiry)
-          });
-      }
-
-      if ((await redisClient.existsAsync(redisKeys(msg.from.id).messageCounter.shadowKey) == 1)) {
-        await redisClient.incrAsync(redisKeys(msg.from.id).messageCounter.key);
-      } else {
-        await redisClient.setAsync(redisKeys(msg.from.id).messageCounter.key, 1);
-        await redisClient.setAsync(redisKeys(msg.from.id).messageCounter.shadowKey, '', 'EX', redisKeys().messageCounter.expiry);
-      }
-    } catch (e) {
-      console.error("ERROR" + JSON.stringify(e));
-      exec(`telegram-send --pre "ERROR!! ${JSON.stringify(e)}"`);
-      bot.sendMessage(msg.chat.id, 'An error occured. Please try again.');
-    }
-  } else if (msg.chat.type === 'group') {
-    bot.sendMessage(msg.chat.id, 'Group conversations are temporarily disabled.');
-  } else {
-    bot.sendMessage(msg.chat.id, 'An error occured. Please try again later.');
-  }
+process.on('SIGINT', async function () {
+  logger.info("Ending process...");
+  logger.info("closing sql");
+  await sequelize.close();
+  await redisStore.close();
+  await messageQueue.close();
+  process.exit(0);
 });
