@@ -17,7 +17,7 @@ import TelegramHandler from './helpers/t-message-handler'
 let env = process.env.NODE_ENV || 'development';
 
 let logger = (new Logger()).getLogger();
-logger.info('Starting app...');
+logger.info('starting app ...');
 
 // ****** Initialize Sequelize database with Postgres ******
 logger.info('Initializing database');
@@ -50,10 +50,10 @@ let tMessageHandler = new TelegramHandler();
 
 
 tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
+  try {
   let rKeys = (new CacheKeys(msg.chat.id)).getKeys();
   if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
-    tBot.sendChatAction(msg.chat.id, 'typing');
-
+    await tBot.sendChatAction(msg.chat.id, 'typing');
     let userCache = (await redisClient.getAsync(rKeys.telegramUser.key));
     if (userCache) { //user exists in redis cache
       let cache:TelegramUser = JSON.parse(userCache);
@@ -95,6 +95,11 @@ tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
   } else if (msg.chat.type === 'group') {
     tBot.sendMessage(msg.chat.id, 'Group conversations are temporarily disabled.');
   } else {
+    logger.error("Unhandled telegram message action");
+    tBot.sendMessage(msg.chat.id, 'ERROR: Unhandled telegram message action');
+  }
+  } catch(e) {
+    logger.error("FATAL: And unknown error occurred: "+JSON.stringify(e));
     tBot.sendMessage(msg.chat.id, 'An error occured. Please try again later.');
   }
 });
