@@ -55,36 +55,38 @@ tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
   if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
     await tBot.sendChatAction(msg.chat.id, 'typing');
     let userCache = (await redisClient.getAsync(rKeys.telegramUser.key));
+    let tUser:TelegramUser, user:User;
     if (userCache) { //user exists in redis cache
       let cache:TelegramUser = JSON.parse(userCache);
-      let tU:TelegramUser = new TelegramUser(cache);
-      tU.user = new User(cache.user);
-      tMessageHandler.handleMessage(msg, tU.user, tU);
+      tUser = new TelegramUser(cache);
+      user = new User(cache.user);
+      console.log("UserCache: "+JSON.stringify(cache));
     } else { // no user data available in cache
       //check if user exists
-      let tUser = await TelegramUser.findById(msg.from.id, { include: [{ model: User }] });
-      if (!tUser) { // new user, create account & load cache
+      let getTUser = await TelegramUser.findById(msg.from.id, { include: [{ model: User }] });
+      if (!getTUser) { // new user, create account & load cache
         let newT = new TelegramUser({ id: msg.from.id, firstName: msg.from.first_name, lastName: msg.from.last_name, languageCode: msg.from.language_code, username: msg.from.username })
         try {
           logger.info("Creating new account...")
           tUser = await newT.create();
+          tUser.user.id = tUser.userId;
+          user = tUser.user;
         } catch (e) {
           logger.error("Error creating account: TelegramUser.create: " + JSON.stringify(e));
           tBot.sendMessage(msg.chat.id, (new User()).__('error_unknown'));
           return;
         }
-
         //create all wallets for user
         let btcWallet = new Wallet({ userId: tUser.user.id });
         btcWallet.create();
-
-        tMessageHandler.handleMessage(msg, tUser.user, tUser);
-      } else { // user account exists, load data to cache in next step
-        tMessageHandler.handleMessage(msg, tUser.user, tUser);
-        // tBot.sendMessage(msg.chat.id, tUser.user.__());
+      } else {
+        tUser = getTUser;
+        user = tUser.user;
       }
-      await redisClient.setAsync(rKeys.telegramUser.key, JSON.stringify(tUser), 'EX', rKeys.telegramUser.expiry);
+      console.log("SAVING TO CACHE: "+JSON.stringify(tUser));
+      redisClient.setAsync(rKeys.telegramUser.key, JSON.stringify(tUser), 'EX', rKeys.telegramUser.expiry);
     }
+    tMessageHandler.handleMessage(msg, user, tUser);
 
     if ((await redisClient.existsAsync(rKeys.messageCounter.shadowKey) == 1)) {
       await redisClient.incrAsync(rKeys.messageCounter.key);
@@ -101,6 +103,33 @@ tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
   } catch(e) {
     logger.error("FATAL: And unknown error occurred: "+JSON.stringify(e));
     tBot.sendMessage(msg.chat.id, 'An error occured. Please try again later.');
+  }
+});
+
+tBot.on("callback_query", async function(callback) {
+  await tBot.answerCallbackQuery(callback.id);
+  
+  let msg:TelegramBot.Message = callback.message, tUser:TelegramUser|null = null, user:User|null = null;
+  let cacheKeys = (new CacheKeys(msg.chat.id)).getKeys();
+  let userCache = (await redisClient.getAsync(cacheKeys.telegramUser.key));
+  
+  if (userCache) { //user exists in redis cache
+    let cache:TelegramUser = JSON.parse(userCache);
+    tUser = new TelegramUser(cache);
+    user = new User(cache.user);
+  } else { // get from db
+    try {
+      tUser = await TelegramUser.findById(msg.chat.id, { include: [{ model: User }] });
+      user = tUser ? tUser.user : null;
+    } catch(e) {
+      logger.error("FATAL: could not get user details");  
+    }
+  }
+
+  if(tUser && user) {
+    tMessageHandler.handleCallbackQuery(callback.message, user, tUser, callback);
+  } else {
+    logger.error("FATAL: user does not exist when it should have");
   }
 });
 

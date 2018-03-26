@@ -23,7 +23,7 @@ export default class User extends Model<User> {
 
   @Default('en')
   @Column
-  locale!: string;
+  public locale!: string;
 
   @Unique
   @Column
@@ -50,5 +50,10 @@ export default class User extends Model<User> {
     let i18n = (new I18n()).getI18n();
     args[0] = {phrase: args[0], locale: locale}
     return i18n.__.apply(null, args);
+  }
+
+  __n(phrase: string, count: number):string {
+    let i18n = (new I18n()).getI18n();
+    return i18n.__n({singular: phrase, plural: phrase, count: count, locale: 'en'});
   }
 }

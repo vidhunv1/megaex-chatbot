@@ -11,16 +11,32 @@
 	"info": "🌐 Info",
 	"settings": "⚙️ Settings",
 	"initial_message %s": "initial_message %s",
-	"unknown_message": "Sorry, could not understand your request.\n\nMegaEx is a fast and secure multi-cryptocurrency wallet and peer-to-peer Bitcoin exchange.\n\nYou can read the getting-started guide for more information on using using the wallet, trading and security guidelines.",
-	"show_wallet_balance %s %s %s %s": "💼 *%2$s wallet*\n\n  Total Balance: *%3$d %1$s* (~ ₹%4$d)",
-	"show_wallet__balance_unconfirmed %s %s %s %s %s %s": "💼 *%2$s wallet*\n\n  total Balance: *%3$s %1$s* (~ ₹%4$s)\nunconfirmed: %5$s %1$s(~ ₹%%6$s)",
-	"show_wallet_balance_inorder %s %s %s %s %s %s %s %s": "💼 *%2$s wallet*\n\n  total Balance: *%3$s %1$s* (~ ₹%4$s)\nunconfirmed: %5$s %1$s(~ ₹%%6$s)\n\ntrade order: %7$s %1$s(~ ₹%8$s)",
-	"btc_full": {
+  "unknown_message": "Sorry, could not understand your request.\n\nMegaEx is a fast and secure multi-cryptocurrency wallet and peer-to-peer Bitcoin exchange.\n\nYou can read the getting-started guide for more information on using using the wallet, trading and security guidelines.",
+  
+	"show_wallet_balance %s %s %s %s": "💼 *Wallet* > *%1$s*\n\n  Total Balance: *%2$s %3$s*\n                        ~  ₹%4$s",
+	"show_wallet__balance_unconfirmed %s %s %s %s %s %s": "💼 *%2$s wallet*\n\n  total Balance: *%3$s %1$s* (~ ₹%4$s)\nunconfirmed: %5$s %1$s(~ ₹%6$s)",
+  "show_wallet_balance_inorder %s %s %s %s %s %s %s %s": "💼 *%2$s wallet*\n\n  total Balance: *%3$s %1$s* (~ ₹%4$s)\nunconfirmed: %5$s %1$s(~ ₹%6$s)\n\ntrade order: %7$s %1$s(~ ₹%8$s)",
+  "send %s": "⚡️ Send %s",
+  "my_address": "📩 My Address", 
+  "withdraw": "📤 Withdraw",
+  "prev": "⬅️ prev ",
+  "next": "next ➡️",
+  "pagination %s %d %d": "%s (%d/%d)",
+  "show_address %s": "*%s*",
+  "show_address_header %s": "📩 *%1$s Address*\n\n💡 All deposits made to this address will be available in your *%1$s wallet* immediately.",
+  "address_info": "Address Info",
+  "qr_code": "QR Code",
+  "new_address": "✨ New Address",
+  "new_address_generated %s": "✨ New *%s address* created\n\n💡 You will still get credited for any deposits made to your previous address's.",
+  "error_new_address": "Error generating new address",
+  "back": "⬅️ Back ",
+  "help_command": "❔ /help",
+  "btc": {
 		"one": "bitcoin",
 		"other": "bitcoins"
 	},
-	"btc_test_full": {
-		"one": "testnet bitcoin",
-		"other": "testnet bitcoins"
+	"tbtc": {
+		"one": "testnet-bitcoin",
+		"other": "testnet-bitcoins"
 	}
 }

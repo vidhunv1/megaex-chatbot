@@ -33,25 +33,11 @@ export default class CacheKeys {
         shadowKey: "TMessageCounterExpire" + formattedId
       },
       tContext: {
-        key: "TContext"
+        key: "TContext",
+        currentContext: "currentContext",
+        "wallet.coin": "wallet.coin",
       }
     }
-  }
-
-  async getContext(getKeys: string[] | undefined = undefined) {
-    let result:any = {};
-    if(!getKeys) {
-      let r:string[] = await this.redisClient.hgetallAsync(this.getKeys().tContext.key);
-      for(let i=0; i<r.length; i+=2) {
-        result[r[i]] = r[i+1];
-      }
-    } else {
-      let r:string[] = await this.redisClient.hmgetAsync(this.getKeys().tContext.key, getKeys);
-      for(let i=0; i<r.length; i++) {
-        result[getKeys[i]] = r[i];
-      }
-    }
-    return result;
   }
 
   async clearUserCache() {
