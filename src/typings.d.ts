@@ -18,7 +18,9 @@ interface KeysInterface {
   tContext: {
     key:string,
     currentContext:string,
-    "wallet.coin":string
+    "Wallet.coin":string,
+    "CoinSend.isInputAmount":string,
+    "CoinSend.amount":string
   }
 }
 

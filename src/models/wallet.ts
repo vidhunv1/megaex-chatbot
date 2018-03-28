@@ -56,7 +56,7 @@ export default class Wallet extends Model<Wallet> {
 
       //generate testnet btc address
       let btcTestAddress = await messageQueue.generateBtcAddress(this.userId);
-      wallets.push(await Wallet.create<Wallet>({ userId: this.userId, address: btcTestAddress, currencyCode: Wallet.getCurrencyCodes()[0] }, {}));
+      wallets.push(await Wallet.create<Wallet>({ userId: this.userId, address: btcTestAddress, currencyCode: Wallet.getCurrencyCodes()[1] }, {}));
 
       return wallets;
     } catch (e) {

@@ -1,6 +1,6 @@
 import {Table, Column, Model, ForeignKey, DataType, BelongsTo, PrimaryKey, AllowNull} from 'sequelize-typescript';
 import User from './user';
-import IdGenerator from '../helpers/id-generator'
+import RandomGenerator from '../helpers/random-generator'
 
 @Table({timestamps: true, tableName: 'TelegramUsers'})
 export default class TelegramUser extends Model<TelegramUser> {
@@ -30,7 +30,7 @@ export default class TelegramUser extends Model<TelegramUser> {
   username!: string
 
   async create(): Promise<TelegramUser> {
-    let idGen:IdGenerator =  new IdGenerator();
+    let idGen:RandomGenerator =  new RandomGenerator();
     let accountId = await idGen.generateId();
     let id, u = null;
     do {

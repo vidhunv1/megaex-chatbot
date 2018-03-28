@@ -7,11 +7,11 @@
      "dialect": "postgres"
    },
   "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "username": "megaexch",
+     "password": "#98ean1B+i*_n8!",
+     "database": "megaex_development",
+     "host": "megaex-db.csxttcl6muwt.ap-south-1.rds.amazonaws.com",
+     "dialect": "postgres"
   },
   "production": {
     "username": "root",

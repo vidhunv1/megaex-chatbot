@@ -35,7 +35,9 @@ export default class CacheKeys {
       tContext: {
         key: "TContext",
         currentContext: "currentContext",
-        "wallet.coin": "wallet.coin",
+        "Wallet.coin": "Wallet.coin",
+        "CoinSend.isInputAmount": "CoinSend.isInputAmount",
+        "CoinSend.amount": "CoinSend.amount"
       }
     }
   }

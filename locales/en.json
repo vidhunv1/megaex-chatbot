@@ -4,7 +4,7 @@
 	"tc_privacy": "Please read our [Terms](https://google.com) and [Privacy Policy](https://google.com). Tap on\n*I Agree* from input below to accept.",
 	"initial_message": "Your account is now ready! Tap on the options from input below to start.",
 	"user_profile %s %d": "Account: %s\n\nBtc Balance: %d",
-	"continue": "👍 Continue",
+	"continue": "👍Continue",
 	"i_agree": "✅ I Agree",
 	"wallet": "💼 Wallet",
 	"buy_sell": "💸 Buy / Sell BTC",
@@ -13,9 +13,9 @@
 	"initial_message %s": "initial_message %s",
   "unknown_message": "Sorry, could not understand your request.\n\nMegaEx is a fast and secure multi-cryptocurrency wallet and peer-to-peer Bitcoin exchange.\n\nYou can read the getting-started guide for more information on using using the wallet, trading and security guidelines.",
   
-	"show_wallet_balance %s %s %s %s": "💼 *Wallet* > *%1$s*\n\n  Total Balance: *%2$s %3$s*\n                        ~  ₹%4$s",
-	"show_wallet__balance_unconfirmed %s %s %s %s %s %s": "💼 *%2$s wallet*\n\n  total Balance: *%3$s %1$s* (~ ₹%4$s)\nunconfirmed: %5$s %1$s(~ ₹%6$s)",
-  "show_wallet_balance_inorder %s %s %s %s %s %s %s %s": "💼 *%2$s wallet*\n\n  total Balance: *%3$s %1$s* (~ ₹%4$s)\nunconfirmed: %5$s %1$s(~ ₹%6$s)\n\ntrade order: %7$s %1$s(~ ₹%8$s)",
+  "show_wallet_balance %s %s %s %s %s": "💼 *Wallet* > *%1$s*\n\n  👤 Account ID: %5$s\n\n Total Balance: *%2$s %3$s*\n                        ~  ₹%4$s",
+  "unconfirmed_balance %s %s %s": "\n  Unconfirmed Balance: *%1$s %2$s*\n                        ~  ₹%3$s",
+  "blocked_balance %s %s %s": "\n  Blocked Balance: *%1$s %2$s*\n                        ~  ₹%3$s",
   "send %s": "⚡️ Send %s",
   "my_address": "📩 My Address", 
   "withdraw": "📤 Withdraw",
@@ -25,11 +25,20 @@
   "show_address %s": "*%s*",
   "show_address_header %s": "📩 *%1$s Address*\n\n💡 All deposits made to this address will be available in your *%1$s wallet* immediately.",
   "address_info": "Address Info",
-  "qr_code": "QR Code",
+  "qr_code": "🔲 QR Code",
   "new_address": "✨ New Address",
   "new_address_generated %s": "✨ New *%s address* created\n\n💡 You will still get credited for any deposits made to your previous address's.",
   "error_new_address": "Error generating new address",
+  "send_payment_info %s": "⚡️ *Send %1$s*\n\n💡 This creates a private *payment link* that can be used to send %1$s to anyone *instantly* with *zero fees*.",
+  "send_payment_enter_details %s %s %s %s": "Enter the amount in *%2$s* or *%4$s* to for this payment.\n\n Example: _%1$s %2$s_ or _%3$s %4$s_",
+  "send_payment_create_confirm %s %s": "A payment link of *%1$s %2$s* will be created. Do you want to continue?",
+  "send_payment_insufficient_balance": "You have insufficient balance to make a payment.",
+  "send_payment_cancelled": "The payment was cancelled",
+  "send_payment_unknown_req": "Could not parse your message. Cancelled action.",
+  "send_payment_created": "Your *Payment link* was created successfully. Share this link *privately* with the recipient you want to make payment to.\n\n💡 This link will *expire* in 48 hours if not used.",
   "back": "⬅️ Back ",
+  "create": "✅ Create",
+  "cancel": "❌ Cancel",
   "help_command": "❔ /help",
   "btc": {
 		"one": "bitcoin",
@@ -38,5 +47,6 @@
 	"tbtc": {
 		"one": "testnet-bitcoin",
 		"other": "testnet-bitcoins"
-	}
+  },
+  "new_transaction_credit %s %s %s %s": "Your *%s* account is credited with *%s %s*.\nTxID: %s"
 }

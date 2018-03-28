@@ -8,6 +8,7 @@ import TelegramBotApi from './telegram-bot-api'
 import TelegramUser from '../models/telegram_user';
 import Transaction from '../models/transaction';
 import Logger from './logger'
+import TMessageHandler from '../helpers/t-message-handler'
 
 var env = process.env.NODE_ENV || 'development';
 
@@ -85,11 +86,13 @@ export default class MessageQueue {
       if(user) {
         let message = '';
         if(transaction.transactionType === "receive") {
-          message = 'You have received '+transaction.amount+' '+transaction.currencyCode+'. Txid: '+transaction.transactionId;
+          message = user.__('new_transaction_credit %s %s %s %s', user.__(transaction.currencyCode), transaction.amount, transaction.currencyCode, transaction.transactionId);
         } else {
           message = 'Your send request '+transaction.amount+' '+transaction.currencyCode+' was successful. Txid: '+transaction.transactionId; 
         }
-        tBot.sendMessage(user.telegramUser.id, message);
+        await tBot.sendMessage(user.telegramUser.id, message, {parse_mode: 'Markdown'});
+        let tHandler = new TMessageHandler();
+        tHandler.handleWallet(null, user, user.telegramUser);
       }
       done(null);
     });

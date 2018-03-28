@@ -16,6 +16,8 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/vidhunv1/megaex-telegram-bot#readme",
   "dependencies": {
+    "@types/qrcode": "^0.8.1",
+    "bcrypt": "^1.0.3",
     "bluebird": "^3.5.1",
     "express": "^4.16.2",
     "i18n": "^0.8.3",
@@ -24,14 +26,15 @@
     "node-telegram-bot-api": "^0.30.0",
     "pg": "^7.4.1",
     "pg-hstore": "^2.3.2",
+    "qrcode": "^1.2.0",
     "redis": "^2.8.0",
     "reflect-metadata": "^0.1.12",
     "sequelize": "^4.36.1",
     "sequelize-typescript": "^0.6.3",
-    "shortid32": "^0.1.1",
     "winston": "^3.0.0-rc3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^1.0.0",
     "@types/express": "^4.11.1",
     "@types/i18n": "^0.8.3",
     "@types/kue": "^0.11.8",
