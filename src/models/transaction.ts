@@ -1,10 +1,11 @@
-import {Table, Column, Model, ForeignKey, Unique ,DataType, BelongsTo, PrimaryKey, AllowNull} from 'sequelize-typescript';
+import {Table, Column, Model, ForeignKey, Unique ,DataType, BelongsTo, PrimaryKey, AllowNull, AutoIncrement} from 'sequelize-typescript';
 import User from './user';
 
 @Table({timestamps: true, tableName: 'Transactions'})
 export default class Transaction extends Model<Transaction> {
   @PrimaryKey
   @AllowNull(false)
+  @AutoIncrement
   @Column(DataType.INTEGER)
   id!: number;
 
@@ -25,6 +26,7 @@ export default class Transaction extends Model<Transaction> {
   @Column
   transactionType!: string;
 
+  //All send balances are negative
   @AllowNull(false)
   @Column(DataType.FLOAT)
   amount!: number;
@@ -44,4 +46,14 @@ export default class Transaction extends Model<Transaction> {
   @AllowNull(false)
   @Column
   currencyCode!: string
+
+
+  static async getTotalBalance(userId:number, currencyCode:string) {
+    // TODO: If you are paranoid, check validity of all transations from core-wallet and verify jwt for payment codes. 
+    // For now this should do.
+
+    // some bug, have to parse & stringify to get sum
+    let totalBalance:number = JSON.parse(JSON.stringify(await Transaction.find({attributes: [[Transaction.sequelize.literal('SUM(amount)'), 'sum']], where: {currencyCode: currencyCode, userId: userId}}))).sum;
+    return totalBalance;
+  }
 }

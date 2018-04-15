@@ -32,17 +32,16 @@ export default class TelegramUser extends Model<TelegramUser> {
   async create(): Promise<TelegramUser> {
     let idGen:RandomGenerator =  new RandomGenerator();
     let accountId = await idGen.generateId();
-    let id, u = null;
+    let accId, u = null;
     do {
-      id = await idGen.generateId();
+      accId = await idGen.generateId();
       u = await User.findOne({
         where: {
-          accountId: id
+          accountId: accId
         }
       })
     } while (u !== null);
-
-    let us = (await User.create<User>( {accountId: accountId}, {}))
+    let us = (await User.create<User>({accountId: accountId}, {}))
     let tUser =  await TelegramUser.create<TelegramUser>({ id: this.id, firstName: this.firstName, lastName: this.lastName, languageCode: this.languageCode, username: this.username, userId: us.id }, {})
     tUser.user = us;
     return tUser;

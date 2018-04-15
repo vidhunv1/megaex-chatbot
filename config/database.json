@@ -9,7 +9,7 @@
   "test": {
     "username": "megaexch",
      "password": "#98ean1B+i*_n8!",
-     "database": "megaex_development",
+     "database": "megaex_test",
      "host": "megaex-db.csxttcl6muwt.ap-south-1.rds.amazonaws.com",
      "dialect": "postgres"
   },

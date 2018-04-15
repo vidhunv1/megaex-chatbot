@@ -1,4 +1,7 @@
 import Store from './helpers/store'
+import * as AppConfig from '../config/app.json'
+let env = process.env.NODE_ENV || 'development';
+
 export default class CacheKeys {
   id: string | number
   redisClient:any
@@ -17,7 +20,7 @@ export default class CacheKeys {
 
   static isKey(checkKey: string, actualKey: string) {
     console.log("isKey() " + checkKey + ', ' + actualKey);
-    return (checkKey === actualKey || checkKey.split(':')[0] === actualKey)
+    return (checkKey === actualKey || checkKey.split(':')[0] === actualKey || checkKey.split(':')[0] === actualKey.split(':')[0])
   }
 
   getKeys():KeysInterface {
@@ -30,7 +33,12 @@ export default class CacheKeys {
       messageCounter: {
         key: "TMessageCounter" + formattedId,
         expiry: 60 * 10,
-        shadowKey: "TMessageCounterExpire" + formattedId
+        shadowKey: "TMessageCounterShadow" + formattedId
+      },
+      paymentExpiryTimer: {
+        key: "PaymentExpiryTimer" + formattedId,
+        shadowKey: "PaymentExpiryShadow" + formattedId,
+        expiry: (<any>AppConfig)[env]["payment_expiry"]
       },
       tContext: {
         key: "TContext",

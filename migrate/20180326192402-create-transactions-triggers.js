@@ -9,13 +9,12 @@ module.exports = {
       $BODY$
         DECLARE 
       	unconfirmed_balance FLOAT;
-      	confirmed_balance FLOAT;
+        confirmed_balance FLOAT;
       	blocked_balance FLOAT;
       BEGIN
-       SELECT SUM("Transactions"."amount") AS "unconfirmedBalance" into "confirmed_balance" from "Transactions" WHERE "currencyCode" = NEW."currencyCode" AND "userId"=NEW."userId" AND "confirmations">=1;
-       SELECT SUM("Transactions"."amount") AS "unconfirmedBalance" into "unconfirmed_balance" from "Transactions" WHERE "currencyCode" = NEW."currencyCode" AND "userId"=NEW."userId" AND "confirmations"=0;
+       SELECT COALESCE(SUM("Transactions"."amount"),0) into "confirmed_balance" from "Transactions" WHERE "currencyCode" = NEW."currencyCode" AND "userId"=NEW."userId" AND "confirmations">=1;
+       SELECT COALESCE(SUM("Transactions"."amount"),0) into "unconfirmed_balance" from "Transactions" WHERE "currencyCode" = NEW."currencyCode" AND "userId"=NEW."userId" AND "confirmations"=0;
        SELECT "blockedBalance" into "blocked_balance" from "Wallets" where "userId"=NEW."userId" AND "currencyCode" = NEW."currencyCode";
-         perform unconfirmed_balance, confirmed_balance from "Users";
  
        UPDATE "Wallets" SET "availableBalance" = COALESCE( ("confirmed_balance" + (-1*"blocked_balance")), 0.0), "unconfirmedBalance" = COALESCE("unconfirmed_balance",0.0) WHERE "userId"=NEW."userId" AND "currencyCode"=NEW."currencyCode";
  

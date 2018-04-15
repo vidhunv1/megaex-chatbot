@@ -1,24 +1,24 @@
 import * as Kue from 'kue'
-import User from '../models/user'
 import * as JWT from 'jsonwebtoken';
 
 import * as RedisConfig from '../../config/redis.json'
 import * as AppConfig from '../../config/app.json'
-import TelegramBotApi from './telegram-bot-api'
-import TelegramUser from '../models/telegram_user';
-import Transaction from '../models/transaction';
+import NotificationManager from './notification-manager'
 import Logger from './logger'
-import TMessageHandler from '../helpers/t-message-handler'
 
 var env = process.env.NODE_ENV || 'development';
+console.log("ENV: "+process.env.NODE_ENV);
 
 export default class MessageQueue {
   static instance: MessageQueue;
   queue!: Kue.Queue
+  notificationManager!:NotificationManager;
+  logger!:any;
 
   constructor() {
     if (MessageQueue.instance)
       return MessageQueue.instance;
+    this.logger = (new Logger()).getLogger();
 
     this.queue = Kue.createQueue({
       prefix: 'q',
@@ -29,16 +29,15 @@ export default class MessageQueue {
       }
     });
     this.createNotificationHandler();
-
+    this.notificationManager = new NotificationManager();
     MessageQueue.instance = this;
   }
 
   generateBtcAddress(id: number): Promise<string> {
-    let logger = (new Logger()).getLogger();
-
-    logger.info("generate btc address");
+    this.logger.info("generate btc address");
     let q = this.queue;
-    let jwtSecret = (<any>AppConfig)["jwt_secret"];
+    let jwtSecret = (<any>AppConfig)[env]["jwt_secret"];
+    let _this = this;
     const promise = new Promise(function (resolve: (address: string) => any, reject) {
       let job = q.create('btc.generateAddress', { id: id })
         .attempts(999999)
@@ -47,14 +46,13 @@ export default class MessageQueue {
             reject(new Error('Error creating job'));
           }
         });
-
       job.on('complete', function (addressSignature) {
         try {
           var decoded = JWT.verify(addressSignature, jwtSecret);
           resolve(decoded);
         } catch (err) {
           if (err.name === "JsonWebTokenError")
-            logger.error("generateBtcAddress could not verify token, invalid signature probably");
+            _this.logger.error("generateBtcAddress could not verify token, invalid signature probably");
           reject(new Error('Could not verify signature'));
         }
       }).on('failed attempt', function (_errorMessage, _doneAttempts) {
@@ -67,44 +65,21 @@ export default class MessageQueue {
   }
 
   createNotificationHandler() {
-    let logger = (new Logger()).getLogger();
-    logger.info("MessageQueue initializing notification handler");
-
-    let tBot = (new TelegramBotApi()).getBot();
-    this.queue.process('notification.newTransaction', 4, async function(job, done) {
-      logger.info("New notification: "+JSON.stringify(job));
-      let transaction = (await Transaction.findAll({
-        limit: 1,
-        where: {
-          transactionId: job.data.transactionId
-        }
-      }))[0];
-
-      let user = await User.findById(transaction.userId, {include: [TelegramUser]});
-      
-      console.log(JSON.stringify(user));
-      if(user) {
-        let message = '';
-        if(transaction.transactionType === "receive") {
-          message = user.__('new_transaction_credit %s %s %s %s', user.__(transaction.currencyCode), transaction.amount, transaction.currencyCode, transaction.transactionId);
-        } else {
-          message = 'Your send request '+transaction.amount+' '+transaction.currencyCode+' was successful. Txid: '+transaction.transactionId; 
-        }
-        await tBot.sendMessage(user.telegramUser.id, message, {parse_mode: 'Markdown'});
-        let tHandler = new TMessageHandler();
-        tHandler.handleWallet(null, user, user.telegramUser);
-      }
+    this.logger.info("MessageQueue initializing main notification handler");
+    let _this = this;
+    this.queue.process('notification', 4, async function(job, done) {
+      let notificationType = job.data.notificationType;
+      _this.notificationManager.sendNotification(notificationType, job.data);
       done(null);
     });
   }
 
   async close() {
-    let logger = (new Logger()).getLogger();
-
     let q = this.queue;
+    let _this = this;
     return new Promise(function(resolve, _reject) {
       q.shutdown(0, function(err:any) {
-        logger.info( 'Kue is shut down.', err||'' );
+        _this.logger.info( 'Kue is shut down.', err||'' );
         resolve();
       })
     })

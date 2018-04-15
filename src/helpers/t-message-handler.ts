@@ -2,13 +2,15 @@ import * as TelegramBot from 'node-telegram-bot-api';
 import TelegramBotApi from './telegram-bot-api'
 import TelegramUser from '../models/telegram_user'
 import User from '../models/user'
-import Payment from '../models/payment'
+import Payment, { PaymentError } from '../models/payment'
 import CacheStore from '../cache-keys'
 import Store from './store'
 import Wallet from '../models/wallet';
 import Logger from './logger'
+import NotificationManager from './notification-manager'
 import * as QRCode from 'qrcode'
 import * as AppConfig from '../../config/app.json'
+let env = process.env.NODE_ENV || 'development';
 
 export default class TMHandler {
   static instance: TMHandler
@@ -16,6 +18,7 @@ export default class TMHandler {
   keyboardMenu!: (user: User) => TelegramBot.KeyboardButton[][];
   redisClient: any
   logger: any
+  notificationManager!:NotificationManager
   WALLET_CONTEXT!: string
   COINSEND_CONTEXT!: string
 
@@ -26,6 +29,7 @@ export default class TMHandler {
     this.COINSEND_CONTEXT = 'CoinSend'
     this.logger = (new Logger()).getLogger()
     this.redisClient = (new Store()).getClient();
+    this.notificationManager = new NotificationManager();
     this.keyboardMenu = (user: User) => {
       return [
         [{ text: user.__('wallet') }, { text: user.__('buy_sell') }],
@@ -37,7 +41,6 @@ export default class TMHandler {
     TMHandler.instance = this;
   }
   async handleCallbackQuery(msg: TelegramBot.Message, user: User, tUser: TelegramUser, callback: TelegramBot.CallbackQuery) {
-    console.log("Callback Data: " + JSON.stringify(user), JSON.stringify(tUser), JSON.stringify(msg));
     let query: CallbackQuery = callback.data ? this.parseCallbackQuery(callback.data) : this.parseCallbackQuery('');
     let cacheKeys = (new CacheStore(tUser.id)).getKeys();
     switch (query.callbackFunction) {
@@ -55,7 +58,7 @@ export default class TMHandler {
             });
           } else if (coinWallet && coinWallet.availableBalance == 0) {
             await this.tBot.sendMessage(tUser.id, user.__('send_payment_insufficient_balance'), {
-              parse_mode: 'Markdown',
+              parse_mode: 'Markdown'
             });
           } else {
             this.logger.error("Error in retrieving wallet for " + JSON.stringify(query));
@@ -117,14 +120,12 @@ export default class TMHandler {
       case 'paginate':
         let showCoin;
         if (query.paginate && query.paginate.action === 'next') {
-          console.log("NEXT");
           let nextIndex = +(query.paginate.currentPage) - 1;
           nextIndex++;
           if (nextIndex > (Wallet.getCurrencyCodes().length - 1))
             nextIndex = 0;
           showCoin = Wallet.getCurrencyCodes()[nextIndex];
         } else if (query.paginate && query.paginate.action === 'prev') {
-          console.log("PREV");
           let prevIndex = +(query.paginate.currentPage) - 1;
           prevIndex--;
           if (prevIndex < 0)
@@ -133,10 +134,8 @@ export default class TMHandler {
         } else {
           showCoin = Wallet.getCurrencyCodes()[0];
         }
-        console.log("Setting cache: " + showCoin);
         await this.redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"], showCoin);
         msg.message_id = query.messageId;
-        console.log("Paginate: " + JSON.stringify(msg));
         this.handleWallet(msg, user, tUser);
         break;
       default:
@@ -166,7 +165,6 @@ export default class TMHandler {
         let currentContext;
         let cacheKeys = (new CacheStore(tUser.id)).getKeys();
         [currentContext] = await this.redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext);
-        console.log("CurrentContext: " + JSON.stringify(currentContext));
         if (currentContext === this.COINSEND_CONTEXT) {
           this.handleCoinSend(msg, user, tUser);
         } else {
@@ -187,7 +185,6 @@ export default class TMHandler {
     let cacheKeys = (new CacheStore(tUser.id)).getKeys();
     let currentContext, currentCoin, currentPage;
     [currentContext, currentCoin] = await this.redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, cacheKeys.tContext["Wallet.coin"]);
-    console.log("Wallet: " + currentContext + ", " + currentCoin + ", " + currentPage);
     if (!currentCoin) {
       currentCoin = Wallet.getCurrencyCodes()[0];
       await this.redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"], currentCoin);
@@ -198,19 +195,26 @@ export default class TMHandler {
     let wallet: Wallet | null = await Wallet.findOne({ attributes: ['availableBalance', 'unconfirmedBalance', 'blockedBalance'], where: { currencyCode: currentCoin, userId: user.id } })
     let message = '', rate = 600000;
     if (wallet) {
-      let availableBalance = wallet.availableBalance.toLocaleString(tUser.languageCode, { minimumFractionDigits: 4 });
+      let availableBalance = wallet.availableBalance;
       let availableBalanceLocal = (wallet.availableBalance * rate).toLocaleString(tUser.languageCode);
-      message = user.__('show_wallet_balance %s %s %s %s %s', this.toTitleCase(user.__n(currentCoin, 1)), availableBalance, currentCoin.toUpperCase(), availableBalanceLocal, '/u' + (user.accountId).toUpperCase());
+      let coinTitle = this.toTitleCase(user.__n(currentCoin, 1));
+      let headerPad = ("                                            /"+user.__('help')).slice(-43 + coinTitle.length);
+      message = user.__('show_wallet_balance %s %s %s %s %s %s', 
+        coinTitle,
+        availableBalance,
+        currentCoin.toUpperCase(), availableBalanceLocal, '/u' + (user.accountId).toUpperCase(),
+        headerPad);
       if (wallet.unconfirmedBalance > 0) {
-        let unconfirmedBalance = wallet.unconfirmedBalance.toLocaleString(tUser.languageCode, { minimumFractionDigits: 4 });
+        let unconfirmedBalance = wallet.unconfirmedBalance;
         let unconfirmedBalanceLocal = (wallet.unconfirmedBalance * rate).toLocaleString(tUser.languageCode);
         message = message + user.__('unconfirmed_balance %s %s %s', unconfirmedBalance, currentCoin.toUpperCase(), unconfirmedBalanceLocal);
       }
       if (wallet.blockedBalance > 0) {
-        let blockedBalance = wallet.blockedBalance.toLocaleString(tUser.languageCode, { minimumFractionDigits: 4 });
+        let blockedBalance = wallet.blockedBalance;
         let blockedBalanceLocal = (wallet.blockedBalance * rate).toLocaleString(tUser.languageCode);
         message = message + user.__('blocked_balance %s %s %s', blockedBalance, currentCoin.toUpperCase(), blockedBalanceLocal);
       }
+      message = message + user.__(currentCoin+'_wallet_info')
     } else {
       if (msg)
         this.handleError(user, tUser);
@@ -218,7 +222,6 @@ export default class TMHandler {
     }
 
     let inlineMessageId = (msg && msg.from && msg.from.is_bot) ? msg.message_id : (msg ? msg.message_id + 1 : null);
-    console.log("InlineMessageId: " + inlineMessageId);
     let inlineKeyboard: TelegramBot.InlineKeyboardMarkup = {
       inline_keyboard: [
         [{ text: user.__('send %s', this.toTitleCase(user.__n(currentCoin, 1))), callback_data: this.stringifyCallbackQuery('coinSend', inlineMessageId, { coin: currentCoin }) }],
@@ -237,12 +240,14 @@ export default class TMHandler {
       await this.tBot.editMessageText(message, {
         parse_mode: 'Markdown',
         chat_id: tUser.id, message_id: msg.message_id,
-        reply_markup: inlineKeyboard
+        reply_markup: inlineKeyboard,
+        disable_web_page_preview: true
       });
     } else if (msg) {
       await this.tBot.sendMessage(msg.chat.id, message, {
         parse_mode: 'Markdown',
-        reply_markup: inlineKeyboard
+        reply_markup: inlineKeyboard,
+        disable_web_page_preview: true 
       });
     }
     if (!currentContext || currentContext !== this.WALLET_CONTEXT) {
@@ -353,17 +358,34 @@ export default class TMHandler {
     } else if (msg.text && msg.text.startsWith('/start')) {
       let query = msg.text.replace('/start', '').replace(' ', ''), func, param;
       [func, param] = query.split('-');
-      console.log("Handling bot command: /start: '"+func+"', "+param)
-      if(func === 'key') {
-        let p = await Payment.claimPayment(param);
-        if(p.status === 'alreadyClaimed') {
-          await this.tBot.sendMessage(msg.chat.id, 'This payment has already been cashed.' + JSON.stringify(p), {});
-        } else if(p.status === 'processed') {
-          await this.tBot.sendMessage(msg.chat.id, 'Got payment,TODO make transaction ' + JSON.stringify(p), {});
-        } else if(p.status === 'expired') {
-          await this.tBot.sendMessage(msg.chat.id, 'This payment has expired or has been cancelled by the user.', {});
-        } else if(p.status === 'invalid') {
-          await this.tBot.sendMessage(msg.chat.id, 'This payment is invalid, you might get temporaily banned from using cheques after repeated invalid attempts.', {});
+      if (func === 'key') {
+        try {
+          let p = await Payment.claimPayment(param, user.id);
+          let t:TelegramUser|null = await TelegramUser.findOne({where: {userId: p.userId}});
+          if(t) {
+            await this.tBot.sendMessage(msg.chat.id, user.__('payment_credit %s %s %s', p.amount, p.currencyCode, t.username ), {parse_mode: 'Markdown'});
+            await this.notificationManager.sendNotification(NotificationManager.NOTIF.PAYMENT_DEBIT, {userId: p.userId, currencyCode: p.currencyCode, amount: p.amount, telegramUsername: tUser.username})
+          }
+        } catch (error) {
+          if (error instanceof PaymentError) {
+            switch (error.status) {
+              case PaymentError.CLAIMED:
+                await this.tBot.sendMessage(msg.chat.id, user.__('claim_payment_already_claimed'), {});
+                break;
+              case PaymentError.EXPIRED:
+                await this.tBot.sendMessage(msg.chat.id, user.__('claim_payment_expired'), {});
+                break;
+              case PaymentError.NOT_FOUND:
+                await this.tBot.sendMessage(msg.chat.id, user.__('claim_payment_not_found'), {});
+                break;
+              case PaymentError.SELF_CLAIM:
+                await this.tBot.sendMessage(msg.chat.id, 'TODO: Handle self claim payment link.', {});
+                break;
+              default:
+                await this.tBot.sendMessage(msg.chat.id, 'An error occurred please try again later.', {});
+            }
+          } else 
+            await this.tBot.sendMessage(msg.chat.id, 'An error occurred please try again later.', {});
         }
       } else {
         this.handleError(user, tUser);
@@ -384,7 +406,6 @@ export default class TMHandler {
     let currentCoin;
     let cacheKeys = (new CacheStore(tUser.id)).getKeys();
     [currentCoin] = await this.redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"]);
-    console.log("Getting wallet for: " + currentCoin);
     let wallet: Wallet | null = await Wallet.findOne({ attributes: ['address', 'currencyCode'], where: { currencyCode: currentCoin, userId: user.id } })
 
     if (wallet) {
@@ -408,16 +429,13 @@ export default class TMHandler {
   }
 
   async handleCoinSend(msg: TelegramBot.Message, user: User, tUser: TelegramUser) {
-    console.log("COIN_SEND handler: " + JSON.stringify(msg));
     let cacheKeys = (new CacheStore(tUser.id)).getKeys();
     let coin: string, isInputContext;
     [coin, isInputContext] = await this.redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"], cacheKeys.tContext["CoinSend.isInputAmount"]);
     if (msg && msg.text) {
-      console.log("isInputContext:" + isInputContext + ", " + (isInputContext == true))
       if (isInputContext) {
         let exchangeRate = 500000;
         let text = msg.text.toLowerCase().replace(/[^0-9a-z.]/g, '');
-        console.log("Text: " + JSON.stringify(text));
         let amount = parseFloat(text.replace(/[^0-9.]/g, '')), amountToPay: number = amount;
         let currency = text.replace(/[^a-z]/g, '');
 
@@ -429,12 +447,11 @@ export default class TMHandler {
           amountToPay = amount / exchangeRate;
         }
 
-        let wallet: Wallet | null = await Wallet.findOne({ attributes: ['availableBalance'], where: { currencyCode: coin } });
-        console.log("Amount to pay: " + amountToPay + ', ' + amount + ', ' + currency);
+        let wallet: Wallet | null = await Wallet.findOne({ attributes: ['availableBalance'], where: { currencyCode: coin, userId: user.id } });
         if (wallet && wallet.availableBalance) {
           if (amountToPay <= wallet.availableBalance && amountToPay > 0) {
             await this.redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext["CoinSend.amount"], amountToPay);
-            await this.tBot.sendMessage(tUser.id, user.__('send_payment_create_confirm %s %s', amountToPay.toLocaleString(), coin.toUpperCase()), {
+            await this.tBot.sendMessage(tUser.id, user.__('send_payment_create_confirm %s %s', amountToPay, coin.toUpperCase()), {
               parse_mode: 'Markdown',
               reply_markup: {
                 keyboard: [[{ text: user.__('create') }], [{ text: user.__('cancel') }]],
@@ -444,7 +461,7 @@ export default class TMHandler {
           } else {
             let message;
             if (!isNaN(amountToPay))
-              message = 'You have insuffucient balance to make this payment.';
+              message = 'You have insufficient balance to make this payment.';
             else
               message = 'Invalid input specified. Please try again.';
             await this.tBot.sendMessage(tUser.id, message, {
@@ -464,27 +481,31 @@ export default class TMHandler {
         await this.redisClient.hdelAsync(cacheKeys.tContext.key, cacheKeys.tContext["CoinSend.isInputAmount"])
         amount = parseFloat(await this.redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["CoinSend.amount"]));
         if (msg.text === user.__('create')) {
-          if (!isNaN(amount) && amount > 0) {
-            let paymentCode = await Payment.newPayment(user.id, coin, amount);
-            await this.tBot.sendMessage(tUser.id, user.__('send_payment_created'), {
-              parse_mode: 'Markdown',
-              reply_markup: {
-                keyboard: this.keyboardMenu(user),
-                one_time_keyboard: false
-              }
-            });
-            let botUsername = (<any>AppConfig)["telegram_bot_username"];
-            await this.tBot.sendMessage(tUser.id, 'https://t.me/' + botUsername + '?start=key-' + paymentCode, {
-              reply_markup: {
-                keyboard: this.keyboardMenu(user),
-                one_time_keyboard: false
-              }
-            });
-          } else {
-            this.logger.error("Error in retrieving amount for sendPayment: " + amount);
+          try {
+            let { paymentCode } = await Payment.newPayment(user.id, coin, amount);
+            if (!isNaN(amount) && amount > 0) {
+              await this.tBot.sendMessage(tUser.id, user.__('send_payment_created'), {
+                parse_mode: 'Markdown',
+                reply_markup: {
+                  keyboard: this.keyboardMenu(user),
+                  one_time_keyboard: false
+                }
+              });
+              let botUsername = (<any>AppConfig)[env]["telegram_bot_username"];
+              await this.tBot.sendMessage(tUser.id, 'https://t.me/' + botUsername + '?start=key-' + paymentCode, {
+                reply_markup: {
+                  keyboard: this.keyboardMenu(user),
+                  one_time_keyboard: false
+                }
+              });
+            } else {
+              this.logger.error("Error in retrieving amount for sendPayment: " + amount);
+              await this.handleError(user, tUser);
+            }
+          } catch (error) {
+            this.logger.error("New Payment error occured");
             await this.handleError(user, tUser);
           }
-
         } else if (msg.text === user.__('cancel')) {
           await this.tBot.sendMessage(tUser.id, user.__('send_payment_cancelled'), {
             parse_mode: 'Markdown',
@@ -522,7 +543,6 @@ export default class TMHandler {
     Object.keys(t).forEach(function (key) {
       q = q + key + '=' + t[key] + ','
     });
-    console.log("BITTON DATA: " + q.substring(0, q.length - 1));
     return q.substring(0, q.length - 1);
   }
 

@@ -32,7 +32,7 @@ module.exports = {
         type: Sequelize.FLOAT
       },
       secretHash: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING
       },
       claimant: {
@@ -41,7 +41,7 @@ module.exports = {
         references: { model: 'Users', key: 'id'}
       },
       paymentSignature: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING
       },
       createdAt: {

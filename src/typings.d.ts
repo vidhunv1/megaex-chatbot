@@ -21,6 +21,11 @@ interface KeysInterface {
     "Wallet.coin":string,
     "CoinSend.isInputAmount":string,
     "CoinSend.amount":string
+  },
+  paymentExpiryTimer: {
+    key:string,
+    shadowKey:string,
+    expiry:number
   }
 }
 

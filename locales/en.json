@@ -13,14 +13,15 @@
 	"initial_message %s": "initial_message %s",
   "unknown_message": "Sorry, could not understand your request.\n\nMegaEx is a fast and secure multi-cryptocurrency wallet and peer-to-peer Bitcoin exchange.\n\nYou can read the getting-started guide for more information on using using the wallet, trading and security guidelines.",
   
-  "show_wallet_balance %s %s %s %s %s": "💼 *Wallet* > *%1$s*\n\n  👤 Account ID: %5$s\n\n Total Balance: *%2$s %3$s*\n                        ~  ₹%4$s",
-  "unconfirmed_balance %s %s %s": "\n  Unconfirmed Balance: *%1$s %2$s*\n                        ~  ₹%3$s",
-  "blocked_balance %s %s %s": "\n  Blocked Balance: *%1$s %2$s*\n                        ~  ₹%3$s",
+  "show_wallet_balance %s %s %s %s %s %s": "💼 *Wallet* > *%1$s*%6$s\n\n 👤 Account ID: %5$s\n\n  *Total Balance:    %2$s %3$s*\n                *Value:    ₹%4$s*\n\n",
+  "unconfirmed_balance %s %s %s": "  🕒 unconfirmed:    %1$s %2$s  ~_₹%3$s_\n",
+  "blocked_balance %s %s %s":     "          🔒 blocked:    %1$s %2$s  ~_₹%3$s_\n",
   "send %s": "⚡️ Send %s",
   "my_address": "📩 My Address", 
   "withdraw": "📤 Withdraw",
   "prev": "⬅️ prev ",
   "next": "next ➡️",
+  "help": "help",
   "pagination %s %d %d": "%s (%d/%d)",
   "show_address %s": "*%s*",
   "show_address_header %s": "📩 *%1$s Address*\n\n💡 All deposits made to this address will be available in your *%1$s wallet* immediately.",
@@ -29,24 +30,39 @@
   "new_address": "✨ New Address",
   "new_address_generated %s": "✨ New *%s address* created\n\n💡 You will still get credited for any deposits made to your previous address's.",
   "error_new_address": "Error generating new address",
+  
   "send_payment_info %s": "⚡️ *Send %1$s*\n\n💡 This creates a private *payment link* that can be used to send %1$s to anyone *instantly* with *zero fees*.",
   "send_payment_enter_details %s %s %s %s": "Enter the amount in *%2$s* or *%4$s* to for this payment.\n\n Example: _%1$s %2$s_ or _%3$s %4$s_",
   "send_payment_create_confirm %s %s": "A payment link of *%1$s %2$s* will be created. Do you want to continue?",
   "send_payment_insufficient_balance": "You have insufficient balance to make a payment.",
   "send_payment_cancelled": "The payment was cancelled",
   "send_payment_unknown_req": "Could not parse your message. Cancelled action.",
-  "send_payment_created": "Your *Payment link* was created successfully. Share this link *privately* with the recipient you want to make payment to.\n\n💡 This link will *expire* in 48 hours if not used.",
+  "send_payment_created": "Your *Payment link* was created successfully. Share this link *privately* with the recipient you want to make payment to.\n\n⏳ This link will *expire* in 48 hours.\n\n💡 Anyone with a Telegram account can use this link.",
+  "send_payment_processed %s %s %s": "Your account is debited with %s %s from your *Payment link* by %s",
+  "send_payment_expired %s %s": "Your *Payment link* of *%s %s* has expired. Your wallet has been updated with this balance.", 
+
+  "claim_payment_already_claimed": "This payment has already been cashed.",
+  "claim_payment_expired": "This payment has expired or has been cancelled by the user.",
+  "claim_payment_not_found": "This payment is invalid, this payment could have expired or cancelled by the payer.",
+
+  "notify_expired_payment %s %s": "Your payment link of *%s %s* has *expired*. Your wallet has been *credited* with this amount.",
+
+  "payment_claimed_debit %s %s %s": "Your account has been debited with %1$s %2$s. @%3$s has received %1$s %2$s from your payment link.",
+  "payment_credit %s %s %s": "Your account is *credited* with *%s %s* from @%s",
+
   "back": "⬅️ Back ",
   "create": "✅ Create",
   "cancel": "❌ Cancel",
   "help_command": "❔ /help",
   "btc": {
 		"one": "bitcoin",
-		"other": "bitcoins"
-	},
+    "other": "bitcoins"
+  },
+  "btc_wallet_info": "\n💡 _This is your Bitcoin wallet. You can view your other coin's wallet by tapping on next_\n",
 	"tbtc": {
 		"one": "testnet-bitcoin",
-		"other": "testnet-bitcoins"
+    "other": "testnet-bitcoins"
   },
+  "tbtc_wallet_info": "\n💡 _Tesnet Bitcoin balances have no real value and should be used only for testing this service._ [Get free test bitcoins](https://testnet.manu.backend.hamburg/faucet)\n",
   "new_transaction_credit %s %s %s %s": "Your *%s* account is credited with *%s %s*.\nTxID: %s"
 }

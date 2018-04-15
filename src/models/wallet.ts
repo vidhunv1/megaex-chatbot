@@ -58,6 +58,7 @@ export default class Wallet extends Model<Wallet> {
       let btcTestAddress = await messageQueue.generateBtcAddress(this.userId);
       wallets.push(await Wallet.create<Wallet>({ userId: this.userId, address: btcTestAddress, currencyCode: Wallet.getCurrencyCodes()[1] }, {}));
 
+      console.log("WALLETS LIST: "+JSON.stringify(wallets));
       return wallets;
     } catch (e) {
       logger.error("error creating bitcoin wallet: " + JSON.stringify(e));
@@ -85,7 +86,35 @@ export default class Wallet extends Model<Wallet> {
     }
   }
 
+  static async unblockBalance(userId:string|number, currencyCode:string, amount:number): Promise<boolean> {
+    let wallet:Wallet | null = await Wallet.findOne({where: {userId: userId, currencyCode: currencyCode}});
+    if(wallet) {
+      if(wallet.blockedBalance >= amount) {
+        await wallet.updateAttributes({availableBalance: (wallet.availableBalance+amount), blockedBalance: (wallet.blockedBalance-amount)})
+        return true;
+      } else {
+        throw new WalletError(WalletError.INSUFFICIENT_BALANCE);
+      }
+    } else {
+      throw new WalletError(WalletError.NOT_FOUND);
+    }
+  }
+
   static getCurrencyCodes() {
     return ['btc', 'tbtc'];
   }
 }
+
+export class WalletError extends Error {
+  public status: number
+  public static INSUFFICIENT_BALANCE = 490
+  public static NOT_FOUND = 404
+
+  constructor(status: number = 500, message: string = 'Wallet Error') {
+    super(message);
+    this.name = this.constructor.name;
+    let logger = (new Logger()).getLogger();
+    logger.error(this.constructor.name + ", " + status);
+    this.status = status;
+  }
+};

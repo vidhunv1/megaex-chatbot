@@ -1,8 +1,29 @@
 {
-  "telegram_access_token": "533091025:AAEYbCc7meRtZN2DJlIYDyZ37BQSAJuGm5c",
-  "telegram_bot_url": "https://megaex.io",
-  "telegram_bot_port": 88,
-  "telegram_bot_username": "megaex_bot",
-  "jwt_secret": "5:oo[{CU]\"\"QNtpIUG)FHneF(",
-  "hash_salt": "$2a$12$ZyXHccSa.lw4j8CYbkrkk."
+  "development": {
+    "telegram_access_token": "533091025:AAEYbCc7meRtZN2DJlIYDyZ37BQSAJuGm5c",
+    "telegram_bot_url": "https://megaex.io",
+    "telegram_bot_port": 88,
+    "telegram_bot_username": "megaex_bot",
+    "jwt_secret": "5:oo[{CU]\"\"QNtpIUG)FHneF(",
+    "hash_salt": "$2a$12$ZyXHccSa.lw4j8CYbkrkk.",
+    "payment_expiry": 120
+  },
+  "test": {
+    "telegram_access_token": "533091025:AAEYbCc7meRtZN2DJlIYDyZ37BQSAJuGm5c",
+    "telegram_bot_url": "https://megaex.io",
+    "telegram_bot_port": 88,
+    "telegram_bot_username": "megaex_bot",
+    "jwt_secret": "5:oo[{CU]\"\"QNtpIUG)FHneF(",
+    "hash_salt": "$2a$12$ZyXHccSa.lw4j8CYbkrkk.",
+    "payment_expiry": 5
+  },
+  "production": {
+    "telegram_access_token": "533091025:AAEYbCc7meRtZN2DJlIYDyZ37BQSAJuGm5c",
+    "telegram_bot_url": "https://megaex.io",
+    "telegram_bot_port": 88,
+    "telegram_bot_username": "megaex_bot",
+    "jwt_secret": "5:oo[{CU]\"\"QNtpIUG)FHneF(",
+    "hash_salt": "$2a$12$ZyXHccSa.lw4j8CYbkrkk.",
+    "payment_expiry": 172800
+  }
 }
