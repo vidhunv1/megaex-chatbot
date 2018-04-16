@@ -12,7 +12,7 @@ import * as DatabaseConfig from '../config/database.json'
 import CacheKeys from './cache-keys'
 import Store from './helpers/store';
 import Logger from './helpers/logger'
-import TelegramHandler from './helpers/t-message-handler'
+import TelegramHandler from './t-conversation/router'
 import Payment from './models/payment';
 
 let env = process.env.NODE_ENV || 'development';

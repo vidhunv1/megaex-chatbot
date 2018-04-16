@@ -15,7 +15,7 @@
   
   "show_wallet_balance %s %s %s %s %s %s": "💼 *Wallet* > *%1$s*%6$s\n\n 👤 Account ID: %5$s\n\n  *Total Balance:    %2$s %3$s*\n                *Value:    ₹%4$s*\n\n",
   "unconfirmed_balance %s %s %s": "  🕒 unconfirmed:    %1$s %2$s  ~_₹%3$s_\n",
-  "blocked_balance %s %s %s":     "          🔒 blocked:    %1$s %2$s  ~_₹%3$s_\n",
+  "blocked_balance %s %s %s": "          🔒 blocked:    %1$s %2$s  ~_₹%3$s_\n",
   "send %s": "⚡️ Send %s",
   "my_address": "📩 My Address", 
   "withdraw": "📤 Withdraw",
@@ -58,7 +58,7 @@
 		"one": "bitcoin",
     "other": "bitcoins"
   },
-  "btc_wallet_info": "\n💡 _This is your Bitcoin wallet. You can view your other coin's wallet by tapping on next_\n",
+  "btc_wallet_info": "\n💡 _This is your Bitcoin wallet. You can view your other coin's wallet by tapping on next._\n",
 	"tbtc": {
 		"one": "testnet-bitcoin",
     "other": "testnet-bitcoins"
