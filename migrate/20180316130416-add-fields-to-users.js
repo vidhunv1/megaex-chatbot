@@ -19,11 +19,16 @@ module.exports = {
       allowNull: false,
       defaultValue: false,
     })
-    return await queryInterface.addColumn('Users', 'currencyCode', {
+    await queryInterface.addColumn('Users', 'currencyCode', {
       type: Sequelize.STRING,
       field: 'currencyCode',
-      defaultValue: 'usd',
-      allowNull: false,
+      allowNull: true,
+    })
+    await queryInterface.addColumn('Users', 'blockedUsers', {
+      type: Sequelize.STRING,
+      field: 'blockedUsers',
+      defaultValue: '[]',
+      allowNull: false,      
     })
   },
 
@@ -31,6 +36,7 @@ module.exports = {
     await queryInterface.removeColumn('Users', 'messageCount')
     await queryInterface.removeColumn('Users', 'isTermsAccepted')
     await queryInterface.removeColumn('Users', 'isVerified')
-    return await queryInterface.removeColumn('Users', 'currencyCode')
+    await queryInterface.removeColumn('Users', 'currencyCode')
+    return await queryInterface.removeColumn('Users', 'blockedUsers');
   }
 };

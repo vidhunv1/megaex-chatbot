@@ -37,9 +37,12 @@ export default class User extends Model<User> {
   @Column
   isVerified!: boolean;
 
-  @Default('usd')
   @Column
   currencyCode!: string
+
+  @Default('[]')
+  @Column
+  blockedUsers!: string
 
   @Default(0)
   @Column

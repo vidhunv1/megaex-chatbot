@@ -34,7 +34,7 @@ export default class Wallet extends Model<Wallet> {
   @Column(DataType.FLOAT)
   blockedBalance!: number;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column
   address!: string;
 
@@ -44,19 +44,25 @@ export default class Wallet extends Model<Wallet> {
 
   //calling this will create all wallets for the userId, should be called only once.
   async create(): Promise<Wallet[] | null> {
+    console.log("Creating wallets");
     let logger = (new Logger()).getLogger();
 
     let messageQueue = new MessageQueue();
     try {
-      let wallets = [];
+      let wallets:Wallet[]|null = [];
 
+      let btcWallet = await Wallet.create<Wallet>({ userId: this.userId, currencyCode: Wallet.getCurrencyCodes()[0] }, {})
+      let tBtcWallet = await Wallet.create<Wallet>({ userId: this.userId, currencyCode: Wallet.getCurrencyCodes()[1] }, {});
       //generate btc address
       let btcAddress = await messageQueue.generateBtcAddress(this.userId);
-      wallets.push(await Wallet.create<Wallet>({ userId: this.userId, address: btcAddress, currencyCode: Wallet.getCurrencyCodes()[0] }, {}));
-
+      btcWallet.updateAttributes({address: btcAddress});
+      btcWallet.address = btcAddress;
       //generate testnet btc address
       let btcTestAddress = await messageQueue.generateBtcAddress(this.userId);
-      wallets.push(await Wallet.create<Wallet>({ userId: this.userId, address: btcTestAddress, currencyCode: Wallet.getCurrencyCodes()[1] }, {}));
+      tBtcWallet.updateAttributes({address: btcTestAddress});
+      tBtcWallet.address = btcTestAddress;
+      wallets.push(btcWallet);
+      wallets.push(tBtcWallet);
 
       console.log("WALLETS LIST: "+JSON.stringify(wallets));
       return wallets;

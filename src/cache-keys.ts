@@ -45,7 +45,8 @@ export default class CacheKeys {
         currentContext: "currentContext",
         "Wallet.coin": "Wallet.coin",
         "CoinSend.isInputAmount": "CoinSend.isInputAmount",
-        "CoinSend.amount": "CoinSend.amount"
+        "CoinSend.amount": "CoinSend.amount",
+        "SendMessage.accountId": "SendMessage.accountId"
       }
     }
   }

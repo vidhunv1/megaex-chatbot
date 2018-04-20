@@ -8,7 +8,7 @@ export default class I18n {
 
     i18n.configure({
         directory: './locales',
-        locales: ['en', 'fr'],
+        locales: ['en', 'hi'],
         defaultLocale: 'en',
         // autoReload: true,
       }); 
@@ -18,5 +18,30 @@ export default class I18n {
 
   getI18n() {
     return i18n;
+  }
+
+  static getAvailableLanguages() {
+    return [
+      {name: 'English', code: 'en'},
+      {name: 'Hindi', code: 'hi'}
+    ]
+  }
+
+  static isLanguageName(language:string):boolean {
+    let l = I18n.getAvailableLanguages();
+    for(let i=0; i<l.length; i++) {
+      if(l[i].name === language)
+        return true;
+    }
+    return false;
+  }
+
+  static getLanguageCode(language:string):string|null {
+    let l = I18n.getAvailableLanguages();
+    for(let i=0; i<l.length; i++) {
+      if(l[i].name === language)
+        return l[i].code;
+    }
+    return null;
   }
 }

@@ -2,93 +2,157 @@ import * as TelegramBot from 'node-telegram-bot-api';
 import TelegramBotApi from '../helpers/telegram-bot-api'
 import TelegramUser from '../models/telegram_user'
 import User from '../models/user'
-import Payment, { PaymentError } from '../models/payment'
 import CacheStore from '../cache-keys'
 import Store from '../helpers/store'
 import Logger from '../helpers/logger'
 import NotificationManager from '../helpers/notification-manager'
-import { isBotCommand, parseCallbackQuery, sendErrorMessage } from './defaults';
+import { isBotCommand, parseCallbackQuery, keyboardMenu, sendErrorMessage } from './defaults';
 
 //conversation routes
 import { walletConversation, walletCallback, walletContext } from './wallet';
 import { settingsConversation, settingsCallback, settingsContext } from './settings';
 import { tradeConversation, tradeCallback, tradeContext } from './trade';
 import { infoConversation, infoCallback, infoContext } from './info';
-
+import { accountConversation, accountCallback, accountContext } from './account';
+import I18n from '../helpers/i18n';
 export default class TMHandler {
   static instance: TMHandler
   tBot!: TelegramBot;
-  keyboardMenu!: (user: User) => TelegramBot.KeyboardButton[][];
   redisClient: any
   logger: any
-  notificationManager!:NotificationManager
-  WALLET_CONTEXT!: string
-  COINSEND_CONTEXT!: string
+  notificationManager!: NotificationManager
 
   constructor() {
     if (TMHandler.instance)
       return TMHandler.instance;
-    this.WALLET_CONTEXT = 'Wallet';
-    this.COINSEND_CONTEXT = 'CoinSend'
     this.logger = (new Logger()).getLogger()
     this.redisClient = (new Store()).getClient();
     this.notificationManager = new NotificationManager();
-    this.keyboardMenu = (user: User) => {
-      return [
-        [{ text: user.__('wallet') }, { text: user.__('buy_sell') }],
-        [{ text: user.__('info') }, { text: user.__('settings') }]
-      ]
-    }
 
     this.tBot = (new TelegramBotApi()).getBot();
     TMHandler.instance = this;
   }
-  
+
   async handleCallbackQuery(msg: TelegramBot.Message, user: User, tUser: TelegramUser, callback: TelegramBot.CallbackQuery) {
     let query: CallbackQuery = callback.data ? parseCallbackQuery(callback.data) : parseCallbackQuery('');
-    let isCallbackHandled:boolean = await walletCallback(msg, user, tUser, query) || await tradeCallback(msg, user, tUser, query) || await infoCallback(msg, user, tUser, query) || await settingsCallback(msg, user, tUser, query);
-    
-    if(!isCallbackHandled) { //error
+    let isCallbackHandled: boolean =
+      await walletCallback(msg, user, tUser, query) ||
+      await tradeCallback(msg, user, tUser, query) ||
+      await infoCallback(msg, user, tUser, query) ||
+      await settingsCallback(msg, user, tUser, query) ||
+      await accountCallback(msg, user, tUser, query);
+
+    if (!isCallbackHandled) {
+      this.logger.error("Callback not defined: " + JSON.stringify(query));
     }
   }
 
   async handleMessage(msg: TelegramBot.Message, user: User, tUser: TelegramUser) {
-    if (!user.isTermsAccepted) {
+    if (!user.isTermsAccepted || !user.currencyCode) {
+      if(isBotCommand(msg)) {
+        this.handleConversations(msg, user, tUser);
+      }
       this.onboardUser(msg, user, tUser);
     } else {
-      if (isBotCommand(msg)) {
-        await this.handleBotCommand(msg, user, tUser);
-        return;
-      }
-      
-      let isMessageHandled:boolean = await walletConversation(msg, user, tUser) || await tradeConversation(msg, user, tUser) || await infoConversation(msg, user, tUser) || await settingsConversation(msg, user, tUser);
-      if(!isMessageHandled) {
-        let currentContext;
-        let cacheKeys = (new CacheStore(tUser.id)).getKeys();
-        [currentContext] = await this.redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext);
+      this.handleConversations(msg, user, tUser);
+    }
+  }
 
-        let isContextHandled:boolean = await walletContext(msg, user, tUser, currentContext) || await tradeContext(msg, user, tUser, currentContext) || await infoContext(msg, user, tUser, currentContext) || await settingsContext(msg, user, tUser, currentContext);
-        if(!isContextHandled) {
-          this.tBot.sendMessage(msg.chat.id, user.__('unknown_message'), {
-            parse_mode: 'Markdown',
-            reply_markup: {
-              keyboard: this.keyboardMenu(user),
-              one_time_keyboard: false,
-              resize_keyboard: true
-            }
-          });
-        }
+  private async handleConversations(msg: TelegramBot.Message, user: User, tUser: TelegramUser) {
+    let isConversationHandled: boolean =
+      await walletConversation(msg, user, tUser) ||
+      await tradeConversation(msg, user, tUser) ||
+      await infoConversation(msg, user, tUser) ||
+      await settingsConversation(msg, user, tUser) ||
+      await accountConversation(msg, user, tUser);
+
+    if (!isConversationHandled && !isBotCommand(msg)) {
+      let currentContext;
+      let cacheKeys = (new CacheStore(tUser.id)).getKeys();
+      [currentContext] = await this.redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext);
+
+      let isContextHandled: boolean =
+        await walletContext(msg, user, tUser, currentContext) ||
+        await tradeContext(msg, user, tUser, currentContext) ||
+        await infoContext(msg, user, tUser, currentContext) ||
+        await settingsContext(msg, user, tUser, currentContext) ||
+        await accountContext(msg, user, tUser, currentContext);
+      if (!isContextHandled) {
+        this.tBot.sendMessage(msg.chat.id, user.__('unknown_message'), {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: keyboardMenu(user),
+            one_time_keyboard: false,
+            resize_keyboard: true
+          }
+        });
       }
+    } else if(!isConversationHandled && isBotCommand(msg) && user.isTermsAccepted && user.currencyCode && msg.text && msg.text.startsWith('/start')) {
+      this.tBot.sendMessage(msg.chat.id, user.__('initial_message'), {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: keyboardMenu(user),
+          one_time_keyboard: false,
+          resize_keyboard: true
+        }
+      }); 
+    } else if(!isConversationHandled && user.isTermsAccepted && user.currencyCode){
+      sendErrorMessage(user, tUser);
     }
   }
 
   async onboardUser(msg: TelegramBot.Message, user: User, tUser: TelegramUser) {
-    if (msg.text && isBotCommand(msg)) {
-      await this.handleBotCommand(msg, user, tUser);
-      this.tBot.sendMessage(msg.chat.id, user.__('get_started_guide %s', tUser.firstName), {
+    let languagesList = I18n.getAvailableLanguages();
+    let currencyList = [
+      {name: '$ USD', code: 'usd'},
+      {name: '₹ INR', code: 'inr'},
+      {name: '€ EUR', code: 'eur'},
+      {name: '¥ CNY', code: 'cny'},
+      {name: '₽ RUB', code: 'rub'},
+      {name: '£ GBP', code: 'gbp'},
+      {name: '¥ YEN', code: 'yen'},
+      {name: 'CAD', code: 'cad'},
+      {name: 'CHF', code: 'chf'}
+    ]
+    let ccKeyboardButton:TelegramBot.ReplyKeyboardMarkup = { keyboard: [], one_time_keyboard: false, resize_keyboard: true };
+    let getCurrencyCode = function(currency:string):string|null {
+      for(let i=0; i<currencyList.length; i++) {
+        if(currencyList[i].name === currency)
+          return currencyList[i].code;
+      }
+      return null;
+    }
+
+    if (msg.text && isBotCommand(msg)) { // entry point
+      let langKeyboardButton:TelegramBot.ReplyKeyboardMarkup = { keyboard: [], one_time_keyboard: false, resize_keyboard: true }, i=0;
+      while(i < languagesList.length) {
+        langKeyboardButton.keyboard.push([{text: languagesList[i].name}])
+        if(++i >= languagesList.length)
+          break;
+        langKeyboardButton.keyboard[langKeyboardButton.keyboard.length-1].push({text: languagesList[i].name});
+        i++;
+      }
+
+      this.tBot.sendMessage(msg.chat.id, '*Hello '+tUser.firstName+'*. Select your *language* from the options below.', {
+        parse_mode: 'Markdown',
+        reply_markup: langKeyboardButton
+      });
+    } else if(msg.text && I18n.getLanguageCode(msg.text)!=null) {
+      let langCode = I18n.getLanguageCode(msg.text) 
+      await User.update(
+        { locale:  langCode},
+        { where: { id: tUser.userId } }
+      )
+      await ((new CacheStore(tUser.id)).clearUserCache());
+      user.locale = langCode || 'en';
+      await this.tBot.sendMessage(msg.chat.id, user.__('get_started_guide'), {
+        parse_mode: 'Markdown',
+      });
+      
+      await this.tBot.sendMessage(msg.chat.id, user.__('tc_privacy'), {
         parse_mode: 'Markdown',
         reply_markup: {
-          keyboard: [[{ text: user.__('continue') }]],
+          keyboard: [[{ text: user.__('i_agree') }]],
           one_time_keyboard: false,
           resize_keyboard: true
         }
@@ -99,80 +163,43 @@ export default class TMHandler {
         { where: { id: tUser.userId } }
       )
       await ((new CacheStore(tUser.id)).clearUserCache());
+     
+      let i=0;
+      while(i < currencyList.length) {
+        ccKeyboardButton.keyboard.push([{text: currencyList[i].name}])
+        if(++i >= currencyList.length)
+          break;
+        ccKeyboardButton.keyboard[ccKeyboardButton.keyboard.length-1].push({text: currencyList[i].name});
+        if(++i >= currencyList.length)
+          break;
+        ccKeyboardButton.keyboard[ccKeyboardButton.keyboard.length-1].push({text: currencyList[i].name});
+        i++;
+      }
+      
+      this.tBot.sendMessage(msg.chat.id, user.__('select_currency'), {
+        parse_mode: 'Markdown',
+        reply_markup: ccKeyboardButton
+      });
+    } else if(msg.text && getCurrencyCode(msg.text)!=null) {
+      await User.update(
+        { currencyCode:  getCurrencyCode(msg.text)},
+        { where: { id: tUser.userId } }
+      )
+      await ((new CacheStore(tUser.id)).clearUserCache());
       this.tBot.sendMessage(msg.chat.id, user.__('initial_message'), {
         parse_mode: 'Markdown',
         reply_markup: {
-          keyboard: this.keyboardMenu(user),
+          keyboard: keyboardMenu(user),
           one_time_keyboard: false,
           resize_keyboard: true
         }
       });
     } else {
-      this.tBot.sendMessage(msg.chat.id, user.__('tc_privacy'), {
+      this.tBot.sendMessage(msg.chat.id, user.__('select_currency'), {
         parse_mode: 'Markdown',
-        reply_markup: {
-          keyboard: [[{ text: user.__('i_agree') }]],
-          one_time_keyboard: false,
-          resize_keyboard: true
-        }
+        reply_markup: ccKeyboardButton
       });
     }
   }
 
-  async handleBotCommand(msg: TelegramBot.Message, user: User, tUser: TelegramUser) {
-    if (msg.text && msg.text.startsWith('/u') && msg.entities) {
-      await this.tBot.sendMessage(msg.chat.id, '[TODO] Show user profile for: ' + (msg.text.substring(msg.entities[0].offset + 2, msg.entities[0].length)), {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          keyboard: [[{ text: user.__('continue') }]],
-          one_time_keyboard: false,
-          resize_keyboard: true
-        }
-      });
-    } else if (msg.text && msg.text.startsWith('/start')) {
-      let query = msg.text.replace('/start', '').replace(' ', ''), func, param;
-      [func, param] = query.split('-');
-      if (func === 'key') {
-        try {
-          let p = await Payment.claimPayment(param, user.id);
-          let t:TelegramUser|null = await TelegramUser.findOne({where: {userId: p.userId}});
-          if(t) {
-            await this.tBot.sendMessage(msg.chat.id, user.__('payment_credit %s %s %s', p.amount, p.currencyCode, t.username ), {parse_mode: 'Markdown'});
-            await this.notificationManager.sendNotification(NotificationManager.NOTIF.PAYMENT_DEBIT, {userId: p.userId, currencyCode: p.currencyCode, amount: p.amount, telegramUsername: tUser.username})
-          }
-        } catch (error) {
-          if (error instanceof PaymentError) {
-            switch (error.status) {
-              case PaymentError.CLAIMED:
-                await this.tBot.sendMessage(msg.chat.id, user.__('claim_payment_already_claimed'), {});
-                break;
-              case PaymentError.EXPIRED:
-                await this.tBot.sendMessage(msg.chat.id, user.__('claim_payment_expired'), {});
-                break;
-              case PaymentError.NOT_FOUND:
-                await this.tBot.sendMessage(msg.chat.id, user.__('claim_payment_not_found'), {});
-                break;
-              case PaymentError.SELF_CLAIM:
-                await this.tBot.sendMessage(msg.chat.id, 'TODO: Handle self claim payment link.', {});
-                break;
-              default:
-                await this.tBot.sendMessage(msg.chat.id, 'An error occurred please try again later.', {});
-            }
-          } else 
-            await this.tBot.sendMessage(msg.chat.id, 'An error occurred please try again later.', {});
-        }
-      } else {
-        sendErrorMessage(user, tUser);
-      }
-    } else {
-      await this.tBot.sendMessage(msg.chat.id, '[TODO] HANDLE BOT COMMAND ' + JSON.stringify(msg), {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          keyboard: [[{ text: user.__('continue') }]],
-          one_time_keyboard: false,
-          resize_keyboard: true
-        }
-      });
-    }
-  }
 }

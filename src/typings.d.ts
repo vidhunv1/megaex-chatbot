@@ -20,7 +20,8 @@ interface KeysInterface {
     currentContext:string,
     "Wallet.coin":string,
     "CoinSend.isInputAmount":string,
-    "CoinSend.amount":string
+    "CoinSend.amount":string,
+    "SendMessage.accountId":string
   },
   paymentExpiryTimer: {
     key:string,
@@ -30,7 +31,7 @@ interface KeysInterface {
 }
 
 interface CallbackQuery {
-  callbackFunction: 'coinSend' | 'coinAddress' | 'coinWithdraw' | 'paginate' | 'newAddress' | 'qrCode',
+  callbackFunction: 'coinSend' | 'coinAddress' | 'coinWithdraw' | 'paginate' | 'newAddress' | 'qrCode' | 'accountLink' | 'referralLink' | 'addPayment' | 'openOrders' | 'sendMessage' | 'blockAccount',
   messageId: number,
   coinSend?: {
     coin:string,
@@ -51,5 +52,15 @@ interface CallbackQuery {
   paginate?: {
     action: 'next' | 'prev' | 'refresh',
     currentPage:number
+  }
+  openOrders?: {
+    accountId: string
+  }
+  sendMessage?: {
+    accountId: string
+  }
+  blockAccount?: {
+    accountId: string,
+    shouldBlock: number 
   }
 }
