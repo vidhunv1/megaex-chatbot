@@ -3,7 +3,7 @@ import CacheStore from '../cache-keys'
 import Wallet from '../models/wallet';
 import TelegramUser from '../models/telegram_user'
 import * as moment from 'moment'
-import Payment, { PaymentError } from '../models/payment'
+import Transfer, { TransferError } from '../models/transfer'
 import User from '../models/user'
 import * as QRCode from 'qrcode'
 import Store from '../helpers/store'
@@ -233,6 +233,7 @@ async function handleCoinSend(msg: TelegramBot.Message, user: User, tUser: Teleg
       if (wallet && wallet.availableBalance) {
         if (amountToPay <= wallet.availableBalance && amountToPay > 0) {
           await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext["CoinSend.amount"], amountToPay);
+          redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry);
           await tBot.sendMessage(tUser.id, user.__('send_payment_create_confirm %s %s', amountToPay, coin.toUpperCase()), {
             parse_mode: 'Markdown',
             reply_markup: {
@@ -260,12 +261,11 @@ async function handleCoinSend(msg: TelegramBot.Message, user: User, tUser: Teleg
       await redisClient.hdelAsync(cacheKeys.tContext.key, cacheKeys.tContext["CoinSend.isInputAmount"])
     } else {
       let amount: number;
-      await redisClient.hdelAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext);
-      await redisClient.hdelAsync(cacheKeys.tContext.key, cacheKeys.tContext["CoinSend.isInputAmount"])
       amount = parseFloat(await redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["CoinSend.amount"]));
+      await redisClient.delAsync(cacheKeys.tContext.key);
       if (msg.text === user.__('create')) {
         try {
-          let { paymentCode } = await Payment.newPayment(user.id, coin, amount);
+          let { paymentCode } = await Transfer.newPayment(user.id, coin, amount);
           if (!isNaN(amount) && amount > 0) {
             await tBot.sendMessage(tUser.id, user.__('send_payment_created %d', ((<any>AppConfig)[env]["payment_expiry"]/60)), {
               parse_mode: 'Markdown',
@@ -315,26 +315,26 @@ async function handleCoinSend(msg: TelegramBot.Message, user: User, tUser: Teleg
 async function handlePaymentClaim(msg: TelegramBot.Message, user: User, tUser: TelegramUser, paymentSecret: string) {
   if(!msg.text) return;
   try {
-    let p = await Payment.claimPayment(paymentSecret, user.id);
+    let p = await Transfer.claimPayment(paymentSecret, user.id);
     let t:TelegramUser|null = await TelegramUser.findOne({where: {userId: p.userId}});
     if(t) {
-      tBot.sendMessage(msg.chat.id, user.__('payment_credit %s %s %s', p.amount, p.currencyCode, t.username ), {parse_mode: 'Markdown'});
-      await notificationManager.sendNotification(NotificationManager.NOTIF.PAYMENT_DEBIT, {userId: p.userId, currencyCode: p.currencyCode, amount: p.amount, telegramUsername: tUser.username})
+      tBot.sendMessage(msg.chat.id, user.__('payment_credit %s %s %s', p.amount, p.currencyCode, t.username ? '@'+t.username : '*'+t.firstName+' '+t.lastName+'*' ), {parse_mode: 'Markdown'});
+      await notificationManager.sendNotification(NotificationManager.NOTIF.PAYMENT_DEBIT, {userId: p.userId, currencyCode: p.currencyCode, amount: p.amount, telegramUsername: tUser.username, telegramName: '*'+tUser.firstName + ' '+ t.lastName+'*'})
     }
   } catch (error) {
-    if (error instanceof PaymentError) {
+    if (error instanceof TransferError) {
       switch (error.status) {
-        case PaymentError.CLAIMED:
+        case TransferError.CLAIMED:
           await tBot.sendMessage(msg.chat.id, user.__('claim_payment_already_claimed'), {});
           break;
-        case PaymentError.EXPIRED:
+        case TransferError.EXPIRED:
           await tBot.sendMessage(msg.chat.id, user.__('claim_payment_expired'), {});
           break;
-        case PaymentError.NOT_FOUND:
+        case TransferError.NOT_FOUND:
           await tBot.sendMessage(msg.chat.id, user.__('claim_payment_not_found'), {});
           break;
-        case PaymentError.SELF_CLAIM:
-          let p:Payment|null = await Payment.getBySecret(paymentSecret);
+        case TransferError.SELF_CLAIM:
+          let p:Transfer|null = await Transfer.getBySecret(paymentSecret);
           if(!p) return;
           await tBot.sendMessage(msg.chat.id, user.__('send_payment_info %f %s %d', p.amount, p.currencyCode, (((<any>AppConfig)[env]["payment_expiry"]/60) - moment(moment()).diff(p.createdAt, 'm'))), {});
           break;

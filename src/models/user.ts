@@ -2,6 +2,7 @@ import {Table, Column, Model, PrimaryKey, AllowNull, AutoIncrement, HasOne, Uniq
 import TelegramUser from './telegram_user'
 import Wallet from './wallet';
 import Transaction from './transaction';
+import PaymentMethod from './payment_method';
 import I18n from '../helpers/i18n'
 
 @Table({timestamps: true, tableName: 'Users'})
@@ -20,6 +21,9 @@ export default class User extends Model<User> {
 
   @HasMany(() => Transaction, 'userId')
   transactions!: Transaction[];
+
+  @HasMany(() => PaymentMethod, 'userId')
+  paymentMethods!: PaymentMethod[];
 
   @Default('en')
   @Column

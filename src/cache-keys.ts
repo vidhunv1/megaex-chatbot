@@ -41,12 +41,15 @@ export default class CacheKeys {
         expiry: (<any>AppConfig)[env]["payment_expiry"]
       },
       tContext: {
-        key: "TContext",
+        key: "TContext" + formattedId,
         currentContext: "currentContext",
         "Wallet.coin": "Wallet.coin",
         "CoinSend.isInputAmount": "CoinSend.isInputAmount",
         "CoinSend.amount": "CoinSend.amount",
-        "SendMessage.accountId": "SendMessage.accountId"
+        "SendMessage.accountId": "SendMessage.accountId",
+        "EnterPayMethod.methodName": "EnterPayMethod.methodName",
+        "EnterPayMethod.fields": "EnterPayMethod.fields",
+        expiry: (<any>AppConfig)[env]["context_expiry"]
       }
     }
   }

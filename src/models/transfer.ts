@@ -13,8 +13,8 @@ import CacheStore from '../cache-keys'
 let env = process.env.NODE_ENV || 'development';
 console.log("Running in environment: "+env);
 
-@Table({ timestamps: true, tableName: 'Payments' })
-export default class Payment extends Model<Payment> {
+@Table({ timestamps: true, tableName: 'Transfers' })
+export default class Transfer extends Model<Transfer> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -54,16 +54,16 @@ export default class Payment extends Model<Payment> {
 
   @AllowNull(true)
   @Column
-  paymentSignature!: string
+  transferSignature!: string
 
   static async newPayment(userId: number, currencyCode: string, amount: number): Promise<{ paymentCode?: string | null }> {
     let logger = (new Logger()).getLogger();
     let wallet: Wallet | null = await Wallet.findOne({ attributes: ['availableBalance', 'id', 'blockedBalance'], where: { currencyCode: currencyCode, userId: userId } });
     if (!wallet)
-      throw new PaymentError();
+      throw new TransferError();
 
     if (wallet.availableBalance < amount)
-      throw new PaymentError(PaymentError.INSUFFICIENT_BALANCE);
+      throw new TransferError(TransferError.INSUFFICIENT_BALANCE);
 
     let r = new RandomGenerator();
     let transactionId = await r.generateTransactionId();
@@ -74,12 +74,12 @@ export default class Payment extends Model<Payment> {
     let paySign = JWT.sign({ userId: userId, currencyCode: currencyCode, amount: amount }, jwtSecret)
 
     try {
-      let payment: Payment = await this.sequelize.transaction(async function (t) {
+      let payment: Transfer = await this.sequelize.transaction(async function (t) {
         if (!wallet)
           throw Error();
 
         await wallet.updateAttributes({ availableBalance: (wallet.availableBalance - amount), blockedBalance: (wallet.blockedBalance + amount) }, { transaction: t });
-        let p = new Payment({ transactionId: transactionId, secretHash: secretHash, userId: userId, currencyCode: currencyCode, amount: amount, status: 'pending', paymentSignature: paySign });
+        let p = new Transfer({ transactionId: transactionId, secretHash: secretHash, userId: userId, currencyCode: currencyCode, amount: amount, status: 'pending', transferSignature: paySign });
         await p.save({ transaction: t });
         if (!p)
           throw Error();
@@ -93,21 +93,21 @@ export default class Payment extends Model<Payment> {
       return { paymentCode: paymentCode };
     } catch (e) {
       logger.error("Transaction error in creating payment link: " + JSON.stringify(e));
-      throw new PaymentError();
+      throw new TransferError();
     }
   }
 
   static async claimPayment(secret: string, claimantUserId: number): Promise<{ amount: number, transactionId: string, currencyCode: string, userId: string|number }> {
-    let p: Payment | null = await this.getBySecret(secret);
+    let p: Transfer | null = await this.getBySecret(secret);
 
     if (!p)
-      throw new PaymentError(PaymentError.NOT_FOUND);
+      throw new TransferError(TransferError.NOT_FOUND);
     if (p.claimant)
-      throw new PaymentError(PaymentError.CLAIMED);
+      throw new TransferError(TransferError.CLAIMED);
     if (p.userId === claimantUserId) //TODO: self payment link, show details about payment link
-      throw new PaymentError(PaymentError.SELF_CLAIM);
+      throw new TransferError(TransferError.SELF_CLAIM);
     if (moment().diff(p.createdAt, 'seconds') >= (<any>AppConfig)[env]["payment_expiry"]) //expiry
-      throw new PaymentError(PaymentError.EXPIRED)
+      throw new TransferError(TransferError.EXPIRED)
 
     try {
       await this.sequelize.transaction(async function (t) {
@@ -126,42 +126,42 @@ export default class Payment extends Model<Payment> {
         // unset expiry on paymentlink
         let redisClient = (new Store()).getClient();
         let cacheKeys = (new CacheStore(p.id)).getKeys();
-        redisClient.setAsync(cacheKeys.paymentExpiryTimer.shadowKey, '', 'EX', -1);
+        redisClient.delAsync(cacheKeys.paymentExpiryTimer.shadowKey);
 
         return await p.updateAttributes({ status: 'claimed', claimant: claimantUserId }, { transaction: t });
       });
       return { amount: p.amount, transactionId: p.transactionId + '-r', currencyCode: p.currencyCode, userId: p.userId }
     } catch (e) {
-      throw new PaymentError();
+      throw new TransferError();
     }
   }
 
   static async deletePayment(secret: string, userId: number): Promise<boolean> {
-    let p: Payment | null = await this.getBySecret(secret);
+    let p: Transfer | null = await this.getBySecret(secret);
     if (!p)
-      throw new PaymentError(PaymentError.NOT_FOUND);
+      throw new TransferError(TransferError.NOT_FOUND);
     if (p.userId != userId)
-      throw new PaymentError(PaymentError.UNAUTHORIZED);
+      throw new TransferError(TransferError.UNAUTHORIZED);
 
     await p.updateAttributes({ paymentSignature: '', status: 'deleted' });
     try {
       await Wallet.unblockBalance(p.userId, p.currencyCode, p.amount);
     } catch(e) {
-      throw new PaymentError();
+      throw new TransferError();
     }
     return true;
   }
 
-  static async getBySecret(secret: string): Promise<Payment | null> {
+  static async getBySecret(secret: string): Promise<Transfer | null> {
     let logger = (new Logger()).getLogger();
     let salt = (<any>AppConfig)[env]["hash_salt"];
     let hash: string = await Bcrypt.hash(secret, salt);
-    let payment: Payment | null = await Payment.findOne({ where: { secretHash: hash } });
+    let payment: Transfer | null = await Transfer.findOne({ where: { secretHash: hash } });
     if (payment == null)
       return null;
     try {
       let jwtSecret = (<any>AppConfig)[env]["jwt_secret"];
-      var decoded = JWT.verify(payment.paymentSignature, jwtSecret);
+      var decoded = JWT.verify(payment.transferSignature, jwtSecret);
       if (decoded.userId && decoded.currencyCode && decoded.amount) {
         payment.userId = decoded.userId;
         payment.currencyCode = decoded.currencyCode;
@@ -177,10 +177,10 @@ export default class Payment extends Model<Payment> {
     }
   }
 
-  public static async deletePaymentIfExpired(paymentId: number):Promise<Payment|null> {
+  public static async deletePaymentIfExpired(paymentId: number):Promise<Transfer|null> {
     let logger = (new Logger()).getLogger();
     if (paymentId) {
-      let p: Payment | null = await Payment.findOne({ where: { id: paymentId } });
+      let p: Transfer | null = await Transfer.findOne({ where: { id: paymentId } });
       if (p && p.status==='pending') {
         await p.updateAttributes({ paymentSignature: '', status: 'expired', secretHash: ''});
         try {
@@ -191,24 +191,24 @@ export default class Payment extends Model<Payment> {
           throw new Error();
         }
       } else {
-        throw new PaymentError(PaymentError.NOT_FOUND);
+        throw new TransferError(TransferError.NOT_FOUND);
       }
     }
     return null;
   }
 
   public static async deleteExpiredPayments():Promise<boolean> {
-    let p:Payment[]|null = await Payment.findAll({where: {status: 'pending', createdAt: {$lte: moment().subtract((<any>AppConfig)[env]["payment_expiry"], 's').toISOString()}}});
+    let p:Transfer[]|null = await Transfer.findAll({where: {status: 'pending', createdAt: {$lte: moment().subtract((<any>AppConfig)[env]["payment_expiry"], 's').toISOString()}}});
     console.log(JSON.stringify(p));
     for(let i=0; i<p.length; i++) {
       console.log("Deleting payment: "+p[i].id);
-      await Payment.deletePaymentIfExpired(p[i].id);
+      await Transfer.deletePaymentIfExpired(p[i].id);
     }
     return false;
   }
 }
 
-export class PaymentError extends Error {
+export class TransferError extends Error {
   public status: number
   public static EXPIRED = 410
   public static INSUFFICIENT_BALANCE = 490

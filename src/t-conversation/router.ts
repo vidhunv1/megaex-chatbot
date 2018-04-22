@@ -66,17 +66,19 @@ export default class TMHandler {
       await settingsConversation(msg, user, tUser) ||
       await accountConversation(msg, user, tUser);
 
-    if (!isConversationHandled && !isBotCommand(msg)) {
+    if (!isConversationHandled && msg.text && !msg.text.startsWith('/start')) {
       let currentContext;
       let cacheKeys = (new CacheStore(tUser.id)).getKeys();
       [currentContext] = await this.redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext);
 
       let isContextHandled: boolean =
+        await this.handleBaseContext(msg, user, tUser, currentContext) ||
         await walletContext(msg, user, tUser, currentContext) ||
         await tradeContext(msg, user, tUser, currentContext) ||
         await infoContext(msg, user, tUser, currentContext) ||
         await settingsContext(msg, user, tUser, currentContext) ||
-        await accountContext(msg, user, tUser, currentContext);
+        await accountContext(msg, user, tUser, currentContext)
+
       if (!isContextHandled) {
         this.tBot.sendMessage(msg.chat.id, user.__('unknown_message'), {
           parse_mode: 'Markdown',
@@ -202,4 +204,20 @@ export default class TMHandler {
     }
   }
 
+  async handleBaseContext(msg: TelegramBot.Message, user: User, tUser: TelegramUser, context:string):Promise<boolean> {
+    let cacheKeys = (new CacheStore(tUser.id)).getKeys();
+    if(context && context!='' && msg.text === user.__('/cancel')) {
+      await this.redisClient.delAsync(cacheKeys.tContext.key); 
+      this.tBot.sendMessage(tUser.id, user.__('context_action_cancelled'), {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: keyboardMenu(user),
+          one_time_keyboard: false,
+          resize_keyboard: true
+        }
+      });
+      return true;
+    }
+    return false;
+  }
 }

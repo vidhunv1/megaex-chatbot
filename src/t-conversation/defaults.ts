@@ -26,7 +26,7 @@ let toTitleCase = function (s: string) {
   return s.replace(/\b\w/g, l => l.toUpperCase());
 }
 
-let stringifyCallbackQuery = function (callbackFunction: CallbackQuery["callbackFunction"], messageId: number | null, values: null | CallbackQuery["coinSend"] | CallbackQuery["coinAddress"] | CallbackQuery["coinWithdraw"] | CallbackQuery["paginate"] | CallbackQuery["back"] | CallbackQuery["qrCode"] | CallbackQuery["openOrders"] | CallbackQuery["sendMessage"] | CallbackQuery["blockAccount"]) {
+let stringifyCallbackQuery = function (callbackFunction: CallbackQuery["callbackFunction"], messageId: number | null, values: null | CallbackQuery["coinSend"] | CallbackQuery["coinAddress"] | CallbackQuery["coinWithdraw"] | CallbackQuery["paginate"] | CallbackQuery["back"] | CallbackQuery["qrCode"] | CallbackQuery["openOrders"] | CallbackQuery["sendMessage"] | CallbackQuery["blockAccount"] | CallbackQuery["addPayment"] | CallbackQuery["deletePayment"]| CallbackQuery["editPayment"] | CallbackQuery["showPayments"]) {
   let q = callbackFunction + ':';
   if (messageId)
     q = q + 'messageId=' + messageId + ',';
@@ -52,6 +52,7 @@ let parseCallbackQuery = function (query: string): CallbackQuery {
         res[callbackFunction][tKey] = tVal;
     }
   }
+  console.log("RES: "+JSON.stringify(res));
   return res;
 }
 

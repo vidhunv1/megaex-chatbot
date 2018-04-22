@@ -13,7 +13,7 @@ import CacheKeys from './cache-keys'
 import Store from './helpers/store';
 import Logger from './helpers/logger'
 import TelegramHandler from './t-conversation/router'
-import Payment from './models/payment';
+import Transfer from './models/transfer';
 
 let env = process.env.NODE_ENV || 'development';
 
@@ -145,4 +145,4 @@ app.listen(89);
 })();
 
 // Initialization tasks
-Payment.deleteExpiredPayments();
+Transfer.deleteExpiredPayments();

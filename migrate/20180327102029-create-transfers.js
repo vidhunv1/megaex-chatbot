@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Payments', {
+    return queryInterface.createTable('Transfers', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -40,7 +40,7 @@ module.exports = {
         type: Sequelize.BIGINT,
         references: { model: 'Users', key: 'id'}
       },
-      paymentSignature: {
+      transferSignature: {
         allowNull: true,
         type: Sequelize.STRING
       },

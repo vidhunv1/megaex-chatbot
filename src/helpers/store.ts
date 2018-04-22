@@ -3,9 +3,10 @@ import CacheKeys from '../cache-keys'
 import * as Bluebird from 'bluebird'
 import * as RedisConfig from '../../config/redis.json'
 import Logger from '../helpers/logger'
-import Payment from '../models/payment'
+import Transfer from '../models/transfer'
 import NotificationManager from './notification-manager'
-
+import TelegramBotApi from '../helpers/telegram-bot-api'
+import { keyboardMenu } from '../t-conversation/defaults';
 var env = process.env.NODE_ENV || 'development';
 
 import TelegramUser from '../models/telegram_user'
@@ -35,6 +36,7 @@ export default class Store {
 
   async initSub() {
     let logger: any = (new Logger()).getLogger();
+    let tBot = (new TelegramBotApi()).getBot();
     try {
       await this.client.select((<any>RedisConfig)[env]['database'], function () { });
       await this.pub.select((<any>RedisConfig)[env]['database'], function () { });
@@ -48,7 +50,7 @@ export default class Store {
         await this.sub.subscribe(expired_subKey, function () {
           logger.info(' [i] Subscribed to "' + expired_subKey + '" event channel : ' + r)
           sub.on('message', async function (_: any, msg: any) {
-            console.log("MESSAG: " + msg);
+            console.log("KEY EXPIRED: " + msg);
             if (CacheKeys.isKey(msg, (new CacheKeys(1)).getKeys().messageCounter.shadowKey)) {
               let telegramId = CacheKeys.getIdFromKey(msg);
               let rKeys = new CacheKeys(telegramId).getKeys();
@@ -59,19 +61,31 @@ export default class Store {
                   tUser.user.updateAttributes({ messageCount: (cacheCount + tUser.user.messageCount) });
                 }
               }
-            } else if (CacheKeys.isKey(msg, (new CacheKeys(1).getKeys().paymentExpiryTimer.shadowKey))) {
+            } else if(CacheKeys.isKey(msg, (new CacheKeys(1).getKeys().paymentExpiryTimer.shadowKey))) {
               // delete expired payment and notify
               let paymentId: number = parseInt(CacheKeys.getIdFromKey(msg));
               try {
-                let payment = await Payment.deletePaymentIfExpired(paymentId);
+                let payment = await Transfer.deletePaymentIfExpired(paymentId);
                 if(payment) {
                   await _this.notificationManager.sendNotification(NotificationManager.NOTIF.PAYMENT_EXPIRED, 
                     {currencyCode: payment.currencyCode, amount: payment.amount, userId: payment.userId});
                 }
-                  //pass to message-queue for notification
               } catch(e) {
                 logger.error("Error occurred in deleting expired payment: "+paymentId+", "+JSON.stringify(e));
               }
+              } else if(CacheKeys.isKey(msg, (new CacheKeys(1).getKeys().tContext.key))) {
+                let telegramId = CacheKeys.getIdFromKey(msg);
+                let tUser:TelegramUser|null = await TelegramUser.findOne({where: {id: telegramId}, include: [ {model: User} ]});
+                if(tUser) {
+                  tBot.sendMessage(telegramId, tUser.user.__('context_action_expired'), {
+                    parse_mode: 'Markdown',
+                    reply_markup: {
+                      keyboard: keyboardMenu(tUser.user),
+                      one_time_keyboard: false,
+                      resize_keyboard: true
+                    }
+                  });
+                }
               }
             })
         })

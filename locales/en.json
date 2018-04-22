@@ -9,7 +9,7 @@
 	"i_agree": "✅ I Agree",
 	"wallet": "💼 Wallet",
 	"buy_sell": "💸 Buy / Sell BTC",
-	"my_account": "👤 My Account",
+	"my_account": "👤 Account",
 	"settings": "⚙️ Settings",
   "unknown_message": "Sorry, could not understand your request.\n\nMegaEx is a fast and secure multi-cryptocurrency wallet and peer-to-peer Bitcoin exchange.\n\nYou can read the getting-started guide for more information on using using the wallet, trading and security guidelines.",
   
@@ -42,19 +42,22 @@
   "send_payment_processed %s %s %s": "Your account is debited with %s %s from your *Payment link* by %s",
   "send_payment_expired %s %s": "Your *Payment link* of *%s %s* has expired. Your wallet has been updated with this balance.",
   "send_payment_info %f %s %d": "This is your payment link for %f %s. This link will expire in %d mins",
-
   "claim_payment_already_claimed": "This payment has already been cashed.",
   "claim_payment_expired": "This payment has expired or has been cancelled by the user.",
   "claim_payment_not_found": "This payment is invalid, this payment could have expired or cancelled by the payer.",
-
   "notify_expired_payment %s %s": "Your payment link of *%s %s* has *expired*. Your wallet has been *credited* with this amount.",
-
-  "payment_claimed_debit %s %s %s": "Your account has been debited with %1$s %2$s. @%3$s has received %1$s %2$s from your payment link.",
-  "payment_credit %s %s %s": "Your account is *credited* with *%s %s* from @%s",
+  "payment_claimed_debit %s %s %s": "Your account has been debited with %1$s %2$s. %3$s has received %1$s %2$s from your payment link.",
+  "payment_credit %s %s %s": "Your account is *credited* with *%s %s* from %s",
+  "context_action_expired": "This action was cancelled, please make a request again.",
+  "context_action_cancelled": "This action was cancelled",
 
   "back": "⬅️ Back ",
   "create": "✅ Create",
+  "confirm": "✅ Confirm",
   "cancel": "❌ Cancel",
+  "delete": "❌ Delete",
+  "edit": "📝 Edit",
+  "/cancel": "/cancel",
   "help_command": "❔ /help",
   "btc": {
 		"one": "bitcoin",
@@ -68,8 +71,9 @@
   "tbtc_wallet_info": "\n 💡 _Tesnet Bitcoins have no real value.\n      _ [Get free test bitcoins](https://testnet.manu.backend.hamburg/faucet)\n",
   "new_transaction_credit %s %s %s %s": "Your *%s* account is credited with *%s %s*.\nTxID: %s",
   
-  "show_my_account %s %d %f %f %d %d %d %d %d %s": "👤  *My Account* - %1$s                    /help\n\n 💸 *Total Trades*: %2$d\n 💎 *Total Volume*: %3$.4f BTC\n 🕒 *Avg trade speed*: %7$s mins\n ⭐️ *Rating*: %4$.1f/5 👍(%5$d) 👎(%6$d)\n\n 🤝 *Referrals*: %8$d\n 💰 *Revenue*: %9$d BTC\n\n* 💳 Accepted Payments*: %11$s\n\n* Account Verification*: %10$s\n\n💡 _Share your Account ID to let others to directly message, open trade or send bitcoins to you._",
+  "show_my_account %s %d %f %f %d %d %d %d %d %s": "👤  *My Account* - %1$s                    /help\n\n 💸 *Total Trades*: %2$d\n 💎 *Total Volume*: %3$.4f BTC\n 🕒 *Avg trade speed*: %7$s mins\n ⭐️ *Rating*: %4$.1f/5 👍(%5$d) 👎(%6$d)\n\n 🤝 *Referrals*: %8$d\n 💰 *Revenue*: %9$d BTC\n\n* 💳 Payment Methods*: %11$s\n\n* Account Verification*: %10$s\n\n💡 _Share your Account ID to let others to directly message, open trade or send bitcoins to you._",
   "show_other_account %s %d %f %f %d %d %s %d %s %d": "👤  *Account* - %1$s                    /help\n\n * ☀️ Last Active*: < %10$s mins ago\n\n 💸 *Total Trades*: %2$d\n 💎 *Total Volume*: %3$.4f BTC\n 🕒 *Avg trade speed*: %8$s mins\n ⭐️ *Rating*: %4$.1f/5 👍(%5$d) 👎(%6$d)\n\n* 💳 Accepted Payments*: %9$s\n\n* Account Verification*: %7$s\n\n",
+  "not_added": "_Not Added_",
   "my_account_info": "💡 This is your public account as shown to other users.",
   "account_not_available %s": "Could not find user with Account ID: *%s*",
   "show_referral_link_info": "🤝 *Referral Link*\n\n💰 Share your referral link to earn Bitcoins.\n\nAny new user from registered using link will become your referral forever, you will *earn 35%* of the fees we take from your referral.\n\nPayouts will be processed daily and credited to your wallet.",
@@ -79,12 +83,15 @@
   "referral_link": " 🤝  Referral Link",
   "account_link": "👤 Account Link",
   "add_payment_method": "💳 Add Payment Method",
+  "add_another_payment_method": "💳 Add Another Payment Method",
+  "show_payment_methods": "💳 Payment Methods",
+  "list_payment_methods": "💳 *My Payment Methods*\n\nClick on the payment method to modify or delete.\n\n 💡 _Consider adding multiple payment methods to get a wider range of buyers._",
   "verify_account": "✅ Verify Account",
   "send_message": "📝 Send Message",
   "open_orders %d": "💸 Active Orders (%d)",
   "block_account": "🔇 Block",
   "unblock_account": "🔈 Unblock",
-  "enter_send_message": "Enter the message to send:",
+  "enter_send_message": "/cancel\n\nType the message to send:",
   "message_send_success %s": "Your message was sent to %s",
   "message_send_failed": "Could not send message to user. Only text and images allowed.",
   "new_message %s": "💬 *New message* from %s",
@@ -97,5 +104,23 @@
   "tx_item %s %s %s": "```%s %s %s```\n",
   "tx_coin_balance %s %f": "\n*%s* Balance: *%f*",
   "credit": "credit",
-  "debit": "debit"
+  "debit": "debit",
+
+
+  "paymethod_add": "💳 *Add Payment Method*     /cancel\n\nSelect the payment method you want to add from options below.\n\n 💡 _Adding existing payment method will update old records._",
+  "paymethod_enter_heading %s %s": "💳  *Add %s Account*\n\nEnter your *%s*:",
+  "paymethod_enter_field %s": "Enter your *%s*:",
+  "paymethod_add_confirm %s": "*Confirm*\n\nVerify if your details for *%s* are correct.\n",
+  "paymethod_show %s": "*%s Account*\n",
+  "paymethod_field_show %s %s": "\n*%s*: %s",
+  "paymethod_saved %s": "✅ *%s Account Saved*\n\nYou can now receive money in this payment method when selling bitcoins.",
+  "paymethod_deleted %s": "Your saved *%s* account was deleted.",
+
+"paymethod1_name": "Paytm",
+"paymethod1_field1": "paytm mobile number",
+"paymethod2_name": "IMPS Bank Transfer",
+"paymethod2_field1": "Bank Account Number",
+"paymethod2_field2": "IFSC Code",
+"paymethod3_name": "UPI",
+"paymethod3_field1": "UPI ID"
 }

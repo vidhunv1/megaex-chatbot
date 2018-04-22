@@ -3,14 +3,19 @@ import TelegramUser from '../models/telegram_user'
 import Store from '../helpers/store'
 import CacheStore from '../cache-keys'
 import User from '../models/user'
-import TelegramBotApi from '../helpers/telegram-bot-api'
-import * as moment from 'moment'
+import PaymentDetail from '../models/payment_detail';
+import PaymentMethod from '../models/payment_method';
+import TelegramBotApi from '../helpers/telegram-bot-api';
+import * as moment from 'moment';
 
 import { stringifyCallbackQuery, keyboardMenu, sendErrorMessage } from './defaults';
-import * as AppConfig from '../../config/app.json'
+import * as AppConfig from '../../config/app.json';
 let env = process.env.NODE_ENV || 'development';
 
 let CONTEXT_SENDMESSAGE = "CONTEXT_SENDMESSAGE";
+let CONTEXT_ADDPAYMETHOD = "CONTEXT_ADDPAYMETHOD";
+let CONTEXT_ENTERPAYMETHOD = "CONTEXT_ENTERPAYMETHOD";
+let ENTER_PAYMETHOD_EXPIRY = 30;
 
 let redisClient = (new Store()).getClient();
 let tBot = (new TelegramBotApi()).getBot();
@@ -20,7 +25,6 @@ let accountConversation = async function (msg: TelegramBot.Message, user: User, 
     showAccount(accountId, msg, user, tUser);
     return true;
   } else if (msg.text && msg.text === user.__('my_account')) {
-    console.log("SHOWING ACCOUNT");
     showMyAccount(msg, user, tUser);
     return true;
   } else if (msg.text && msg.text.startsWith('/start')) {
@@ -42,6 +46,7 @@ let accountConversation = async function (msg: TelegramBot.Message, user: User, 
 
 let accountCallback = async function (msg: TelegramBot.Message, user: User, tUser: TelegramUser, query: CallbackQuery): Promise<boolean> {
   let botUsername = (<any>AppConfig)[env]["telegram_bot_username"];
+  let cacheKeys = (new CacheStore(tUser.id)).getKeys();
   switch (query.callbackFunction) {
     case 'accountLink':
       await tBot.sendMessage(msg.chat.id, user.__('show_account_link_info'), {
@@ -62,29 +67,108 @@ let accountCallback = async function (msg: TelegramBot.Message, user: User, tUse
       });
       return true;
     case 'addPayment':
-      await tBot.sendMessage(tUser.id, '[TODO] Handle add payment', {});
+      await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, CONTEXT_ADDPAYMETHOD);
+      redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry);
+      let payNames: string[] = await PaymentDetail.getPaymethodNames(user);
+      let keyboard: TelegramBot.KeyboardButton[][] = [];
+      for (let i = 0; i < payNames.length; i++) {
+        keyboard.push([{ text: payNames[i] }]);
+      }
+      await tBot.sendMessage(msg.chat.id, user.__('paymethod_add'), {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: keyboard,
+          one_time_keyboard: true,
+          resize_keyboard: true
+        }
+      })
       return true;
+    case 'showPayments':
+      if(query.showPayments && query.showPayments.paymentId) {
+        let pmName = user.__('paymethod'+query.showPayments.paymentId+'_name');
+        let pmFields = await PaymentDetail.getLocaleFields(user, pmName);
+        if(!pmFields) return true;
+        let fields:string[] = [], pmethod = await PaymentMethod.findOne({where: {paymentId: query.showPayments.paymentId, userId: user.id}});
+        if(!pmethod) return true;
+        fields.push(pmethod.field1, pmethod.field2, pmethod.field3, pmethod.field4);
+        let message: string = user.__('paymethod_show %s', pmName);
+        for (let i = 0; i < pmFields.length; i++) {
+          message = message + user.__('paymethod_field_show %s %s', pmFields[i], fields[i]);
+        }
+        pmFields && await tBot.sendMessage(tUser.id, message, {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [[ 
+              {text: user.__('delete'), callback_data: stringifyCallbackQuery('deletePayment', null, {paymentId: await PaymentDetail.getPaymethodID(user, pmName)})}, 
+              {text: user.__('edit'), callback_data: stringifyCallbackQuery('editPayment', null, {paymentId: await PaymentDetail.getPaymethodID(user, pmName)})}, 
+            ]],
+            one_time_keyboard: false,
+            resize_keyboard: true
+          }
+        });
+      } else {
+        let pmNames = await PaymentDetail.getPaymethodNames(user, true);
+        let inline: TelegramBot.InlineKeyboardButton[][] = [];
+        for(let i=0; i<pmNames.length; i++) {
+          inline.push([{ text: pmNames[i], callback_data: stringifyCallbackQuery('showPayments', null, {paymentId: await PaymentDetail.getPaymethodID(user, pmNames[i])}) }]);        
+        }
+        inline.push([{ text: user.__('add_another_payment_method'), callback_data: stringifyCallbackQuery('addPayment', null, null) }]);
+        tBot.sendMessage(tUser.id, user.__('list_payment_methods'), { 
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: inline,
+            one_time_keyboard: false,
+            resize_keyboard: true
+          }
+        });
+      }
+    return true;
+    case 'deletePayment':
+      if(!query || !query.deletePayment || !query.deletePayment.paymentId)
+        return true;
+      let pmName = user.__('paymethod'+query.deletePayment.paymentId+'_name');
+      console.log("DELETING: "+user.id+",  "+query.deletePayment.paymentId);
+
+      await PaymentMethod.destroy({where: {userId: user.id, paymentId: query.deletePayment.paymentId}});
+      await tBot.sendMessage(tUser.id, user.__('paymethod_deleted %s', pmName), {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: keyboardMenu(user),
+          one_time_keyboard: false,
+          resize_keyboard: true
+        } 
+      });
+    return true;
+    case 'editPayment':
+      if(!query || !query.editPayment || !query.editPayment.paymentId)
+        return true;
+      let pmName1 = user.__('paymethod'+query.editPayment.paymentId+'_name');  
+      showAddPayment(pmName1, user, tUser);
+    return true;
     case 'openOrders':
       await tBot.sendMessage(tUser.id, '[TODO] Handle open orders', {});
       return true;
     case 'sendMessage':
       if (!query || !query.sendMessage || !query.sendMessage.accountId)
         return true;
-      let cacheKeys = (new CacheStore(tUser.id)).getKeys();
-      await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, CONTEXT_SENDMESSAGE, cacheKeys.tContext["SendMessage.accountId"], query.sendMessage.accountId, 'EX', 240);
+      await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, CONTEXT_SENDMESSAGE, cacheKeys.tContext["SendMessage.accountId"], query.sendMessage.accountId);
+      redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry);
       let receiverUser: User | null = await User.findOne({ where: { accountId: query.sendMessage.accountId } });
       let receiverBlockedUsers: number[] = receiverUser ? JSON.parse(receiverUser.blockedUsers) : [];
       let amIBlocked: boolean = (receiverUser != null && (receiverBlockedUsers.indexOf(user.id) > -1));
       if (amIBlocked) {
+        await redisClient.delAsync(cacheKeys.tContext.key);
         tBot.sendMessage(tUser.id, user.__('send_message_not_allowed'), { parse_mode: 'Markdown' });
       } else if (receiverUser) {
         let myBlockList: number[] = JSON.parse(user.blockedUsers);
         if (myBlockList.indexOf(receiverUser.id) > -1) {
+          await redisClient.delAsync(cacheKeys.tContext.key);
           tBot.sendMessage(tUser.id, user.__('send_error_user_blocked'), { parse_mode: 'Markdown' });
         } else {
           tBot.sendMessage(tUser.id, user.__('enter_send_message'), { parse_mode: 'Markdown' });
         }
       } else {
+        await redisClient.delAsync(cacheKeys.tContext.key);
         sendErrorMessage(user, tUser);
       }
       return true;
@@ -108,7 +192,6 @@ let accountCallback = async function (msg: TelegramBot.Message, user: User, tUse
       } else {
         sendErrorMessage(user, tUser);
       }
-      console.log("USER TO UPDATE: " + JSON.stringify(user));
       await User.update({ blockedUsers: JSON.stringify(blockedUsers1) }, { where: { id: user.id } });
       await (new CacheStore(tUser.id)).clearUserCache();
       msg.message_id = query.messageId;
@@ -122,9 +205,10 @@ let accountCallback = async function (msg: TelegramBot.Message, user: User, tUse
 
 let accountContext = async function (msg: TelegramBot.Message, user: User, tUser: TelegramUser, context: string): Promise<boolean> {
   let cacheKeys = (new CacheStore(tUser.id)).getKeys();
-  let [sendAccount] = await redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["SendMessage.accountId"]);
   await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, '', cacheKeys.tContext["SendMessage.accountId"], '');
   if (context === CONTEXT_SENDMESSAGE) {
+    let [sendAccount] = await redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["SendMessage.accountId"]);
+    await redisClient.delAsync(cacheKeys.tContext.key);
     let sendUser: User | null = await User.findOne({ where: { accountId: sendAccount.toLowerCase() }, include: [TelegramUser] });
     if (sendUser && (msg.text || msg.photo)) {
       let replyMarkup = {
@@ -148,15 +232,115 @@ let accountContext = async function (msg: TelegramBot.Message, user: User, tUser
       await tBot.sendMessage(tUser.id, user.__('message_send_failed'), {});
     }
     return true;
+  } else if (context === CONTEXT_ADDPAYMETHOD) {
+    showAddPayment(msg.text || '', user, tUser);
+    return true;
+  } else if (msg.text && context === CONTEXT_ENTERPAYMETHOD) {
+    await redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry); 
+    let fields: string[] = JSON.parse(await redisClient.hgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["EnterPayMethod.fields"]));
+    let methodName = await redisClient.hgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["EnterPayMethod.methodName"]);
+    fields.push(msg.text);
+    await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, CONTEXT_ENTERPAYMETHOD, cacheKeys.tContext["EnterPayMethod.fields"], JSON.stringify(fields));
+
+    let pmFields = await PaymentDetail.getLocaleFields(user, methodName);
+    if (pmFields && fields.length < pmFields.length) {
+      pmFields && await tBot.sendMessage(tUser.id, user.__('paymethod_enter_field %s', pmFields[fields.length]), {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: [[]]
+        }
+      });
+    } else if (pmFields) {
+      if (msg.text === user.__('confirm')) {
+        redisClient.delAsync(cacheKeys.tContext.key);
+        // TODO: SAVE payment method
+        let paymentId = await PaymentDetail.getPaymethodID(user, methodName);
+        let insert:any = {userId: user.id, paymentId: paymentId, field1: fields[0]}
+        console.log("LENGTH: "+pmFields.length);
+        if(pmFields.length >=2)
+          insert["field2"] = fields[1];
+        if(pmFields.length >=3)
+          insert["field3"] = fields[2];
+        if(pmFields.length >=4)
+          insert["field4"] = fields[3];
+        
+        await PaymentMethod.destroy({where: {userId: user.id, paymentId: paymentId}});
+        let pm = new PaymentMethod(insert);
+        await pm.save();
+
+        pmFields && await tBot.sendMessage(tUser.id, user.__('paymethod_saved %s', methodName), {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: keyboardMenu(user),
+            one_time_keyboard: false,
+            resize_keyboard: true
+          }
+        });        
+      } else if (msg.text === user.__('cancel')) {
+          await redisClient.delAsync(cacheKeys.tContext.key);
+          tBot.sendMessage(tUser.id, user.__('context_action_cancelled'), {
+            parse_mode: 'Markdown',
+            reply_markup: {
+              keyboard: keyboardMenu(user),
+              one_time_keyboard: false,
+              resize_keyboard: true
+            }
+          });
+      } else {
+        let message: string = user.__('paymethod_add_confirm %s', methodName);
+        for (let i = 0; i < pmFields.length; i++) {
+          message = message + user.__('paymethod_field_show %s %s', pmFields[i], fields[i]);
+        }
+        pmFields && await tBot.sendMessage(tUser.id, message, {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: [[{ text: user.__('confirm') }], [{ text: user.__('cancel') }]],
+            one_time_keyboard: true,
+            resize_keyboard: true
+          }
+        });
+      }
+    }
+    return true;
+  } else {
+    return false;
   }
-  return false;
 }
 
-async function showMyAccount(msg: TelegramBot.Message, user: User, tUser: TelegramUser) {
-  let addPaymentInline = { text: user.__('add_payment_method'), callback_data: stringifyCallbackQuery('addPayment', null, null) };
+async function showAddPayment(paymethod:string, user:User, tUser:TelegramUser) {
+  let cacheKeys = (new CacheStore(tUser.id)).getKeys();
+  if (paymethod && await PaymentDetail.isPaymethodNameExists(user, paymethod)) {
+    await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, CONTEXT_ENTERPAYMETHOD, cacheKeys.tContext["EnterPayMethod.methodName"], paymethod, cacheKeys.tContext["EnterPayMethod.fields"], '[]');
+    await redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry); 
+    let pmFields = await PaymentDetail.getLocaleFields(user, paymethod);
+    pmFields && await tBot.sendMessage(tUser.id, user.__('paymethod_enter_heading %s %s', paymethod, pmFields[0]), {
+      parse_mode: 'Markdown'
+    });
+  }
+  else {
+    await redisClient.delAsync(cacheKeys.tContext.key);
+    await tBot.sendMessage(tUser.id, 'Invalid input. Please try again.', {});
+  }
+}
+
+async function showMyAccount(msg: TelegramBot.Message, user: User, _tUser: TelegramUser) {
+  let addPaymentInline, pmNames = await PaymentDetail.getPaymethodNames(user, true);
+  if(pmNames.length === 0) {
+    addPaymentInline = { text: user.__('add_payment_method'), callback_data: stringifyCallbackQuery('addPayment', null, null) };
+  } else {
+    addPaymentInline = { text: user.__('show_payment_methods'), callback_data: stringifyCallbackQuery('showPayments', null, null) };
+  }
   let fisrtInline = !user.isVerified ? [{ text: user.__('verify_account'), url: 'http://google.com' }, addPaymentInline] : [addPaymentInline];
+
+  let pmethodMessage = pmNames.length > 0 ? '' : user.__('not_added');
+  for(let i=0; i<pmNames.length; i++) {
+    if(i === pmNames.length-1)
+      pmethodMessage = pmethodMessage + pmNames[i];
+    else
+      pmethodMessage = pmethodMessage + ' ' + pmNames[i] + ',';
+  }
   let verificationMessage = user.isVerified ? user.__('account_verified') : user.__('account_not_verified');
-  await tBot.sendMessage(msg.chat.id, user.__('show_my_account %s %d %f %f %d %d %d %d %d %s', '/u' + (user.accountId.toUpperCase()), 1, 0.0001, 4.8, 4, 1, 2, 100, 1, verificationMessage, 'PayTM, UPI, IMPS'), {
+  await tBot.sendMessage(msg.chat.id, user.__('show_my_account %s %d %f %f %d %d %d %d %d %s', '/u' + (user.accountId.toUpperCase()), 1, 0.0001, 4.8, 4, 1, 2, 100, 1, verificationMessage, pmethodMessage), {
     parse_mode: 'Markdown',
     reply_markup: {
       inline_keyboard: [fisrtInline, [{ text: user.__('referral_link'), callback_data: stringifyCallbackQuery('referralLink', null, null) }, { text: user.__('account_link'), callback_data: stringifyCallbackQuery('accountLink', null, null) }]],
@@ -196,7 +380,7 @@ async function showAccount(accountId: string, msg: TelegramBot.Message, user: Us
     let message: string = user.__('show_other_account %s %d %f %f %d %d %s %d %s %d', '/u' + (accountId.toUpperCase()), 1, 0.0001, 4.8, 4, 1, verificationMessage, '10', 'PayTM, UPI, IMPS', lastActive)
     if (isUserBlocked)
       message = message + user.__('account_block_info');
-    if(accountId.toLowerCase() === user.accountId) {
+    if (accountId.toLowerCase() === user.accountId) {
       message = message + user.__('my_account_info');
     }
     if (msg && msg.from && msg.from.is_bot) { //callback query

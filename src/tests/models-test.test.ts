@@ -5,7 +5,7 @@ import { initDB, closeDB, createUser } from './test-db-helper'
 import Wallets from '../models/wallet'
 import User from '../models/user'
 import Transaction from '../models/transaction'
-import Payment, { PaymentError } from '../models/payment';
+import Transfer, { TransferError } from '../models/transfer';
 import Wallet from '../models/wallet';
 
 describe('Models Test', function () {
@@ -211,24 +211,24 @@ describe('Models Test', function () {
     it('should throw insufficient balance on payment create', async function() {
       let error = null;
       try {
-        await Payment.newPayment(createdUser.id, Wallets.getCurrencyCodes()[0], 1);
-        expect.fail(200, PaymentError.INSUFFICIENT_BALANCE, "Payment did not throw insufficient balance")
+        await Transfer.newPayment(createdUser.id, Wallets.getCurrencyCodes()[0], 1);
+        expect.fail(200, TransferError.INSUFFICIENT_BALANCE, "Payment did not throw insufficient balance")
       } catch(e) {
         error = e;
       }
-      expect(error instanceof PaymentError);
-      error && expect(error.status === PaymentError.INSUFFICIENT_BALANCE);
+      expect(error instanceof TransferError);
+      error && expect(error.status === TransferError.INSUFFICIENT_BALANCE);
     })
 
     it('should update blocked balance on successful create payment', async function() {
       let tx = await Transaction.create<Transaction>({ userId: createdUser.id, transactionType: 'receive', amount: 0.32, confirmations: 2, transactionId: Math.floor(Math.random() * 10000000)+'', transactionSource: 'test', currencyCode: firstCoin, receivedTime: (new Date()) });
 
-      let p = await Payment.newPayment(createdUser.id, Wallets.getCurrencyCodes()[0], 0.1);
+      let p = await Transfer.newPayment(createdUser.id, Wallets.getCurrencyCodes()[0], 0.1);
       let wallet = oldWalletFirst && await Wallets.findById(oldWalletFirst.id);
       wallet && expect(wallet.blockedBalance).to.equal(0.1);
       wallet && expect(wallet.availableBalance).to.equal(0.22);
       if(p.paymentCode) {
-        let payment = await Payment.getBySecret(p.paymentCode);
+        let payment = await Transfer.getBySecret(p.paymentCode);
         payment && await payment.destroy();
       }
       wallet && await wallet.updateAttributes({blockedBalance: 0});
@@ -238,9 +238,9 @@ describe('Models Test', function () {
     it('should update balance on successful claim', async function() {
       await Transaction.create<Transaction>({ userId: createdUser.id, transactionType: 'receive', amount: 0.32, confirmations: 2, transactionId: Math.floor(Math.random() * 10000000)+'', transactionSource: 'test', currencyCode: firstCoin, receivedTime: (new Date()) });
 
-      let p = await Payment.newPayment(createdUser.id, firstCoin, 0.1);
+      let p = await Transfer.newPayment(createdUser.id, firstCoin, 0.1);
       let claimantUser = await createUser();
-      p && p.paymentCode && await Payment.claimPayment(p.paymentCode, claimantUser.id);
+      p && p.paymentCode && await Transfer.claimPayment(p.paymentCode, claimantUser.id);
       let wallet1 = await Wallet.findOne({where: {currencyCode: firstCoin, userId: createdUser.id}});
       let wallet2 = await Wallet.findOne({where: {currencyCode: firstCoin, userId: claimantUser.id}});
 
@@ -248,7 +248,7 @@ describe('Models Test', function () {
       wallet1 && expect(wallet1.blockedBalance).to.equal(0);
       wallet2 && expect(wallet2.availableBalance).to.equal(0.1);
       
-      let payment = await Payment.findOne({where: {userId: createdUser.id}});
+      let payment = await Transfer.findOne({where: {userId: createdUser.id}});
       
       await Transaction.destroy({where: {userId: [claimantUser.id, createdUser.id]}});
       payment && await payment.destroy();
@@ -263,18 +263,18 @@ describe('Models Test', function () {
       let claimantUser = await createUser(), error = null;
       try {
         await Transaction.create<Transaction>({ userId: createdUser.id, transactionType: 'receive', amount: 0.32, confirmations: 2, transactionId: Math.floor(Math.random() * 10000000)+'', transactionSource: 'test', currencyCode: firstCoin, receivedTime: (new Date()) });
-        let p = await Payment.newPayment(createdUser.id, firstCoin, 0.1);
+        let p = await Transfer.newPayment(createdUser.id, firstCoin, 0.1);
 
-        p && p.paymentCode && await Payment.claimPayment(p.paymentCode, claimantUser.id);
-        p && p.paymentCode && await Payment.claimPayment(p.paymentCode, claimantUser.id);
+        p && p.paymentCode && await Transfer.claimPayment(p.paymentCode, claimantUser.id);
+        p && p.paymentCode && await Transfer.claimPayment(p.paymentCode, claimantUser.id);
       } catch(e) {
         error = e;
       }
-      expect(error instanceof PaymentError);
-      error && expect(error.status).equal(PaymentError.CLAIMED);
+      expect(error instanceof TransferError);
+      error && expect(error.status).equal(TransferError.CLAIMED);
 
       await Transaction.destroy({where: {userId: [claimantUser.id, createdUser.id]}});
-      await Payment.destroy({where: {userId: createdUser.id}});
+      await Transfer.destroy({where: {userId: createdUser.id}});
       for(let i=0; i<claimantUser.wallets.length; i++) {
         await claimantUser.wallets[i].destroy();
       }
@@ -286,15 +286,15 @@ describe('Models Test', function () {
       let error = null;
       try {
         await Transaction.create<Transaction>({ userId: createdUser.id, transactionType: 'receive', amount: 0.32, confirmations: 2, transactionId: Math.floor(Math.random() * 10000000)+'', transactionSource: 'test', currencyCode: firstCoin, receivedTime: (new Date()) });
-        let p = await Payment.newPayment(createdUser.id, firstCoin, 0.1);
-        p.paymentCode && await Payment.claimPayment(p.paymentCode, createdUser.id);
+        let p = await Transfer.newPayment(createdUser.id, firstCoin, 0.1);
+        p.paymentCode && await Transfer.claimPayment(p.paymentCode, createdUser.id);
       } catch(e) {
         error = e;
       }
-      expect(error instanceof PaymentError);
-      error && expect(error.status).equal(PaymentError.SELF_CLAIM);
+      expect(error instanceof TransferError);
+      error && expect(error.status).equal(TransferError.SELF_CLAIM);
 
-      let payment = await Payment.findOne({where: {userId: createdUser.id}});
+      let payment = await Transfer.findOne({where: {userId: createdUser.id}});
       payment && await payment.destroy();
       oldWalletFirst && Wallet.update({blockedBalance: 0}, {where: {id: oldWalletFirst.id}})
       await Transaction.destroy({where: {userId: [createdUser.id]}});
@@ -306,10 +306,10 @@ describe('Models Test', function () {
       };
 
       let tx = await Transaction.create<Transaction>({ userId: createdUser.id, transactionType: 'receive', amount: 0.32, confirmations: 2, transactionId: Math.floor(Math.random() * 10000000)+'', transactionSource: 'test', currencyCode: firstCoin, receivedTime: (new Date()) }); 
-      let p = await Payment.newPayment(createdUser.id, firstCoin, 0.1);
+      let p = await Transfer.newPayment(createdUser.id, firstCoin, 0.1);
       await timeout(6000);
       if(p.paymentCode) {
-        let payment = await Payment.getBySecret(p.paymentCode);
+        let payment = await Transfer.getBySecret(p.paymentCode);
         console.log("EXPIRED... "+JSON.stringify(payment));
         expect(payment).to.be.null;
         let wallet = oldWalletFirst && await Wallet.findOne({where: {id: oldWalletFirst.id}});
@@ -317,7 +317,7 @@ describe('Models Test', function () {
         console.log('WB: ----'+JSON.stringify(wallet));
         wallet && expect(wallet.blockedBalance).equal(0);
       }
-      await Payment.destroy({where: {userId: createdUser.id}});
+      await Transfer.destroy({where: {userId: createdUser.id}});
       await tx.destroy();
     })
 

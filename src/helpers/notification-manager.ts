@@ -59,7 +59,7 @@ export default class NotificationManager {
         if(!user)
         return;
 
-        await tBot.sendMessage(user.telegramUser.id, user.__('payment_claimed_debit %s %s %s', data.amount, data.currencyCode, data.telegramUsername), {parse_mode: 'Markdown'})  
+        await tBot.sendMessage(user.telegramUser.id, user.__('payment_claimed_debit %s %s %s', data.amount, data.currencyCode, data.telegramUsername ? '@'+data.telegramUsername : data.telegramName), {parse_mode: 'Markdown'})  
         break;
 
       default:
