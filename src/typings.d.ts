@@ -34,7 +34,24 @@ interface KeysInterface {
 }
 
 interface CallbackQuery {
-  callbackFunction: 'coinSend' | 'coinAddress' | 'coinWithdraw' | 'paginate' | 'newAddress' | 'qrCode' | 'accountLink' | 'referralLink' | 'addPayment' | 'deletePayment' | 'showPayments' | 'editPayment' | 'openOrders' | 'sendMessage' | 'blockAccount',
+  callbackFunction: 
+      'coinSend'
+    | 'coinAddress'
+    | 'coinWithdraw'
+    | 'paginate'
+    | 'newAddress'
+    | 'qrCode'
+    | 'accountLink'
+    | 'referralLink'
+    | 'addPayment'
+    | 'deletePayment'
+    | 'showPayments'
+    | 'editPayment'
+    | 'openOrders'
+    | 'sendMessage'
+    | 'blockAccount'
+    | 'buy'
+    | 'sell',
   messageId: number,
   coinSend?: {
     coin:string,

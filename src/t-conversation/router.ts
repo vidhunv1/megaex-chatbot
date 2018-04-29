@@ -15,6 +15,7 @@ import { tradeConversation, tradeCallback, tradeContext } from './trade';
 import { infoConversation, infoCallback, infoContext } from './info';
 import { accountConversation, accountCallback, accountContext } from './account';
 import I18n from '../helpers/i18n';
+import Market from '../models/market';
 export default class TMHandler {
   static instance: TMHandler
   tBot!: TelegramBot;
@@ -105,17 +106,7 @@ export default class TMHandler {
 
   async onboardUser(msg: TelegramBot.Message, user: User, tUser: TelegramUser) {
     let languagesList = I18n.getAvailableLanguages();
-    let currencyList = [
-      {name: '$ USD', code: 'usd'},
-      {name: '₹ INR', code: 'inr'},
-      {name: '€ EUR', code: 'eur'},
-      {name: '¥ CNY', code: 'cny'},
-      {name: '₽ RUB', code: 'rub'},
-      {name: '£ GBP', code: 'gbp'},
-      {name: '¥ YEN', code: 'yen'},
-      {name: 'CAD', code: 'cad'},
-      {name: 'CHF', code: 'chf'}
-    ]
+    let currencyList = Market.getFiatCurrencies();
     let ccKeyboardButton:TelegramBot.ReplyKeyboardMarkup = { keyboard: [], one_time_keyboard: false, resize_keyboard: true };
     let getCurrencyCode = function(currency:string):string|null {
       for(let i=0; i<currencyList.length; i++) {

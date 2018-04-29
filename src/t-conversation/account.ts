@@ -15,7 +15,7 @@ let env = process.env.NODE_ENV || 'development';
 let CONTEXT_SENDMESSAGE = "CONTEXT_SENDMESSAGE";
 let CONTEXT_ADDPAYMETHOD = "CONTEXT_ADDPAYMETHOD";
 let CONTEXT_ENTERPAYMETHOD = "CONTEXT_ENTERPAYMETHOD";
-let ENTER_PAYMETHOD_EXPIRY = 30;
+// let ENTER_PAYMETHOD_EXPIRY = 30;
 
 let redisClient = (new Store()).getClient();
 let tBot = (new TelegramBotApi()).getBot();
@@ -78,7 +78,7 @@ let accountCallback = async function (msg: TelegramBot.Message, user: User, tUse
         parse_mode: 'Markdown',
         reply_markup: {
           keyboard: keyboard,
-          one_time_keyboard: true,
+          one_time_keyboard: false,
           resize_keyboard: true
         }
       })
@@ -314,7 +314,12 @@ async function showAddPayment(paymethod:string, user:User, tUser:TelegramUser) {
     await redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry); 
     let pmFields = await PaymentDetail.getLocaleFields(user, paymethod);
     pmFields && await tBot.sendMessage(tUser.id, user.__('paymethod_enter_heading %s %s', paymethod, pmFields[0]), {
-      parse_mode: 'Markdown'
+      parse_mode: 'Markdown',
+      reply_markup: {
+        keyboard: keyboardMenu(user),
+        one_time_keyboard: true,
+        resize_keyboard: true
+      }
     });
   }
   else {

@@ -7,13 +7,14 @@ import MessageQueue from './helpers/message-queue';
 import User from './models/user'
 import TelegramUser from './models/telegram_user'
 import Wallet from './models/wallet'
+import Jobs from './jobs'
 
 import * as DatabaseConfig from '../config/database.json'
 import CacheKeys from './cache-keys'
 import Store from './helpers/store';
 import Logger from './helpers/logger'
 import TelegramHandler from './t-conversation/router'
-import Transfer from './models/transfer';
+// import Transfer from './models/transfer';
 
 let env = process.env.NODE_ENV || 'development';
 
@@ -40,6 +41,8 @@ app.listen(89);
     }
   });
   sequelize.addModels([__dirname + '/models/']);
+  // Initialization tasks
+  // Transfer.deleteExpiredPayments();
 
   // ****** Initialize Redis client ******
   let redisStore = new Store();
@@ -48,7 +51,8 @@ app.listen(89);
   let tBot = (new TelegramBotApi()).getBot();
   let messageQueue = new MessageQueue();
   let tMessageHandler = new TelegramHandler();
-
+  let jobs = new Jobs();
+  jobs.start();
   tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
     console.log("Received message: ");
     try {
@@ -140,9 +144,7 @@ app.listen(89);
     await sequelize.close();
     await redisStore.close();
     await messageQueue.close();
+    await jobs.stop();
     process.exit(0);
   });
 })();
-
-// Initialization tasks
-Transfer.deleteExpiredPayments();

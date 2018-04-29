@@ -5,6 +5,7 @@ import TelegramUser from '../models/telegram_user'
 import * as moment from 'moment'
 import Transfer, { TransferError } from '../models/transfer'
 import User from '../models/user'
+import Market from '../models/market'
 import * as QRCode from 'qrcode'
 import Store from '../helpers/store'
 import TelegramBotApi from '../helpers/telegram-bot-api'
@@ -70,7 +71,6 @@ let walletConversation = async function(msg: TelegramBot.Message, user: User, tU
 }
 
 let walletCallback = async function(msg: TelegramBot.Message, user: User, tUser: TelegramUser, query:CallbackQuery):Promise<boolean> {
-  console.log("Handling callback query: "+query.callbackFunction);
   let cacheKeys = (new CacheStore(tUser.id)).getKeys();
   switch (query.callbackFunction) {
     case 'coinSend':
@@ -79,10 +79,11 @@ let walletCallback = async function(msg: TelegramBot.Message, user: User, tUser:
           parse_mode: 'Markdown',
         });
         let coinWallet: Wallet | null = await Wallet.findOne({ attributes: ['availableBalance'], where: { userId: user.id, currencyCode: query.coinSend.coin } })
-        let exchangeRate = 500000;
         if (coinWallet && coinWallet.availableBalance > 0) {
-          await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, CONTEXT_COINSEND, cacheKeys.tContext["CoinSend.isInputAmount"], 1);
-          await tBot.sendMessage(tUser.id, user.__('send_payment_enter_details %s %s %s %s', (coinWallet.availableBalance).toLocaleString(), query.coinSend.coin.toUpperCase(), (coinWallet.availableBalance * exchangeRate).toLocaleString(), 'INR'.toUpperCase()), {
+          await redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry);
+          await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, CONTEXT_COINSEND, cacheKeys.tContext["CoinSend.isInputAmount"], 1, cacheKeys.tContext["Wallet.coin"], query.coinSend.coin);
+          let value = (await Market.getValue(query.coinSend.coin, user.currencyCode)) || 100;
+          await tBot.sendMessage(tUser.id, user.__('send_payment_enter_details %s %s %s %s', (coinWallet.availableBalance).toLocaleString(), query.coinSend.coin.toUpperCase(), (coinWallet.availableBalance * value).toLocaleString(), user.currencyCode.toUpperCase()), {
             parse_mode: 'Markdown',
           });
         } else if (coinWallet && coinWallet.availableBalance == 0) {
@@ -216,17 +217,16 @@ async function handleCoinSend(msg: TelegramBot.Message, user: User, tUser: Teleg
   [coin, isInputContext] = await redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"], cacheKeys.tContext["CoinSend.isInputAmount"]);
   if (msg && msg.text) {
     if (isInputContext) {
-      let exchangeRate = 500000;
-      let text = msg.text.toLowerCase().replace(/[^0-9a-z.]/g, '');
-      let amount = parseFloat(text.replace(/[^0-9.]/g, '')), amountToPay: number = amount;
-      let currency = text.replace(/[^a-z]/g, '');
-
-      if (Wallet.getCurrencyCodes().indexOf(currency) >= 0) {
-        coin = currency;
-      }
-
-      if (currency === 'inr') {
-        amountToPay = amount / exchangeRate;
+      let amountToPay:number|null = await Market.parseCurrencyValue(msg.text, coin);
+      if(!amountToPay) {
+        await tBot.sendMessage(tUser.id, user.__('invalid_input'), {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: keyboardMenu(user),
+            one_time_keyboard: false
+          }
+        });
+        return;
       }
 
       let wallet: Wallet | null = await Wallet.findOne({ attributes: ['availableBalance'], where: { currencyCode: coin, userId: user.id } });
@@ -234,7 +234,7 @@ async function handleCoinSend(msg: TelegramBot.Message, user: User, tUser: Teleg
         if (amountToPay <= wallet.availableBalance && amountToPay > 0) {
           await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext["CoinSend.amount"], amountToPay);
           redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry);
-          await tBot.sendMessage(tUser.id, user.__('send_payment_create_confirm %s %s', amountToPay, coin.toUpperCase()), {
+          await tBot.sendMessage(tUser.id, user.__('send_payment_create_confirm %f %s', amountToPay, coin.toUpperCase()), {
             parse_mode: 'Markdown',
             reply_markup: {
               keyboard: [[{ text: user.__('create') }], [{ text: user.__('cancel') }]],
@@ -243,12 +243,7 @@ async function handleCoinSend(msg: TelegramBot.Message, user: User, tUser: Teleg
             }
           });
         } else {
-          let message;
-          if (!isNaN(amountToPay))
-            message = 'You have insufficient balance to make this payment.';
-          else
-            message = 'Invalid input specified. Please try again.';
-          await tBot.sendMessage(tUser.id, message, {
+          await tBot.sendMessage(tUser.id, user.__('send_payment_insufficient_balance'), {
             parse_mode: 'Markdown',
             reply_markup: {
               keyboard: keyboardMenu(user),
@@ -360,8 +355,9 @@ async function handleWallet(msg: TelegramBot.Message | null, user: User, tUser: 
   let wallet: Wallet | null = await Wallet.findOne({ attributes: ['availableBalance', 'unconfirmedBalance', 'blockedBalance'], where: { currencyCode: currentCoin, userId: user.id } })
   let message = '', rate = 600000;
   if (wallet) {
-    let availableBalance = wallet.availableBalance;
-    let availableBalanceLocal = (wallet.availableBalance * rate).toLocaleString(tUser.languageCode);
+    let availableBalance = wallet.availableBalance, availableBalanceLocal:string;
+    let val = await Market.getValue(currentCoin, user.currencyCode);
+    availableBalanceLocal = val ? (val*wallet.availableBalance).toLocaleString(tUser.languageCode, {style: 'currency', currency: user.currencyCode}) : 'N/A';
     let coinTitle = toTitleCase(user.__n(currentCoin, 1));
     let headerPad = ("                                            /"+user.__('help')).slice(-43 + coinTitle.length);
     message = user.__('show_wallet_balance %s %s %s %s %s', 

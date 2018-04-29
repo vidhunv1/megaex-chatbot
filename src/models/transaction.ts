@@ -47,7 +47,6 @@ export default class Transaction extends Model<Transaction> {
   @Column
   currencyCode!: string
 
-
   static async getTotalBalance(userId:number, currencyCode:string) {
     // TODO: If you are paranoid, check validity of all transations from core-wallet and verify jwt for payment codes. 
     // For now this should do.

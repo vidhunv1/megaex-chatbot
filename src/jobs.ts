@@ -1,0 +1,79 @@
+import { CronJob } from 'cron';
+import * as request from 'request-promise';
+import Market from './models/market'
+import * as moment from 'moment'
+import Logger from './helpers/logger'
+export default class Jobs {
+  jobs: CronJob[];
+  logger:any
+  constructor() {
+    this.jobs = []
+    this.jobs.push(this.getMarketRatesJob());
+    this.logger = (new Logger()).getLogger();
+  }
+
+  start() {
+    console.log("Starting all jobs: ");
+    for (let i = 0; i < this.jobs.length; i++) {
+      this.jobs[i].start();
+    }
+  }
+
+  stop() {
+    console.log("stopping all jobs");
+    for (let i = 0; i < this.jobs.length; i++) {
+      this.jobs[i].stop();
+    }
+  }
+
+  private getMarketRatesJob() {
+    let _this = this;
+    return new CronJob({
+      cronTime: '*/2 * * * *',
+      onTick: async function () {
+        console.log("[TODO] Fetch and update market rates");
+
+        let pd: Market[] = (await Market.sequelize.query('SELECT * FROM "Markets" WHERE "fromCurrency"=\'btc\' AND "toCurrency" IN (SELECT DISTINCT "currencyCode" FROM "Users") ORDER BY "updatedAt" DESC;'))[0];
+        let shouldSync = false, exchangeRates;
+        for (let i = 0; i < pd.length; i++) {
+          if (pd[i].toCurrency === 'inr') {
+            try {
+              let zebpayResp = JSON.parse(await request('https://www.zebapi.com/api/v1/market/ticker-new/btc/inr'));
+              console.log("UPDATING ZEBPAY PRICE: "+zebpayResp["24hoursHigh"]+", "+JSON.stringify(pd[i]));
+              await Market.update({value: zebpayResp["24hoursHigh"]}, { where: {id: pd[i].id}});
+            } catch (e) {
+              _this.logger.error("getMarketRatesJob ERROR UPDATING: "+e);
+             }
+          } else if (pd[i].toCurrency === 'usd') {
+            try {
+              let btcPrice = JSON.parse(await request('https://api.coinmarketcap.com/v1/ticker/bitcoin/?convert=usd'))[0].price_usd;
+              await Market.update({value: btcPrice}, { where: {id: pd[i].id}});
+            } catch (e) { }
+          } else if (!shouldSync) {
+            if (moment().diff(pd[i].updatedAt, 'hour') >= 24) {
+              try {
+                exchangeRates = JSON.parse(await request('http://data.fixer.io/api/latest?access_key=b7cb98de1d0f513b39019d797f7514ff&base=eur'));
+                shouldSync = true;
+              } catch (e) {
+                _this.logger.error("getMarketRatesJobERROR UPDATING" + JSON.stringify(e));
+              }
+            }
+          }
+
+          if(shouldSync) {
+            let usdRate = exchangeRates.rates["USD"];
+            if(usdRate && exchangeRates.rates[pd[i].toCurrency.toUpperCase()]) {
+              try {
+              await Market.update({toCurrencyUsdValue: (exchangeRates.rates[pd[i].toCurrency.toUpperCase()] / usdRate)}, { where: {id: pd[i].id}});
+              } catch(e) {
+                _this.logger.error("getMarketRatesJobERROR UPDATING" + JSON.stringify(e)); 
+              }
+            }
+          }
+        }
+      },
+      onComplete: function () { },
+      start: false
+    })
+  }
+}

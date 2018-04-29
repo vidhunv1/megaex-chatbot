@@ -7,7 +7,7 @@
     "jwt_secret": "5:oo[{CU]\"\"QNtpIUG)FHneF(",
     "hash_salt": "$2a$12$ZyXHccSa.lw4j8CYbkrkk.",
     "payment_expiry": 120,
-    "context_expiry": 5
+    "context_expiry": 30
   },
   "test": {
     "telegram_access_token": "533091025:AAEYbCc7meRtZN2DJlIYDyZ37BQSAJuGm5c",

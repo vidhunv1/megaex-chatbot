@@ -199,9 +199,8 @@ export default class Transfer extends Model<Transfer> {
 
   public static async deleteExpiredPayments():Promise<boolean> {
     let p:Transfer[]|null = await Transfer.findAll({where: {status: 'pending', createdAt: {$lte: moment().subtract((<any>AppConfig)[env]["payment_expiry"], 's').toISOString()}}});
-    console.log(JSON.stringify(p));
+    console.log("Deleting expired payments: "+JSON.stringify(p));
     for(let i=0; i<p.length; i++) {
-      console.log("Deleting payment: "+p[i].id);
       await Transfer.deletePaymentIfExpired(p[i].id);
     }
     return false;
@@ -226,4 +225,3 @@ export class TransferError extends Error {
     this.status = status;
   }
 };
-
