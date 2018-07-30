@@ -6,11 +6,10 @@ import CacheStore from '../cache-keys'
 import Store from '../helpers/store'
 import Logger from '../helpers/logger'
 import NotificationManager from '../helpers/notification-manager'
-import { isBotCommand, parseCallbackQuery, keyboardMenu, sendErrorMessage } from './defaults';
+import { isBotCommand, parseCallbackQuery, keyboardMenu, sendErrorMessage, ICallbackQuery, ICallbackFunction } from './defaults';
 
 //conversation routes
 import { walletConversation, walletCallback, walletContext } from './wallet';
-import { settingsConversation, settingsCallback, settingsContext } from './settings';
 import { tradeConversation, tradeCallback, tradeContext } from './trade';
 import { infoConversation, infoCallback, infoContext } from './info';
 import { accountConversation, accountCallback, accountContext } from './account';
@@ -26,7 +25,7 @@ export default class TMHandler {
   constructor() {
     if (TMHandler.instance)
       return TMHandler.instance;
-    this.logger = (new Logger()).getLogger()
+    this.logger = (new Logger()).getLogger();
     this.redisClient = (new Store()).getClient();
     this.notificationManager = new NotificationManager();
 
@@ -35,12 +34,15 @@ export default class TMHandler {
   }
 
   async handleCallbackQuery(msg: TelegramBot.Message, user: User, tUser: TelegramUser, callback: TelegramBot.CallbackQuery) {
-    let query: CallbackQuery = callback.data ? parseCallbackQuery(callback.data) : parseCallbackQuery('');
+    let query: ICallbackQuery = callback.data ? parseCallbackQuery(callback.data) : parseCallbackQuery('');
+    if(query.callbackFunction === ICallbackFunction.GoBack) {
+      await this.tBot.deleteMessage(tUser.id, query.messageId);
+      return;
+    }
     let isCallbackHandled: boolean =
       await walletCallback(msg, user, tUser, query) ||
       await tradeCallback(msg, user, tUser, query) ||
       await infoCallback(msg, user, tUser, query) ||
-      await settingsCallback(msg, user, tUser, query) ||
       await accountCallback(msg, user, tUser, query);
 
     if (!isCallbackHandled) {
@@ -64,7 +66,6 @@ export default class TMHandler {
       await walletConversation(msg, user, tUser) ||
       await tradeConversation(msg, user, tUser) ||
       await infoConversation(msg, user, tUser) ||
-      await settingsConversation(msg, user, tUser) ||
       await accountConversation(msg, user, tUser);
 
     if (!isConversationHandled && msg.text && !msg.text.startsWith('/start')) {
@@ -77,7 +78,6 @@ export default class TMHandler {
         await walletContext(msg, user, tUser, currentContext) ||
         await tradeContext(msg, user, tUser, currentContext) ||
         await infoContext(msg, user, tUser, currentContext) ||
-        await settingsContext(msg, user, tUser, currentContext) ||
         await accountContext(msg, user, tUser, currentContext)
 
       if (!isContextHandled) {
@@ -195,9 +195,9 @@ export default class TMHandler {
     }
   }
 
-  async handleBaseContext(msg: TelegramBot.Message, user: User, tUser: TelegramUser, context:string):Promise<boolean> {
+  async handleBaseContext(msg: TelegramBot.Message, user: User, tUser: TelegramUser, _context:string):Promise<boolean> {
     let cacheKeys = (new CacheStore(tUser.id)).getKeys();
-    if(context && context!='' && msg.text === user.__('/cancel')) {
+    if((msg.text === user.__('/cancel') || msg.text === user.__('cancel_text'))) {
       await this.redisClient.delAsync(cacheKeys.tContext.key); 
       this.tBot.sendMessage(tUser.id, user.__('context_action_cancelled'), {
         parse_mode: 'Markdown',

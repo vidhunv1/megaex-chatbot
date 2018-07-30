@@ -1,8 +1,8 @@
 import { Table, Column, Model, ForeignKey, DataType, BelongsTo, PrimaryKey, AllowNull, Unique, AutoIncrement } from 'sequelize-typescript';
 import * as moment from 'moment'
 import User from './user';
-import Wallet from '../models/wallet'
-import Transaction from './transaction'
+import Wallet, { WalletError } from '../models/wallet'
+import Transaction, { TransactionError } from './transaction'
 import RandomGenerator from '../helpers/random-generator'
 import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken';
@@ -78,7 +78,8 @@ export default class Transfer extends Model<Transfer> {
         if (!wallet)
           throw Error();
 
-        await wallet.updateAttributes({ availableBalance: (wallet.availableBalance - amount), blockedBalance: (wallet.blockedBalance + amount) }, { transaction: t });
+        await Wallet.blockBalance(userId, currencyCode, amount, t);
+        
         let p = new Transfer({ transactionId: transactionId, secretHash: secretHash, userId: userId, currencyCode: currencyCode, amount: amount, status: 'pending', transferSignature: paySign });
         await p.save({ transaction: t });
         if (!p)
@@ -112,16 +113,18 @@ export default class Transfer extends Model<Transfer> {
     try {
       await this.sequelize.transaction(async function (t) {
         if (!p)
-          throw Error();
-        let walletSender: Wallet | null = await Wallet.findOne({ attributes: ['blockedBalance', 'id', 'availableBalance'], where: { currencyCode: p.currencyCode, userId: p.userId } });
-        if (!walletSender)
-          throw Error();
-        await walletSender.updateAttributes({ blockedBalance: walletSender.blockedBalance - p.amount, availableBalance: walletSender.availableBalance + p.amount }, { transaction: t })
-        let senderTransaction = new Transaction({ userId: p.userId, transactionId: p.transactionId + '-s', amount: -1 * p.amount, confirmations: 3, receivedTime: (new Date()), transactionSource: 'payment', transactionType: 'send', currencyCode: p.currencyCode });
-        await senderTransaction.save({ transaction: t });
-
-        let receiverTransaction = new Transaction({ userId: claimantUserId, transactionId: p.transactionId + '-r', amount: p.amount, confirmations: 3, receivedTime: (new Date()), transactionSource: 'payment', transactionType: 'receive', currencyCode: p.currencyCode });
-        await receiverTransaction.save({ transaction: t });
+          throw new TransferError(TransferError.NOT_FOUND);
+        try {
+          await Wallet.unblockBalance(p.userId, p.currencyCode, p.amount, t);
+        } catch(e) {
+          if(e instanceof WalletError) {
+            if(e.status = WalletError.INSUFFICIENT_BALANCE) {
+              throw new TransferError(TransferError.INSUFFICIENT_BALANCE);
+            }
+          }
+        }
+        
+        await Transaction.transfer(p.userId, claimantUserId, p.amount, p.currencyCode, p.transactionId, t);
 
         // unset expiry on paymentlink
         let redisClient = (new Store()).getClient();
@@ -132,6 +135,11 @@ export default class Transfer extends Model<Transfer> {
       });
       return { amount: p.amount, transactionId: p.transactionId + '-r', currencyCode: p.currencyCode, userId: p.userId }
     } catch (e) {
+      if(e instanceof TransactionError) {
+        if(e.status === TransactionError.INSUFFICIENT_BALANCE) {
+          throw new TransferError(TransferError.INSUFFICIENT_BALANCE);
+        }
+      }
       throw new TransferError();
     }
   }
@@ -143,8 +151,8 @@ export default class Transfer extends Model<Transfer> {
     if (p.userId != userId)
       throw new TransferError(TransferError.UNAUTHORIZED);
 
-    await p.updateAttributes({ paymentSignature: '', status: 'deleted' });
     try {
+      await p.updateAttributes({ paymentSignature: '', status: 'deleted' });
       await Wallet.unblockBalance(p.userId, p.currencyCode, p.amount);
     } catch(e) {
       throw new TransferError();

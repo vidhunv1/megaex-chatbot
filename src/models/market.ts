@@ -1,5 +1,4 @@
 import { Table, Column, Model, PrimaryKey, AllowNull, AutoIncrement, DataType } from 'sequelize-typescript';
-import Wallet from './wallet'
 
 @Table({ timestamps: true, tableName: 'Markets' })
 export default class Market extends Model<Market> {
@@ -27,9 +26,9 @@ export default class Market extends Model<Market> {
 
   @AllowNull(true)
   @Column(DataType.FLOAT)
-  toCurrencyUsdValue!: number
+  fromCurrencyUsdValue!: number
 
-  static getCurrency(currencyCode:string):{name:string, code:string, symbol?:string}|null {
+  static getFiatCurrency(currencyCode:string):{name:string, code:string, symbol?:string}|null {
     let c = this.getFiatCurrencies();
     for(let i=0; i<c.length; i++) {
       if(c[i].code === currencyCode)
@@ -38,12 +37,30 @@ export default class Market extends Model<Market> {
     return null;
   }
 
+  static getCryptoCurrency(currencyCode:string):{name:string, code:string, symbol?:string}|null {
+    let c = this.getCryptoCurrencies();
+    for(let i=0; i<c.length; i++) {
+      if(c[i].code === currencyCode)
+        return c[i];
+    }
+    return null;
+  }
+
+  static getCryptoCurrencyIndex(currencyCode:string):number {
+    let c = this.getCryptoCurrencies();
+    for(let i=0; i<c.length; i++) {
+      if(c[i].code === currencyCode)
+        return i;
+    }
+    return -1;
+  }  
+
   static async parseCurrencyValue(text:string, toCurrency:string):Promise<number|null> {
-    console.log("parseCurrencyValue: "+toCurrency+", "+text);
     text = text.toLowerCase().replace(/[^0-9a-z.]/g, '');
     let amount = parseFloat(text.replace(/[^0-9.]/g, ''));
     let currencyCode = text.replace(/[^a-z]/g, '').toLowerCase();
-    if(this.getCurrency(currencyCode) && amount>0) {
+    currencyCode = currencyCode === '' ? 'btc' : currencyCode;
+    if((this.getFiatCurrency(currencyCode) || this.getCryptoCurrency(currencyCode)) && amount>0) {
       if (currencyCode === toCurrency) {
         return amount;
       } else {
@@ -54,20 +71,19 @@ export default class Market extends Model<Market> {
         return null;
       }
     } else {
-      return amount;
+      return null;
     }
   }
 
   static async getValue(fromCurrency:string, toCurrency:string):Promise<number|null> {
     let market:Market|null, reverse = false;
-    if(Wallet.getCurrencyCodes().indexOf(toCurrency)>=0) {
+    if(Market.getCryptoCurrency(toCurrency)!==null) {
       market = await Market.findOne({where: {fromCurrency: toCurrency, toCurrency: fromCurrency}});
       reverse = true;
     } else {
       market = await Market.findOne({where: {fromCurrency, toCurrency}});
       reverse = false 
     }
-    console.log("MARKET: "+JSON.stringify(market));
     if(!market) {
       return null;
     }
@@ -77,9 +93,16 @@ export default class Market extends Model<Market> {
       let marketUsd:Market|null = await Market.findOne({where: {fromCurrency: reverse ? toCurrency : fromCurrency, toCurrency: 'usd'}});
       if(!marketUsd)
         return null;
-      let v = (marketUsd.value * market.toCurrencyUsdValue);
+      let v = (marketUsd.value * market.fromCurrencyUsdValue);
       return reverse ? 1/v : v;
     }
+  }
+
+  static getCryptoCurrencies() {
+    return [
+      { name: 'Bitcoin', code: 'btc' },
+      { name: 'Test Bitcoin', code: 'tbtc'}
+    ];
   }
 
   static getFiatCurrencies() {
@@ -249,7 +272,7 @@ export default class Market extends Model<Market> {
       { name: 'TVD', code: 'tvd' },
       { name: 'IMP', code: 'imp' },
       { name: 'GGP', code: 'ggp' },
-      { name: 'ZMW', code: 'zmw' }
+      { name: 'ZMW', code: 'zmw' },
     ]
   }
 }

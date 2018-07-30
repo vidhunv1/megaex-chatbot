@@ -7,6 +7,7 @@ import User from '../models/user'
 import Transaction from '../models/transaction'
 import Transfer, { TransferError } from '../models/transfer';
 import Wallet from '../models/wallet';
+import Market from '../models/market';
 
 describe('Models Test', function () {
   let createdUser: User;
@@ -35,7 +36,7 @@ describe('Models Test', function () {
 
   describe('[Wallet]', function () {
     it('should create all cryptocurrency coins address', () => {
-      let allCoins = Wallets.getCurrencyCodes();
+      let allCoins = Market.getCryptoCurrencies();
       expect(createdUser.wallets).have.length(allCoins.length);
       for (let i = 0; i < createdUser.wallets.length; i++) {
         expect(allCoins).to.deep.include(createdUser.wallets[0].currencyCode);
@@ -57,8 +58,8 @@ describe('Models Test', function () {
   describe('[Transactions]', function () {
     let firstCoin:string, secondCoin:string, oldWalletFirst:Wallets | null, oldWalletSecond:Wallets | null;
     before(async function() {
-      firstCoin = Wallets.getCurrencyCodes()[0];
-      secondCoin = Wallets.getCurrencyCodes()[1];
+      firstCoin = Market.getCryptoCurrencies()[0].code;
+      secondCoin = Market.getCryptoCurrencies()[1].code;
 
       oldWalletFirst = await Wallets.findOne({ where: { currencyCode: firstCoin, userId: createdUser.id } });
       oldWalletSecond = await Wallets.findOne({ where: { currencyCode: secondCoin, userId: createdUser.id } });
@@ -196,8 +197,8 @@ describe('Models Test', function () {
   describe('[Payments]', function () {
     let firstCoin:string, secondCoin:string, oldWalletFirst:Wallets | null, oldWalletSecond:Wallets | null;
     before(async function() {
-      firstCoin = Wallets.getCurrencyCodes()[0];
-      secondCoin = Wallets.getCurrencyCodes()[1];
+      firstCoin = Market.getCryptoCurrencies()[0].code;
+      secondCoin = Market.getCryptoCurrencies()[1].code;
 
       oldWalletFirst = await Wallets.findOne({ where: { currencyCode: firstCoin, userId: createdUser.id } });
       oldWalletSecond = await Wallets.findOne({ where: { currencyCode: secondCoin, userId: createdUser.id } });
@@ -211,7 +212,7 @@ describe('Models Test', function () {
     it('should throw insufficient balance on payment create', async function() {
       let error = null;
       try {
-        await Transfer.newPayment(createdUser.id, Wallets.getCurrencyCodes()[0], 1);
+        await Transfer.newPayment(createdUser.id, Market.getCryptoCurrencies()[0].code, 1);
         expect.fail(200, TransferError.INSUFFICIENT_BALANCE, "Payment did not throw insufficient balance")
       } catch(e) {
         error = e;
@@ -223,7 +224,7 @@ describe('Models Test', function () {
     it('should update blocked balance on successful create payment', async function() {
       let tx = await Transaction.create<Transaction>({ userId: createdUser.id, transactionType: 'receive', amount: 0.32, confirmations: 2, transactionId: Math.floor(Math.random() * 10000000)+'', transactionSource: 'test', currencyCode: firstCoin, receivedTime: (new Date()) });
 
-      let p = await Transfer.newPayment(createdUser.id, Wallets.getCurrencyCodes()[0], 0.1);
+      let p = await Transfer.newPayment(createdUser.id, Market.getCryptoCurrencies()[1].code, 0.1);
       let wallet = oldWalletFirst && await Wallets.findById(oldWalletFirst.id);
       wallet && expect(wallet.blockedBalance).to.equal(0.1);
       wallet && expect(wallet.availableBalance).to.equal(0.22);

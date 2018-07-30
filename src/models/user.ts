@@ -41,6 +41,10 @@ export default class User extends Model<User> {
   @Column
   isVerified!: boolean;
 
+  @Default('localrate')
+  @Column
+  exchangeRateSource!: 'localrate'|'localbitcoins'|'kraken'|'coinbase'|'bitfinex'
+
   @Column
   currencyCode!: string
 

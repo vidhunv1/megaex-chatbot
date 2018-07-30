@@ -101,7 +101,7 @@ export default class Store {
 
   async close() {
     let logger: any = (new Logger()).getLogger();
-    logger.info("Closeing redis connection");
+    logger.info("Closing redis connection");
     return this.client.quit();
   }
 }

@@ -8,7 +8,7 @@ import PaymentMethod from '../models/payment_method';
 import TelegramBotApi from '../helpers/telegram-bot-api';
 import * as moment from 'moment';
 
-import { stringifyCallbackQuery, keyboardMenu, sendErrorMessage } from './defaults';
+import { stringifyCallbackQuery, keyboardMenu, sendErrorMessage, ICallbackQuery, ICallbackFunction } from './defaults';
 import * as AppConfig from '../../config/app.json';
 let env = process.env.NODE_ENV || 'development';
 
@@ -24,7 +24,7 @@ let accountConversation = async function (msg: TelegramBot.Message, user: User, 
     let accountId = msg.text.substring(msg.entities[0].offset + 2, msg.entities[0].length).toLowerCase();
     showAccount(accountId, msg, user, tUser);
     return true;
-  } else if (msg.text && msg.text === user.__('my_account')) {
+  } else if (msg.text && msg.text === user.__('menu_my_account')) {
     showMyAccount(msg, user, tUser);
     return true;
   } else if (msg.text && msg.text.startsWith('/start')) {
@@ -44,7 +44,7 @@ let accountConversation = async function (msg: TelegramBot.Message, user: User, 
   }
 }
 
-let accountCallback = async function (msg: TelegramBot.Message, user: User, tUser: TelegramUser, query: CallbackQuery): Promise<boolean> {
+let accountCallback = async function (msg: TelegramBot.Message, user: User, tUser: TelegramUser, query: ICallbackQuery): Promise<boolean> {
   let botUsername = (<any>AppConfig)[env]["telegram_bot_username"];
   let cacheKeys = (new CacheStore(tUser.id)).getKeys();
   switch (query.callbackFunction) {
@@ -99,8 +99,8 @@ let accountCallback = async function (msg: TelegramBot.Message, user: User, tUse
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [[ 
-              {text: user.__('delete'), callback_data: stringifyCallbackQuery('deletePayment', null, {paymentId: await PaymentDetail.getPaymethodID(user, pmName)})}, 
-              {text: user.__('edit'), callback_data: stringifyCallbackQuery('editPayment', null, {paymentId: await PaymentDetail.getPaymethodID(user, pmName)})}, 
+              {text: user.__('delete'), callback_data: stringifyCallbackQuery(ICallbackFunction.DeletePayment, null, {paymentId: await PaymentDetail.getPaymethodID(user, pmName)})}, 
+              {text: user.__('edit'), callback_data: stringifyCallbackQuery(ICallbackFunction.EditPayment, null, {paymentId: await PaymentDetail.getPaymethodID(user, pmName)})}, 
             ]],
             one_time_keyboard: false,
             resize_keyboard: true
@@ -110,9 +110,9 @@ let accountCallback = async function (msg: TelegramBot.Message, user: User, tUse
         let pmNames = await PaymentDetail.getPaymethodNames(user, true);
         let inline: TelegramBot.InlineKeyboardButton[][] = [];
         for(let i=0; i<pmNames.length; i++) {
-          inline.push([{ text: pmNames[i], callback_data: stringifyCallbackQuery('showPayments', null, {paymentId: await PaymentDetail.getPaymethodID(user, pmNames[i])}) }]);        
+          inline.push([{ text: pmNames[i], callback_data: stringifyCallbackQuery(ICallbackFunction.ShowPayments, null, {paymentId: await PaymentDetail.getPaymethodID(user, pmNames[i])}) }]);        
         }
-        inline.push([{ text: user.__('add_another_payment_method'), callback_data: stringifyCallbackQuery('addPayment', null, null) }]);
+        inline.push([{ text: user.__('add_another_payment_method'), callback_data: stringifyCallbackQuery(ICallbackFunction.AddPayment, null, null) }]);
         tBot.sendMessage(tUser.id, user.__('list_payment_methods'), { 
           parse_mode: 'Markdown',
           reply_markup: {
@@ -145,7 +145,7 @@ let accountCallback = async function (msg: TelegramBot.Message, user: User, tUse
       let pmName1 = user.__('paymethod'+query.editPayment.paymentId+'_name');  
       showAddPayment(pmName1, user, tUser);
     return true;
-    case 'openOrders':
+    case 'myOrders':
       await tBot.sendMessage(tUser.id, '[TODO] Handle open orders', {});
       return true;
     case 'sendMessage':
@@ -212,7 +212,7 @@ let accountContext = async function (msg: TelegramBot.Message, user: User, tUser
     let sendUser: User | null = await User.findOne({ where: { accountId: sendAccount.toLowerCase() }, include: [TelegramUser] });
     if (sendUser && (msg.text || msg.photo)) {
       let replyMarkup = {
-        inline_keyboard: [[{ text: user.__('send_response_message'), callback_data: stringifyCallbackQuery('sendMessage', null, { accountId: user.accountId }) }]]
+        inline_keyboard: [[{ text: user.__('send_response_message'), callback_data: stringifyCallbackQuery(ICallbackFunction.SendMessage, null, { accountId: user.accountId }) }]]
       }
       if (msg.text) {
         await tBot.sendMessage(sendUser.telegramUser.id, user.__('new_message %s', '/u' + user.accountId.toUpperCase()) + '\n\n' + msg.text, {
@@ -316,7 +316,9 @@ async function showAddPayment(paymethod:string, user:User, tUser:TelegramUser) {
     pmFields && await tBot.sendMessage(tUser.id, user.__('paymethod_enter_heading %s %s', paymethod, pmFields[0]), {
       parse_mode: 'Markdown',
       reply_markup: {
-        keyboard: keyboardMenu(user),
+        keyboard: [
+          [{ text: user.__('cancel_text') }]
+        ],
         one_time_keyboard: true,
         resize_keyboard: true
       }
@@ -331,11 +333,12 @@ async function showAddPayment(paymethod:string, user:User, tUser:TelegramUser) {
 async function showMyAccount(msg: TelegramBot.Message, user: User, _tUser: TelegramUser) {
   let addPaymentInline, pmNames = await PaymentDetail.getPaymethodNames(user, true);
   if(pmNames.length === 0) {
-    addPaymentInline = { text: user.__('add_payment_method'), callback_data: stringifyCallbackQuery('addPayment', null, null) };
+    addPaymentInline = { text: user.__('add_payment_method'), callback_data: stringifyCallbackQuery(ICallbackFunction.AddPayment, null, null) };
   } else {
-    addPaymentInline = { text: user.__('show_payment_methods'), callback_data: stringifyCallbackQuery('showPayments', null, null) };
+    addPaymentInline = { text: user.__('show_payment_methods'), callback_data: stringifyCallbackQuery(ICallbackFunction.ShowPayments, null, null) };
   }
-  let fisrtInline = !user.isVerified ? [{ text: user.__('verify_account'), url: 'http://google.com' }, addPaymentInline] : [addPaymentInline];
+  let inlineSettings = { text: user.__('menu_settings'), callback_data: stringifyCallbackQuery(ICallbackFunction.Settings, null, null) };
+  let secondInline = !user.isVerified ? [{ text: user.__('verify_account'), url: 'http://google.com' }, inlineSettings] : [inlineSettings];
 
   let pmethodMessage = pmNames.length > 0 ? '' : user.__('not_added');
   for(let i=0; i<pmNames.length; i++) {
@@ -348,7 +351,10 @@ async function showMyAccount(msg: TelegramBot.Message, user: User, _tUser: Teleg
   await tBot.sendMessage(msg.chat.id, user.__('show_my_account %s %d %f %f %d %d %d %d %d %s', '/u' + (user.accountId.toUpperCase()), 1, 0.0001, 4.8, 4, 1, 2, 100, 1, verificationMessage, pmethodMessage), {
     parse_mode: 'Markdown',
     reply_markup: {
-      inline_keyboard: [fisrtInline, [{ text: user.__('referral_link'), callback_data: stringifyCallbackQuery('referralLink', null, null) }, { text: user.__('account_link'), callback_data: stringifyCallbackQuery('accountLink', null, null) }]],
+      inline_keyboard: [
+        [addPaymentInline], 
+        secondInline, 
+      ],
       one_time_keyboard: false,
       resize_keyboard: true
     }
@@ -366,16 +372,16 @@ async function showAccount(accountId: string, msg: TelegramBot.Message, user: Us
     let blockedUsers: number[] = JSON.parse(user.blockedUsers);
     let isUserBlocked = (blockedUsers.indexOf(showUser.id) > -1);
     let blockUnblockMessage = isUserBlocked ? user.__('unblock_account') : user.__('block_account');
-    console.log("BLOCK MESSAGE: " + blockUnblockMessage + ", " + JSON.stringify(blockedUsers));
+    
     let inlineMessageId = (msg && msg.from && msg.from.is_bot) ? msg.message_id : (msg ? msg.message_id + 1 : null);
     let inlineKeyboard: TelegramBot.InlineKeyboardMarkup = {
       inline_keyboard: [
         [
-          { text: blockUnblockMessage, callback_data: stringifyCallbackQuery('blockAccount', inlineMessageId, { accountId: accountId, shouldBlock: isUserBlocked ? 0 : 1 }) },
-          { text: user.__('send_message'), callback_data: stringifyCallbackQuery('sendMessage', null, { accountId: accountId }) },
+          { text: blockUnblockMessage, callback_data: stringifyCallbackQuery(ICallbackFunction.BlockAccount, inlineMessageId, { accountId: accountId, shouldBlock: isUserBlocked ? 0 : 1 }) },
+          { text: user.__('send_message'), callback_data: stringifyCallbackQuery(ICallbackFunction.SendMessage, null, { accountId: accountId }) },
         ],
         [
-          { text: user.__('open_orders %d', 1), callback_data: stringifyCallbackQuery('openOrders', null, { accountId: accountId }) }
+          { text: user.__('open_orders %d', 1), callback_data: stringifyCallbackQuery(ICallbackFunction.MyOrders, null, { accountId: accountId }) }
         ]
       ]
     }

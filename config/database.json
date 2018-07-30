@@ -1,17 +1,17 @@
 {
   "development": {
-     "username": "megaexch",
-     "password": "#98ean1B+i*_n8!",
-     "database": "megaex_development",
-     "host": "megaex-db.csxttcl6muwt.ap-south-1.rds.amazonaws.com",
+     "username": "postgres",
+     "password": "futurearts",
+     "database": "megaex_dev",
+     "host": "52.66.101.232",
      "dialect": "postgres"
    },
   "test": {
-    "username": "megaexch",
-     "password": "#98ean1B+i*_n8!",
-     "database": "megaex_test",
-     "host": "megaex-db.csxttcl6muwt.ap-south-1.rds.amazonaws.com",
-     "dialect": "postgres"
+    "username": "postgres",
+    "password": "futurearts",
+    "database": "megaex_test",
+    "host": "52.66.101.232",
+    "dialect": "postgres"
   },
   "production": {
     "username": "root",

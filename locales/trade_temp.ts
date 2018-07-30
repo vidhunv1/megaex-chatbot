@@ -198,7 +198,7 @@ let tradeContext = async function (msg: TelegramBot.Message, user: User, tUser: 
       await redisClient.hdelAsync(cacheKeys.tContext.key, cacheKeys.tContext["Trade.isParsePaymethod"]);
       let paymethodId = await PaymentDetail.getPaymethodID(user, msg.text);
       if (msg.text && paymethodId >= 0) {
-        await tBot.sendMessage(msg.chat.id, user.__('buy_btc_enter_amount %s', user.currencyCode.toUpperCase()), {
+        await tBot.sendMessage(msg.chat.id, user.__('buy_btc_enter_amount', user.currencyCode), {
           parse_mode: 'Markdown',
           reply_markup: {
             keyboard: [
@@ -314,8 +314,18 @@ async function handleOrderCreate(msg: string, user: User, tUser: TelegramUser, t
       });
     }
   } else if (type === 'sell') {
-    let maxAmount: number | null = null, minAmount: number | null = 0;
-    [minAmount, maxAmount] = await parseRange(msg);
+    let maxAmount: number | null, minAmount: number = 0;
+    if (msg.indexOf('-') > -1) {
+      let t = msg.split('-');
+      let tCur1 = t[0].replace(/[^a-z]/g, '').toLowerCase();
+      let tCur2 = t[1].replace(/[^a-z]/g, '').toLowerCase();
+      if (tCur1.length === 0)
+        t[0] = t[0] + tCur2;
+      minAmount = (await Market.parseCurrencyValue(t[0], 'btc')) || 0;
+      maxAmount = await Market.parseCurrencyValue(t[1], 'btc');
+    } else {
+      maxAmount = (await Market.parseCurrencyValue(msg, 'btc'));
+    }
     if (!maxAmount) {
       // invalid amount entered
       tBot.sendMessage(tUser.id, user.__('sell_invalid_amount %s', user.currencyCode.toUpperCase()),

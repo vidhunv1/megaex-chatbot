@@ -49,6 +49,13 @@ export default class CacheKeys {
         "SendMessage.accountId": "SendMessage.accountId",
         "EnterPayMethod.methodName": "EnterPayMethod.methodName",
         "EnterPayMethod.fields": "EnterPayMethod.fields",
+        "Trade.minAmount": "Trade.minAmount",
+        "Trade.maxAmount": "Trade.maxAmount",
+        "Trade.isInputPrice": "Trade.isInputPrice",
+        "Trade.price": "Trade.price",
+        "Trade.paymethodId": "Trade.paymethodId",
+        "Trade.isParsePaymethod": "Trade.isParsePaymethod",
+        "Trade.editOrderId": "Trade.editOrderId",
         expiry: (<any>AppConfig)[env]["context_expiry"]
       }
     }

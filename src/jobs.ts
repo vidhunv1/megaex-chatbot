@@ -3,12 +3,14 @@ import * as request from 'request-promise';
 import Market from './models/market'
 import * as moment from 'moment'
 import Logger from './helpers/logger'
+import Transfer from './models/transfer';
 export default class Jobs {
   jobs: CronJob[];
   logger:any
   constructor() {
     this.jobs = []
     this.jobs.push(this.getMarketRatesJob());
+    this.jobs.push(this.getDeleteExpiredPaymentsJob());
     this.logger = (new Logger()).getLogger();
   }
 
@@ -48,7 +50,7 @@ export default class Jobs {
             try {
               let btcPrice = JSON.parse(await request('https://api.coinmarketcap.com/v1/ticker/bitcoin/?convert=usd'))[0].price_usd;
               await Market.update({value: btcPrice}, { where: {id: pd[i].id}});
-            } catch (e) { }
+            } catch (e) {}
           } else if (!shouldSync) {
             if (moment().diff(pd[i].updatedAt, 'hour') >= 24) {
               try {
@@ -66,11 +68,23 @@ export default class Jobs {
               try {
               await Market.update({toCurrencyUsdValue: (exchangeRates.rates[pd[i].toCurrency.toUpperCase()] / usdRate)}, { where: {id: pd[i].id}});
               } catch(e) {
-                _this.logger.error("getMarketRatesJobERROR UPDATING" + JSON.stringify(e)); 
+                _this.logger.error("getMarketRatesJob ERROR UPDATING" + JSON.stringify(e)); 
               }
             }
           }
         }
+      },
+      onComplete: function () { },
+      start: false
+    })
+  }
+
+  private getDeleteExpiredPaymentsJob() {
+    return new CronJob({
+      cronTime: '*/2 * * * *',
+      onTick: async function () {
+        console.log("Deleting expired payments");
+        await Transfer.deleteExpiredPayments();
       },
       onComplete: function () { },
       start: false

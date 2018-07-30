@@ -21,7 +21,7 @@ module.exports = {
         allowNull: true,
         type: Sequelize.FLOAT
       },
-      toCurrencyUsdValue: {
+      fromCurrencyUsdValue: {
         allowNull: true,
         type: Sequelize.FLOAT
       },

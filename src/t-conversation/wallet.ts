@@ -13,7 +13,7 @@ import Logger from '../helpers/logger'
 import NotificationManager from '../helpers/notification-manager'
 import * as AppConfig from '../../config/app.json'
 
-import { keyboardMenu, sendErrorMessage, toTitleCase, stringifyCallbackQuery, centerJustify } from './defaults';
+import { keyboardMenu, sendErrorMessage, toTitleCase, stringifyCallbackQuery, centerJustify, ICallbackQuery, ICallbackFunction } from './defaults';
 import Transaction from '../models/transaction';
 
 let env = process.env.NODE_ENV || 'development';
@@ -27,7 +27,7 @@ let tBot = (new TelegramBotApi()).getBot();
 let notificationManager:NotificationManager = new NotificationManager();
 
 let walletConversation = async function(msg: TelegramBot.Message, user: User, tUser: TelegramUser):Promise<boolean> {
-  if(msg.text === user.__('wallet')) {
+  if(msg.text === user.__('menu_wallet')) {
     handleWallet(msg, user, tUser);
     return true;
   } else if (msg.text && msg.text.startsWith('/start')) {
@@ -41,8 +41,8 @@ let walletConversation = async function(msg: TelegramBot.Message, user: User, tU
     }
   } else if(msg.text && msg.text === '/tx') {
     let message = user.__('tx_header'), footer = '';
-    for(let i=0;i<Wallet.getCurrencyCodes().length; i++) {
-      let t = await Wallet.findOne({where: {userId: user.id, currencyCode: Wallet.getCurrencyCodes()[i]}})
+    for(let i=0;i<Market.getCryptoCurrencies().length; i++) {
+      let t = await Wallet.findOne({where: {userId: user.id, currencyCode: Market.getCryptoCurrencies()[i].code}})
       if(t)
         footer = footer + user.__('tx_coin_balance %s %f', t.currencyCode.toUpperCase(), (t.availableBalance + t.blockedBalance + t.unconfirmedBalance), 7);
     }
@@ -70,10 +70,10 @@ let walletConversation = async function(msg: TelegramBot.Message, user: User, tU
   return false;
 }
 
-let walletCallback = async function(msg: TelegramBot.Message, user: User, tUser: TelegramUser, query:CallbackQuery):Promise<boolean> {
+let walletCallback = async function(msg: TelegramBot.Message, user: User, tUser: TelegramUser, query:ICallbackQuery):Promise<boolean> {
   let cacheKeys = (new CacheStore(tUser.id)).getKeys();
   switch (query.callbackFunction) {
-    case 'coinSend':
+    case ICallbackFunction.CoinSend:
       if (query.coinSend && query.coinSend.coin) {
         await tBot.sendMessage(tUser.id, user.__('send_payment_info %s', toTitleCase(user.__(query.coinSend.coin))), {
           parse_mode: 'Markdown',
@@ -99,7 +99,7 @@ let walletCallback = async function(msg: TelegramBot.Message, user: User, tUser:
         sendErrorMessage(user, tUser);
       }
       return true;
-    case 'newAddress':
+    case ICallbackFunction.NewAddress:
       await tBot.sendChatAction(msg.chat.id, 'typing');
       let cCoin, newAddress = null;
       [cCoin] = await redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"]);
@@ -120,7 +120,7 @@ let walletCallback = async function(msg: TelegramBot.Message, user: User, tUser:
         });
       }
       return true;
-    case 'qrCode':
+    case ICallbackFunction.QRCode:
       if (query.qrCode && query.qrCode.address && query.qrCode.coin) {
         await tBot.sendChatAction(msg.chat.id, 'upload_photo');
         let t = await QRCode.toDataURL(query.qrCode.address, { scale: 8 });
@@ -133,7 +133,7 @@ let walletCallback = async function(msg: TelegramBot.Message, user: User, tUser:
         });
       }
       return true;
-    case 'coinAddress':
+    case ICallbackFunction.CoinAddress:
       await tBot.sendChatAction(msg.chat.id, 'typing');
       let curCoin;
       [curCoin] = await redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"]);
@@ -142,27 +142,27 @@ let walletCallback = async function(msg: TelegramBot.Message, user: User, tUser:
       });
       sendCurrentAddress(user, tUser, null);
       return true;
-    case 'coinWithdraw':
+    case ICallbackFunction.CoinWithdraw:
       tBot.sendMessage(tUser.id, '[TODO] Handle coin withdraw', {
         parse_mode: 'Markdown',
       });
       return true;
-    case 'paginate':
+    case ICallbackFunction.Paginate:
       let showCoin;
       if (query.paginate && query.paginate.action === 'next') {
         let nextIndex = +(query.paginate.currentPage) - 1;
         nextIndex++;
-        if (nextIndex > (Wallet.getCurrencyCodes().length - 1))
+        if (nextIndex > (Market.getCryptoCurrencies().length - 1))
           nextIndex = 0;
-        showCoin = Wallet.getCurrencyCodes()[nextIndex];
+        showCoin = Market.getCryptoCurrencies()[nextIndex].code;
       } else if (query.paginate && query.paginate.action === 'prev') {
         let prevIndex = +(query.paginate.currentPage) - 1;
         prevIndex--;
         if (prevIndex < 0)
-          prevIndex = (Wallet.getCurrencyCodes().length - 1);
-        showCoin = Wallet.getCurrencyCodes()[prevIndex];
+          prevIndex = (Market.getCryptoCurrencies().length - 1);
+        showCoin = Market.getCryptoCurrencies()[prevIndex].code;
       } else {
-        showCoin = Wallet.getCurrencyCodes()[0];
+        showCoin = Market.getCryptoCurrencies()[0].code;
       }
       await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"], showCoin);
       msg.message_id = query.messageId;
@@ -197,8 +197,8 @@ async function sendCurrentAddress(user: User, tUser: TelegramUser, deleteMessage
       reply_markup: {
         inline_keyboard: [
           [
-            { text: user.__('new_address'), callback_data: stringifyCallbackQuery('newAddress', deleteMessageId, { coin: currentCoin }) },
-            { text: user.__('qr_code'), callback_data: stringifyCallbackQuery('qrCode', null, { coin: currentCoin, address: wallet.address }) }],
+            { text: user.__('new_address'), callback_data: stringifyCallbackQuery(ICallbackFunction.NewAddress, deleteMessageId, { coin: currentCoin }) },
+            { text: user.__('qr_code'), callback_data: stringifyCallbackQuery(ICallbackFunction.QRCode, null, { coin: currentCoin, address: wallet.address }) }],
           [{ text: user.__('address_info'), url: 'https://google.com' }]
         ]
       }
@@ -346,11 +346,11 @@ async function handleWallet(msg: TelegramBot.Message | null, user: User, tUser: 
   let currentContext, currentCoin, currentPage;
   [currentContext, currentCoin] = await redisClient.hmgetAsync(cacheKeys.tContext.key, cacheKeys.tContext.currentContext, cacheKeys.tContext["Wallet.coin"]);
   if (!currentCoin) {
-    currentCoin = Wallet.getCurrencyCodes()[0];
+    currentCoin = Market.getCryptoCurrencies()[0].code;
     await redisClient.hmsetAsync(cacheKeys.tContext.key, cacheKeys.tContext["Wallet.coin"], currentCoin);
   }
 
-  currentPage = (Wallet.getCurrencyCodes().indexOf(currentCoin) + 1);
+  currentPage = (Market.getCryptoCurrencyIndex(currentCoin) + 1);
 
   let wallet: Wallet | null = await Wallet.findOne({ attributes: ['availableBalance', 'unconfirmedBalance', 'blockedBalance'], where: { currencyCode: currentCoin, userId: user.id } })
   let message = '', rate = 600000;
@@ -359,13 +359,11 @@ async function handleWallet(msg: TelegramBot.Message | null, user: User, tUser: 
     let val = await Market.getValue(currentCoin, user.currencyCode);
     availableBalanceLocal = val ? (val*wallet.availableBalance).toLocaleString(tUser.languageCode, {style: 'currency', currency: user.currencyCode}) : 'N/A';
     let coinTitle = toTitleCase(user.__n(currentCoin, 1));
-    let headerPad = ("                                            /"+user.__('help')).slice(-43 + coinTitle.length);
-    message = user.__('show_wallet_balance %s %s %s %s %s', 
+    message = user.__('show_wallet_balance %s %s %s %s', 
       coinTitle,
-      availableBalance,
+      availableBalance.toFixed(6).replace(/\.?0*$/,''),
       currentCoin.toUpperCase(), 
-      availableBalanceLocal,
-      headerPad);
+      availableBalanceLocal);
     if (wallet.unconfirmedBalance > 0) {
       let unconfirmedBalance = wallet.unconfirmedBalance;
       let unconfirmedBalanceLocal = (wallet.unconfirmedBalance * rate).toLocaleString(tUser.languageCode);
@@ -387,15 +385,15 @@ async function handleWallet(msg: TelegramBot.Message | null, user: User, tUser: 
   let inlineMessageId = (msg && msg.from && msg.from.is_bot) ? msg.message_id : (msg ? msg.message_id + 1 : null);
   let inlineKeyboard: TelegramBot.InlineKeyboardMarkup = {
     inline_keyboard: [
-      [{ text: user.__('send %s', toTitleCase(user.__n(currentCoin, 1))), callback_data: stringifyCallbackQuery('coinSend', inlineMessageId, { coin: currentCoin }) }],
+      [{ text: user.__('send %s', toTitleCase(user.__n(currentCoin, 1))), callback_data: stringifyCallbackQuery(ICallbackFunction.CoinSend, inlineMessageId, { coin: currentCoin }) }],
       [
-        { text: user.__('my_address'), callback_data: stringifyCallbackQuery('coinAddress', inlineMessageId, { coin: currentCoin }) },
-        { text: user.__('withdraw'), callback_data: stringifyCallbackQuery('coinWithdraw', inlineMessageId, { coin: currentCoin }) }
+        { text: user.__('my_address'), callback_data: stringifyCallbackQuery(ICallbackFunction.CoinAddress, inlineMessageId, { coin: currentCoin }) },
+        { text: user.__('withdraw'), callback_data: stringifyCallbackQuery(ICallbackFunction.CoinWithdraw, inlineMessageId, { coin: currentCoin }) }
       ],
       [
-        { text: user.__('prev'), callback_data: stringifyCallbackQuery('paginate', inlineMessageId, { action: 'prev', currentPage }) },
-        { text: user.__('pagination %s %d %d', currentCoin.toUpperCase(), currentPage, Wallet.getCurrencyCodes().length), callback_data: stringifyCallbackQuery('paginate', inlineMessageId, { action: 'refresh', currentPage }) },
-        { text: user.__('next'), callback_data: stringifyCallbackQuery('paginate', (inlineMessageId), { action: 'next', currentPage }) }]
+        { text: user.__('prev'), callback_data: stringifyCallbackQuery(ICallbackFunction.Paginate, inlineMessageId, { action: 'prev', currentPage }) },
+        { text: user.__('pagination %s %d %d', currentCoin.toUpperCase(), currentPage, Market.getCryptoCurrencies().length), callback_data: stringifyCallbackQuery(ICallbackFunction.Paginate, inlineMessageId, { action: 'refresh', currentPage }) },
+        { text: user.__('next'), callback_data: stringifyCallbackQuery(ICallbackFunction.Paginate, (inlineMessageId), { action: 'next', currentPage }) }]
     ]
   }
 

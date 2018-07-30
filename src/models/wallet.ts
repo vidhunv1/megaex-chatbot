@@ -2,6 +2,7 @@ import { Table, Column, Model, ForeignKey, DataType, BelongsTo, PrimaryKey, Allo
 import User from './user';
 import MessageQueue from '../helpers/message-queue'
 import Logger from '../helpers/logger'
+import { Transaction as SequelizeTransacion } from 'sequelize';
 
 @Table({ timestamps: true, tableName: 'Wallets' })
 export default class Wallet extends Model<Wallet> {
@@ -51,8 +52,8 @@ export default class Wallet extends Model<Wallet> {
     try {
       let wallets:Wallet[]|null = [];
 
-      let btcWallet = await Wallet.create<Wallet>({ userId: this.userId, currencyCode: Wallet.getCurrencyCodes()[0] }, {})
-      let tBtcWallet = await Wallet.create<Wallet>({ userId: this.userId, currencyCode: Wallet.getCurrencyCodes()[1] }, {});
+      let btcWallet = await Wallet.create<Wallet>({ userId: this.userId, currencyCode: 'btc' }, {})
+      let tBtcWallet = await Wallet.create<Wallet>({ userId: this.userId, currencyCode: 'tbtc' }, {});
       //generate btc address
       let btcAddress = await messageQueue.generateBtcAddress(this.userId);
       btcWallet.updateAttributes({address: btcAddress});
@@ -92,11 +93,11 @@ export default class Wallet extends Model<Wallet> {
     }
   }
 
-  static async unblockBalance(userId:string|number, currencyCode:string, amount:number): Promise<boolean> {
+  static async unblockBalance(userId:string|number, currencyCode:string, amount:number, transaction?:SequelizeTransacion) {
     let wallet:Wallet | null = await Wallet.findOne({where: {userId: userId, currencyCode: currencyCode}});
     if(wallet) {
       if(wallet.blockedBalance >= amount) {
-        await wallet.updateAttributes({availableBalance: (wallet.availableBalance+amount), blockedBalance: (wallet.blockedBalance-amount)})
+        await wallet.updateAttributes({availableBalance: (wallet.availableBalance+amount), blockedBalance: (wallet.blockedBalance-amount)}, {transaction: transaction})
         return true;
       } else {
         throw new WalletError(WalletError.INSUFFICIENT_BALANCE);
@@ -106,15 +107,25 @@ export default class Wallet extends Model<Wallet> {
     }
   }
 
-  static getCurrencyCodes() {
-    return ['btc', 'tbtc'];
+  static async blockBalance(userId:string|number, currencyCode:string, amount:number, transaction?:SequelizeTransacion) {
+    let wallet:Wallet | null = await Wallet.findOne({where: {userId: userId, currencyCode: currencyCode}});
+    if(wallet) {
+      if(wallet.availableBalance >= amount) {
+        await wallet.updateAttributes({ availableBalance: (wallet.availableBalance - amount), blockedBalance: (wallet.blockedBalance + amount) }, { transaction: transaction });
+        return true;
+      } else {
+        throw new WalletError(WalletError.INSUFFICIENT_BALANCE);
+      }
+    } else {
+      throw new WalletError(WalletError.NOT_FOUND);
+    }
   }
 }
 
 export class WalletError extends Error {
-  public status: number
-  public static INSUFFICIENT_BALANCE = 490
-  public static NOT_FOUND = 404
+  public status: number;
+  public static INSUFFICIENT_BALANCE = 490;
+  public static NOT_FOUND = 404;
 
   constructor(status: number = 500, message: string = 'Wallet Error') {
     super(message);

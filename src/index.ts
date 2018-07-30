@@ -14,16 +14,11 @@ import CacheKeys from './cache-keys'
 import Store from './helpers/store';
 import Logger from './helpers/logger'
 import TelegramHandler from './t-conversation/router'
-// import Transfer from './models/transfer';
 
 let env = process.env.NODE_ENV || 'development';
 
 let logger = (new Logger()).getLogger();
 logger.info('starting app ...');
-/* ***** DEBUG ***** */
-const { exec } = require('child_process');
-exec(`telegram-send --pre "reload ${(new Date()).toLocaleTimeString()}"`);
-/* ***** DEBUG ***** */
 
 // load balancer ping test
 var app = Express()
@@ -33,7 +28,6 @@ app.get('/', function (_, res) {
 app.listen(89);
 
 (async () => {
-  // ****** Initialize Sequelize database with Postgres ******
   logger.info('Initializing database');
   let sequelize = new Sequelize({
     ...(<any>DatabaseConfig)[env], logging: function (sql: any, _sequelizeObject: any) {
@@ -41,18 +35,18 @@ app.listen(89);
     }
   });
   sequelize.addModels([__dirname + '/models/']);
-  // Initialization tasks
-  // Transfer.deleteExpiredPayments();
 
   // ****** Initialize Redis client ******
   let redisStore = new Store();
   await redisStore.initSub();
   const redisClient: any = redisStore.getClient();
+
   let tBot = (new TelegramBotApi()).getBot();
   let messageQueue = new MessageQueue();
   let tMessageHandler = new TelegramHandler();
   let jobs = new Jobs();
   jobs.start();
+  
   tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
     console.log("Received message: ");
     try {
@@ -92,7 +86,7 @@ app.listen(89);
           redisClient.setAsync(rKeys.telegramUser.key, JSON.stringify(tUser), 'EX', rKeys.telegramUser.expiry);
         }
         tMessageHandler.handleMessage(msg, user, tUser);
-  
+
         if ((await redisClient.existsAsync(rKeys.messageCounter.shadowKey) == 1)) {
           await redisClient.incrAsync(rKeys.messageCounter.key);
         } else {
@@ -106,18 +100,18 @@ app.listen(89);
         tBot.sendMessage(msg.chat.id, 'ERROR: Unhandled telegram message action');
       }
     } catch (e) {
-      logger.error("FATAL: And unknown error occurred: " + JSON.stringify(e));
+      logger.error("FATAL: An unknown error occurred: " + JSON.stringify(e));
       tBot.sendMessage(msg.chat.id, 'An error occured. Please try again later.');
     }
   });
-  
+
   tBot.on("callback_query", async function (callback) {
     await tBot.answerCallbackQuery(callback.id);
-  
+
     let msg: TelegramBot.Message = callback.message, tUser: TelegramUser | null = null, user: User | null = null;
     let cacheKeys = (new CacheKeys(msg.chat.id)).getKeys();
     let userCache = (await redisClient.getAsync(cacheKeys.telegramUser.key));
-  
+
     if (userCache) { //user exists in redis cache
       let cache: TelegramUser = JSON.parse(userCache);
       tUser = new TelegramUser(cache);
@@ -130,14 +124,14 @@ app.listen(89);
         logger.error("FATAL: could not get user details");
       }
     }
-  
+
     if (tUser && user) {
       tMessageHandler.handleCallbackQuery(callback.message, user, tUser, callback);
     } else {
       logger.error("FATAL: user does not exist when it should have");
     }
   });
-  
+
   process.on('SIGINT', async function () {
     logger.info("Ending process...");
     logger.info("closing sql");

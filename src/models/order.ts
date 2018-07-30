@@ -1,5 +1,8 @@
-import {Table, Column, Model, ForeignKey, DataType, BelongsTo, PrimaryKey, AllowNull, AutoIncrement, Default} from 'sequelize-typescript';
+import {Table, Column, Model, ForeignKey, DataType, BelongsTo, PrimaryKey, AllowNull, AutoIncrement, Default, Sequelize} from 'sequelize-typescript';
 import User from './user';
+import Transaction from './transaction';
+import Logger from '../helpers/logger';
+import Wallet from './wallet';
 
 @Table({timestamps: true, tableName: 'Orders'})
 export default class Order extends Model<Order> {
@@ -17,13 +20,17 @@ export default class Order extends Model<Order> {
   @BelongsTo(() => User)
   user!: User;
 
+  @AllowNull(true)
+  @Column(DataType.FLOAT)
+  minAmount!:number|null
+
   @AllowNull(false)
   @Column(DataType.FLOAT)
-  minAmount!:number
+  maxAmount!:number
 
   @AllowNull(true)
   @Column(DataType.FLOAT)
-  maxAmount!:number
+  price!:number|null // null values are market price orders
 
   @AllowNull(true)
   @ForeignKey(() => Order)
@@ -36,15 +43,24 @@ export default class Order extends Model<Order> {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  status!:'pending'|'matched'|'accepted'|'completed';
+  status!:'active'|'matched'|'accepted'|'completed'|'stopped';
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  currencyCode!:string
 
   @AllowNull(true)
   @Column(DataType.STRING)
   paymentMethodFilters!:string;
 
   @AllowNull(true)
-  @Column(DataType.STRING)
-  accountVerifiedFilter!:string;
+  @Default(0.0)
+  @Column(DataType.FLOAT)
+  marginPercentage!:number;
+
+  @AllowNull(true)
+  @Column(DataType.BOOLEAN)
+  accountVerifiedFilter!:boolean;
 
   @AllowNull(true)
   @Column(DataType.DATE)
@@ -54,4 +70,58 @@ export default class Order extends Model<Order> {
   @Default(0)
   @Column(DataType.INTEGER)
   cancelCount!:number;
+
+  async createSellOrder(userId:number, minAmount:number|null, maxAmount:number, price:number|null, margin:number|null=0.0, currencyCode:string = 'btc'):Promise<Order> {
+    // check if balance available
+    let balance = await Transaction.getTotalBalance(userId, currencyCode), marginPercentage:number = 0;
+    if(maxAmount > balance) {
+      throw new OrderError(OrderError.INSUFFICIENT_BALANCE);
+    }
+    if(minAmount && minAmount<0) {
+      throw new OrderError(OrderError.INVALID_PARAMS);
+    }
+    if(!price) {
+      price = null;
+      marginPercentage = margin || 0;
+    }
+
+    return await this.sequelize.transaction(async function (t) {
+      // block balance
+      try {
+        await Wallet.blockBalance(userId, currencyCode, maxAmount, t);
+      } catch(e) {
+        throw new OrderError();
+      }
+      let order = await Order.create<Order>({price, marginPercentage, minAmount, maxAmount, userId, status: 'active', type: 'sell', currencyCode}, {transaction: t});
+      return order;
+    });
+  }
+
+  async createBuyOrder(userId:number, minAmount:number|null, maxAmount:number, price:number|null, currencyCode:string = 'btc'):Promise<Order> {
+    let order = await Order.create<Order>({userId, minAmount, maxAmount, status: 'active', type: 'buy', currencyCode, price }, {});
+    return order;
+  }
+
+  async updateAccountVerifiedFilter(shouldSet:boolean) {
+    await this.update({accountVerifiedFilter: shouldSet})
+  }
+
+  async getActiveOrders(userId:number) {
+    let activeOrders = await Order.findAll({where: {userId: userId, status: {[Sequelize.Op.ne]: 'completed'}}})
+    console.log("Active orders: "+JSON.stringify(activeOrders));
+  }
 }
+
+export class OrderError extends Error {
+  public status: number
+  public static INSUFFICIENT_BALANCE = 490;
+  public static INVALID_PARAMS = 400;
+
+  constructor(status: number = 500, message: string = 'Transaction Error') {
+    super(message);
+    this.name = this.constructor.name;
+    let logger = (new Logger()).getLogger();
+    logger.error(this.constructor.name + ", " + status);
+    this.status = status;
+  }
+};
