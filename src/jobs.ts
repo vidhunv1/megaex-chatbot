@@ -1,17 +1,17 @@
-import { CronJob } from 'cron';
-import * as request from 'request-promise';
-import Market from './models/market'
-import * as moment from 'moment'
-import Logger from './helpers/logger'
-import Transfer from './models/transfer';
+import { CronJob } from "cron";
+import * as request from "request-promise";
+import Market from "./models/market";
+import * as moment from "moment";
+import Logger from "./helpers/logger";
+import Transfer from "./models/transfer";
 export default class Jobs {
   jobs: CronJob[];
-  logger:any
+  logger: any;
   constructor() {
-    this.jobs = []
+    this.jobs = [];
     this.jobs.push(this.getMarketRatesJob());
     this.jobs.push(this.getDeleteExpiredPaymentsJob());
-    this.logger = (new Logger()).getLogger();
+    this.logger = new Logger().getLogger();
   }
 
   start() {
@@ -31,63 +31,103 @@ export default class Jobs {
   private getMarketRatesJob() {
     let _this = this;
     return new CronJob({
-      cronTime: '*/2 * * * *',
-      onTick: async function () {
+      cronTime: "*/2 * * * *",
+      onTick: async function() {
         console.log("[TODO] Fetch and update market rates");
 
-        let pd: Market[] = (await Market.sequelize.query('SELECT * FROM "Markets" WHERE "fromCurrency"=\'btc\' AND "toCurrency" IN (SELECT DISTINCT "currencyCode" FROM "Users") ORDER BY "updatedAt" DESC;'))[0];
-        let shouldSync = false, exchangeRates;
+        let pd: Market[] = (await Market.sequelize.query(
+          'SELECT * FROM "Markets" WHERE "fromCurrency"=\'btc\' AND "toCurrency" IN (SELECT DISTINCT "currencyCode" FROM "Users") ORDER BY "updatedAt" DESC;'
+        ))[0];
+        let shouldSync = false,
+          exchangeRates;
         for (let i = 0; i < pd.length; i++) {
-          if (pd[i].toCurrency === 'inr') {
+          if (pd[i].toCurrency === "inr") {
             try {
-              let zebpayResp = JSON.parse(await request('https://www.zebapi.com/api/v1/market/ticker-new/btc/inr'));
-              console.log("UPDATING ZEBPAY PRICE: "+zebpayResp["24hoursHigh"]+", "+JSON.stringify(pd[i]));
-              await Market.update({value: zebpayResp["24hoursHigh"]}, { where: {id: pd[i].id}});
+              let zebpayResp = JSON.parse(
+                await request(
+                  "https://www.zebapi.com/api/v1/market/ticker-new/btc/inr"
+                )
+              );
+              console.log(
+                "UPDATING ZEBPAY PRICE: " +
+                  zebpayResp["24hoursHigh"] +
+                  ", " +
+                  JSON.stringify(pd[i])
+              );
+              await Market.update(
+                { value: zebpayResp["24hoursHigh"] },
+                { where: { id: pd[i].id } }
+              );
             } catch (e) {
-              _this.logger.error("getMarketRatesJob ERROR UPDATING: "+e);
-             }
-          } else if (pd[i].toCurrency === 'usd') {
+              _this.logger.error("getMarketRatesJob ERROR UPDATING: " + e);
+            }
+          } else if (pd[i].toCurrency === "usd") {
             try {
-              let btcPrice = JSON.parse(await request('https://api.coinmarketcap.com/v1/ticker/bitcoin/?convert=usd'))[0].price_usd;
-              await Market.update({value: btcPrice}, { where: {id: pd[i].id}});
+              let btcPrice = JSON.parse(
+                await request(
+                  "https://api.coinmarketcap.com/v1/ticker/bitcoin/?convert=usd"
+                )
+              )[0].price_usd;
+              await Market.update(
+                { value: btcPrice },
+                { where: { id: pd[i].id } }
+              );
             } catch (e) {}
           } else if (!shouldSync) {
-            if (moment().diff(pd[i].updatedAt, 'hour') >= 24) {
+            if (moment().diff(pd[i].updatedAt, "hour") >= 24) {
               try {
-                exchangeRates = JSON.parse(await request('http://data.fixer.io/api/latest?access_key=b7cb98de1d0f513b39019d797f7514ff&base=eur'));
+                exchangeRates = JSON.parse(
+                  await request(
+                    "http://data.fixer.io/api/latest?access_key=b7cb98de1d0f513b39019d797f7514ff&base=eur"
+                  )
+                );
                 shouldSync = true;
               } catch (e) {
-                _this.logger.error("getMarketRatesJobERROR UPDATING" + JSON.stringify(e));
+                _this.logger.error(
+                  "getMarketRatesJobERROR UPDATING" + JSON.stringify(e)
+                );
               }
             }
           }
 
-          if(shouldSync) {
+          if (shouldSync) {
             let usdRate = exchangeRates.rates["USD"];
-            if(usdRate && exchangeRates.rates[pd[i].toCurrency.toUpperCase()]) {
+            if (
+              usdRate &&
+              exchangeRates.rates[pd[i].toCurrency.toUpperCase()]
+            ) {
               try {
-              await Market.update({toCurrencyUsdValue: (exchangeRates.rates[pd[i].toCurrency.toUpperCase()] / usdRate)}, { where: {id: pd[i].id}});
-              } catch(e) {
-                _this.logger.error("getMarketRatesJob ERROR UPDATING" + JSON.stringify(e)); 
+                await Market.update(
+                  {
+                    toCurrencyUsdValue:
+                      exchangeRates.rates[pd[i].toCurrency.toUpperCase()] /
+                      usdRate
+                  },
+                  { where: { id: pd[i].id } }
+                );
+              } catch (e) {
+                _this.logger.error(
+                  "getMarketRatesJob ERROR UPDATING" + JSON.stringify(e)
+                );
               }
             }
           }
         }
       },
-      onComplete: function () { },
+      onComplete: function() {},
       start: false
-    })
+    });
   }
 
   private getDeleteExpiredPaymentsJob() {
     return new CronJob({
-      cronTime: '*/2 * * * *',
-      onTick: async function () {
+      cronTime: "*/2 * * * *",
+      onTick: async function() {
         console.log("Deleting expired payments");
         await Transfer.deleteExpiredPayments();
       },
-      onComplete: function () { },
+      onComplete: function() {},
       start: false
-    })
+    });
   }
 }

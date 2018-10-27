@@ -1,31 +1,42 @@
-import {Table, Column, Model, PrimaryKey, AllowNull, AutoIncrement, HasOne, Unique, Default, HasMany} from 'sequelize-typescript';
-import TelegramUser from './telegram_user'
-import Wallet from './wallet';
-import Transaction from './transaction';
-import PaymentMethod from './payment_method';
-import I18n from '../helpers/i18n'
+import {
+  Table,
+  Column,
+  Model,
+  PrimaryKey,
+  AllowNull,
+  AutoIncrement,
+  HasOne,
+  Unique,
+  Default,
+  HasMany
+} from "sequelize-typescript";
+import TelegramUser from "./telegram_user";
+import Wallet from "./wallet";
+import Transaction from "./transaction";
+import PaymentMethod from "./payment_method";
+import I18n from "../helpers/i18n";
 
-@Table({timestamps: true, tableName: 'Users'})
+@Table({ timestamps: true, tableName: "Users" })
 export default class User extends Model<User> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
   @Column
-  id!: number
+  id!: number;
 
-  @HasOne(() => TelegramUser, 'userId')
+  @HasOne(() => TelegramUser, "userId")
   telegramUser!: TelegramUser;
 
-  @HasMany(() => Wallet, 'userId')
+  @HasMany(() => Wallet, "userId")
   wallets!: Wallet[];
 
-  @HasMany(() => Transaction, 'userId')
+  @HasMany(() => Transaction, "userId")
   transactions!: Transaction[];
 
-  @HasMany(() => PaymentMethod, 'userId')
+  @HasMany(() => PaymentMethod, "userId")
   paymentMethods!: PaymentMethod[];
 
-  @Default('en')
+  @Default("en")
   @Column
   public locale!: string;
 
@@ -41,30 +52,40 @@ export default class User extends Model<User> {
   @Column
   isVerified!: boolean;
 
-  @Default('localrate')
+  @Default("localrate")
   @Column
-  exchangeRateSource!: 'localrate'|'localbitcoins'|'kraken'|'coinbase'|'bitfinex'
+  exchangeRateSource!:
+    | "localrate"
+    | "localbitcoins"
+    | "kraken"
+    | "coinbase"
+    | "bitfinex";
 
   @Column
-  currencyCode!: string
+  currencyCode!: string;
 
-  @Default('[]')
+  @Default("[]")
   @Column
-  blockedUsers!: string
+  blockedUsers!: string;
 
   @Default(0)
   @Column
-  messageCount!: number
+  messageCount!: number;
 
-  __(...args:any[]):string {
-    let locale = this.locale ? this.locale : 'en';
-    let i18n = (new I18n()).getI18n();
-    args[0] = {phrase: args[0], locale: locale}
+  __(...args: any[]): string {
+    let locale = this.locale ? this.locale : "en";
+    let i18n = new I18n().getI18n();
+    args[0] = { phrase: args[0], locale: locale };
     return i18n.__.apply(null, args);
   }
 
-  __n(phrase: string, count: number):string {
-    let i18n = (new I18n()).getI18n();
-    return i18n.__n({singular: phrase, plural: phrase, count: count, locale: 'en'});
+  __n(phrase: string, count: number): string {
+    let i18n = new I18n().getI18n();
+    return i18n.__n({
+      singular: phrase,
+      plural: phrase,
+      count: count,
+      locale: "en"
+    });
   }
 }
