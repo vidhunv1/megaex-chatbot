@@ -8,44 +8,44 @@ import {
   ForeignKey,
   DataType,
   BelongsTo
-} from "sequelize-typescript";
-import User from "./user";
-import PaymentDetail from "./payment_detail";
+} from 'sequelize-typescript'
+import User from './user'
+import PaymentDetail from './payment_detail'
 
-@Table({ timestamps: true, tableName: "PaymentMethods", paranoid: true })
+@Table({ timestamps: true, tableName: 'PaymentMethods', paranoid: true })
 export default class PaymentMethod extends Model<PaymentMethod> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
   @Column
-  id!: number;
+  id!: number
 
   @AllowNull(false)
   @ForeignKey(() => User)
   @Column(DataType.BIGINT)
-  userId!: number;
+  userId!: number
 
   @BelongsTo(() => User)
-  user!: User;
+  user!: User
 
   @AllowNull(false)
   @ForeignKey(() => PaymentDetail)
   @Column(DataType.BIGINT)
-  paymentId!: number;
+  paymentId!: number
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  field1!: string;
+  field1!: string
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  field2!: string;
+  field2!: string
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  field3!: string;
+  field3!: string
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  field4!: string;
+  field4!: string
 }

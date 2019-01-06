@@ -9,83 +9,83 @@ import {
   Unique,
   Default,
   HasMany
-} from "sequelize-typescript";
-import TelegramUser from "./telegram_user";
-import Wallet from "./wallet";
-import Transaction from "./transaction";
-import PaymentMethod from "./payment_method";
-import I18n from "../helpers/i18n";
+} from 'sequelize-typescript'
+import TelegramUser from './telegram_user'
+import Wallet from './wallet'
+import Transaction from './transaction'
+import PaymentMethod from './payment_method'
+import I18n from '../helpers/i18n'
 
-@Table({ timestamps: true, tableName: "Users" })
+@Table({ timestamps: true, tableName: 'Users' })
 export default class User extends Model<User> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
   @Column
-  id!: number;
+  id!: number
 
-  @HasOne(() => TelegramUser, "userId")
-  telegramUser!: TelegramUser;
+  @HasOne(() => TelegramUser, 'userId')
+  telegramUser!: TelegramUser
 
-  @HasMany(() => Wallet, "userId")
-  wallets!: Wallet[];
+  @HasMany(() => Wallet, 'userId')
+  wallets!: Wallet[]
 
-  @HasMany(() => Transaction, "userId")
-  transactions!: Transaction[];
+  @HasMany(() => Transaction, 'userId')
+  transactions!: Transaction[]
 
-  @HasMany(() => PaymentMethod, "userId")
-  paymentMethods!: PaymentMethod[];
+  @HasMany(() => PaymentMethod, 'userId')
+  paymentMethods!: PaymentMethod[]
 
-  @Default("en")
+  @Default('en')
   @Column
-  public locale!: string;
+  public locale!: string
 
   @Unique
   @Column
-  accountId!: string;
+  accountId!: string
 
   @Default(false)
   @Column
-  isTermsAccepted!: boolean;
+  isTermsAccepted!: boolean
 
   @Default(false)
   @Column
-  isVerified!: boolean;
+  isVerified!: boolean
 
-  @Default("localrate")
+  @Default('localrate')
   @Column
   exchangeRateSource!:
-    | "localrate"
-    | "localbitcoins"
-    | "kraken"
-    | "coinbase"
-    | "bitfinex";
+    | 'localrate'
+    | 'localbitcoins'
+    | 'kraken'
+    | 'coinbase'
+    | 'bitfinex'
 
   @Column
-  currencyCode!: string;
+  currencyCode!: string
 
-  @Default("[]")
+  @Default('[]')
   @Column
-  blockedUsers!: string;
+  blockedUsers!: string
 
   @Default(0)
   @Column
-  messageCount!: number;
+  messageCount!: number
 
   __(...args: any[]): string {
-    let locale = this.locale ? this.locale : "en";
-    let i18n = new I18n().getI18n();
-    args[0] = { phrase: args[0], locale: locale };
-    return i18n.__.apply(null, args);
+    const locale = this.locale ? this.locale : 'en'
+    const i18n = new I18n().getI18n()
+    args[0] = { phrase: args[0], locale: locale }
+    return i18n.__.apply(null, args as any)
   }
 
   __n(phrase: string, count: number): string {
-    let i18n = new I18n().getI18n();
+    const i18n = new I18n().getI18n()
     return i18n.__n({
       singular: phrase,
       plural: phrase,
       count: count,
-      locale: "en"
-    });
+      locale: 'en'
+    })
   }
 }

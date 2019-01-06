@@ -10,78 +10,78 @@ import {
   AutoIncrement,
   Default,
   Sequelize
-} from "sequelize-typescript";
-import User from "./user";
-import Transaction from "./transaction";
-import Logger from "../helpers/logger";
-import Wallet from "./wallet";
+} from 'sequelize-typescript'
+import User from './user'
+import Transaction from './transaction'
+import Logger from '../helpers/logger'
+import Wallet from './wallet'
 
-@Table({ timestamps: true, tableName: "Orders" })
+@Table({ timestamps: true, tableName: 'Orders' })
 export default class Order extends Model<Order> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
   @Column
-  id!: number;
+  id!: number
 
   @AllowNull(false)
   @ForeignKey(() => User)
   @Column(DataType.BIGINT)
-  userId!: number;
+  userId!: number
 
   @BelongsTo(() => User)
-  user!: User;
+  user!: User
 
   @AllowNull(true)
   @Column(DataType.FLOAT)
-  minAmount!: number | null;
+  minAmount!: number | null
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
-  maxAmount!: number;
+  maxAmount!: number
 
   @AllowNull(true)
   @Column(DataType.FLOAT)
-  price!: number | null; // null values are market price orders
+  price!: number | null // null values are market price orders
 
   @AllowNull(true)
   @ForeignKey(() => Order)
   @Column(DataType.INTEGER)
-  matchedOrderId!: number;
+  matchedOrderId!: number
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  type!: "buy" | "sell";
+  type!: 'buy' | 'sell'
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  status!: "active" | "matched" | "accepted" | "completed" | "stopped";
+  status!: 'active' | 'matched' | 'accepted' | 'completed' | 'stopped'
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  currencyCode!: string;
+  currencyCode!: string
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  paymentMethodFilters!: string;
+  paymentMethodFilters!: string
 
   @AllowNull(true)
   @Default(0.0)
   @Column(DataType.FLOAT)
-  marginPercentage!: number;
+  marginPercentage!: number
 
   @AllowNull(true)
   @Column(DataType.BOOLEAN)
-  accountVerifiedFilter!: boolean;
+  accountVerifiedFilter!: boolean
 
   @AllowNull(true)
   @Column(DataType.DATE)
-  confirmedTime!: Date;
+  confirmedTime!: Date
 
   @AllowNull(false)
   @Default(0)
   @Column(DataType.INTEGER)
-  cancelCount!: number;
+  cancelCount!: number
 
   async createSellOrder(
     userId: number,
@@ -89,44 +89,44 @@ export default class Order extends Model<Order> {
     maxAmount: number,
     price: number | null,
     margin: number | null = 0.0,
-    currencyCode: string = "btc"
+    currencyCode: string = 'btc'
   ): Promise<Order> {
     // check if balance available
-    let balance = await Transaction.getTotalBalance(userId, currencyCode),
-      marginPercentage: number = 0;
+    const balance = await Transaction.getTotalBalance(userId, currencyCode)
+    let marginPercentage: number = 0
     if (maxAmount > balance) {
-      throw new OrderError(OrderError.INSUFFICIENT_BALANCE);
+      throw new OrderError(OrderError.INSUFFICIENT_BALANCE)
     }
     if (minAmount && minAmount < 0) {
-      throw new OrderError(OrderError.INVALID_PARAMS);
+      throw new OrderError(OrderError.INVALID_PARAMS)
     }
     if (!price) {
-      price = null;
-      marginPercentage = margin || 0;
+      price = null
+      marginPercentage = margin || 0
     }
 
     return await this.sequelize.transaction(async function(t) {
       // block balance
       try {
-        await Wallet.blockBalance(userId, currencyCode, maxAmount, t);
+        await Wallet.blockBalance(userId, currencyCode, maxAmount, t)
       } catch (e) {
-        throw new OrderError();
+        throw new OrderError()
       }
-      let order = await Order.create<Order>(
+      const order = await Order.create<Order>(
         {
           price,
           marginPercentage,
           minAmount,
           maxAmount,
           userId,
-          status: "active",
-          type: "sell",
+          status: 'active',
+          type: 'sell',
           currencyCode
         },
         { transaction: t }
-      );
-      return order;
-    });
+      )
+      return order
+    })
   }
 
   async createBuyOrder(
@@ -134,45 +134,45 @@ export default class Order extends Model<Order> {
     minAmount: number | null,
     maxAmount: number,
     price: number | null,
-    currencyCode: string = "btc"
+    currencyCode: string = 'btc'
   ): Promise<Order> {
-    let order = await Order.create<Order>(
+    const order = await Order.create<Order>(
       {
         userId,
         minAmount,
         maxAmount,
-        status: "active",
-        type: "buy",
+        status: 'active',
+        type: 'buy',
         currencyCode,
         price
       },
       {}
-    );
-    return order;
+    )
+    return order
   }
 
   async updateAccountVerifiedFilter(shouldSet: boolean) {
-    await this.update({ accountVerifiedFilter: shouldSet });
+    await this.update({ accountVerifiedFilter: shouldSet })
   }
 
   async getActiveOrders(userId: number) {
-    let activeOrders = await Order.findAll({
-      where: { userId: userId, status: { [Sequelize.Op.ne]: "completed" } }
-    });
-    console.log("Active orders: " + JSON.stringify(activeOrders));
+    const activeOrders = await Order.findAll({
+      where: { userId: userId, status: { [Sequelize.Op.ne]: 'completed' } }
+    })
+    console.log('Active orders: ' + JSON.stringify(activeOrders))
   }
 }
 
 export class OrderError extends Error {
-  public status: number;
-  public static INSUFFICIENT_BALANCE = 490;
-  public static INVALID_PARAMS = 400;
+  public status: number
+  public static INSUFFICIENT_BALANCE = 490
+  public static INVALID_PARAMS = 400
 
-  constructor(status: number = 500, message: string = "Transaction Error") {
-    super(message);
-    this.name = this.constructor.name;
-    let logger = new Logger().getLogger();
-    logger.error(this.constructor.name + ", " + status);
-    this.status = status;
+  constructor(status: number = 500, message: string = 'Transaction Error') {
+    super(message)
+    this.name = this.constructor.name
+    const logger = new Logger().getLogger()
+    logger.error(this.constructor.name + ', ' + status)
+    this.status = status
   }
 }

@@ -1,169 +1,156 @@
-import * as TelegramBot from "node-telegram-bot-api";
-import * as Express from "express";
-import { Sequelize } from "sequelize-typescript";
-import TelegramBotApi from "./helpers/telegram-bot-api";
-import MessageQueue from "./helpers/message-queue";
+import * as TelegramBot from 'node-telegram-bot-api'
+import { Sequelize } from 'sequelize-typescript'
+import TelegramBotApi from './helpers/telegram-bot-api'
+import MessageQueue from './helpers/message-queue'
 
-import User from "./models/user";
-import TelegramUser from "./models/telegram_user";
-import Wallet from "./models/wallet";
-import Jobs from "./jobs";
+import User from './models/user'
+import TelegramUser from './models/telegram_user'
+import Wallet from './models/wallet'
+import Jobs from './jobs'
 
-import * as DatabaseConfig from "../config/database.json";
-import CacheKeys from "./cache-keys";
-import Store from "./helpers/store";
-import Logger from "./helpers/logger";
-import TelegramHandler from "./t-conversation/router";
+import * as DatabaseConfig from '../config/database.json'
+import CacheKeys from './cache-keys'
+import Store from './helpers/store'
+import Logger from './helpers/logger'
+import TelegramHandler from './t-conversation/router'
 
-let env = process.env.NODE_ENV || "development";
+const env = process.env.NODE_ENV || 'development'
 
-let logger = new Logger().getLogger();
-logger.info("starting app ...");
-
-// load balancer ping test
-var app = Express();
-app.get("/", function(_, res) {
-  res.send("pong");
-});
-app.listen(89);
-
-(async () => {
-  logger.info("Initializing database");
-  let sequelize = new Sequelize({
+const logger = new Logger().getLogger()
+;(async () => {
+  logger.info('Initializing database')
+  const sequelize = new Sequelize({
     ...(<any>DatabaseConfig)[env],
     logging: function(sql: any, _sequelizeObject: any) {
-      logger.info(sql);
+      logger.info(sql)
     }
-  });
-  sequelize.addModels([__dirname + "/models/"]);
+  })
+  sequelize.addModels([__dirname + '/models/'])
 
   // ****** Initialize Redis client ******
-  let redisStore = new Store();
-  await redisStore.initSub();
-  const redisClient: any = redisStore.getClient();
+  const redisStore = new Store()
+  await redisStore.initSub()
+  const redisClient: any = redisStore.getClient()
 
-  let tBot = new TelegramBotApi().getBot();
-  let messageQueue = new MessageQueue();
-  let tMessageHandler = new TelegramHandler();
-  let jobs = new Jobs();
-  jobs.start();
+  const tBot = new TelegramBotApi().getBot()
+  const messageQueue = new MessageQueue()
+  const tMessageHandler = new TelegramHandler()
+  const jobs = new Jobs()
+  jobs.start()
 
-  tBot.on("message", async function onMessage(msg: TelegramBot.Message) {
-    console.log("Received message: ");
+  tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
+    console.log('Received message: ')
     try {
-      let rKeys = new CacheKeys(msg.chat.id).getKeys();
+      const rKeys = new CacheKeys(msg.chat.id).getKeys()
       if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
-        await tBot.sendChatAction(msg.chat.id, "typing");
-        let userCache = await redisClient.getAsync(rKeys.telegramUser.key);
-        let tUser: TelegramUser, user: User;
+        await tBot.sendChatAction(msg.chat.id, 'typing')
+        const userCache = await redisClient.getAsync(rKeys.telegramUser.key)
+        let tUser: TelegramUser, user: User
         if (userCache) {
-          //user exists in redis cache
-          let cache: TelegramUser = JSON.parse(userCache);
-          tUser = new TelegramUser(cache);
-          user = new User(cache.user);
-          console.log("UserCache: " + JSON.stringify(cache));
+          // user exists in redis cache
+          const cache: TelegramUser = JSON.parse(userCache)
+          tUser = new TelegramUser(cache)
+          user = new User(cache.user)
+          console.log('UserCache: ' + JSON.stringify(cache))
         } else {
           // no user data available in cache
-          //check if user exists
-          let getTUser = await TelegramUser.findById(msg.from.id, {
+          // check if user exists
+          const getTUser = await TelegramUser.findById(msg.from.id, {
             include: [{ model: User }]
-          });
+          })
           if (!getTUser) {
             // new user, create account & load cache
-            let newT = new TelegramUser({
+            const newT = new TelegramUser({
               id: msg.from.id,
               firstName: msg.from.first_name,
               lastName: msg.from.last_name,
               languageCode: msg.from.language_code,
               username: msg.from.username
-            });
+            })
             try {
-              logger.info("Creating new account...");
-              tUser = await newT.create();
-              tUser.user.id = tUser.userId;
-              user = tUser.user;
+              logger.info('Creating new account...')
+              tUser = await newT.create()
+              tUser.user.id = tUser.userId
+              user = tUser.user
             } catch (e) {
               logger.error(
-                "Error creating account: TelegramUser.create: " +
+                'Error creating account: TelegramUser.create: ' +
                   JSON.stringify(e)
-              );
-              tBot.sendMessage(msg.chat.id, new User().__("error_unknown"));
-              return;
+              )
+              tBot.sendMessage(msg.chat.id, new User().__('error_unknown'))
+              return
             }
-            //create all wallets for user
-            let wallets = new Wallet({ userId: tUser.user.id });
-            wallets.create();
+            // create all wallets for user
+            const wallets = new Wallet({ userId: tUser.user.id })
+            wallets.create()
           } else {
-            tUser = getTUser;
-            user = tUser.user;
+            tUser = getTUser
+            user = tUser.user
           }
-          console.log("SAVING TO CACHE: " + JSON.stringify(tUser));
+          console.log('SAVING TO CACHE: ' + JSON.stringify(tUser))
           redisClient.setAsync(
             rKeys.telegramUser.key,
             JSON.stringify(tUser),
-            "EX",
+            'EX',
             rKeys.telegramUser.expiry
-          );
+          )
         }
-        tMessageHandler.handleMessage(msg, user, tUser);
+        tMessageHandler.handleMessage(msg, user, tUser)
 
         if (
           (await redisClient.existsAsync(rKeys.messageCounter.shadowKey)) == 1
         ) {
-          await redisClient.incrAsync(rKeys.messageCounter.key);
+          await redisClient.incrAsync(rKeys.messageCounter.key)
         } else {
-          await redisClient.setAsync(rKeys.messageCounter.key, 1);
+          await redisClient.setAsync(rKeys.messageCounter.key, 1)
           await redisClient.setAsync(
             rKeys.messageCounter.shadowKey,
-            "",
-            "EX",
+            '',
+            'EX',
             rKeys.messageCounter.expiry
-          );
+          )
         }
-      } else if (msg.chat.type === "group") {
+      } else if (msg.chat.type === 'group') {
         tBot.sendMessage(
           msg.chat.id,
-          "Group conversations are temporarily disabled."
-        );
+          'Group conversations are temporarily disabled.'
+        )
       } else {
-        logger.error("Unhandled telegram message action");
+        logger.error('Unhandled telegram message action')
         tBot.sendMessage(
           msg.chat.id,
-          "ERROR: Unhandled telegram message action"
-        );
+          'ERROR: Unhandled telegram message action'
+        )
       }
     } catch (e) {
-      logger.error("FATAL: An unknown error occurred: " + JSON.stringify(e));
-      tBot.sendMessage(
-        msg.chat.id,
-        "An error occured. Please try again later."
-      );
+      logger.error('FATAL: An unknown error occurred: ' + JSON.stringify(e))
+      tBot.sendMessage(msg.chat.id, 'An error occured. Please try again later.')
     }
-  });
+  })
 
-  tBot.on("callback_query", async function(callback) {
-    await tBot.answerCallbackQuery(callback.id);
+  tBot.on('callback_query', async function(callback) {
+    await tBot.answerCallbackQuery(callback.id)
 
-    let msg: TelegramBot.Message = callback.message,
-      tUser: TelegramUser | null = null,
-      user: User | null = null;
-    let cacheKeys = new CacheKeys(msg.chat.id).getKeys();
-    let userCache = await redisClient.getAsync(cacheKeys.telegramUser.key);
+    const msg: TelegramBot.Message = callback.message
+    let tUser: TelegramUser | null = null
+    let user: User | null = null
+    const cacheKeys = new CacheKeys(msg.chat.id).getKeys()
+    const userCache = await redisClient.getAsync(cacheKeys.telegramUser.key)
 
     if (userCache) {
-      //user exists in redis cache
-      let cache: TelegramUser = JSON.parse(userCache);
-      tUser = new TelegramUser(cache);
-      user = new User(cache.user);
+      // user exists in redis cache
+      const cache: TelegramUser = JSON.parse(userCache)
+      tUser = new TelegramUser(cache)
+      user = new User(cache.user)
     } else {
       // get from db
       try {
         tUser = await TelegramUser.findById(msg.chat.id, {
           include: [{ model: User }]
-        });
-        user = tUser ? tUser.user : null;
+        })
+        user = tUser ? tUser.user : null
       } catch (e) {
-        logger.error("FATAL: could not get user details");
+        logger.error('FATAL: could not get user details')
       }
     }
 
@@ -173,19 +160,19 @@ app.listen(89);
         user,
         tUser,
         callback
-      );
+      )
     } else {
-      logger.error("FATAL: user does not exist when it should have");
+      logger.error('FATAL: user does not exist when it should have')
     }
-  });
+  })
 
-  process.on("SIGINT", async function() {
-    logger.info("Ending process...");
-    logger.info("closing sql");
-    await sequelize.close();
-    await redisStore.close();
-    await messageQueue.close();
-    await jobs.stop();
-    process.exit(0);
-  });
-})();
+  process.on('SIGINT', async function() {
+    logger.info('Ending process...')
+    logger.info('closing sql')
+    await sequelize.close()
+    await redisStore.close()
+    await messageQueue.close()
+    await jobs.stop()
+    process.exit(0)
+  })
+})()

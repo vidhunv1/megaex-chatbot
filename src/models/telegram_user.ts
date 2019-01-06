@@ -7,52 +7,51 @@ import {
   BelongsTo,
   PrimaryKey,
   AllowNull
-} from "sequelize-typescript";
-import User from "./user";
-import RandomGenerator from "../helpers/random-generator";
+} from 'sequelize-typescript'
+import User from './user'
+import RandomGenerator from '../helpers/random-generator'
 
-@Table({ timestamps: true, tableName: "TelegramUsers" })
+@Table({ timestamps: true, tableName: 'TelegramUsers' })
 export default class TelegramUser extends Model<TelegramUser> {
   @PrimaryKey
   @AllowNull(false)
   @Column(DataType.BIGINT)
-  id!: number; //corresponds to UserId field from telegram
+  id!: number // corresponds to UserId field from telegram
 
   @AllowNull(false)
   @ForeignKey(() => User)
   @Column(DataType.BIGINT)
-  userId!: number;
+  userId!: number
 
   @BelongsTo(() => User)
-  user!: User;
+  user!: User
 
   @Column
-  firstName!: string;
+  firstName!: string
 
   @Column
-  lastName!: string;
+  lastName!: string
 
   @Column
-  languageCode!: string;
+  languageCode!: string
 
   @Column
-  username!: string;
+  username!: string
 
   async create(): Promise<TelegramUser> {
-    let idGen: RandomGenerator = new RandomGenerator();
-    let accountId = await idGen.generateId();
+    const idGen: RandomGenerator = new RandomGenerator()
+    const accountId = await idGen.generateId()
     let accId,
-      u = null;
+      u = null,
+      i = 0
     do {
-      accId = await idGen.generateId();
-      u = await User.findOne({
-        where: {
-          accountId: accId
-        }
-      });
-    } while (u !== null);
-    let us = await User.create<User>({ accountId: accountId }, {});
-    let tUser = await TelegramUser.create<TelegramUser>(
+      accId = await idGen.generateId()
+      u = await User.findOne({ where: { accountId: accId } })
+      i++
+    } while (u !== null)
+    console.log(`${i} attempts to generate random user id`)
+    const us = await User.create<User>({ accountId: accountId }, {})
+    const tUser = await TelegramUser.create<TelegramUser>(
       {
         id: this.id,
         firstName: this.firstName,
@@ -62,8 +61,8 @@ export default class TelegramUser extends Model<TelegramUser> {
         userId: us.id
       },
       {}
-    );
-    tUser.user = us;
-    return tUser;
+    )
+    tUser.user = us
+    return tUser
   }
 }

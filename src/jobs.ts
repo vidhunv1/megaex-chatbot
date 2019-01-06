@@ -1,97 +1,97 @@
-import { CronJob } from "cron";
-import * as request from "request-promise";
-import Market from "./models/market";
-import * as moment from "moment";
-import Logger from "./helpers/logger";
-import Transfer from "./models/transfer";
+import { CronJob } from 'cron'
+import * as request from 'request-promise'
+import Market from './models/market'
+import * as moment from 'moment'
+import Logger from './helpers/logger'
+import Transfer from './models/transfer'
 export default class Jobs {
-  jobs: CronJob[];
-  logger: any;
+  jobs: CronJob[]
+  logger: any
   constructor() {
-    this.jobs = [];
-    this.jobs.push(this.getMarketRatesJob());
-    this.jobs.push(this.getDeleteExpiredPaymentsJob());
-    this.logger = new Logger().getLogger();
+    this.jobs = []
+    this.jobs.push(this.getMarketRatesJob())
+    this.jobs.push(this.getDeleteExpiredPaymentsJob())
+    this.logger = new Logger().getLogger()
   }
 
   start() {
-    console.log("Starting all jobs: ");
+    console.log('Starting all jobs: ')
     for (let i = 0; i < this.jobs.length; i++) {
-      this.jobs[i].start();
+      this.jobs[i].start()
     }
   }
 
   stop() {
-    console.log("stopping all jobs");
+    console.log('stopping all jobs')
     for (let i = 0; i < this.jobs.length; i++) {
-      this.jobs[i].stop();
+      this.jobs[i].stop()
     }
   }
 
   private getMarketRatesJob() {
-    let _this = this;
+    const _this = this
     return new CronJob({
-      cronTime: "*/2 * * * *",
+      cronTime: '*/2 * * * *',
       onTick: async function() {
-        console.log("[TODO] Fetch and update market rates");
+        console.log('[TODO] Fetch and update market rates')
 
-        let pd: Market[] = (await Market.sequelize.query(
-          'SELECT * FROM "Markets" WHERE "fromCurrency"=\'btc\' AND "toCurrency" IN (SELECT DISTINCT "currencyCode" FROM "Users") ORDER BY "updatedAt" DESC;'
-        ))[0];
+        const pd: Market[] = (await Market.sequelize.query(
+          'SELECT * FROM "Markets" WHERE "fromCurrency"=\'btc\' AND "toCurrency" IN (SELECT DISTINCT "currencyCode" FROM "Users") ORDER BY "updatedAt" DESC'
+        ))[0]
         let shouldSync = false,
-          exchangeRates;
+          exchangeRates
         for (let i = 0; i < pd.length; i++) {
-          if (pd[i].toCurrency === "inr") {
+          if (pd[i].toCurrency === 'inr') {
             try {
-              let zebpayResp = JSON.parse(
+              const zebpayResp = JSON.parse(
                 await request(
-                  "https://www.zebapi.com/api/v1/market/ticker-new/btc/inr"
+                  'https://www.zebapi.com/api/v1/market/ticker-new/btc/inr'
                 )
-              );
+              )
               console.log(
-                "UPDATING ZEBPAY PRICE: " +
-                  zebpayResp["24hoursHigh"] +
-                  ", " +
+                'UPDATING ZEBPAY PRICE: ' +
+                  zebpayResp['24hoursHigh'] +
+                  ', ' +
                   JSON.stringify(pd[i])
-              );
+              )
               await Market.update(
-                { value: zebpayResp["24hoursHigh"] },
+                { value: zebpayResp['24hoursHigh'] },
                 { where: { id: pd[i].id } }
-              );
+              )
             } catch (e) {
-              _this.logger.error("getMarketRatesJob ERROR UPDATING: " + e);
+              _this.logger.error('getMarketRatesJob ERROR UPDATING: ' + e)
             }
-          } else if (pd[i].toCurrency === "usd") {
+          } else if (pd[i].toCurrency === 'usd') {
             try {
-              let btcPrice = JSON.parse(
+              const btcPrice = JSON.parse(
                 await request(
-                  "https://api.coinmarketcap.com/v1/ticker/bitcoin/?convert=usd"
+                  'https://api.coinmarketcap.com/v1/ticker/bitcoin/?convert=usd'
                 )
-              )[0].price_usd;
+              )[0].price_usd
               await Market.update(
                 { value: btcPrice },
                 { where: { id: pd[i].id } }
-              );
+              )
             } catch (e) {}
           } else if (!shouldSync) {
-            if (moment().diff(pd[i].updatedAt, "hour") >= 24) {
+            if (moment().diff(pd[i].updatedAt, 'hour') >= 24) {
               try {
                 exchangeRates = JSON.parse(
                   await request(
-                    "http://data.fixer.io/api/latest?access_key=b7cb98de1d0f513b39019d797f7514ff&base=eur"
+                    'http://data.fixer.io/api/latest?access_key=b7cb98de1d0f513b39019d797f7514ff&base=eur'
                   )
-                );
-                shouldSync = true;
+                )
+                shouldSync = true
               } catch (e) {
                 _this.logger.error(
-                  "getMarketRatesJobERROR UPDATING" + JSON.stringify(e)
-                );
+                  'getMarketRatesJobERROR UPDATING' + JSON.stringify(e)
+                )
               }
             }
           }
 
           if (shouldSync) {
-            let usdRate = exchangeRates.rates["USD"];
+            const usdRate = exchangeRates.rates['USD']
             if (
               usdRate &&
               exchangeRates.rates[pd[i].toCurrency.toUpperCase()]
@@ -104,11 +104,11 @@ export default class Jobs {
                       usdRate
                   },
                   { where: { id: pd[i].id } }
-                );
+                )
               } catch (e) {
                 _this.logger.error(
-                  "getMarketRatesJob ERROR UPDATING" + JSON.stringify(e)
-                );
+                  'getMarketRatesJob ERROR UPDATING' + JSON.stringify(e)
+                )
               }
             }
           }
@@ -116,18 +116,18 @@ export default class Jobs {
       },
       onComplete: function() {},
       start: false
-    });
+    })
   }
 
   private getDeleteExpiredPaymentsJob() {
     return new CronJob({
-      cronTime: "*/2 * * * *",
+      cronTime: '*/2 * * * *',
       onTick: async function() {
-        console.log("Deleting expired payments");
-        await Transfer.deleteExpiredPayments();
+        console.log('Deleting expired payments')
+        await Transfer.deleteExpiredPayments()
       },
       onComplete: function() {},
       start: false
-    });
+    })
   }
 }
