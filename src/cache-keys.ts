@@ -1,6 +1,5 @@
 import Store from './helpers/store'
-import * as AppConfig from '../config/app.json'
-const env = process.env.NODE_ENV || 'development'
+import { CONFIG } from '../config'
 
 export default class CacheKeys {
   id: string | number
@@ -45,7 +44,7 @@ export default class CacheKeys {
       paymentExpiryTimer: {
         key: 'PaymentExpiryTimer' + formattedId,
         shadowKey: 'PaymentExpiryShadow' + formattedId,
-        expiry: (<any>AppConfig)[env]['payment_expiry']
+        expiry: CONFIG.PAYMENT_EXPIRY_S
       },
       tContext: {
         key: 'TContext' + formattedId,
@@ -63,7 +62,7 @@ export default class CacheKeys {
         'Trade.paymethodId': 'Trade.paymethodId',
         'Trade.isParsePaymethod': 'Trade.isParsePaymethod',
         'Trade.editOrderId': 'Trade.editOrderId',
-        expiry: (<any>AppConfig)[env]['context_expiry']
+        expiry: CONFIG.CONTEXT_EXPIRY_S
       }
     }
   }

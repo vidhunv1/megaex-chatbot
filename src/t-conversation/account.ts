@@ -15,8 +15,7 @@ import {
   ICallbackQuery,
   ICallbackFunction
 } from './defaults'
-import * as AppConfig from '../../config/app.json'
-const env = process.env.NODE_ENV || 'development'
+import { CONFIG } from '../../config'
 
 const CONTEXT_SENDMESSAGE = 'CONTEXT_SENDMESSAGE'
 const CONTEXT_ADDPAYMETHOD = 'CONTEXT_ADDPAYMETHOD'
@@ -64,7 +63,7 @@ const accountCallback = async function(
   tUser: TelegramUser,
   query: ICallbackQuery
 ): Promise<boolean> {
-  const botUsername = (<any>AppConfig)[env]['telegram_bot_username']
+  const botUsername = CONFIG.BOT_USERNAME
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   switch (query.callbackFunction) {
     case 'accountLink':

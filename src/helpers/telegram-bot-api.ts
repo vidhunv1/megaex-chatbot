@@ -1,17 +1,16 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import * as AppConfig from '../../config/app.json'
-const env = process.env.NODE_ENV || 'development'
+import { CONFIG } from '../../config'
+
 export default class TelegramBotApi {
   static instance: TelegramBotApi
   bot!: TelegramBot
 
   constructor() {
     if (TelegramBotApi.instance) return TelegramBotApi.instance
-
-    this.bot = new TelegramBot((<any>AppConfig)[env]['telegram_access_token'], {
+    this.bot = new TelegramBot(CONFIG.TELEGRAM_ACCESS_TOKEN, {
       webHook: {
         // @ts-ignore
-        port: (<any>AppConfig)[env]['telegram_bot_port'],
+        port: CONFIG.WEBHOOK_PORT,
         key: '',
         cert: '',
         pfx: ''
@@ -19,10 +18,10 @@ export default class TelegramBotApi {
     })
 
     this.bot.setWebHook(
-      `${(<any>AppConfig)[env]['telegram_bot_url'] +
+      `${CONFIG.WEBHOOK_URL +
         ':' +
-        (<any>AppConfig)[env]['telegram_bot_port']}/bot${
-        (<any>AppConfig)[env]['telegram_access_token']
+        CONFIG.WEBHOOK_PORT}/bot${
+        CONFIG.TELEGRAM_ACCESS_TOKEN
       }`
     )
 

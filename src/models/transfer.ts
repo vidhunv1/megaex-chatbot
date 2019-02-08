@@ -17,12 +17,10 @@ import Transaction, { TransactionError } from './transaction'
 import RandomGenerator from '../helpers/random-generator'
 import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken'
-import * as AppConfig from '../../config/app.json'
 import Logger from '../helpers/logger'
 import Store from '../helpers/store'
 import CacheStore from '../cache-keys'
-const env = process.env.NODE_ENV || 'development'
-console.log('Running in environment: ' + env)
+import { CONFIG } from '../../config'
 
 @Table({ timestamps: true, tableName: 'Transfers' })
 export default class Transfer extends Model<Transfer> {
@@ -84,10 +82,10 @@ export default class Transfer extends Model<Transfer> {
 
     const r = new RandomGenerator()
     const transactionId = await r.generateTransactionId()
-    const salt = (<any>AppConfig)[env]['hash_salt']
+    const salt = CONFIG.HASH_SALT
     const paymentCode = await r.generatePaymentCode()
     const secretHash = await Bcrypt.hash(paymentCode, salt)
-    const jwtSecret = (<any>AppConfig)[env]['jwt_secret']
+    const jwtSecret = CONFIG.JWT_SECRET
     const paySign = JWT.sign(
       { userId: userId, currencyCode: currencyCode, amount: amount },
       jwtSecret
@@ -151,7 +149,7 @@ export default class Transfer extends Model<Transfer> {
       throw new TransferError(TransferError.SELF_CLAIM)
     if (
       moment().diff(p.createdAt, 'seconds') >=
-      (<any>AppConfig)[env]['payment_expiry']
+      CONFIG.PAYMENT_EXPIRY_S
     )
       // expiry
       throw new TransferError(TransferError.EXPIRED)
@@ -220,14 +218,14 @@ export default class Transfer extends Model<Transfer> {
 
   static async getBySecret(secret: string): Promise<Transfer | null> {
     const logger = new Logger().getLogger()
-    const salt = (<any>AppConfig)[env]['hash_salt']
+    const salt = CONFIG.HASH_SALT
     const hash: string = await Bcrypt.hash(secret, salt)
     const payment: Transfer | null = await Transfer.findOne({
       where: { secretHash: hash }
     })
     if (payment == null) return null
     try {
-      const jwtSecret = (<any>AppConfig)[env]['jwt_secret']
+      const jwtSecret = CONFIG.JWT_SECRET
       const decoded = JWT.verify(payment.transferSignature, jwtSecret)
       if (decoded.userId && decoded.currencyCode && decoded.amount) {
         payment.userId = decoded.userId
@@ -278,7 +276,7 @@ export default class Transfer extends Model<Transfer> {
         status: 'pending',
         createdAt: {
           $lte: moment()
-            .subtract((<any>AppConfig)[env]['payment_expiry'], 's')
+            .subtract(CONFIG.PAYMENT_EXPIRY_S, 's')
             .toISOString()
         }
       }

@@ -1,13 +1,9 @@
 import * as Kue from 'kue'
 import * as JWT from 'jsonwebtoken'
 
-import * as RedisConfig from '../../config/redis.json'
-import * as AppConfig from '../../config/app.json'
 import NotificationManager from './notification-manager'
 import Logger from './logger'
-
-const env = process.env.NODE_ENV || 'development'
-console.log('ENV: ' + process.env.NODE_ENV)
+import { CONFIG } from '../../config'
 
 export default class MessageQueue {
   static instance: MessageQueue
@@ -21,10 +17,10 @@ export default class MessageQueue {
 
     this.queue = Kue.createQueue({
       prefix: 'q',
-      db: (<any>RedisConfig)[env]['database'],
+      db: CONFIG.REDIS_DATABASE,
       redis: {
-        host: (<any>RedisConfig)[env]['host'],
-        port: (<any>RedisConfig)[env]['port']
+        host: CONFIG.REDIS_HOST,
+        port: CONFIG.REDIS_PORT
       }
     })
     this.createNotificationHandler()
@@ -35,7 +31,7 @@ export default class MessageQueue {
   generateBtcAddress(id: number): Promise<string> {
     this.logger.info('generate btc address')
     const q = this.queue
-    const jwtSecret = (<any>AppConfig)[env]['jwt_secret']
+    const jwtSecret = CONFIG.JWT_SECRET
     const _this = this
     const promise = new Promise(function(
       resolve: (address: string) => any,

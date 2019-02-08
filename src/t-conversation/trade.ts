@@ -14,11 +14,10 @@ import {
   parseRange
 } from './defaults'
 import CacheStore from '../cache-keys'
-import * as AppConfig from '../../config/app.json'
 import Wallet from '../models/wallet'
 import Order from '../models/order'
 import PaymentDetail from '../models/payment_detail'
-const env = process.env.NODE_ENV || 'development'
+import { CONFIG } from '../../config'
 
 const logger = new Logger().getLogger()
 const tBot = new TelegramBotApi().getBot()
@@ -99,7 +98,7 @@ const tradeConversation = async function(
       msg.chat.id,
       user.__(
         'buy_sell_message %s %s %s',
-        (<any>AppConfig)[env]['telegram_support_username'],
+        CONFIG.SUPPORT_USERNAME,
         user.currencyCode.toUpperCase(),
         localizedRate
       ),
@@ -430,7 +429,7 @@ const tradeContext = async function(
     if (msg.text.indexOf('%') > -1) {
       const margin = parseFloat(msg.text)
       if (margin >= 0) {
-        ;[updatedRows] = await Order.update(
+        [updatedRows] = await Order.update(
           { marginPercentage: margin, price: null },
           { where: { id: orderId } }
         )
@@ -443,7 +442,7 @@ const tradeContext = async function(
     } else {
       const rate = parseInt(msg.text)
       if (rate >= 0) {
-        ;[updatedRows] = await Order.update(
+        [updatedRows] = await Order.update(
           { price: rate },
           { where: { id: orderId } }
         )
@@ -756,7 +755,7 @@ async function showOrder(
         order.paymentMethodFilters,
         user.__('order_status_' + order.status),
         'https://t.me/' +
-          (<any>AppConfig)[env]['telegram_bot_username'] +
+          CONFIG.BOT_USERNAME +
           '/start=order-' +
           order.id
       )
@@ -772,7 +771,7 @@ async function showOrder(
         order.paymentMethodFilters,
         user.__('order_status_' + order.status),
         'https://t.me/' +
-          (<any>AppConfig)[env]['telegram_bot_username'] +
+          CONFIG.BOT_USERNAME +
           '/start=order-' +
           order.id,
         '%'

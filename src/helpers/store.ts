@@ -1,13 +1,12 @@
 import * as Redis from 'redis'
 import CacheKeys from '../cache-keys'
 import * as Bluebird from 'bluebird'
-import * as RedisConfig from '../../config/redis.json'
 import Logger from '../helpers/logger'
 import Transfer from '../models/transfer'
 import NotificationManager from './notification-manager'
 import TelegramBotApi from '../helpers/telegram-bot-api'
 import { keyboardMenu } from '../t-conversation/defaults'
-const env = process.env.NODE_ENV || 'development'
+import { CONFIG } from '../../config'
 
 import TelegramUser from '../models/telegram_user'
 import User from '../models/user'
@@ -22,14 +21,14 @@ export default class Store {
 
     const logger: any = new Logger().getLogger()
     logger.info(
-      'Initializing redis & redis pub/sub keyspace-events using ' + env + ' '
+      'Initializing redis & redis pub/sub keyspace-events using ' + CONFIG.NODE_ENV + ' '
     )
 
     Bluebird.promisifyAll(Redis.RedisClient.prototype)
     Bluebird.promisifyAll(Redis.Multi.prototype)
     const options = {
-      host: (<any>RedisConfig)[env]['host'],
-      port: (<any>RedisConfig)[env]['port']
+      host: CONFIG.REDIS_HOST,
+      port: CONFIG.REDIS_PORT ? parseInt(CONFIG.REDIS_PORT) : undefined
     }
     this.client = Redis.createClient(options)
     this.pub = Redis.createClient(options)
@@ -43,11 +42,11 @@ export default class Store {
     const tBot = new TelegramBotApi().getBot()
     try {
       await this.client.select(
-        (<any>RedisConfig)[env]['database'],
+        CONFIG.REDIS_DATABASE,
         function() {}
       )
-      await this.pub.select((<any>RedisConfig)[env]['database'], function() {})
-      await this.sub.select((<any>RedisConfig)[env]['database'], function() {})
+      await this.pub.select(CONFIG.REDIS_DATABASE, function() {})
+      await this.sub.select(CONFIG.REDIS_DATABASE, function() {})
 
       await this.pub.send_command(
         'config',

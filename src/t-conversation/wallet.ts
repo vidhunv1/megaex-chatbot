@@ -11,7 +11,7 @@ import Store from '../helpers/store'
 import TelegramBotApi from '../helpers/telegram-bot-api'
 import Logger from '../helpers/logger'
 import NotificationManager from '../helpers/notification-manager'
-import * as AppConfig from '../../config/app.json'
+import { CONFIG } from '../../config'
 
 import {
   keyboardMenu,
@@ -23,8 +23,6 @@ import {
   ICallbackFunction
 } from './defaults'
 import Transaction from '../models/transaction'
-
-const env = process.env.NODE_ENV || 'development'
 
 const CONTEXT_WALLET = 'Wallet'
 const CONTEXT_COINSEND = 'CoinSend'
@@ -346,7 +344,7 @@ async function handleCoinSend(
 ) {
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   let coin: string, isInputContext
-  ;[coin, isInputContext] = await redisClient.hmgetAsync(
+  [coin, isInputContext] = await redisClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Wallet.coin'],
     cacheKeys.tContext['CoinSend.isInputAmount']
@@ -445,7 +443,7 @@ async function handleCoinSend(
               tUser.id,
               user.__(
                 'send_payment_created %d',
-                (<any>AppConfig)[env]['payment_expiry'] / 60
+                CONFIG.PAYMENT_EXPIRY_S / 60
               ),
               {
                 parse_mode: 'Markdown',
@@ -456,7 +454,7 @@ async function handleCoinSend(
                 }
               }
             )
-            const botUsername = (<any>AppConfig)[env]['telegram_bot_username']
+            const botUsername = CONFIG.BOT_USERNAME
             await tBot.sendMessage(
               tUser.id,
               'https://t.me/' + botUsername + '?start=key-' + paymentCode,
@@ -568,7 +566,7 @@ async function handlePaymentClaim(
               'send_payment_info %f %s %d',
               p.amount,
               p.currencyCode,
-              (<any>AppConfig)[env]['payment_expiry'] / 60 -
+              CONFIG.PAYMENT_EXPIRY_S / 60 -
                 moment(moment()).diff(p.createdAt, 'm')
             ),
             {}
@@ -597,7 +595,7 @@ async function handleWallet(
 ) {
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   let currentContext, currentCoin, currentPage
-  ;[currentContext, currentCoin] = await redisClient.hmgetAsync(
+  [currentContext, currentCoin] = await redisClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,
     cacheKeys.tContext['Wallet.coin']

@@ -1,5 +1,7 @@
+import { CONFIG } from '../../config'
 const { createLogger, format, transports } = require('winston')
 const { combine, timestamp, printf } = format
+
 export default class Logger {
   static instance: Logger
   logger: any
@@ -7,7 +9,7 @@ export default class Logger {
   constructor() {
     if (Logger.instance) return Logger.instance
 
-    const env = process.env.NODE_ENV || 'development'
+    const env = CONFIG.NODE_ENV
 
     const myFormat = printf((info: any) => {
       return `${info.timestamp} ${info.level}: ${info.message}`

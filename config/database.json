@@ -1,23 +1,23 @@
 {
   "development": {
      "username": "postgres",
-     "password": "futurearts",
-     "database": "megaex_dev",
-     "host": "52.66.101.232",
+     "password": "arfGmFvLatbBxchL",
+     "database": "postgres",
+     "host": "10.121.96.3",
      "dialect": "postgres"
    },
   "test": {
     "username": "postgres",
-    "password": "futurearts",
-    "database": "megaex_test",
-    "host": "52.66.101.232",
+    "password": "arfGmFvLatbBxchL",
+    "database": "postgres",
+    "host": "10.121.96.3",
     "dialect": "postgres"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "username": "postgres",
+    "password": "arfGmFvLatbBxchL",
+    "database": "postgres",
+    "host": "10.121.96.3",
+    "dialect": "postgres"
   }
 }

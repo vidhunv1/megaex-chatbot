@@ -8,19 +8,21 @@ import TelegramUser from './models/telegram_user'
 import Wallet from './models/wallet'
 import Jobs from './jobs'
 
-import * as DatabaseConfig from '../config/database.json'
 import CacheKeys from './cache-keys'
 import Store from './helpers/store'
 import Logger from './helpers/logger'
 import TelegramHandler from './t-conversation/router'
+import { CONFIG } from '../config'
 
-const env = process.env.NODE_ENV || 'development'
+const logger = new Logger().getLogger();
 
-const logger = new Logger().getLogger()
-;(async () => {
+(async () => {
   logger.info('Initializing database')
   const sequelize = new Sequelize({
-    ...(<any>DatabaseConfig)[env],
+    database: CONFIG.DB_DATABASE_NAME,
+    username: CONFIG.DB_USERNAME,
+    password: CONFIG.DB_PASSWORD,
+    dialect: 'postgres',
     logging: function(sql: any, _sequelizeObject: any) {
       logger.info(sql)
     }
