@@ -3,6 +3,7 @@ EXPOSE 8443 8443
 COPY . /home/t-bot
 WORKDIR /home/t-bot
 RUN yarn install
-RUN yarn db:create
-RUN yarn db:migrate
+
+CMD yarn db:create
+CMD yarn db:migrate
 CMD yarn serve
