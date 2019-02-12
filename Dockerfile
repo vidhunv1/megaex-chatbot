@@ -1,9 +1,8 @@
 FROM node:10
-EXPOSE 8443 8443
+EXPOSE 443 443
 COPY . /home/t-bot
 WORKDIR /home/t-bot
+
 RUN yarn install
 
-CMD yarn db:create
-CMD yarn db:migrate
 CMD yarn serve

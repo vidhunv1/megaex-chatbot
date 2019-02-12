@@ -20,6 +20,7 @@ const logger = new Logger().getLogger();
   logger.info('Initializing database')
   const sequelize = new Sequelize({
     database: CONFIG.DB_DATABASE_NAME,
+    host: CONFIG.DB_HOST,
     username: CONFIG.DB_USERNAME,
     password: CONFIG.DB_PASSWORD,
     dialect: 'postgres',

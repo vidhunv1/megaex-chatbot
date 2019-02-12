@@ -20,7 +20,8 @@ export default class MessageQueue {
       db: CONFIG.REDIS_DATABASE,
       redis: {
         host: CONFIG.REDIS_HOST,
-        port: CONFIG.REDIS_PORT
+        port: CONFIG.REDIS_PORT,
+        auth: CONFIG.REDIS_PASSWORD
       }
     })
     this.createNotificationHandler()

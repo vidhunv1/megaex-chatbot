@@ -28,7 +28,8 @@ export default class Store {
     Bluebird.promisifyAll(Redis.Multi.prototype)
     const options = {
       host: CONFIG.REDIS_HOST,
-      port: CONFIG.REDIS_PORT ? parseInt(CONFIG.REDIS_PORT) : undefined
+      port: CONFIG.REDIS_PORT ? parseInt(CONFIG.REDIS_PORT) : undefined,
+      password: CONFIG.REDIS_PASSWORD
     }
     this.client = Redis.createClient(options)
     this.pub = Redis.createClient(options)

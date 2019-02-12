@@ -1,23 +1,23 @@
 {
   "development": {
-     "username": "postgres",
-     "password": "arfGmFvLatbBxchL",
-     "database": "postgres",
-     "host": "10.121.96.3",
-     "dialect": "postgres"
-   },
-  "test": {
-    "username": "postgres",
-    "password": "arfGmFvLatbBxchL",
+    "username": "one",
+    "password": "",
     "database": "postgres",
-    "host": "10.121.96.3",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "one",
+    "password": "",
+    "database": "postgres",
+    "host": "localhost",
     "dialect": "postgres"
   },
   "production": {
-    "username": "postgres",
-    "password": "arfGmFvLatbBxchL",
+    "username": "one",
+    "password": "",
     "database": "postgres",
-    "host": "10.121.96.3",
+    "host": "localhost",
     "dialect": "postgres"
   }
 }

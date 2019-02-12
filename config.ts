@@ -28,5 +28,6 @@ export const CONFIG = {
 
     REDIS_HOST: getEnv('REDIS_HOST'),
     REDIS_PORT: getEnv('REDIS_PORT'),
-    REDIS_DATABASE: getEnv('REDIS_DATABASE')
+    REDIS_DATABASE: getEnv('REDIS_DATABASE'),
+    REDIS_PASSWORD: getEnv('REDIS_PASSWORD')
 }
