@@ -14,13 +14,13 @@ import * as moment from 'moment'
 import User from './user'
 import Wallet, { WalletError } from '../models/wallet'
 import Transaction, { TransactionError } from './transaction'
-import RandomGenerator from '../helpers/random-generator'
+import RandomGenerator from '../lib/random-generator'
 import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken'
-import Logger from '../helpers/logger'
-import Store from '../helpers/store'
+import Logger from '../lib/logger'
+import cacheConnection from '../modules/cache'
 import CacheStore from '../cache-keys'
-import { CONFIG } from '../../config'
+import { CONFIG } from '../config'
 
 @Table({ timestamps: true, tableName: 'Transfers' })
 export default class Transfer extends Model<Transfer> {
@@ -71,6 +71,7 @@ export default class Transfer extends Model<Transfer> {
     amount: number
   ): Promise<{ paymentCode?: string | null }> {
     const logger = new Logger().getLogger()
+    const cacheClient = await cacheConnection.getCacheClient()
     const wallet: Wallet | null = await Wallet.findOne({
       attributes: ['availableBalance', 'id', 'blockedBalance'],
       where: { currencyCode: currencyCode, userId: userId }
@@ -113,10 +114,9 @@ export default class Transfer extends Model<Transfer> {
 
         return p
       })
-      const redisClient = new Store().getClient()
       const cacheKeys = new CacheStore(payment.id).getKeys()
-      await redisClient.setAsync(cacheKeys.paymentExpiryTimer.key, payment.id)
-      await redisClient.setAsync(
+      await cacheClient.setAsync(cacheKeys.paymentExpiryTimer.key, payment.id)
+      await cacheClient.setAsync(
         cacheKeys.paymentExpiryTimer.shadowKey,
         '',
         'EX',
@@ -140,6 +140,8 @@ export default class Transfer extends Model<Transfer> {
     currencyCode: string
     userId: string | number
   }> {
+    const cacheClient = await cacheConnection.getCacheClient()
+
     const p: Transfer | null = await this.getBySecret(secret)
 
     if (!p) throw new TransferError(TransferError.NOT_FOUND)
@@ -147,10 +149,7 @@ export default class Transfer extends Model<Transfer> {
     if (p.userId === claimantUserId)
       // TODO: self payment link, show details about payment link
       throw new TransferError(TransferError.SELF_CLAIM)
-    if (
-      moment().diff(p.createdAt, 'seconds') >=
-      CONFIG.PAYMENT_EXPIRY_S
-    )
+    if (moment().diff(p.createdAt, 'seconds') >= CONFIG.PAYMENT_EXPIRY_S)
       // expiry
       throw new TransferError(TransferError.EXPIRED)
 
@@ -177,9 +176,8 @@ export default class Transfer extends Model<Transfer> {
         )
 
         // unset expiry on paymentlink
-        const redisClient = new Store().getClient()
         const cacheKeys = new CacheStore(p.id).getKeys()
-        redisClient.delAsync(cacheKeys.paymentExpiryTimer.shadowKey)
+        cacheClient.delAsync(cacheKeys.paymentExpiryTimer.shadowKey)
 
         return await p.updateAttributes(
           { status: 'claimed', claimant: claimantUserId },
@@ -226,7 +224,7 @@ export default class Transfer extends Model<Transfer> {
     if (payment == null) return null
     try {
       const jwtSecret = CONFIG.JWT_SECRET
-      const decoded = JWT.verify(payment.transferSignature, jwtSecret)
+      const decoded = JWT.verify(payment.transferSignature, jwtSecret) as any
       if (decoded.userId && decoded.currencyCode && decoded.amount) {
         payment.userId = decoded.userId
         payment.currencyCode = decoded.currencyCode

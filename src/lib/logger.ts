@@ -1,4 +1,4 @@
-import { CONFIG } from '../../config'
+import { CONFIG } from '../config'
 const { createLogger, format, transports } = require('winston')
 const { combine, timestamp, printf } = format
 

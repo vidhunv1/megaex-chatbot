@@ -3,8 +3,6 @@ declare module '*.json' {
   export default value
 }
 
-declare module 'jsonwebtoken'
-
 interface KeysInterface {
   telegramUser: {
     key: string

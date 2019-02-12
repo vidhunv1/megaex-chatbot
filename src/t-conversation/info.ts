@@ -1,7 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import TelegramUser from '../models/telegram_user'
 import User from '../models/user'
-import TelegramBotApi from '../helpers/telegram-bot-api'
+import TelegramBotApi from '../lib/telegram-bot-api'
 import {
   ICallbackQuery,
   ICallbackFunction,

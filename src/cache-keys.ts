@@ -1,13 +1,11 @@
-import Store from './helpers/store'
-import { CONFIG } from '../config'
+import { CONFIG } from './config'
+import cacheConnection from './modules/cache'
 
 export default class CacheKeys {
   id: string | number
-  redisClient: any
 
   constructor(id: string | number) {
     this.id = id
-    this.redisClient = new Store().getClient()
   }
 
   static getIdFromKey(key: string) {
@@ -68,6 +66,7 @@ export default class CacheKeys {
   }
 
   async clearUserCache() {
-    await this.redisClient.delAsync(this.getKeys().telegramUser.key)
+    const cacheClient = await cacheConnection.getCacheClient()
+    await cacheClient.delAsync(this.getKeys().telegramUser.key)
   }
 }

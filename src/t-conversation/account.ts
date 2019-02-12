@@ -1,11 +1,11 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import TelegramUser from '../models/telegram_user'
-import Store from '../helpers/store'
 import CacheStore from '../cache-keys'
 import User from '../models/user'
 import PaymentDetail from '../models/payment_detail'
 import PaymentMethod from '../models/payment_method'
-import TelegramBotApi from '../helpers/telegram-bot-api'
+import TelegramBotApi from '../lib/telegram-bot-api'
+import cacheConnection from '../modules/cache'
 import * as moment from 'moment'
 
 import {
@@ -15,14 +15,13 @@ import {
   ICallbackQuery,
   ICallbackFunction
 } from './defaults'
-import { CONFIG } from '../../config'
+import { CONFIG } from '../config'
 
 const CONTEXT_SENDMESSAGE = 'CONTEXT_SENDMESSAGE'
 const CONTEXT_ADDPAYMETHOD = 'CONTEXT_ADDPAYMETHOD'
 const CONTEXT_ENTERPAYMETHOD = 'CONTEXT_ENTERPAYMETHOD'
 // let ENTER_PAYMETHOD_EXPIRY = 30
 
-const redisClient = new Store().getClient()
 const tBot = new TelegramBotApi().getBot()
 const accountConversation = async function(
   msg: TelegramBot.Message,
@@ -63,6 +62,7 @@ const accountCallback = async function(
   tUser: TelegramUser,
   query: ICallbackQuery
 ): Promise<boolean> {
+  const cacheClient = await cacheConnection.getCacheClient()
   const botUsername = CONFIG.BOT_USERNAME
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   switch (query.callbackFunction) {
@@ -99,12 +99,12 @@ const accountCallback = async function(
       )
       return true
     case 'addPayment':
-      await redisClient.hmsetAsync(
+      await cacheClient.hmsetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext.currentContext,
         CONTEXT_ADDPAYMETHOD
       )
-      redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
+      cacheClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
       const payNames: string[] = await PaymentDetail.getPaymethodNames(user)
       const keyboard: TelegramBot.KeyboardButton[][] = []
       for (let i = 0; i < payNames.length; i++) {
@@ -261,14 +261,14 @@ const accountCallback = async function(
     case 'sendMessage':
       if (!query || !query.sendMessage || !query.sendMessage.accountId)
         return true
-      await redisClient.hmsetAsync(
+      await cacheClient.hmsetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext.currentContext,
         CONTEXT_SENDMESSAGE,
         cacheKeys.tContext['SendMessage.accountId'],
         query.sendMessage.accountId
       )
-      redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
+      cacheClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
       const receiverUser: User | null = await User.findOne({
         where: { accountId: query.sendMessage.accountId }
       })
@@ -278,14 +278,14 @@ const accountCallback = async function(
       const amIBlocked: boolean =
         receiverUser != null && receiverBlockedUsers.indexOf(user.id) > -1
       if (amIBlocked) {
-        await redisClient.delAsync(cacheKeys.tContext.key)
+        await cacheClient.delAsync(cacheKeys.tContext.key)
         tBot.sendMessage(tUser.id, user.__('send_message_not_allowed'), {
           parse_mode: 'Markdown'
         })
       } else if (receiverUser) {
         const myBlockList: number[] = JSON.parse(user.blockedUsers)
         if (myBlockList.indexOf(receiverUser.id) > -1) {
-          await redisClient.delAsync(cacheKeys.tContext.key)
+          await cacheClient.delAsync(cacheKeys.tContext.key)
           tBot.sendMessage(tUser.id, user.__('send_error_user_blocked'), {
             parse_mode: 'Markdown'
           })
@@ -295,7 +295,7 @@ const accountCallback = async function(
           })
         }
       } else {
-        await redisClient.delAsync(cacheKeys.tContext.key)
+        await cacheClient.delAsync(cacheKeys.tContext.key)
         sendErrorMessage(user, tUser)
       }
       return true
@@ -359,7 +359,8 @@ const accountContext = async function(
   context: string
 ): Promise<boolean> {
   const cacheKeys = new CacheStore(tUser.id).getKeys()
-  await redisClient.hmsetAsync(
+  const cacheClient = await cacheConnection.getCacheClient()
+  await cacheClient.hmsetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,
     '',
@@ -367,11 +368,11 @@ const accountContext = async function(
     ''
   )
   if (context === CONTEXT_SENDMESSAGE) {
-    const [sendAccount] = await redisClient.hmgetAsync(
+    const [sendAccount] = await cacheClient.hmgetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext['SendMessage.accountId']
     )
-    await redisClient.delAsync(cacheKeys.tContext.key)
+    await cacheClient.delAsync(cacheKeys.tContext.key)
     const sendUser: User | null = await User.findOne({
       where: { accountId: sendAccount.toLowerCase() },
       include: [TelegramUser]
@@ -430,22 +431,22 @@ const accountContext = async function(
     showAddPayment(msg.text || '', user, tUser)
     return true
   } else if (msg.text && context === CONTEXT_ENTERPAYMETHOD) {
-    await redisClient.expireAsync(
+    await cacheClient.expireAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext.expiry
     )
     const fields: string[] = JSON.parse(
-      await redisClient.hgetAsync(
+      await cacheClient.hgetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext['EnterPayMethod.fields']
       )
     )
-    const methodName = await redisClient.hgetAsync(
+    const methodName = await cacheClient.hgetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext['EnterPayMethod.methodName']
     )
     fields.push(msg.text)
-    await redisClient.hmsetAsync(
+    await cacheClient.hmsetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext.currentContext,
       CONTEXT_ENTERPAYMETHOD,
@@ -468,7 +469,7 @@ const accountContext = async function(
         ))
     } else if (pmFields) {
       if (msg.text === user.__('confirm')) {
-        redisClient.delAsync(cacheKeys.tContext.key)
+        cacheClient.delAsync(cacheKeys.tContext.key)
         // TODO: SAVE payment method
         const paymentId = await PaymentDetail.getPaymethodID(user, methodName)
         const insert: any = {
@@ -501,7 +502,7 @@ const accountContext = async function(
             }
           ))
       } else if (msg.text === user.__('cancel')) {
-        await redisClient.delAsync(cacheKeys.tContext.key)
+        await cacheClient.delAsync(cacheKeys.tContext.key)
         tBot.sendMessage(tUser.id, user.__('context_action_cancelled'), {
           parse_mode: 'Markdown',
           reply_markup: {
@@ -542,12 +543,13 @@ async function showAddPayment(
   user: User,
   tUser: TelegramUser
 ) {
+  const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   if (
     paymethod &&
     (await PaymentDetail.isPaymethodNameExists(user, paymethod))
   ) {
-    await redisClient.hmsetAsync(
+    await cacheClient.hmsetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext.currentContext,
       CONTEXT_ENTERPAYMETHOD,
@@ -556,7 +558,7 @@ async function showAddPayment(
       cacheKeys.tContext['EnterPayMethod.fields'],
       '[]'
     )
-    await redisClient.expireAsync(
+    await cacheClient.expireAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext.expiry
     )
@@ -575,7 +577,7 @@ async function showAddPayment(
         }
       ))
   } else {
-    await redisClient.delAsync(cacheKeys.tContext.key)
+    await cacheClient.delAsync(cacheKeys.tContext.key)
     await tBot.sendMessage(tUser.id, 'Invalid input. Please try again.', {})
   }
 }
@@ -671,8 +673,9 @@ async function showAccount(
       JSON.stringify(user)
   )
   if (!msg.text || !msg.entities) return
+  const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
-  await redisClient.hmsetAsync(
+  await cacheClient.hmsetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,
     ''

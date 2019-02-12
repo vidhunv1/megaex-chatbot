@@ -61,7 +61,7 @@
   "order_status_completed": "complted",
   "order_status_stopped": "stopped",
   
-  "show_wallet_balance %s %s %s %s": "💼 *Wallet* > *%1$s*                      \n\n       *Total Balance:    %2$s %3$s*\n                     *Value:    %4$s*\n",
+  "show_wallet_balance %s %s %s %s": "💼 *Wallets* > *%1$s*                      \n\n       *Total Balance:    %2$s %3$s*\n                     *Value:    %4$s*\n",
   "unconfirmed_balance %s %s %s": "🕒 unconfirmed:    %1$s %2$s  ~_₹%3$s_\n",
   "blocked_balance %s %s %s": "        🔒 blocked:    %1$s %2$s  ~_₹%3$s_\n",
   "my_transactions": "\n 📃 Trasactions: /tx\n",

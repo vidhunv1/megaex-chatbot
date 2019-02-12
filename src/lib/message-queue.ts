@@ -3,7 +3,7 @@ import * as JWT from 'jsonwebtoken'
 
 import NotificationManager from './notification-manager'
 import Logger from './logger'
-import { CONFIG } from '../../config'
+import { CONFIG } from '../config'
 
 export default class MessageQueue {
   static instance: MessageQueue
@@ -49,7 +49,9 @@ export default class MessageQueue {
       job
         .on('complete', function(addressSignature) {
           try {
-            const decoded = JWT.verify(addressSignature, jwtSecret)
+            const decoded = JSON.stringify(
+              JWT.verify(addressSignature, jwtSecret)
+            )
             resolve(decoded)
           } catch (err) {
             if (err.name === 'JsonWebTokenError')

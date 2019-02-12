@@ -2,7 +2,7 @@ import { CronJob } from 'cron'
 import * as request from 'request-promise'
 import Market from './models/market'
 import * as moment from 'moment'
-import Logger from './helpers/logger'
+import Logger from './lib/logger'
 import Transfer from './models/transfer'
 export default class Jobs {
   jobs: CronJob[]

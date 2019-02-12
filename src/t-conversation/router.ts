@@ -1,11 +1,11 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import TelegramBotApi from '../helpers/telegram-bot-api'
+import TelegramBotApi from '../lib/telegram-bot-api'
 import TelegramUser from '../models/telegram_user'
 import User from '../models/user'
 import CacheStore from '../cache-keys'
-import Store from '../helpers/store'
-import Logger from '../helpers/logger'
-import NotificationManager from '../helpers/notification-manager'
+import Logger from '../lib/logger'
+import cacheConnection from '../modules/cache'
+import NotificationManager from '../lib/notification-manager'
 import {
   isBotCommand,
   parseCallbackQuery,
@@ -20,19 +20,17 @@ import { walletConversation, walletCallback, walletContext } from './wallet'
 import { tradeConversation, tradeCallback, tradeContext } from './trade'
 import { infoConversation, infoCallback, infoContext } from './info'
 import { accountConversation, accountCallback, accountContext } from './account'
-import I18n from '../helpers/i18n'
+import I18n from '../lib/i18n'
 import Market from '../models/market'
 export default class TMHandler {
   static instance: TMHandler
   tBot!: TelegramBot
-  redisClient: any
   logger: any
   notificationManager!: NotificationManager
 
   constructor() {
     if (TMHandler.instance) return TMHandler.instance
     this.logger = new Logger().getLogger()
-    this.redisClient = new Store().getClient()
     this.notificationManager = new NotificationManager()
 
     this.tBot = new TelegramBotApi().getBot()
@@ -83,6 +81,7 @@ export default class TMHandler {
     user: User,
     tUser: TelegramUser
   ) {
+    const cacheClient = await cacheConnection.getCacheClient()
     const isConversationHandled: boolean =
       (await walletConversation(msg, user, tUser)) ||
       (await tradeConversation(msg, user, tUser)) ||
@@ -91,7 +90,7 @@ export default class TMHandler {
 
     if (!isConversationHandled && msg.text && !msg.text.startsWith('/start')) {
       const cacheKeys = new CacheStore(tUser.id).getKeys()
-      const [currentContext] = await this.redisClient.hmgetAsync(
+      const [currentContext] = await cacheClient.hmgetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext.currentContext
       )
@@ -251,11 +250,12 @@ export default class TMHandler {
     _context: string
   ): Promise<boolean> {
     const cacheKeys = new CacheStore(tUser.id).getKeys()
+    const cacheClient = await cacheConnection.getCacheClient()
     if (
       msg.text === user.__('/cancel') ||
       msg.text === user.__('cancel_text')
     ) {
-      await this.redisClient.delAsync(cacheKeys.tContext.key)
+      await cacheClient.delAsync(cacheKeys.tContext.key)
       this.tBot.sendMessage(tUser.id, user.__('context_action_cancelled'), {
         parse_mode: 'Markdown',
         reply_markup: {

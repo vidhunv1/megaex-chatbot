@@ -11,8 +11,8 @@ import {
   AutoIncrement
 } from 'sequelize-typescript'
 import User from './user'
-import MessageQueue from '../helpers/message-queue'
-import Logger from '../helpers/logger'
+import MessageQueue from '../lib/message-queue'
+import Logger from '../lib/logger'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 
 @Table({ timestamps: true, tableName: 'Wallets' })

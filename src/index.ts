@@ -1,7 +1,10 @@
+if (!process.env.NODE_ENV) {
+  require('dotenv').config()
+}
+
 import * as TelegramBot from 'node-telegram-bot-api'
-import { Sequelize } from 'sequelize-typescript'
-import TelegramBotApi from './helpers/telegram-bot-api'
-import MessageQueue from './helpers/message-queue'
+import TelegramBotApi from './lib/telegram-bot-api'
+import MessageQueue from './lib/message-queue'
 
 import User from './models/user'
 import TelegramUser from './models/telegram_user'
@@ -9,32 +12,22 @@ import Wallet from './models/wallet'
 import Jobs from './jobs'
 
 import CacheKeys from './cache-keys'
-import Store from './helpers/store'
-import Logger from './helpers/logger'
+import Logger from './lib/logger'
 import TelegramHandler from './t-conversation/router'
-import { CONFIG } from '../config'
 
-const logger = new Logger().getLogger();
+import database from './modules/db'
+import cacheConnection from './modules/cache'
+import { expirySubscription } from './t-conversation/subscriptions'
 
-(async () => {
-  logger.info('Initializing database')
-  const sequelize = new Sequelize({
-    database: CONFIG.DB_DATABASE_NAME,
-    host: CONFIG.DB_HOST,
-    username: CONFIG.DB_USERNAME,
-    password: CONFIG.DB_PASSWORD,
-    dialect: 'postgres',
-    logging: function(sql: any, _sequelizeObject: any) {
-      logger.info(sql)
-    }
-  })
-  sequelize.addModels([__dirname + '/models/'])
+const logger = new Logger().getLogger()
 
-  // ****** Initialize Redis client ******
-  const redisStore = new Store()
-  await redisStore.initSub()
-  const redisClient: any = redisStore.getClient()
+;(async () => {
+  await database.init()
+  await cacheConnection.init()
 
+  cacheConnection.subscribeKeyExpiry(expirySubscription)
+
+  const redisClient = await cacheConnection.getCacheClient()
   const tBot = new TelegramBotApi().getBot()
   const messageQueue = new MessageQueue()
   const tMessageHandler = new TelegramHandler()
@@ -42,12 +35,12 @@ const logger = new Logger().getLogger();
   jobs.start()
 
   tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
-    console.log('Received message: ')
     try {
       const rKeys = new CacheKeys(msg.chat.id).getKeys()
       if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
         await tBot.sendChatAction(msg.chat.id, 'typing')
         const userCache = await redisClient.getAsync(rKeys.telegramUser.key)
+
         let tUser: TelegramUser, user: User
         if (userCache) {
           // user exists in redis cache
@@ -172,8 +165,8 @@ const logger = new Logger().getLogger();
   process.on('SIGINT', async function() {
     logger.info('Ending process...')
     logger.info('closing sql')
-    await sequelize.close()
-    await redisStore.close()
+    await database.close()
+    await cacheConnection.close()
     await messageQueue.close()
     await jobs.stop()
     process.exit(0)

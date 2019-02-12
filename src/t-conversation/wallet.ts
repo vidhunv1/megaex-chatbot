@@ -7,11 +7,11 @@ import Transfer, { TransferError } from '../models/transfer'
 import User from '../models/user'
 import Market from '../models/market'
 import * as QRCode from 'qrcode'
-import Store from '../helpers/store'
-import TelegramBotApi from '../helpers/telegram-bot-api'
-import Logger from '../helpers/logger'
-import NotificationManager from '../helpers/notification-manager'
-import { CONFIG } from '../../config'
+import cacheConnection from '../modules/cache'
+import TelegramBotApi from '../lib/telegram-bot-api'
+import Logger from '../lib/logger'
+import NotificationManager from '../lib/notification-manager'
+import { CONFIG } from '../config'
 
 import {
   keyboardMenu,
@@ -28,10 +28,8 @@ const CONTEXT_WALLET = 'Wallet'
 const CONTEXT_COINSEND = 'CoinSend'
 
 const logger = new Logger().getLogger()
-const redisClient = new Store().getClient()
 const tBot = new TelegramBotApi().getBot()
 const notificationManager: NotificationManager = new NotificationManager()
-
 const walletConversation = async function(
   msg: TelegramBot.Message,
   user: User,
@@ -108,6 +106,7 @@ const walletCallback = async function(
   tUser: TelegramUser,
   query: ICallbackQuery
 ): Promise<boolean> {
+  const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   switch (query.callbackFunction) {
     case ICallbackFunction.CoinSend:
@@ -127,11 +126,11 @@ const walletCallback = async function(
           where: { userId: user.id, currencyCode: query.coinSend.coin }
         })
         if (coinWallet && coinWallet.availableBalance > 0) {
-          await redisClient.expireAsync(
+          await cacheClient.expireAsync(
             cacheKeys.tContext.key,
             cacheKeys.tContext.expiry
           )
-          await redisClient.hmsetAsync(
+          await cacheClient.hmsetAsync(
             cacheKeys.tContext.key,
             cacheKeys.tContext.currentContext,
             CONTEXT_COINSEND,
@@ -178,7 +177,7 @@ const walletCallback = async function(
     case ICallbackFunction.NewAddress:
       await tBot.sendChatAction(msg.chat.id, 'typing')
       let newAddress = null
-      const [cCoin] = await redisClient.hmgetAsync(
+      const [cCoin] = await cacheClient.hmgetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext['Wallet.coin']
       )
@@ -222,7 +221,7 @@ const walletCallback = async function(
       return true
     case ICallbackFunction.CoinAddress:
       await tBot.sendChatAction(msg.chat.id, 'typing')
-      const [curCoin] = await redisClient.hmgetAsync(
+      const [curCoin] = await cacheClient.hmgetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext['Wallet.coin']
       )
@@ -255,7 +254,7 @@ const walletCallback = async function(
       } else {
         showCoin = Market.getCryptoCurrencies()[0].code
       }
-      await redisClient.hmsetAsync(
+      await cacheClient.hmsetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext['Wallet.coin'],
         showCoin
@@ -287,8 +286,9 @@ async function sendCurrentAddress(
   tUser: TelegramUser,
   deleteMessageId: number | null = null
 ) {
+  const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
-  const [currentCoin] = await redisClient.hmgetAsync(
+  const [currentCoin] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Wallet.coin']
   )
@@ -342,9 +342,10 @@ async function handleCoinSend(
   user: User,
   tUser: TelegramUser
 ) {
+  const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   let coin: string, isInputContext
-  [coin, isInputContext] = await redisClient.hmgetAsync(
+  ;[coin, isInputContext] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Wallet.coin'],
     cacheKeys.tContext['CoinSend.isInputAmount']
@@ -372,12 +373,12 @@ async function handleCoinSend(
       })
       if (wallet && wallet.availableBalance) {
         if (amountToPay <= wallet.availableBalance && amountToPay > 0) {
-          await redisClient.hmsetAsync(
+          await cacheClient.hmsetAsync(
             cacheKeys.tContext.key,
             cacheKeys.tContext['CoinSend.amount'],
             amountToPay
           )
-          redisClient.expireAsync(
+          cacheClient.expireAsync(
             cacheKeys.tContext.key,
             cacheKeys.tContext.expiry
           )
@@ -412,25 +413,25 @@ async function handleCoinSend(
               }
             }
           )
-          await redisClient.hdelAsync(
+          await cacheClient.hdelAsync(
             cacheKeys.tContext.key,
             cacheKeys.tContext.currentContext
           )
         }
       }
-      await redisClient.hdelAsync(
+      await cacheClient.hdelAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext['CoinSend.isInputAmount']
       )
     } else {
       let amount: number
       amount = parseFloat(
-        await redisClient.hmgetAsync(
+        await cacheClient.hmgetAsync(
           cacheKeys.tContext.key,
           cacheKeys.tContext['CoinSend.amount']
         )
       )
-      await redisClient.delAsync(cacheKeys.tContext.key)
+      await cacheClient.delAsync(cacheKeys.tContext.key)
       if (msg.text === user.__('create')) {
         try {
           const { paymentCode } = await Transfer.newPayment(
@@ -441,10 +442,7 @@ async function handleCoinSend(
           if (!isNaN(amount) && amount > 0) {
             await tBot.sendMessage(
               tUser.id,
-              user.__(
-                'send_payment_created %d',
-                CONFIG.PAYMENT_EXPIRY_S / 60
-              ),
+              user.__('send_payment_created %d', CONFIG.PAYMENT_EXPIRY_S / 60),
               {
                 parse_mode: 'Markdown',
                 reply_markup: {
@@ -593,16 +591,17 @@ async function handleWallet(
   user: User,
   tUser: TelegramUser
 ) {
+  const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   let currentContext, currentCoin, currentPage
-  [currentContext, currentCoin] = await redisClient.hmgetAsync(
+  ;[currentContext, currentCoin] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,
     cacheKeys.tContext['Wallet.coin']
   )
   if (!currentCoin) {
     currentCoin = Market.getCryptoCurrencies()[0].code
-    await redisClient.hmsetAsync(
+    await cacheClient.hmsetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext['Wallet.coin'],
       currentCoin
@@ -757,7 +756,7 @@ async function handleWallet(
     })
   }
   if (!currentContext || currentContext !== CONTEXT_WALLET) {
-    redisClient.hmsetAsync(
+    cacheClient.hmsetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext.currentContext,
       CONTEXT_WALLET

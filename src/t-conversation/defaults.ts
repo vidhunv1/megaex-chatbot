@@ -1,6 +1,6 @@
 import User from '../models/user'
 import TelegramUser from '../models/telegram_user'
-import TelegramBotApi from '../helpers/telegram-bot-api'
+import TelegramBotApi from '../lib/telegram-bot-api'
 import Market from '../models/market'
 import * as TelegramBot from 'node-telegram-bot-api'
 

@@ -14,7 +14,7 @@ import TelegramUser from './telegram_user'
 import Wallet from './wallet'
 import Transaction from './transaction'
 import PaymentMethod from './payment_method'
-import I18n from '../helpers/i18n'
+import I18n from '../lib/i18n'
 
 @Table({ timestamps: true, tableName: 'Users' })
 export default class User extends Model<User> {

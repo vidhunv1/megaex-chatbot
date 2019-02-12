@@ -12,7 +12,7 @@ import {
 } from 'sequelize-typescript'
 import User from './user'
 import { Transaction as SequelizeTransacion } from 'sequelize'
-import Logger from '../helpers/logger'
+import Logger from '../lib/logger'
 
 @Table({ timestamps: true, tableName: 'Transactions' })
 export default class Transaction extends Model<Transaction> {

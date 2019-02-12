@@ -1,11 +1,11 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import TelegramUser from '../models/telegram_user'
 import User from '../models/user'
-import Store from '../helpers/store'
 import PaymentMethods from '../models/payment_method'
 import Market from '../models/market'
-import Logger from '../helpers/logger'
-import TelegramBotApi from '../helpers/telegram-bot-api'
+import Logger from '../lib/logger'
+import cacheConnection from '../modules/cache'
+import TelegramBotApi from '../lib/telegram-bot-api'
 import {
   stringifyCallbackQuery,
   ICallbackFunction,
@@ -17,11 +17,10 @@ import CacheStore from '../cache-keys'
 import Wallet from '../models/wallet'
 import Order from '../models/order'
 import PaymentDetail from '../models/payment_detail'
-import { CONFIG } from '../../config'
+import { CONFIG } from '../config'
 
 const logger = new Logger().getLogger()
 const tBot = new TelegramBotApi().getBot()
-const redisClient = new Store().getClient()
 
 const CONTEXT_TRADE_BUY = 'TRADE_BUY'
 const CONTEXT_TRADE_SELL = 'TRADE_SELL'
@@ -35,6 +34,7 @@ const tradeConversation = async function(
   tUser: TelegramUser
 ): Promise<boolean> {
   const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheClient = await cacheConnection.getCacheClient()
   if (msg && msg.text === user.__('menu_buy_sell')) {
     const rate = await Market.getValue('btc', user.currencyCode)
     let localizedRate = 'N/A'
@@ -112,8 +112,8 @@ const tradeConversation = async function(
 
     return true
   } else if (msg && msg.text === user.__('sell_btc_order_create')) {
-    await redisClient.delAsync(cacheKeys.tContext.key)
-    await redisClient.hmsetAsync(
+    await cacheClient.delAsync(cacheKeys.tContext.key)
+    await cacheClient.hmsetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext.currentContext,
       CONTEXT_TRADE_SELL
@@ -141,7 +141,7 @@ const tradeConversation = async function(
             }
           }
         )
-        redisClient.expireAsync(
+        cacheClient.expireAsync(
           cacheKeys.tContext.key,
           cacheKeys.tContext.expiry
         )
@@ -168,15 +168,15 @@ const tradeConversation = async function(
 
     return true
   } else if (msg && msg.text === user.__('buy_btc_order_create')) {
-    await redisClient.delAsync(cacheKeys.tContext.key)
-    await redisClient.hmsetAsync(
+    await cacheClient.delAsync(cacheKeys.tContext.key)
+    await cacheClient.hmsetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext.currentContext,
       CONTEXT_TRADE_BUY,
       cacheKeys.tContext['Trade.isParsePaymethod'],
       1
     )
-    redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
+    cacheClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
 
     // Choose required payment method:
     const payNames: string[] = await PaymentDetail.getPaymethodNames(user)
@@ -209,6 +209,7 @@ const tradeCallback = async function(
   tUser: TelegramUser,
   query: ICallbackQuery
 ): Promise<boolean> {
+  const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   switch (query.callbackFunction) {
     case ICallbackFunction.Buy:
@@ -220,8 +221,8 @@ const tradeCallback = async function(
       return true
 
     case ICallbackFunction.CreateOrder:
-      await redisClient.delAsync(cacheKeys.tContext.key)
-      redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
+      await cacheClient.delAsync(cacheKeys.tContext.key)
+      cacheClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
       await tBot.sendMessage(tUser.id, user.__('create_order_message'), {
         parse_mode: 'Markdown',
         reply_markup: {
@@ -253,7 +254,7 @@ const tradeCallback = async function(
 
     case ICallbackFunction.OrderEditAmount:
       if (query.orderEditAmount && query.orderEditAmount.orderId)
-        await redisClient.hmsetAsync(
+        await cacheClient.hmsetAsync(
           cacheKeys.tContext.key,
           cacheKeys.tContext.currentContext,
           CONTEXT_TRADE_EDIT_AMOUNT,
@@ -263,12 +264,12 @@ const tradeCallback = async function(
       await tBot.sendMessage(tUser.id, user.__('btc_edit_amount'), {
         parse_mode: 'Markdown'
       })
-      redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
+      cacheClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
       return true
 
     case ICallbackFunction.OrderEditRate:
       if (query.orderEditRate && query.orderEditRate.orderId)
-        await redisClient.hmsetAsync(
+        await cacheClient.hmsetAsync(
           cacheKeys.tContext.key,
           cacheKeys.tContext.currentContext,
           CONTEXT_TRADE_EDIT_RATE,
@@ -287,12 +288,12 @@ const tradeCallback = async function(
           parse_mode: 'Markdown'
         }
       )
-      redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
+      cacheClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
       return true
 
     case ICallbackFunction.OrderEditTerms:
       if (query.orderEditTerms && query.orderEditTerms.orderId)
-        await redisClient.hmsetAsync(
+        await cacheClient.hmsetAsync(
           cacheKeys.tContext.key,
           cacheKeys.tContext.currentContext,
           CONTEXT_TRADE_EDIT_TERMS,
@@ -302,7 +303,7 @@ const tradeCallback = async function(
       await tBot.sendMessage(tUser.id, user.__('btc_edit_terms'), {
         parse_mode: 'Markdown'
       })
-      redisClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
+      cacheClient.expireAsync(cacheKeys.tContext.key, cacheKeys.tContext.expiry)
       return true
 
     case ICallbackFunction.OrderSetActive:
@@ -318,14 +319,15 @@ const tradeContext = async function(
   tUser: TelegramUser,
   context: string
 ): Promise<boolean> {
+  const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
-  const [isInputPrice] = await redisClient.hmgetAsync(
+  const [isInputPrice] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Trade.isInputPrice']
   )
 
   if (context === CONTEXT_TRADE_BUY && msg.text) {
-    const [isParsePaymethod] = await redisClient.hmgetAsync(
+    const [isParsePaymethod] = await cacheClient.hmgetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext['Trade.isParsePaymethod']
     )
@@ -338,7 +340,7 @@ const tradeContext = async function(
         tUser
       )
     } else if (isParsePaymethod) {
-      await redisClient.hdelAsync(
+      await cacheClient.hdelAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext['Trade.isParsePaymethod']
       )
@@ -357,7 +359,7 @@ const tradeContext = async function(
           }
         )
       } else {
-        await redisClient.delAsync(cacheKeys.tContext.key)
+        await cacheClient.delAsync(cacheKeys.tContext.key)
         await tBot.sendMessage(
           msg.chat.id,
           user.__('invalid_input', user.currencyCode),
@@ -397,11 +399,11 @@ const tradeContext = async function(
         { parse_mode: 'markdown' }
       )
     } else {
-      const [orderId] = await redisClient.hmgetAsync(
+      const [orderId] = await cacheClient.hmgetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext['Trade.editOrderId']
       )
-      redisClient.delAsync(cacheKeys.tContext.key)
+      cacheClient.delAsync(cacheKeys.tContext.key)
       const [updatedRows] = await Order.update(
         { maxAmount, minAmount },
         { where: { id: orderId } }
@@ -421,7 +423,7 @@ const tradeContext = async function(
 
     return true
   } else if (context === CONTEXT_TRADE_EDIT_RATE && msg.text) {
-    const [orderId] = await redisClient.hmgetAsync(
+    const [orderId] = await cacheClient.hmgetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext['Trade.editOrderId']
     )
@@ -429,11 +431,11 @@ const tradeContext = async function(
     if (msg.text.indexOf('%') > -1) {
       const margin = parseFloat(msg.text)
       if (margin >= 0) {
-        [updatedRows] = await Order.update(
+        ;[updatedRows] = await Order.update(
           { marginPercentage: margin, price: null },
           { where: { id: orderId } }
         )
-        redisClient.delAsync(cacheKeys.tContext.key)
+        cacheClient.delAsync(cacheKeys.tContext.key)
       } else {
         await tBot.sendMessage(tUser.id, user.__('invalid_input'), {
           parse_mode: 'markdown'
@@ -442,17 +444,17 @@ const tradeContext = async function(
     } else {
       const rate = parseInt(msg.text)
       if (rate >= 0) {
-        [updatedRows] = await Order.update(
+        ;[updatedRows] = await Order.update(
           { price: rate },
           { where: { id: orderId } }
         )
-        redisClient.delAsync(cacheKeys.tContext.key)
+        cacheClient.delAsync(cacheKeys.tContext.key)
       } else {
         await tBot.sendMessage(tUser.id, user.__('invalid_input'), {
           parse_mode: 'markdown'
         })
       }
-      redisClient.delAsync(cacheKeys.tContext.key)
+      cacheClient.delAsync(cacheKeys.tContext.key)
     }
     if (updatedRows === 1) {
       const order = await Order.findOne({ where: { id: orderId } })
@@ -477,6 +479,7 @@ async function handleOrderCreate(
   tUser: TelegramUser,
   type: 'buy' | 'sell'
 ) {
+  const cacheClient = await cacheConnection.getCacheClient()
   if (!msg) return
   const cacheKeys = new CacheStore(tUser.id).getKeys()
 
@@ -491,7 +494,7 @@ async function handleOrderCreate(
         { parse_mode: 'markdown' }
       )
     } else {
-      await redisClient.hmsetAsync(
+      await cacheClient.hmsetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext['Trade.maxAmount'],
         maxAmount,
@@ -547,7 +550,7 @@ async function handleOrderCreate(
       if (wallet) {
         if (maxAmount > wallet.availableBalance) {
           // insufficient funds for sell order
-          redisClient.delAsync(cacheKeys.tContext.key)
+          cacheClient.delAsync(cacheKeys.tContext.key)
 
           tBot.sendMessage(
             tUser.id,
@@ -564,7 +567,7 @@ async function handleOrderCreate(
             }
           )
         } else {
-          await redisClient.hmsetAsync(
+          await cacheClient.hmsetAsync(
             cacheKeys.tContext.key,
             cacheKeys.tContext['Trade.minAmount'],
             minAmount,
@@ -612,13 +615,14 @@ async function handleOrderCreateInputPrice(
   tUser: TelegramUser
 ) {
   const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheClient = await cacheConnection.getCacheClient()
   if (fiatPrice && fiatPrice !== NaN && fiatPrice > 0) {
-    const [maxAmount, minAmount] = await redisClient.hmgetAsync(
+    const [maxAmount, minAmount] = await cacheClient.hmgetAsync(
       cacheKeys.tContext.key,
       cacheKeys.tContext['Trade.maxAmount'],
       cacheKeys.tContext['Trade.minAmount']
     )
-    redisClient.delAsync(cacheKeys.tContext.key)
+    cacheClient.delAsync(cacheKeys.tContext.key)
     if (orderType === 'buy') {
       let order = new Order()
       const price = priceType === 'market' ? null : fiatPrice
@@ -754,10 +758,7 @@ async function showOrder(
         priceText,
         order.paymentMethodFilters,
         user.__('order_status_' + order.status),
-        'https://t.me/' +
-          CONFIG.BOT_USERNAME +
-          '/start=order-' +
-          order.id
+        'https://t.me/' + CONFIG.BOT_USERNAME + '/start=order-' + order.id
       )
     } else {
       message = user.__(
@@ -770,10 +771,7 @@ async function showOrder(
         order.marginPercentage,
         order.paymentMethodFilters,
         user.__('order_status_' + order.status),
-        'https://t.me/' +
-          CONFIG.BOT_USERNAME +
-          '/start=order-' +
-          order.id,
+        'https://t.me/' + CONFIG.BOT_USERNAME + '/start=order-' + order.id,
         '%'
       )
     }

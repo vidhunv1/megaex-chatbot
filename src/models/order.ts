@@ -13,7 +13,7 @@ import {
 } from 'sequelize-typescript'
 import User from './user'
 import Transaction from './transaction'
-import Logger from '../helpers/logger'
+import Logger from '../lib/logger'
 import Wallet from './wallet'
 
 @Table({ timestamps: true, tableName: 'Orders' })
