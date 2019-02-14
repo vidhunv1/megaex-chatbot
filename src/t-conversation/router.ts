@@ -1,7 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import TelegramBotApi from '../lib/telegram-bot-api'
-import TelegramUser from '../models/telegram_user'
-import User from '../models/user'
+import telegramHook from '../modules/telegram-hook'
 import CacheStore from '../cache-keys'
 import Logger from '../lib/logger'
 import cacheConnection from '../modules/cache'
@@ -21,7 +19,7 @@ import { tradeConversation, tradeCallback, tradeContext } from './trade'
 import { infoConversation, infoCallback, infoContext } from './info'
 import { accountConversation, accountCallback, accountContext } from './account'
 import I18n from '../lib/i18n'
-import Market from '../models/market'
+import { Market, User, TelegramUser } from '../models'
 export default class TMHandler {
   static instance: TMHandler
   tBot!: TelegramBot
@@ -33,7 +31,7 @@ export default class TMHandler {
     this.logger = new Logger().getLogger()
     this.notificationManager = new NotificationManager()
 
-    this.tBot = new TelegramBotApi().getBot()
+    this.tBot = telegramHook.getBot()
     TMHandler.instance = this
   }
 

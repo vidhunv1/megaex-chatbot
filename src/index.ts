@@ -1,34 +1,40 @@
 if (!process.env.NODE_ENV) {
+  console.log('Using environment variable from .env')
   require('dotenv').config()
+} else {
+  console.log('Using system environment variables')
 }
 
+import database from './modules/db'
+import cacheConnection from './modules/cache'
+
 import * as TelegramBot from 'node-telegram-bot-api'
-import TelegramBotApi from './lib/telegram-bot-api'
+import TelegramHook from './modules/telegram-hook'
 import MessageQueue from './lib/message-queue'
 
-import User from './models/user'
-import TelegramUser from './models/telegram_user'
-import Wallet from './models/wallet'
+import { Wallet, TelegramUser, User } from './models'
 import Jobs from './jobs'
 
 import CacheKeys from './cache-keys'
 import Logger from './lib/logger'
 import TelegramHandler from './t-conversation/router'
 
-import database from './modules/db'
-import cacheConnection from './modules/cache'
 import { expirySubscription } from './t-conversation/subscriptions'
 
 const logger = new Logger().getLogger()
 
-;(async () => {
+; (async () => {
+  // Postgres Init
   await database.init()
+
+  // Redis Init
   await cacheConnection.init()
-
   cacheConnection.subscribeKeyExpiry(expirySubscription)
-
   const redisClient = await cacheConnection.getCacheClient()
-  const tBot = new TelegramBotApi().getBot()
+
+  // Telegram hook
+  const tBot = TelegramHook.getBot()
+
   const messageQueue = new MessageQueue()
   const tMessageHandler = new TelegramHandler()
   const jobs = new Jobs()
@@ -37,8 +43,8 @@ const logger = new Logger().getLogger()
   tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
     try {
       const rKeys = new CacheKeys(msg.chat.id).getKeys()
+
       if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
-        await tBot.sendChatAction(msg.chat.id, 'typing')
         const userCache = await redisClient.getAsync(rKeys.telegramUser.key)
 
         let tUser: TelegramUser, user: User
@@ -47,7 +53,6 @@ const logger = new Logger().getLogger()
           const cache: TelegramUser = JSON.parse(userCache)
           tUser = new TelegramUser(cache)
           user = new User(cache.user)
-          console.log('UserCache: ' + JSON.stringify(cache))
         } else {
           // no user data available in cache
           // check if user exists

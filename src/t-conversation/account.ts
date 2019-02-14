@@ -1,10 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import TelegramUser from '../models/telegram_user'
 import CacheStore from '../cache-keys'
-import User from '../models/user'
-import PaymentDetail from '../models/payment_detail'
-import PaymentMethod from '../models/payment_method'
-import TelegramBotApi from '../lib/telegram-bot-api'
+import { PaymentMethod, PaymentDetail, User, TelegramUser } from '../models'
+import telegramHook from '../modules/telegram-hook'
 import cacheConnection from '../modules/cache'
 import * as moment from 'moment'
 
@@ -22,7 +19,7 @@ const CONTEXT_ADDPAYMETHOD = 'CONTEXT_ADDPAYMETHOD'
 const CONTEXT_ENTERPAYMETHOD = 'CONTEXT_ENTERPAYMETHOD'
 // let ENTER_PAYMETHOD_EXPIRY = 30
 
-const tBot = new TelegramBotApi().getBot()
+const tBot = telegramHook.getBot()
 const accountConversation = async function(
   msg: TelegramBot.Message,
   user: User,

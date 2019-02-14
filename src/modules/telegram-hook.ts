@@ -1,16 +1,16 @@
-import * as TelegramBot from 'node-telegram-bot-api'
+import * as NodeTelegramBot from 'node-telegram-bot-api'
 import { CONFIG } from '../config'
 
-export default class TelegramBotApi {
-  static instance: TelegramBotApi
-  bot!: TelegramBot
+export class TelegramHook {
+  static instance: TelegramHook
+  bot!: NodeTelegramBot
 
   constructor() {
-    if (TelegramBotApi.instance) {
-      return TelegramBotApi.instance
+    if (TelegramHook.instance) {
+      return TelegramHook.instance
     }
 
-    this.bot = new TelegramBot(CONFIG.TELEGRAM_ACCESS_TOKEN, {
+    this.bot = new NodeTelegramBot(CONFIG.TELEGRAM_ACCESS_TOKEN, {
       webHook: {
         // @ts-ignore
         port: CONFIG.WEBHOOK_PORT,
@@ -26,10 +26,12 @@ export default class TelegramBotApi {
       }`
     )
 
-    TelegramBotApi.instance = this
+    TelegramHook.instance = this
   }
 
   getBot() {
     return this.bot
   }
 }
+
+export default new TelegramHook()

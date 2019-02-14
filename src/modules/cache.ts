@@ -38,26 +38,35 @@ export class Cache {
     this.pub = await Redis.createClient(options)
     this.sub = await Redis.createClient(options)
 
-    this.client.select(CONFIG.REDIS_DATABASE)
-    this.pub.select(CONFIG.REDIS_DATABASE)
-    this.sub.select(CONFIG.REDIS_DATABASE)
+    await this.client.select(CONFIG.REDIS_DATABASE)
+    await this.pub.select(CONFIG.REDIS_DATABASE)
+    await this.sub.select(CONFIG.REDIS_DATABASE)
   }
 
   subscribeKeyExpiry(callback: (msg: string) => any) {
-    logger.info('Initializing expiry subscriptions...')
-
     if (!this.isInitialized()) {
       throw Error('Error subscribing to redis pub/sub. pub/sub not initialized')
     } else {
+      logger.info('Initializing expiry subscriptions...')
+
       const sub = this.sub
-      this.pub!.sendCommand(
+      this.pub.sendCommand(
         'config',
         ['set', 'notify-keyspace-events', 'Ex'],
-        function() {
-          logger.info('Activated expiry subsciptions')
-          sub!.on('message', (channel, message) => {
-            logger.info('Received expiry message: ' + channel + ', ' + message)
-            callback(message)
+        async function() {
+          const expired_subKey =
+            '__keyevent@' + CONFIG.REDIS_DATABASE + '__:expired'
+          await sub.subscribe(expired_subKey, () => {
+            logger.info(
+              'Activated expiry pub subsciptions: notify-kespace-events(Ex) - Keyevent-expiry'
+            )
+
+            sub!.on('message', async function(channel, message) {
+              logger.info(
+                'Received expiry message: ' + channel + ', ' + message
+              )
+              callback(message)
+            })
           })
         }
       )
@@ -65,6 +74,8 @@ export class Cache {
   }
 
   unsubscribeKeyExpiry() {
+    logger.info('Unsubscribe expiry key')
+
     if (this.pub) {
       this.pub!.sendCommand(
         'config',
@@ -76,6 +87,7 @@ export class Cache {
 
   async close() {
     logger.info('Closing redis connection')
+
     if (this.isInitialized()) {
       await this.unsubscribeKeyExpiry()
 

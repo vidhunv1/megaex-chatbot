@@ -1,7 +1,5 @@
-import Transaction from '../models/transaction'
-import TelegramUser from '../models/telegram_user'
-import User from '../models/user'
-import TelegramBotApi from './telegram-bot-api'
+import { User, Transaction, TelegramUser } from '../models'
+import telegramHook from '../modules/telegram-hook'
 import Logger from './logger'
 
 export default class NotificationManager {
@@ -21,7 +19,7 @@ export default class NotificationManager {
   }
 
   async sendNotification(notificationType: string, data: any) {
-    const tBot = new TelegramBotApi().getBot()
+    const tBot = telegramHook.getBot()
     let user
     switch (notificationType) {
       case NotificationManager.NOTIF.NEW_TRANSACTION:

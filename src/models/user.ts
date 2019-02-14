@@ -10,14 +10,11 @@ import {
   Default,
   HasMany
 } from 'sequelize-typescript'
-import TelegramUser from './telegram_user'
-import Wallet from './wallet'
-import Transaction from './transaction'
-import PaymentMethod from './payment_method'
+import { TelegramUser, Wallet, Transaction, PaymentMethod } from './'
 import I18n from '../lib/i18n'
 
 @Table({ timestamps: true, tableName: 'Users' })
-export default class User extends Model<User> {
+export class User extends Model<User> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -89,3 +86,5 @@ export default class User extends Model<User> {
     })
   }
 }
+
+export default User

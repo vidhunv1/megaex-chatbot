@@ -9,7 +9,7 @@ import {
 } from 'sequelize-typescript'
 
 @Table({ timestamps: true, tableName: 'Markets' })
-export default class Market extends Model<Market> {
+export class Market extends Model<Market> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -302,3 +302,5 @@ export default class Market extends Model<Market> {
     ]
   }
 }
+
+export default Market

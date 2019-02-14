@@ -10,13 +10,13 @@ import {
   Default,
   AutoIncrement
 } from 'sequelize-typescript'
-import User from './user'
+import { User } from './user'
 import MessageQueue from '../lib/message-queue'
 import Logger from '../lib/logger'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 
 @Table({ timestamps: true, tableName: 'Wallets' })
-export default class Wallet extends Model<Wallet> {
+export class Wallet extends Model<Wallet> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -183,3 +183,5 @@ export class WalletError extends Error {
     this.status = status
   }
 }
+
+export default Wallet

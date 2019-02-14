@@ -11,9 +11,7 @@ import {
   AutoIncrement
 } from 'sequelize-typescript'
 import * as moment from 'moment'
-import User from './user'
-import Wallet, { WalletError } from '../models/wallet'
-import Transaction, { TransactionError } from './transaction'
+import { User, Wallet, Transaction } from './'
 import RandomGenerator from '../lib/random-generator'
 import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken'
@@ -21,9 +19,17 @@ import Logger from '../lib/logger'
 import cacheConnection from '../modules/cache'
 import CacheStore from '../cache-keys'
 import { CONFIG } from '../config'
+import { TransactionError } from './transaction'
+import { WalletError } from './wallet'
+
+enum TransferStatus {
+  PENDING = 'pending',
+  CLAIMED = 'claimed',
+  EXPIRED = 'expired'
+}
 
 @Table({ timestamps: true, tableName: 'Transfers' })
-export default class Transfer extends Model<Transfer> {
+export class Transfer extends Model<Transfer> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -47,7 +53,7 @@ export default class Transfer extends Model<Transfer> {
   currencyCode!: string
 
   @Column
-  status!: 'pending' | 'claimed' | 'expired'
+  status!: TransferStatus
 
   @Column(DataType.FLOAT)
   amount!: number
@@ -106,7 +112,7 @@ export default class Transfer extends Model<Transfer> {
           userId: userId,
           currencyCode: currencyCode,
           amount: amount,
-          status: 'pending',
+          status: TransferStatus.PENDING,
           transferSignature: paySign
         })
         await p.save({ transaction: t })
@@ -305,3 +311,5 @@ export class TransferError extends Error {
     this.status = status
   }
 }
+
+export default Transfer

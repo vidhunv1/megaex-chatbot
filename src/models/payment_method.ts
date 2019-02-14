@@ -9,11 +9,10 @@ import {
   DataType,
   BelongsTo
 } from 'sequelize-typescript'
-import User from './user'
-import PaymentDetail from './payment_detail'
+import { User, PaymentDetail } from './'
 
 @Table({ timestamps: true, tableName: 'PaymentMethods', paranoid: true })
-export default class PaymentMethod extends Model<PaymentMethod> {
+export class PaymentMethod extends Model<PaymentMethod> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -49,3 +48,5 @@ export default class PaymentMethod extends Model<PaymentMethod> {
   @Column(DataType.STRING)
   field4!: string
 }
+
+export default PaymentMethod

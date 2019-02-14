@@ -7,10 +7,10 @@ import {
   AutoIncrement,
   Default
 } from 'sequelize-typescript'
-import User from './user'
+import { User } from './'
 
 @Table({ timestamps: true, tableName: 'PaymentDetails' })
-export default class PaymentDetail extends Model<PaymentDetail> {
+export class PaymentDetail extends Model<PaymentDetail> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -107,3 +107,5 @@ export default class PaymentDetail extends Model<PaymentDetail> {
     return null
   }
 }
+
+export default PaymentDetail

@@ -1,14 +1,18 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import CacheStore from '../cache-keys'
-import Wallet from '../models/wallet'
-import TelegramUser from '../models/telegram_user'
+import {
+  Wallet,
+  TelegramUser,
+  Transfer,
+  User,
+  Market,
+  TransferError,
+  Transaction
+} from '../models'
 import * as moment from 'moment'
-import Transfer, { TransferError } from '../models/transfer'
-import User from '../models/user'
-import Market from '../models/market'
 import * as QRCode from 'qrcode'
 import cacheConnection from '../modules/cache'
-import TelegramBotApi from '../lib/telegram-bot-api'
+import telegramHook from '../modules/telegram-hook'
 import Logger from '../lib/logger'
 import NotificationManager from '../lib/notification-manager'
 import { CONFIG } from '../config'
@@ -22,13 +26,12 @@ import {
   ICallbackQuery,
   ICallbackFunction
 } from './defaults'
-import Transaction from '../models/transaction'
 
 const CONTEXT_WALLET = 'Wallet'
 const CONTEXT_COINSEND = 'CoinSend'
 
 const logger = new Logger().getLogger()
-const tBot = new TelegramBotApi().getBot()
+const tBot = telegramHook.getBot()
 const notificationManager: NotificationManager = new NotificationManager()
 const walletConversation = async function(
   msg: TelegramBot.Message,

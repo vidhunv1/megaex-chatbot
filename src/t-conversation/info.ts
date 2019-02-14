@@ -1,14 +1,13 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import TelegramUser from '../models/telegram_user'
-import User from '../models/user'
-import TelegramBotApi from '../lib/telegram-bot-api'
+import { TelegramUser, User } from '../models'
+import telegramHook from '../modules/telegram-hook'
 import {
   ICallbackQuery,
   ICallbackFunction,
   stringifyCallbackQuery
 } from './defaults'
 
-const tBot = new TelegramBotApi().getBot()
+const tBot = telegramHook.getBot()
 const infoConversation = async function(
   msg: TelegramBot.Message | null,
   user: User,

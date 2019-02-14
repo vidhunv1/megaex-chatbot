@@ -1,9 +1,9 @@
 import { CronJob } from 'cron'
 import * as request from 'request-promise'
-import Market from './models/market'
+import { Market } from './models/market'
 import * as moment from 'moment'
 import Logger from './lib/logger'
-import Transfer from './models/transfer'
+import { Transfer } from './models/transfer'
 export default class Jobs {
   jobs: CronJob[]
   logger: any

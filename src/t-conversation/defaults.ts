@@ -1,7 +1,5 @@
-import User from '../models/user'
-import TelegramUser from '../models/telegram_user'
-import TelegramBotApi from '../lib/telegram-bot-api'
-import Market from '../models/market'
+import telegramHook from '../modules/telegram-hook'
+import { Market, User, TelegramUser } from '../models'
 import * as TelegramBot from 'node-telegram-bot-api'
 
 enum ICallbackFunction {
@@ -105,7 +103,7 @@ interface ICallbackQuery {
   createOrder?: {}
 }
 
-const tBot = new TelegramBotApi().getBot()
+const tBot = telegramHook.getBot()
 const keyboardMenu = (user: User) => {
   return [
     [{ text: user.__('menu_wallet') }, { text: user.__('menu_buy_sell') }],

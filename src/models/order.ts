@@ -11,13 +11,11 @@ import {
   Default,
   Sequelize
 } from 'sequelize-typescript'
-import User from './user'
-import Transaction from './transaction'
+import { User, Transaction, Wallet } from './'
 import Logger from '../lib/logger'
-import Wallet from './wallet'
 
 @Table({ timestamps: true, tableName: 'Orders' })
-export default class Order extends Model<Order> {
+export class Order extends Model<Order> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -176,3 +174,5 @@ export class OrderError extends Error {
     this.status = status
   }
 }
+
+export default Order

@@ -1,19 +1,17 @@
 import CacheKeys from '../../cache-keys'
 import NotificationManager from '../../lib/notification-manager'
-import TelegramBotApi from '../../lib/telegram-bot-api'
+import telegramHook from '../../modules/telegram-hook'
 import Logger from '../../lib/logger'
 import cacheConnection from '../../modules/cache'
 import { keyboardMenu } from '../../t-conversation/defaults'
 
-import TelegramUser from '../../models/telegram_user'
-import User from '../../models/user'
-import Transfer from '../../models/transfer'
+import { TelegramUser, User, Transfer } from '../../models'
 
 export const expirySubscription = async (msg: string) => {
   const cacheClient = await cacheConnection.getCacheClient()
   const notificationManager = new NotificationManager()
   const logger: any = new Logger().getLogger()
-  const tBot = new TelegramBotApi().getBot()
+  const tBot = telegramHook.getBot()
 
   if (
     CacheKeys.isKey(msg, new CacheKeys(1).getKeys().messageCounter.shadowKey)

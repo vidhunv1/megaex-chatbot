@@ -10,12 +10,12 @@ import {
   AllowNull,
   AutoIncrement
 } from 'sequelize-typescript'
-import User from './user'
+import { User } from './'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 import Logger from '../lib/logger'
 
 @Table({ timestamps: true, tableName: 'Transactions' })
-export default class Transaction extends Model<Transaction> {
+export class Transaction extends Model<Transaction> {
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -132,3 +132,5 @@ export class TransactionError extends Error {
     this.status = status
   }
 }
+
+export default Transaction

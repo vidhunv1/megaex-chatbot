@@ -1,11 +1,16 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import TelegramUser from '../models/telegram_user'
-import User from '../models/user'
-import PaymentMethods from '../models/payment_method'
-import Market from '../models/market'
+import {
+  TelegramUser,
+  User,
+  PaymentMethod,
+  PaymentDetail,
+  Market,
+  Wallet,
+  Order
+} from '../models'
 import Logger from '../lib/logger'
 import cacheConnection from '../modules/cache'
-import TelegramBotApi from '../lib/telegram-bot-api'
+import telegramHook from '../modules/telegram-hook'
 import {
   stringifyCallbackQuery,
   ICallbackFunction,
@@ -14,13 +19,10 @@ import {
   parseRange
 } from './defaults'
 import CacheStore from '../cache-keys'
-import Wallet from '../models/wallet'
-import Order from '../models/order'
-import PaymentDetail from '../models/payment_detail'
 import { CONFIG } from '../config'
 
 const logger = new Logger().getLogger()
-const tBot = new TelegramBotApi().getBot()
+const tBot = telegramHook.getBot()
 
 const CONTEXT_TRADE_BUY = 'TRADE_BUY'
 const CONTEXT_TRADE_SELL = 'TRADE_SELL'
@@ -118,7 +120,7 @@ const tradeConversation = async function(
       cacheKeys.tContext.currentContext,
       CONTEXT_TRADE_SELL
     )
-    const pm = await PaymentMethods.findOne({ where: { userId: user.id } })
+    const pm = await PaymentMethod.findOne({ where: { userId: user.id } })
     if (pm) {
       const wallet: Wallet | null = await Wallet.find({
         where: { userId: user.id, currencyCode: 'btc' }

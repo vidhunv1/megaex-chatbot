@@ -8,11 +8,11 @@ import {
   PrimaryKey,
   AllowNull
 } from 'sequelize-typescript'
-import User from './user'
+import { User } from './user'
 import RandomGenerator from '../lib/random-generator'
 
 @Table({ timestamps: true, tableName: 'TelegramUsers' })
-export default class TelegramUser extends Model<TelegramUser> {
+export class TelegramUser extends Model<TelegramUser> {
   @PrimaryKey
   @AllowNull(false)
   @Column(DataType.BIGINT)
@@ -66,3 +66,5 @@ export default class TelegramUser extends Model<TelegramUser> {
     return tUser
   }
 }
+
+export default TelegramUser
