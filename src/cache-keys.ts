@@ -29,7 +29,7 @@ export default class CacheKeys {
   getKeys(): KeysInterface {
     const formattedId = this.id && this.id !== '' ? ':' + this.id : ''
     return {
-      telegramUser: {
+      telegramAccount: {
         // should also contain user object
         key: 'TelegramUser' + formattedId,
         expiry: 60 * 60
@@ -67,6 +67,6 @@ export default class CacheKeys {
 
   async clearUserCache() {
     const cacheClient = await cacheConnection.getCacheClient()
-    await cacheClient.delAsync(this.getKeys().telegramUser.key)
+    await cacheClient.delAsync(this.getKeys().telegramAccount.key)
   }
 }

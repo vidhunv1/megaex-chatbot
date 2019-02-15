@@ -12,7 +12,7 @@ import {
 } from 'sequelize-typescript'
 import { User } from './user'
 import MessageQueue from '../lib/message-queue'
-import Logger from '../lib/logger'
+import logger from '../modules/logger'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 
 @Table({ timestamps: true, tableName: 'Wallets' })
@@ -56,9 +56,6 @@ export class Wallet extends Model<Wallet> {
 
   // calling this will create all wallets for the userId, should be called only once.
   async create(): Promise<Wallet[] | null> {
-    console.log('Creating wallets')
-    const logger = new Logger().getLogger()
-
     const messageQueue = new MessageQueue()
     try {
       const wallets: Wallet[] | null = []
@@ -85,14 +82,13 @@ export class Wallet extends Model<Wallet> {
       console.log('WALLETS LIST: ' + JSON.stringify(wallets))
       return wallets
     } catch (e) {
-      logger.error('error creating bitcoin wallet: ' + JSON.stringify(e))
+      logger.error('error creating wallets: ' + JSON.stringify(e))
       return null
     }
   }
 
   async newAddress(): Promise<string | null> {
     const messageQueue = new MessageQueue()
-    const logger = new Logger().getLogger()
     try {
       if (this.currencyCode === 'btc') {
         const btcAddress = await messageQueue.generateBtcAddress(this.userId)
@@ -178,7 +174,6 @@ export class WalletError extends Error {
   constructor(status: number = 500, message: string = 'Wallet Error') {
     super(message)
     this.name = this.constructor.name
-    const logger = new Logger().getLogger()
     logger.error(this.constructor.name + ', ' + status)
     this.status = status
   }

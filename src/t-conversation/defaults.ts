@@ -1,5 +1,5 @@
 import telegramHook from '../modules/telegram-hook'
-import { Market, User, TelegramUser } from '../models'
+import { Market, User, TelegramAccount } from '../models'
 import * as TelegramBot from 'node-telegram-bot-api'
 
 enum ICallbackFunction {
@@ -111,7 +111,7 @@ const keyboardMenu = (user: User) => {
   ]
 }
 
-const sendErrorMessage = async function(user: User, tUser: TelegramUser) {
+const sendErrorMessage = async function(user: User, tUser: TelegramAccount) {
   tBot.sendMessage(tUser.id, user.__('error_unknown'), {
     parse_mode: 'Markdown',
     reply_markup: {
@@ -142,13 +142,13 @@ const stringifyCallbackQuery = function(
 
 const parseCallbackQuery = function(query: string): ICallbackQuery {
   let callbackFunction, obj, pairs: string[], tKey, tVal
-  ;[callbackFunction, obj] = query.split(':')
+  [callbackFunction, obj] = query.split(':')
   const res: any = { callbackFunction }
   res[callbackFunction] = {}
   pairs = obj ? obj.split(',') : []
   for (let i = 0; i < pairs.length; i++) {
     if (pairs.length > 0) {
-      ;[tKey, tVal] = pairs[i].split('=')
+      [tKey, tVal] = pairs[i].split('=')
       if (tKey === 'messageId') res[tKey] = tVal
       else res[callbackFunction][tKey] = tVal
     }

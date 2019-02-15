@@ -21,3 +21,4 @@ logs
 results
 tmp
 
+**/*.log

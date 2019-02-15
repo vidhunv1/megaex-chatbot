@@ -12,7 +12,7 @@ import {
 } from 'sequelize-typescript'
 import { User } from './'
 import { Transaction as SequelizeTransacion } from 'sequelize'
-import Logger from '../lib/logger'
+import logger from '../modules/logger'
 
 @Table({ timestamps: true, tableName: 'Transactions' })
 export class Transaction extends Model<Transaction> {
@@ -127,7 +127,6 @@ export class TransactionError extends Error {
   constructor(status: number = 500, message: string = 'Transaction Error') {
     super(message)
     this.name = this.constructor.name
-    const logger = new Logger().getLogger()
     logger.error(this.constructor.name + ', ' + status)
     this.status = status
   }

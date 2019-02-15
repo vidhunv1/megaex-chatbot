@@ -1,7 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import telegramHook from '../modules/telegram-hook'
 import CacheStore from '../cache-keys'
-import Logger from '../lib/logger'
+import logger from '../modules/logger'
 import cacheConnection from '../modules/cache'
 import NotificationManager from '../lib/notification-manager'
 import {
@@ -19,16 +19,14 @@ import { tradeConversation, tradeCallback, tradeContext } from './trade'
 import { infoConversation, infoCallback, infoContext } from './info'
 import { accountConversation, accountCallback, accountContext } from './account'
 import I18n from '../lib/i18n'
-import { Market, User, TelegramUser } from '../models'
+import { Market, User, TelegramAccount } from '../models'
 export default class TMHandler {
   static instance: TMHandler
   tBot!: TelegramBot
-  logger: any
   notificationManager!: NotificationManager
 
   constructor() {
     if (TMHandler.instance) return TMHandler.instance
-    this.logger = new Logger().getLogger()
     this.notificationManager = new NotificationManager()
 
     this.tBot = telegramHook.getBot()
@@ -38,7 +36,7 @@ export default class TMHandler {
   async handleCallbackQuery(
     msg: TelegramBot.Message,
     user: User,
-    tUser: TelegramUser,
+    tUser: TelegramAccount,
     callback: TelegramBot.CallbackQuery
   ) {
     const query: ICallbackQuery = callback.data
@@ -55,14 +53,14 @@ export default class TMHandler {
       (await accountCallback(msg, user, tUser, query))
 
     if (!isCallbackHandled) {
-      this.logger.error('Callback not defined: ' + JSON.stringify(query))
+      logger.error('Callback not defined: ' + JSON.stringify(query))
     }
   }
 
   async handleMessage(
     msg: TelegramBot.Message,
     user: User,
-    tUser: TelegramUser
+    tUser: TelegramAccount
   ) {
     if (!user.isTermsAccepted || !user.currencyCode) {
       if (isBotCommand(msg)) {
@@ -77,7 +75,7 @@ export default class TMHandler {
   private async handleConversations(
     msg: TelegramBot.Message,
     user: User,
-    tUser: TelegramUser
+    tUser: TelegramAccount
   ) {
     const cacheClient = await cacheConnection.getCacheClient()
     const isConversationHandled: boolean =
@@ -135,7 +133,7 @@ export default class TMHandler {
     }
   }
 
-  async onboardUser(msg: TelegramBot.Message, user: User, tUser: TelegramUser) {
+  async onboardUser(msg: TelegramBot.Message, user: User, tUser: TelegramAccount) {
     const languagesList = I18n.getAvailableLanguages()
     const currencyList = Market.getFiatCurrencies()
     const ccKeyboardButton: TelegramBot.ReplyKeyboardMarkup = {
@@ -244,7 +242,7 @@ export default class TMHandler {
   async handleBaseContext(
     msg: TelegramBot.Message,
     user: User,
-    tUser: TelegramUser,
+    tUser: TelegramAccount,
     _context: string
   ): Promise<boolean> {
     const cacheKeys = new CacheStore(tUser.id).getKeys()

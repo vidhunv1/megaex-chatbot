@@ -1,6 +1,5 @@
-import { User, Transaction, TelegramUser } from '../models'
+import { User, Transaction, TelegramAccount } from '../models'
 import telegramHook from '../modules/telegram-hook'
-import Logger from './logger'
 
 export default class NotificationManager {
   static instance: NotificationManager
@@ -14,7 +13,6 @@ export default class NotificationManager {
   constructor() {
     if (NotificationManager.instance) return NotificationManager.instance
 
-    this.logger = new Logger().getLogger()
     NotificationManager.instance = this
   }
 
@@ -31,7 +29,7 @@ export default class NotificationManager {
         if (!transaction) return
 
         user = await User.findById(transaction.userId, {
-          include: [TelegramUser]
+          include: [TelegramAccount]
         })
         if (!user) return
 
@@ -59,7 +57,7 @@ export default class NotificationManager {
         break
 
       case NotificationManager.NOTIF.PAYMENT_EXPIRED:
-        user = await User.findById(data.userId, { include: [TelegramUser] })
+        user = await User.findById(data.userId, { include: [TelegramAccount] })
         if (!user) return
 
         await tBot.sendMessage(
@@ -74,7 +72,7 @@ export default class NotificationManager {
         break
 
       case NotificationManager.NOTIF.PAYMENT_DEBIT:
-        user = await User.findById(data.userId, { include: [TelegramUser] })
+        user = await User.findById(data.userId, { include: [TelegramAccount] })
         if (!user) return
 
         await tBot.sendMessage(

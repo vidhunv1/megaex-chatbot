@@ -4,7 +4,7 @@ declare module '*.json' {
 }
 
 interface KeysInterface {
-  telegramUser: {
+  telegramAccount: {
     key: string
     expiry: number
   }

@@ -1,16 +1,15 @@
 import CacheKeys from '../../cache-keys'
 import NotificationManager from '../../lib/notification-manager'
 import telegramHook from '../../modules/telegram-hook'
-import Logger from '../../lib/logger'
+import logger from '../../modules/logger'
 import cacheConnection from '../../modules/cache'
 import { keyboardMenu } from '../../t-conversation/defaults'
 
-import { TelegramUser, User, Transfer } from '../../models'
+import { TelegramAccount, User, Transfer } from '../../models'
 
 export const expirySubscription = async (msg: string) => {
   const cacheClient = await cacheConnection.getCacheClient()
   const notificationManager = new NotificationManager()
-  const logger: any = new Logger().getLogger()
   const tBot = telegramHook.getBot()
 
   if (
@@ -21,7 +20,7 @@ export const expirySubscription = async (msg: string) => {
     const cacheCount: number = parseInt(
       await cacheClient.getAsync(rKeys.messageCounter.key)
     )
-    const tUser = await TelegramUser.findById(telegramId, {
+    const tUser = await TelegramAccount.findById(telegramId, {
       include: [{ model: User }]
     })
     if (tUser) {
@@ -61,7 +60,7 @@ export const expirySubscription = async (msg: string) => {
     }
   } else if (CacheKeys.isKey(msg, new CacheKeys(1).getKeys().tContext.key)) {
     const telegramId = CacheKeys.getIdFromKey(msg)
-    const tUser: TelegramUser | null = await TelegramUser.findOne({
+    const tUser: TelegramAccount | null = await TelegramAccount.findOne({
       where: { id: telegramId },
       include: [{ model: User }]
     })

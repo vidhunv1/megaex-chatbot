@@ -2,16 +2,14 @@ import { CronJob } from 'cron'
 import * as request from 'request-promise'
 import { Market } from './models/market'
 import * as moment from 'moment'
-import Logger from './lib/logger'
+import logger from './modules/logger'
 import { Transfer } from './models/transfer'
 export default class Jobs {
   jobs: CronJob[]
-  logger: any
   constructor() {
     this.jobs = []
     this.jobs.push(this.getMarketRatesJob())
     this.jobs.push(this.getDeleteExpiredPaymentsJob())
-    this.logger = new Logger().getLogger()
   }
 
   start() {
@@ -29,7 +27,6 @@ export default class Jobs {
   }
 
   private getMarketRatesJob() {
-    const _this = this
     return new CronJob({
       cronTime: '*/2 * * * *',
       onTick: async function() {
@@ -59,7 +56,7 @@ export default class Jobs {
                 { where: { id: pd[i].id } }
               )
             } catch (e) {
-              _this.logger.error('getMarketRatesJob ERROR UPDATING: ' + e)
+              logger.error('getMarketRatesJob ERROR UPDATING: ' + e)
             }
           } else if (pd[i].toCurrency === 'usd') {
             try {
@@ -83,7 +80,7 @@ export default class Jobs {
                 )
                 shouldSync = true
               } catch (e) {
-                _this.logger.error(
+                logger.error(
                   'getMarketRatesJobERROR UPDATING' + JSON.stringify(e)
                 )
               }
@@ -106,7 +103,7 @@ export default class Jobs {
                   { where: { id: pd[i].id } }
                 )
               } catch (e) {
-                _this.logger.error(
+                logger.error(
                   'getMarketRatesJob ERROR UPDATING' + JSON.stringify(e)
                 )
               }

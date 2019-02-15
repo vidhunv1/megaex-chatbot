@@ -2,18 +2,16 @@ import * as Kue from 'kue'
 import * as JWT from 'jsonwebtoken'
 
 import NotificationManager from './notification-manager'
-import Logger from './logger'
 import { CONFIG } from '../config'
+import logger from '../modules/logger'
 
 export default class MessageQueue {
   static instance: MessageQueue
   queue!: Kue.Queue
   notificationManager!: NotificationManager
-  logger!: any
 
   constructor() {
     if (MessageQueue.instance) return MessageQueue.instance
-    this.logger = new Logger().getLogger()
 
     this.queue = Kue.createQueue({
       prefix: 'q',
@@ -30,10 +28,9 @@ export default class MessageQueue {
   }
 
   generateBtcAddress(id: number): Promise<string> {
-    this.logger.info('generate btc address')
+    logger.info('generate btc address')
     const q = this.queue
     const jwtSecret = CONFIG.JWT_SECRET
-    const _this = this
     const promise = new Promise(function(
       resolve: (address: string) => any,
       reject
@@ -55,7 +52,7 @@ export default class MessageQueue {
             resolve(decoded)
           } catch (err) {
             if (err.name === 'JsonWebTokenError')
-              _this.logger.error(
+              logger.error(
                 'generateBtcAddress could not verify token, invalid signature probably'
               )
             reject(new Error('Could not verify signature'))
@@ -71,7 +68,7 @@ export default class MessageQueue {
   }
 
   createNotificationHandler() {
-    this.logger.info('MessageQueue initializing main notification handler')
+    logger.info('MessageQueue initializing main notification handler')
     const _this = this
     this.queue.process('notification', 4, async function(job, done) {
       const notificationType = job.data.notificationType
@@ -82,10 +79,9 @@ export default class MessageQueue {
 
   async close() {
     const q = this.queue
-    const _this = this
     return new Promise(function(resolve, _reject) {
       q.shutdown(0, function(err: any) {
-        _this.logger.info('Kue is shut down.', err || '')
+        logger.info('Kue is shut down.', err || '')
         resolve()
       })
     })

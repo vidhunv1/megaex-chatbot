@@ -15,7 +15,7 @@ import { User, Wallet, Transaction } from './'
 import RandomGenerator from '../lib/random-generator'
 import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken'
-import Logger from '../lib/logger'
+import logger from '../modules/logger'
 import cacheConnection from '../modules/cache'
 import CacheStore from '../cache-keys'
 import { CONFIG } from '../config'
@@ -76,7 +76,6 @@ export class Transfer extends Model<Transfer> {
     currencyCode: string,
     amount: number
   ): Promise<{ paymentCode?: string | null }> {
-    const logger = new Logger().getLogger()
     const cacheClient = await cacheConnection.getCacheClient()
     const wallet: Wallet | null = await Wallet.findOne({
       attributes: ['availableBalance', 'id', 'blockedBalance'],
@@ -221,7 +220,6 @@ export class Transfer extends Model<Transfer> {
   }
 
   static async getBySecret(secret: string): Promise<Transfer | null> {
-    const logger = new Logger().getLogger()
     const salt = CONFIG.HASH_SALT
     const hash: string = await Bcrypt.hash(secret, salt)
     const payment: Transfer | null = await Transfer.findOne({
@@ -249,7 +247,6 @@ export class Transfer extends Model<Transfer> {
   public static async deletePaymentIfExpired(
     paymentId: number
   ): Promise<Transfer | null> {
-    const logger = new Logger().getLogger()
     if (paymentId) {
       const p: Transfer | null = await Transfer.findOne({
         where: { id: paymentId }
@@ -306,7 +303,6 @@ export class TransferError extends Error {
   constructor(status: number = 500, message: string = 'Payment Error') {
     super(message)
     this.name = this.constructor.name
-    const logger = new Logger().getLogger()
     logger.error(this.constructor.name + ', ' + status)
     this.status = status
   }

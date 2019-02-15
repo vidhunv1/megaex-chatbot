@@ -1,10 +1,8 @@
 import * as Redis from 'redis'
 import * as Bluebird from 'bluebird'
-import Logger from '../lib/logger'
+import logger from '../modules/logger'
 
 import { CONFIG } from '../config'
-
-const logger = new Logger().getLogger()
 
 export class Cache {
   static instance: Cache

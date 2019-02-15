@@ -12,11 +12,11 @@ import { User } from './user'
 import RandomGenerator from '../lib/random-generator'
 
 @Table({ timestamps: true, tableName: 'TelegramUsers' })
-export class TelegramUser extends Model<TelegramUser> {
+export class TelegramAccount extends Model<TelegramAccount> {
   @PrimaryKey
   @AllowNull(false)
   @Column(DataType.BIGINT)
-  id!: number // corresponds to UserId field from telegram
+  id!: number // corresponds to msg.from.id field from telegram
 
   @AllowNull(false)
   @ForeignKey(() => User)
@@ -38,7 +38,7 @@ export class TelegramUser extends Model<TelegramUser> {
   @Column
   username!: string
 
-  async create(): Promise<TelegramUser> {
+  async create(): Promise<TelegramAccount> {
     const idGen: RandomGenerator = new RandomGenerator()
     const accountId = await idGen.generateId()
     let accId,
@@ -51,7 +51,7 @@ export class TelegramUser extends Model<TelegramUser> {
     } while (u !== null)
     console.log(`${i} attempts to generate random user id`)
     const us = await User.create<User>({ accountId: accountId }, {})
-    const tUser = await TelegramUser.create<TelegramUser>(
+    const tUser = await TelegramAccount.create<TelegramAccount>(
       {
         id: this.id,
         firstName: this.firstName,
@@ -67,4 +67,4 @@ export class TelegramUser extends Model<TelegramUser> {
   }
 }
 
-export default TelegramUser
+export default TelegramAccount

@@ -1,12 +1,12 @@
 const env = 'test'
-import TelegramUser from '../models/telegram_user'
+import TelegramAccount from '../models/telegram_user'
 import User from '../models/user'
 import Wallet from '../models/wallet'
 import Store from '../helpers/store'
 
 import * as DatabaseConfig from '../../config/database.json'
 import { Sequelize } from 'sequelize-typescript'
-import MessageQueue from '../helpers/message-queue'
+import MessageQueue from '../lib/message-queue'
 
 let createdUser: User, sequelize: any
 let messageQueue: any
@@ -32,7 +32,7 @@ const initDB = async (): Promise<User> => {
 
 const createUser = async () => {
   let user: User
-  const newTelegramUser = new TelegramUser({
+  const newTelegramUser = new TelegramAccount({
     id: Math.floor(Math.random() * 10000000),
     firstName: 'Test1',
     lastName: 'Test2',

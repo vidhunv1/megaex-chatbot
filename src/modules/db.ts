@@ -1,9 +1,7 @@
 import { Sequelize } from 'sequelize-typescript'
-import Logger from '../lib/logger'
+import logger from '../modules/logger'
 import { CONFIG } from '../config'
 import path = require('path')
-
-const logger = new Logger().getLogger()
 
 export class DB {
   static instance: DB

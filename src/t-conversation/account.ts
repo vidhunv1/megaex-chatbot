@@ -1,6 +1,6 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import CacheStore from '../cache-keys'
-import { PaymentMethod, PaymentDetail, User, TelegramUser } from '../models'
+import { PaymentMethod, PaymentDetail, User, TelegramAccount } from '../models'
 import telegramHook from '../modules/telegram-hook'
 import cacheConnection from '../modules/cache'
 import * as moment from 'moment'
@@ -23,7 +23,7 @@ const tBot = telegramHook.getBot()
 const accountConversation = async function(
   msg: TelegramBot.Message,
   user: User,
-  tUser: TelegramUser
+  tUser: TelegramAccount
 ): Promise<boolean> {
   if (msg.text && msg.text.startsWith('/u') && msg.entities) {
     const accountId = msg.text
@@ -56,7 +56,7 @@ const accountConversation = async function(
 const accountCallback = async function(
   msg: TelegramBot.Message,
   user: User,
-  tUser: TelegramUser,
+  tUser: TelegramAccount,
   query: ICallbackQuery
 ): Promise<boolean> {
   const cacheClient = await cacheConnection.getCacheClient()
@@ -352,7 +352,7 @@ const accountCallback = async function(
 const accountContext = async function(
   msg: TelegramBot.Message,
   user: User,
-  tUser: TelegramUser,
+  tUser: TelegramAccount,
   context: string
 ): Promise<boolean> {
   const cacheKeys = new CacheStore(tUser.id).getKeys()
@@ -372,7 +372,7 @@ const accountContext = async function(
     await cacheClient.delAsync(cacheKeys.tContext.key)
     const sendUser: User | null = await User.findOne({
       where: { accountId: sendAccount.toLowerCase() },
-      include: [TelegramUser]
+      include: [TelegramAccount]
     })
     if (sendUser && (msg.text || msg.photo)) {
       const replyMarkup = {
@@ -538,7 +538,7 @@ const accountContext = async function(
 async function showAddPayment(
   paymethod: string,
   user: User,
-  tUser: TelegramUser
+  tUser: TelegramAccount
 ) {
   const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheStore(tUser.id).getKeys()
@@ -582,7 +582,7 @@ async function showAddPayment(
 async function showMyAccount(
   msg: TelegramBot.Message,
   user: User,
-  _tUser: TelegramUser
+  _tUser: TelegramAccount
 ) {
   let addPaymentInline
   const pmNames = await PaymentDetail.getPaymethodNames(user, true)
@@ -659,7 +659,7 @@ async function showAccount(
   accountId: string,
   msg: TelegramBot.Message,
   user: User,
-  tUser: TelegramUser
+  tUser: TelegramAccount
 ) {
   console.log(
     'ACCOUNT: ' +
@@ -782,7 +782,7 @@ async function showAccount(
 async function handleReferrals(
   msg: TelegramBot.Message,
   user: User,
-  _tUser: TelegramUser
+  _tUser: TelegramAccount
 ) {
   await tBot.sendMessage(msg.chat.id, '[TODO] HANDLE REFERRALS ', {
     parse_mode: 'Markdown',

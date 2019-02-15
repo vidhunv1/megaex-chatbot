@@ -12,16 +12,14 @@ import * as TelegramBot from 'node-telegram-bot-api'
 import TelegramHook from './modules/telegram-hook'
 import MessageQueue from './lib/message-queue'
 
-import { Wallet, TelegramUser, User } from './models'
+import { User } from './models'
 import Jobs from './jobs'
 
-import CacheKeys from './cache-keys'
-import Logger from './lib/logger'
+import logger from './modules/logger'
+import { Account } from './lib/accounts'
 import TelegramHandler from './t-conversation/router'
 
 import { expirySubscription } from './t-conversation/subscriptions'
-
-const logger = new Logger().getLogger()
 
 ; (async () => {
   // Postgres Init
@@ -35,80 +33,41 @@ const logger = new Logger().getLogger()
   // Telegram hook
   const tBot = TelegramHook.getBot()
 
+  // Message Queue
   const messageQueue = new MessageQueue()
-  const tMessageHandler = new TelegramHandler()
+
+  // Cron Jobs
   const jobs = new Jobs()
   jobs.start()
 
+  // Telegram bot incoming message router
+  const tMessageHandler = new TelegramHandler()
+
   tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
     try {
-      const rKeys = new CacheKeys(msg.chat.id).getKeys()
-
       if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
-        const userCache = await redisClient.getAsync(rKeys.telegramUser.key)
+        const account = new Account(msg.from, msg.from.id)
 
-        let tUser: TelegramUser, user: User
-        if (userCache) {
-          // user exists in redis cache
-          const cache: TelegramUser = JSON.parse(userCache)
-          tUser = new TelegramUser(cache)
-          user = new User(cache.user)
-        } else {
-          // no user data available in cache
-          // check if user exists
-          const getTUser = await TelegramUser.findById(msg.from.id, {
-            include: [{ model: User }]
-          })
-          if (!getTUser) {
-            // new user, create account & load cache
-            const newT = new TelegramUser({
-              id: msg.from.id,
-              firstName: msg.from.first_name,
-              lastName: msg.from.last_name,
-              languageCode: msg.from.language_code,
-              username: msg.from.username
-            })
-            try {
-              logger.info('Creating new account...')
-              tUser = await newT.create()
-              tUser.user.id = tUser.userId
-              user = tUser.user
-            } catch (e) {
-              logger.error(
-                'Error creating account: TelegramUser.create: ' +
-                  JSON.stringify(e)
-              )
-              tBot.sendMessage(msg.chat.id, new User().__('error_unknown'))
-              return
-            }
-            // create all wallets for user
-            const wallets = new Wallet({ userId: tUser.user.id })
-            wallets.create()
-          } else {
-            tUser = getTUser
-            user = tUser.user
-          }
-          console.log('SAVING TO CACHE: ' + JSON.stringify(tUser))
-          redisClient.setAsync(
-            rKeys.telegramUser.key,
-            JSON.stringify(tUser),
-            'EX',
-            rKeys.telegramUser.expiry
-          )
+        try {
+          const telegramAccount = await account.createOrGetAccount()
+          tMessageHandler.handleMessage(msg, telegramAccount.user, telegramAccount)
+        } catch (e) {
+          tBot.sendMessage(msg.chat.id, new User().__('error_unknown'))
         }
-        tMessageHandler.handleMessage(msg, user, tUser)
 
+        // Message tracker.
+        // TODO: Update this to also show time, remove expiry
         if (
-          (await redisClient.existsAsync(rKeys.messageCounter.shadowKey)) == 1
+          (await redisClient.existsAsync(account.keys.messageCounter.shadowKey)) == 1
         ) {
-          await redisClient.incrAsync(rKeys.messageCounter.key)
+          await redisClient.incrAsync(account.keys.messageCounter.key)
         } else {
-          await redisClient.setAsync(rKeys.messageCounter.key, 1)
+          await redisClient.setAsync(account.keys.messageCounter.key, 1)
           await redisClient.setAsync(
-            rKeys.messageCounter.shadowKey,
+            account.keys.messageCounter.shadowKey,
             '',
             'EX',
-            rKeys.messageCounter.expiry
+            account.keys.messageCounter.expiry
           )
         }
       } else if (msg.chat.type === 'group') {
@@ -131,40 +90,15 @@ const logger = new Logger().getLogger()
 
   tBot.on('callback_query', async function(callback) {
     await tBot.answerCallbackQuery(callback.id)
-
     const msg: TelegramBot.Message = callback.message
-    let tUser: TelegramUser | null = null
-    let user: User | null = null
-    const cacheKeys = new CacheKeys(msg.chat.id).getKeys()
-    const userCache = await redisClient.getAsync(cacheKeys.telegramUser.key)
 
-    if (userCache) {
-      // user exists in redis cache
-      const cache: TelegramUser = JSON.parse(userCache)
-      tUser = new TelegramUser(cache)
-      user = new User(cache.user)
-    } else {
-      // get from db
-      try {
-        tUser = await TelegramUser.findById(msg.chat.id, {
-          include: [{ model: User }]
-        })
-        user = tUser ? tUser.user : null
-      } catch (e) {
-        logger.error('FATAL: could not get user details')
-      }
-    }
-
-    if (tUser && user) {
-      tMessageHandler.handleCallbackQuery(
-        callback.message,
-        user,
-        tUser,
-        callback
-      )
-    } else {
-      logger.error('FATAL: user does not exist when it should have')
-    }
+    const telegramAccount = await (new Account(undefined, msg.chat.id)).createOrGetAccount()
+    tMessageHandler.handleCallbackQuery(
+      callback.message,
+      telegramAccount.user,
+      telegramAccount,
+      callback
+    )
   })
 
   process.on('SIGINT', async function() {

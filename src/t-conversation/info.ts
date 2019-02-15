@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { TelegramUser, User } from '../models'
+import { TelegramAccount, User } from '../models'
 import telegramHook from '../modules/telegram-hook'
 import {
   ICallbackQuery,
@@ -11,7 +11,7 @@ const tBot = telegramHook.getBot()
 const infoConversation = async function(
   msg: TelegramBot.Message | null,
   user: User,
-  _tUser: TelegramUser
+  _tUser: TelegramAccount
 ): Promise<boolean> {
   if (!(msg && msg.text === user.__('menu_info'))) {
     return false
@@ -55,7 +55,7 @@ const infoConversation = async function(
 const infoCallback = async function(
   _msg: TelegramBot.Message,
   _user: User,
-  _tUser: TelegramUser,
+  _tUser: TelegramAccount,
   _query: ICallbackQuery
 ): Promise<boolean> {
   return false
@@ -64,7 +64,7 @@ const infoCallback = async function(
 const infoContext = async function(
   _msg: TelegramBot.Message,
   _user: User,
-  _tUser: TelegramUser,
+  _tUser: TelegramAccount,
   _context: string
 ): Promise<boolean> {
   return false

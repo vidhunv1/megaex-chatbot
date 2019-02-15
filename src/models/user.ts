@@ -10,7 +10,7 @@ import {
   Default,
   HasMany
 } from 'sequelize-typescript'
-import { TelegramUser, Wallet, Transaction, PaymentMethod } from './'
+import { TelegramAccount, Wallet, Transaction, PaymentMethod } from './'
 import I18n from '../lib/i18n'
 
 @Table({ timestamps: true, tableName: 'Users' })
@@ -21,8 +21,8 @@ export class User extends Model<User> {
   @Column
   id!: number
 
-  @HasOne(() => TelegramUser, 'userId')
-  telegramUser!: TelegramUser
+  @HasOne(() => TelegramAccount, 'userId')
+  telegramUser!: TelegramAccount
 
   @HasMany(() => Wallet, 'userId')
   wallets!: Wallet[]

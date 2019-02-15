@@ -1,6 +1,6 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import {
-  TelegramUser,
+  TelegramAccount,
   User,
   PaymentMethod,
   PaymentDetail,
@@ -8,7 +8,7 @@ import {
   Wallet,
   Order
 } from '../models'
-import Logger from '../lib/logger'
+import logger from '../modules/logger'
 import cacheConnection from '../modules/cache'
 import telegramHook from '../modules/telegram-hook'
 import {
@@ -21,7 +21,6 @@ import {
 import CacheStore from '../cache-keys'
 import { CONFIG } from '../config'
 
-const logger = new Logger().getLogger()
 const tBot = telegramHook.getBot()
 
 const CONTEXT_TRADE_BUY = 'TRADE_BUY'
@@ -33,7 +32,7 @@ const CONTEXT_TRADE_EDIT_TERMS = 'TRADE_EDIT_TERMS'
 const tradeConversation = async function(
   msg: TelegramBot.Message | null,
   user: User,
-  tUser: TelegramUser
+  tUser: TelegramAccount
 ): Promise<boolean> {
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   const cacheClient = await cacheConnection.getCacheClient()
@@ -208,7 +207,7 @@ const tradeConversation = async function(
 const tradeCallback = async function(
   _msg: TelegramBot.Message,
   user: User,
-  tUser: TelegramUser,
+  tUser: TelegramAccount,
   query: ICallbackQuery
 ): Promise<boolean> {
   const cacheClient = await cacheConnection.getCacheClient()
@@ -318,7 +317,7 @@ const tradeCallback = async function(
 const tradeContext = async function(
   msg: TelegramBot.Message,
   user: User,
-  tUser: TelegramUser,
+  tUser: TelegramAccount,
   context: string
 ): Promise<boolean> {
   const cacheClient = await cacheConnection.getCacheClient()
@@ -433,7 +432,7 @@ const tradeContext = async function(
     if (msg.text.indexOf('%') > -1) {
       const margin = parseFloat(msg.text)
       if (margin >= 0) {
-        ;[updatedRows] = await Order.update(
+        [updatedRows] = await Order.update(
           { marginPercentage: margin, price: null },
           { where: { id: orderId } }
         )
@@ -446,7 +445,7 @@ const tradeContext = async function(
     } else {
       const rate = parseInt(msg.text)
       if (rate >= 0) {
-        ;[updatedRows] = await Order.update(
+        [updatedRows] = await Order.update(
           { price: rate },
           { where: { id: orderId } }
         )
@@ -478,7 +477,7 @@ const tradeContext = async function(
 async function handleOrderCreate(
   msg: string,
   user: User,
-  tUser: TelegramUser,
+  tUser: TelegramAccount,
   type: 'buy' | 'sell'
 ) {
   const cacheClient = await cacheConnection.getCacheClient()
@@ -614,7 +613,7 @@ async function handleOrderCreateInputPrice(
   priceType: 'market' | 'fixed',
   orderType: 'buy' | 'sell',
   user: User,
-  tUser: TelegramUser
+  tUser: TelegramAccount
 ) {
   const cacheKeys = new CacheStore(tUser.id).getKeys()
   const cacheClient = await cacheConnection.getCacheClient()
@@ -676,7 +675,7 @@ async function handleOrderCreateInputPrice(
 
 async function showOrder(
   user: User,
-  tUser: TelegramUser,
+  tUser: TelegramAccount,
   order: Order,
   thisMessageId: number,
   shouldEdit: boolean = false
