@@ -1,6 +1,6 @@
 import * as i18n from 'i18n'
 
-export default class I18n {
+export class I18n {
   static instance: I18n
 
   constructor() {
@@ -16,7 +16,7 @@ export default class I18n {
     I18n.instance = this
   }
 
-  getI18n() {
+  get getI18n() {
     return i18n
   }
 

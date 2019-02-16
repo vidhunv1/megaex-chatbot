@@ -18,7 +18,7 @@ import { walletConversation, walletCallback, walletContext } from './wallet'
 import { tradeConversation, tradeCallback, tradeContext } from './trade'
 import { infoConversation, infoCallback, infoContext } from './info'
 import { accountConversation, accountCallback, accountContext } from './account'
-import I18n from '../lib/i18n'
+import { I18n } from '../modules/i18n'
 import { Market, User, TelegramAccount } from '../models'
 export default class TMHandler {
   static instance: TMHandler
