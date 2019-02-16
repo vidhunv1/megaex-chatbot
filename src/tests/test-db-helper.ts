@@ -45,7 +45,7 @@ const createUser = async () => {
   user.telegramUser = u
 
   const createWallets = new Wallet({ userId: user.id })
-  const wallets = await createWallets.create()
+  const wallets = await createWallets.createAll()
   if (wallets) user.wallets = wallets
   return user
 }

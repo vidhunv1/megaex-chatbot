@@ -38,6 +38,7 @@ export interface WalletJobProducer {
   [WalletJobs.GENERATED_ADDRESS]: {
     userId: number // Unique id for assocated used; (User.id model)
     address: string
+    currency: CryptoCurrency
   }
   [WalletJobs.WITHDRAWAL_STATUS_ALERT]: {
     id: number

@@ -85,7 +85,7 @@ export class Account {
 
           // create all wallets for user
           const wallets = new Wallet({ userId: t.user.id })
-          wallets.create()
+          await wallets.createAll()
 
           this.saveToCache(t)
           return t

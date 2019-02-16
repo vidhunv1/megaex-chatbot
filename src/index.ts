@@ -72,7 +72,7 @@ import { expirySubscription } from './t-conversation/subscriptions'
         )
       }
     } catch (e) {
-      logger.error('FATAL: An unknown error occurred: ' + JSON.stringify(e))
+      logger.error('FATAL: An unknown error occurred: ')
       tBot.sendMessage(msg.chat.id, 'An error occured. Please try again later.')
       throw e
     }

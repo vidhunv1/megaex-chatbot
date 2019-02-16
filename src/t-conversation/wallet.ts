@@ -26,6 +26,7 @@ import {
   ICallbackQuery,
   ICallbackFunction
 } from './defaults'
+import { CryptoCurrency } from '../constants/currencies'
 
 const CONTEXT_WALLET = 'Wallet'
 const CONTEXT_COINSEND = 'CoinSend'
@@ -316,7 +317,7 @@ async function handleCoinSend(
 ) {
   const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
-  let coin: string, isInputContext
+  let coin: CryptoCurrency, isInputContext
   ;[coin, isInputContext] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Wallet.coin'],

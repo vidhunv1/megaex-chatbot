@@ -21,6 +21,7 @@ import { CacheKeys } from '../cache-keys'
 import { CONFIG } from '../config'
 import { TransactionError } from './transaction'
 import { WalletError } from './wallet'
+import { CryptoCurrency } from '../constants/currencies'
 
 enum TransferStatus {
   PENDING = 'pending',
@@ -50,7 +51,7 @@ export class Transfer extends Model<Transfer> {
   transactionId!: string
 
   @Column
-  currencyCode!: string
+  currencyCode!: CryptoCurrency
 
   @Column
   status!: TransferStatus
@@ -73,7 +74,7 @@ export class Transfer extends Model<Transfer> {
 
   static async newPayment(
     userId: number,
-    currencyCode: string,
+    currencyCode: CryptoCurrency,
     amount: number
   ): Promise<{ paymentCode?: string | null }> {
     const cacheClient = await cacheConnection.getCacheClient()

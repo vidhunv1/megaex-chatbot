@@ -6,9 +6,9 @@ import { CONFIG } from '../config'
 
 export class Cache {
   static instance: Cache
-  client!: Redis.RedisClient
-  pub!: Redis.RedisClient
-  sub!: Redis.RedisClient
+  private client!: Redis.RedisClient
+  private pub!: Redis.RedisClient
+  private sub!: Redis.RedisClient
 
   constructor() {
     if (Cache.instance) {

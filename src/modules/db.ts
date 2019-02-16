@@ -5,7 +5,7 @@ import path = require('path')
 
 export class DB {
   static instance: DB
-  sequelize!: Sequelize | null
+  private sequelize!: Sequelize | null
 
   constructor() {
     if (DB.instance) {

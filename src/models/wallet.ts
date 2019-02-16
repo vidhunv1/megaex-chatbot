@@ -56,7 +56,7 @@ export class Wallet extends Model<Wallet> {
   currencyCode!: string
 
   // calling this will create all wallets for the userId
-  async create(): Promise<boolean | null> {
+  async createAll(): Promise<boolean | null> {
     try {
       await Wallet.create<Wallet>(
         { userId: this.userId, currencyCode: CryptoCurrency.BTC },
@@ -72,9 +72,29 @@ export class Wallet extends Model<Wallet> {
     }
   }
 
+  static async updateNewAddress(
+    userId: number,
+    currency: CryptoCurrency,
+    address: string
+  ): Promise<boolean> {
+    const wallet: Wallet | null = await Wallet.findOne({
+      where: { userId: userId, currencyCode: currency }
+    })
+
+    if (wallet) {
+      await wallet.updateAttributes({
+        address
+      })
+      return true
+    } else {
+      logger.error('Wallet not found')
+      throw new WalletError(WalletError.NOT_FOUND)
+    }
+  }
+
   static async unblockBalance(
     userId: string | number,
-    currencyCode: string,
+    currencyCode: CryptoCurrency,
     amount: number,
     transaction?: SequelizeTransacion
   ) {
@@ -95,6 +115,7 @@ export class Wallet extends Model<Wallet> {
         throw new WalletError(WalletError.INSUFFICIENT_BALANCE)
       }
     } else {
+      logger.error('Wallet not found')
       throw new WalletError(WalletError.NOT_FOUND)
     }
   }

@@ -4,6 +4,7 @@ import { WalletJobs, WalletJobProducer } from './types'
 import { CONFIG } from '../../../config'
 import logger from '../../logger'
 import { CryptoCurrency } from '../../../constants/currencies'
+import { Wallet } from '../../../models'
 
 export type ProducerTypes =
   | WalletJobProducer[WalletJobs.CREATE_ADDRESS]
@@ -15,7 +16,7 @@ export type ProducerTypes =
 
 export class WalletQueue {
   static instance: WalletQueue
-  queue!: Queue.Queue<ProducerTypes>
+  private queue!: Queue.Queue<ProducerTypes>
 
   constructor() {
     if (WalletQueue.instance) {
@@ -43,12 +44,17 @@ export class WalletQueue {
     try {
       await this.queue.isReady()
       this.initializeConsumers()
+
       logger.info('OK: Wallet Queue')
       return true
     } catch (e) {
       logger.error('Error: Wallet Queue')
       throw e
     }
+  }
+
+  get getQueue() {
+    return this.queue
   }
 
   async close() {
@@ -60,13 +66,23 @@ export class WalletQueue {
   }
 
   initializeConsumers() {
-    this.queue.process(WalletJobs.GENERATED_ADDRESS, (_jobs: any) => {
-      logger.error('TODO: wallet-queue Save generated address')
+    this.queue.process(WalletJobs.GENERATED_ADDRESS, async (jobs) => {
+      logger.error(
+        `TODO: ${
+          WalletJobs.GENERATED_ADDRESS
+        } queue needs to check with Bitcoin RPC if the userId address is valid`
+      )
+
       // TODO: save address to database
-      return Promise.resolve()
+      const {
+        address,
+        userId,
+        currency
+      } = jobs.data as WalletJobProducer['generated-address']
+      return Wallet.updateNewAddress(userId, currency, address)
     })
 
-    this.queue.process(WalletJobs.DEPOSIT_ALERT, (_jobs: any) => {
+    this.queue.process(WalletJobs.DEPOSIT_ALERT, (_jobs) => {
       logger.error('TODO: wallet-queue Handle new deposits')
       // TODO: Handle new deposit
 
