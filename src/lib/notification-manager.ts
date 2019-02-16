@@ -1,14 +1,15 @@
 import { User, Transaction, TelegramAccount } from '../models'
 import telegramHook from '../modules/telegram-hook'
+import logger from '../modules/logger'
 
-export default class NotificationManager {
+export enum NotificationType {
+  NEW_TRANSACTION,
+  PAYMENT_EXPIRED,
+  PAYMENT_DEBIT
+}
+
+export class NotificationManager {
   static instance: NotificationManager
-  private logger!: any
-  static NOTIF = {
-    NEW_TRANSACTION: 'newTransaction',
-    PAYMENT_EXPIRED: 'paymentLinkExpired',
-    PAYMENT_DEBIT: 'paymentLinkDebit'
-  }
 
   constructor() {
     if (NotificationManager.instance) return NotificationManager.instance
@@ -16,11 +17,11 @@ export default class NotificationManager {
     NotificationManager.instance = this
   }
 
-  async sendNotification(notificationType: string, data: any) {
+  async sendNotification(notificationType: NotificationType, data: any) {
     const tBot = telegramHook.getBot()
     let user
     switch (notificationType) {
-      case NotificationManager.NOTIF.NEW_TRANSACTION:
+      case NotificationType.NEW_TRANSACTION:
         const transaction = await Transaction.findOne({
           where: {
             transactionId: data.transactionId
@@ -56,7 +57,7 @@ export default class NotificationManager {
         })
         break
 
-      case NotificationManager.NOTIF.PAYMENT_EXPIRED:
+      case NotificationType.PAYMENT_EXPIRED:
         user = await User.findById(data.userId, { include: [TelegramAccount] })
         if (!user) return
 
@@ -71,7 +72,7 @@ export default class NotificationManager {
         )
         break
 
-      case NotificationManager.NOTIF.PAYMENT_DEBIT:
+      case NotificationType.PAYMENT_DEBIT:
         user = await User.findById(data.userId, { include: [TelegramAccount] })
         if (!user) return
 
@@ -90,7 +91,7 @@ export default class NotificationManager {
         break
 
       default:
-        this.logger.error('Unknown notification type: ' + notificationType)
+        logger.error('Unknown notification type: ' + notificationType)
     }
   }
 }

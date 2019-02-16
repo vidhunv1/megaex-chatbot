@@ -1,5 +1,5 @@
 import { CacheKeys } from '../../cache-keys'
-import NotificationManager from '../../lib/notification-manager'
+import { NotificationManager, NotificationType } from '../../lib/notification-manager'
 import telegramHook from '../../modules/telegram-hook'
 import logger from '../../modules/logger'
 import cacheConnection from '../../modules/cache'
@@ -42,7 +42,7 @@ export const expirySubscription = async (msg: string) => {
       const payment = await Transfer.deletePaymentIfExpired(paymentId)
       if (payment) {
         await notificationManager.sendNotification(
-          NotificationManager.NOTIF.PAYMENT_EXPIRED,
+          NotificationType.PAYMENT_EXPIRED,
           {
             currencyCode: payment.currencyCode,
             amount: payment.amount,

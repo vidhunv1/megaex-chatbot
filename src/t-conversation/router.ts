@@ -3,7 +3,7 @@ import telegramHook from '../modules/telegram-hook'
 import { CacheKeys } from '../cache-keys'
 import logger from '../modules/logger'
 import cacheConnection from '../modules/cache'
-import NotificationManager from '../lib/notification-manager'
+import { NotificationManager } from '../lib/notification-manager'
 import {
   isBotCommand,
   parseCallbackQuery,

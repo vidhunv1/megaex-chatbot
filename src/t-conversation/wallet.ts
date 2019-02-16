@@ -14,7 +14,7 @@ import * as QRCode from 'qrcode'
 import cacheConnection from '../modules/cache'
 import telegramHook from '../modules/telegram-hook'
 import logger from '../modules/logger'
-import NotificationManager from '../lib/notification-manager'
+import { NotificationManager, NotificationType } from '../lib/notification-manager'
 import { CONFIG } from '../config'
 
 import {
@@ -318,7 +318,7 @@ async function handleCoinSend(
   const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   let coin: CryptoCurrency, isInputContext
-  ;[coin, isInputContext] = await cacheClient.hmgetAsync(
+  ; [coin, isInputContext] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Wallet.coin'],
     cacheKeys.tContext['CoinSend.isInputAmount']
@@ -494,7 +494,7 @@ async function handlePaymentClaim(
         { parse_mode: 'Markdown' }
       )
       await notificationManager.sendNotification(
-        NotificationManager.NOTIF.PAYMENT_DEBIT,
+        NotificationType.PAYMENT_DEBIT,
         {
           userId: p.userId,
           currencyCode: p.currencyCode,
@@ -567,7 +567,7 @@ async function handleWallet(
   const cacheClient = await cacheConnection.getCacheClient()
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   let currentContext, currentCoin, currentPage
-  ;[currentContext, currentCoin] = await cacheClient.hmgetAsync(
+  ; [currentContext, currentCoin] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,
     cacheKeys.tContext['Wallet.coin']
