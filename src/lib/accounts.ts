@@ -2,7 +2,7 @@ import cacheConnection from '../modules/cache'
 import * as TelegramBot from 'node-telegram-bot-api'
 import logger from '../modules/logger'
 
-import CacheKeys from '../cache-keys'
+import { CacheKeys } from '../cache-keys'
 import { User, TelegramAccount, Wallet } from '../models'
 
 export class Account {
@@ -15,7 +15,10 @@ export class Account {
     telegramMessage contains info for creating new account. 
     If you are sure the user exists in DB then only telegram ID needs to be passed
    */
-  constructor(telegramMessage: TelegramBot.Message['from'], telegramId: number) {
+  constructor(
+    telegramId: number,
+    telegramMessage: TelegramBot.Message['from']
+  ) {
     this.telegramId = telegramId
     this.keys = new CacheKeys(telegramId).getKeys()
     this.telegramMessage = telegramMessage
@@ -34,8 +37,10 @@ export class Account {
   // This will create account if it does not exist
   async createOrGetAccount(): Promise<TelegramAccount> {
     const cacheClient = await cacheConnection.getCacheClient()
-    
-    const accountCache = await cacheClient.getAsync(this.keys.telegramAccount.key)
+
+    const accountCache = await cacheClient.getAsync(
+      this.keys.telegramAccount.key
+    )
     if (accountCache) {
       console.log('From cache')
       // user exists in cache
@@ -59,15 +64,18 @@ export class Account {
       } else {
         console.log('Creating new User')
         if (!this.telegramMessage) {
-          logger.error('FATAL: lib/accounts Account details not passed to create new account')
+          logger.error(
+            'FATAL: lib/accounts Account details not passed to create new account'
+          )
         }
-        
+
         // new user, create account & load cache
         const newT = new TelegramAccount({
           id: this.telegramId,
           firstName: this.telegramMessage && this.telegramMessage.first_name,
           lastName: this.telegramMessage && this.telegramMessage.last_name,
-          languageCode: this.telegramMessage && this.telegramMessage.language_code,
+          languageCode:
+            this.telegramMessage && this.telegramMessage.language_code,
           username: this.telegramMessage && this.telegramMessage.username
         })
         try {
@@ -78,13 +86,12 @@ export class Account {
           // create all wallets for user
           const wallets = new Wallet({ userId: t.user.id })
           wallets.create()
-          
+
           this.saveToCache(t)
           return t
         } catch (e) {
           logger.error(
-            'Error creating account: TelegramUser.create: ' +
-            JSON.stringify(e)
+            'Error creating account: TelegramUser.create: ' + JSON.stringify(e)
           )
           throw new Error('Error creating account')
         }

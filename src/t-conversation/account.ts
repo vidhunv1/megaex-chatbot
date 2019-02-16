@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import CacheStore from '../cache-keys'
+import { CacheKeys } from '../cache-keys'
 import { PaymentMethod, PaymentDetail, User, TelegramAccount } from '../models'
 import telegramHook from '../modules/telegram-hook'
 import cacheConnection from '../modules/cache'
@@ -61,7 +61,7 @@ const accountCallback = async function(
 ): Promise<boolean> {
   const cacheClient = await cacheConnection.getCacheClient()
   const botUsername = CONFIG.BOT_USERNAME
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   switch (query.callbackFunction) {
     case 'accountLink':
       await tBot.sendMessage(msg.chat.id, user.__('show_account_link_info'), {
@@ -339,7 +339,7 @@ const accountCallback = async function(
         { blockedUsers: JSON.stringify(blockedUsers1) },
         { where: { id: user.id } }
       )
-      await new CacheStore(tUser.id).clearUserCache()
+      await new CacheKeys(tUser.id).clearUserCache()
       msg.message_id = query.messageId
       user.blockedUsers = JSON.stringify(blockedUsers1)
       showAccount(query.blockAccount.accountId, msg, user, tUser)
@@ -355,7 +355,7 @@ const accountContext = async function(
   tUser: TelegramAccount,
   context: string
 ): Promise<boolean> {
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   const cacheClient = await cacheConnection.getCacheClient()
   await cacheClient.hmsetAsync(
     cacheKeys.tContext.key,
@@ -541,7 +541,7 @@ async function showAddPayment(
   tUser: TelegramAccount
 ) {
   const cacheClient = await cacheConnection.getCacheClient()
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   if (
     paymethod &&
     (await PaymentDetail.isPaymethodNameExists(user, paymethod))
@@ -671,7 +671,7 @@ async function showAccount(
   )
   if (!msg.text || !msg.entities) return
   const cacheClient = await cacheConnection.getCacheClient()
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   await cacheClient.hmsetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,

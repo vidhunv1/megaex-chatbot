@@ -18,7 +18,7 @@ import {
   keyboardMenu,
   parseRange
 } from './defaults'
-import CacheStore from '../cache-keys'
+import { CacheKeys } from '../cache-keys'
 import { CONFIG } from '../config'
 
 const tBot = telegramHook.getBot()
@@ -34,7 +34,7 @@ const tradeConversation = async function(
   user: User,
   tUser: TelegramAccount
 ): Promise<boolean> {
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   const cacheClient = await cacheConnection.getCacheClient()
   if (msg && msg.text === user.__('menu_buy_sell')) {
     const rate = await Market.getValue('btc', user.currencyCode)
@@ -211,7 +211,7 @@ const tradeCallback = async function(
   query: ICallbackQuery
 ): Promise<boolean> {
   const cacheClient = await cacheConnection.getCacheClient()
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   switch (query.callbackFunction) {
     case ICallbackFunction.Buy:
       tBot.sendMessage(tUser.id, `[TODO] Show buy orders list`)
@@ -321,7 +321,7 @@ const tradeContext = async function(
   context: string
 ): Promise<boolean> {
   const cacheClient = await cacheConnection.getCacheClient()
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   const [isInputPrice] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Trade.isInputPrice']
@@ -432,7 +432,7 @@ const tradeContext = async function(
     if (msg.text.indexOf('%') > -1) {
       const margin = parseFloat(msg.text)
       if (margin >= 0) {
-        [updatedRows] = await Order.update(
+        ;[updatedRows] = await Order.update(
           { marginPercentage: margin, price: null },
           { where: { id: orderId } }
         )
@@ -445,7 +445,7 @@ const tradeContext = async function(
     } else {
       const rate = parseInt(msg.text)
       if (rate >= 0) {
-        [updatedRows] = await Order.update(
+        ;[updatedRows] = await Order.update(
           { price: rate },
           { where: { id: orderId } }
         )
@@ -482,7 +482,7 @@ async function handleOrderCreate(
 ) {
   const cacheClient = await cacheConnection.getCacheClient()
   if (!msg) return
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
 
   if (type === 'buy') {
     const [minAmount, maxAmount] = await parseRange(msg)
@@ -615,7 +615,7 @@ async function handleOrderCreateInputPrice(
   user: User,
   tUser: TelegramAccount
 ) {
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   const cacheClient = await cacheConnection.getCacheClient()
   if (fiatPrice && fiatPrice !== NaN && fiatPrice > 0) {
     const [maxAmount, minAmount] = await cacheClient.hmgetAsync(

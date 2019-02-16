@@ -11,9 +11,10 @@ import {
   AutoIncrement
 } from 'sequelize-typescript'
 import { User } from './user'
-import MessageQueue from '../lib/message-queue'
+import walletQueue from '../modules/queue/wallet/wallet-queue'
 import logger from '../modules/logger'
 import { Transaction as SequelizeTransacion } from 'sequelize'
+import { CryptoCurrency } from '../constants/currencies'
 
 @Table({ timestamps: true, tableName: 'Wallets' })
 export class Wallet extends Model<Wallet> {
@@ -54,60 +55,20 @@ export class Wallet extends Model<Wallet> {
   @Column
   currencyCode!: string
 
-  // calling this will create all wallets for the userId, should be called only once.
-  async create(): Promise<Wallet[] | null> {
-    const messageQueue = new MessageQueue()
+  // calling this will create all wallets for the userId
+  async create(): Promise<boolean | null> {
     try {
-      const wallets: Wallet[] | null = []
-
-      const btcWallet = await Wallet.create<Wallet>(
-        { userId: this.userId, currencyCode: 'btc' },
+      await Wallet.create<Wallet>(
+        { userId: this.userId, currencyCode: CryptoCurrency.BTC },
         {}
       )
-      const tBtcWallet = await Wallet.create<Wallet>(
-        { userId: this.userId, currencyCode: 'tbtc' },
-        {}
-      )
-      // generate btc address
-      const btcAddress = await messageQueue.generateBtcAddress(this.userId)
-      btcWallet.updateAttributes({ address: btcAddress })
-      btcWallet.address = btcAddress
-      // generate testnet btc address
-      const btcTestAddress = await messageQueue.generateBtcAddress(this.userId)
-      tBtcWallet.updateAttributes({ address: btcTestAddress })
-      tBtcWallet.address = btcTestAddress
-      wallets.push(btcWallet)
-      wallets.push(tBtcWallet)
+      // generate btc address queue
+      await walletQueue.generateNewAddress(CryptoCurrency.BTC, this.userId)
 
-      console.log('WALLETS LIST: ' + JSON.stringify(wallets))
-      return wallets
+      return true
     } catch (e) {
       logger.error('error creating wallets: ' + JSON.stringify(e))
-      return null
-    }
-  }
-
-  async newAddress(): Promise<string | null> {
-    const messageQueue = new MessageQueue()
-    try {
-      if (this.currencyCode === 'btc') {
-        const btcAddress = await messageQueue.generateBtcAddress(this.userId)
-        await this.updateAttributes({ address: btcAddress })
-        return btcAddress
-      } else if (this.currencyCode === 'tbtc') {
-        const btcAddress = await messageQueue.generateBtcAddress(this.userId)
-        await this.updateAttributes({ address: btcAddress })
-        return btcAddress
-      }
-      return null
-    } catch (e) {
-      logger.error(
-        'Error generating new address: ' +
-          JSON.stringify(this) +
-          ', error: ' +
-          JSON.stringify(e)
-      )
-      return null
+      throw e
     }
   }
 

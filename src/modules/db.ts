@@ -10,23 +10,35 @@ export class DB {
   constructor() {
     if (DB.instance) {
       return DB.instance
+    } else {
+      DB.instance = this
+    }
+
+    if (!this.sequelize) {
+      logger.warn('DB is not yet initialized')
     }
   }
 
   init() {
-    logger.info('Initializing database')
+    try {
+      const sequelize = new Sequelize({
+        database: CONFIG.DB_DATABASE_NAME,
+        host: CONFIG.DB_HOST,
+        username: CONFIG.DB_USERNAME,
+        password: CONFIG.DB_PASSWORD,
+        dialect: 'postgres',
+        logging: function(sql: any, _sequelizeObject: any) {
+          logger.info(sql)
+        }
+      })
+      sequelize.addModels([path.resolve('src/models/')])
 
-    const sequelize = new Sequelize({
-      database: CONFIG.DB_DATABASE_NAME,
-      host: CONFIG.DB_HOST,
-      username: CONFIG.DB_USERNAME,
-      password: CONFIG.DB_PASSWORD,
-      dialect: 'postgres',
-      logging: function(sql: any, _sequelizeObject: any) {
-        logger.info(sql)
-      }
-    })
-    sequelize.addModels([path.resolve('src/models/')])
+      DB.instance = this
+      logger.info('OK: DB')
+    } catch (e) {
+      logger.error('Error: DB')
+      throw e
+    }
   }
 
   close() {

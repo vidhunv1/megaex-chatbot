@@ -5,71 +5,60 @@ if (!process.env.NODE_ENV) {
   console.log('Using system environment variables')
 }
 
-import database from './modules/db'
-import cacheConnection from './modules/cache'
-
 import * as TelegramBot from 'node-telegram-bot-api'
-import TelegramHook from './modules/telegram-hook'
-import MessageQueue from './lib/message-queue'
-
-import { User } from './models'
-import Jobs from './jobs'
-
 import logger from './modules/logger'
+import telegramHook from './modules/telegram-hook'
+import { initializeQueues, closeQueues } from './modules/queue'
+import { DB } from './modules/db'
+import { Cache } from './modules/cache'
 import { Account } from './lib/accounts'
 import TelegramHandler from './t-conversation/router'
-
 import { expirySubscription } from './t-conversation/subscriptions'
-
-; (async () => {
-  // Postgres Init
-  await database.init()
-
+;(async () => {
+  /* 
+    Initializations
+  */
   // Redis Init
+  const cacheConnection = new Cache()
   await cacheConnection.init()
-  cacheConnection.subscribeKeyExpiry(expirySubscription)
-  const redisClient = await cacheConnection.getCacheClient()
-
+  // Queue Init
+  await initializeQueues()
   // Telegram hook
-  const tBot = TelegramHook.getBot()
-
-  // Message Queue
-  const messageQueue = new MessageQueue()
-
+  const tBot = telegramHook.getBot()
+  // Postgres Init
+  await new DB().init()
+  cacheConnection.subscribeKeyExpiry(expirySubscription)
   // Cron Jobs
-  const jobs = new Jobs()
-  jobs.start()
+  // const jobs = new Jobs()
+  // jobs.start()
 
-  // Telegram bot incoming message router
+  /* 
+    TEST code:
+  */
+  /*
+  END
+  */
+
   const tMessageHandler = new TelegramHandler()
-
   tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
     try {
       if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
-        const account = new Account(msg.from, msg.from.id)
+        const account = new Account(msg.from.id, msg.from)
 
         try {
           const telegramAccount = await account.createOrGetAccount()
-          tMessageHandler.handleMessage(msg, telegramAccount.user, telegramAccount)
+          tMessageHandler.handleMessage(
+            msg,
+            telegramAccount.user,
+            telegramAccount
+          )
         } catch (e) {
-          tBot.sendMessage(msg.chat.id, new User().__('error_unknown'))
+          tBot.sendMessage(msg.chat.id, 'Error creating account')
+          throw e
         }
 
         // Message tracker.
-        // TODO: Update this to also show time, remove expiry
-        if (
-          (await redisClient.existsAsync(account.keys.messageCounter.shadowKey)) == 1
-        ) {
-          await redisClient.incrAsync(account.keys.messageCounter.key)
-        } else {
-          await redisClient.setAsync(account.keys.messageCounter.key, 1)
-          await redisClient.setAsync(
-            account.keys.messageCounter.shadowKey,
-            '',
-            'EX',
-            account.keys.messageCounter.expiry
-          )
-        }
+        // Implement message tracker to see message cound and last active time
       } else if (msg.chat.type === 'group') {
         tBot.sendMessage(
           msg.chat.id,
@@ -85,6 +74,7 @@ import { expirySubscription } from './t-conversation/subscriptions'
     } catch (e) {
       logger.error('FATAL: An unknown error occurred: ' + JSON.stringify(e))
       tBot.sendMessage(msg.chat.id, 'An error occured. Please try again later.')
+      throw e
     }
   })
 
@@ -92,7 +82,10 @@ import { expirySubscription } from './t-conversation/subscriptions'
     await tBot.answerCallbackQuery(callback.id)
     const msg: TelegramBot.Message = callback.message
 
-    const telegramAccount = await (new Account(undefined, msg.chat.id)).createOrGetAccount()
+    const telegramAccount = await new Account(
+      msg.chat.id,
+      undefined
+    ).createOrGetAccount()
     tMessageHandler.handleCallbackQuery(
       callback.message,
       telegramAccount.user,
@@ -104,10 +97,10 @@ import { expirySubscription } from './t-conversation/subscriptions'
   process.on('SIGINT', async function() {
     logger.info('Ending process...')
     logger.info('closing sql')
-    await database.close()
+    await new DB().close()
     await cacheConnection.close()
-    await messageQueue.close()
-    await jobs.stop()
+    await closeQueues()
+    // await jobs.stop()
     process.exit(0)
   })
 })()

@@ -16,6 +16,10 @@ export class Cache {
     } else {
       Cache.instance = this
     }
+
+    if (!this.client || !this.pub || !this.sub) {
+      logger.warn('WalletQueue is not yet initialized.. call init()')
+    }
   }
 
   async init() {
@@ -32,13 +36,21 @@ export class Cache {
       password: CONFIG.REDIS_PASSWORD
     }
 
-    this.client = await Redis.createClient(options)
-    this.pub = await Redis.createClient(options)
-    this.sub = await Redis.createClient(options)
+    try {
+      this.client = await Redis.createClient(options)
+      this.pub = await Redis.createClient(options)
+      this.sub = await Redis.createClient(options)
 
-    await this.client.select(CONFIG.REDIS_DATABASE)
-    await this.pub.select(CONFIG.REDIS_DATABASE)
-    await this.sub.select(CONFIG.REDIS_DATABASE)
+      await this.client.select(CONFIG.REDIS_DATABASE)
+      await this.pub.select(CONFIG.REDIS_DATABASE)
+      await this.sub.select(CONFIG.REDIS_DATABASE)
+
+      Cache.instance = this
+      logger.info('OK: Redis')
+    } catch (e) {
+      logger.error('Error: Redis')
+      throw e
+    }
   }
 
   subscribeKeyExpiry(callback: (msg: string) => any) {

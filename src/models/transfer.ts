@@ -17,7 +17,7 @@ import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken'
 import logger from '../modules/logger'
 import cacheConnection from '../modules/cache'
-import CacheStore from '../cache-keys'
+import { CacheKeys } from '../cache-keys'
 import { CONFIG } from '../config'
 import { TransactionError } from './transaction'
 import { WalletError } from './wallet'
@@ -119,7 +119,7 @@ export class Transfer extends Model<Transfer> {
 
         return p
       })
-      const cacheKeys = new CacheStore(payment.id).getKeys()
+      const cacheKeys = new CacheKeys(payment.id).getKeys()
       await cacheClient.setAsync(cacheKeys.paymentExpiryTimer.key, payment.id)
       await cacheClient.setAsync(
         cacheKeys.paymentExpiryTimer.shadowKey,
@@ -181,7 +181,7 @@ export class Transfer extends Model<Transfer> {
         )
 
         // unset expiry on paymentlink
-        const cacheKeys = new CacheStore(p.id).getKeys()
+        const cacheKeys = new CacheKeys(p.id).getKeys()
         cacheClient.delAsync(cacheKeys.paymentExpiryTimer.shadowKey)
 
         return await p.updateAttributes(

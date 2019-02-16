@@ -1,7 +1,7 @@
 import { CONFIG } from './config'
 import cacheConnection from './modules/cache'
 
-export default class CacheKeys {
+export class CacheKeys {
   id: string | number
 
   constructor(id: string | number) {

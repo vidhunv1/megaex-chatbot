@@ -1,6 +1,6 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import telegramHook from '../modules/telegram-hook'
-import CacheStore from '../cache-keys'
+import { CacheKeys } from '../cache-keys'
 import logger from '../modules/logger'
 import cacheConnection from '../modules/cache'
 import NotificationManager from '../lib/notification-manager'
@@ -85,7 +85,7 @@ export default class TMHandler {
       (await accountConversation(msg, user, tUser))
 
     if (!isConversationHandled && msg.text && !msg.text.startsWith('/start')) {
-      const cacheKeys = new CacheStore(tUser.id).getKeys()
+      const cacheKeys = new CacheKeys(tUser.id).getKeys()
       const [currentContext] = await cacheClient.hmgetAsync(
         cacheKeys.tContext.key,
         cacheKeys.tContext.currentContext
@@ -133,7 +133,11 @@ export default class TMHandler {
     }
   }
 
-  async onboardUser(msg: TelegramBot.Message, user: User, tUser: TelegramAccount) {
+  async onboardUser(
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount
+  ) {
     const languagesList = I18n.getAvailableLanguages()
     const currencyList = Market.getFiatCurrencies()
     const ccKeyboardButton: TelegramBot.ReplyKeyboardMarkup = {
@@ -178,7 +182,7 @@ export default class TMHandler {
     } else if (msg.text && I18n.getLanguageCode(msg.text) != null) {
       const langCode = I18n.getLanguageCode(msg.text)
       await User.update({ locale: langCode }, { where: { id: tUser.userId } })
-      await new CacheStore(tUser.id).clearUserCache()
+      await new CacheKeys(tUser.id).clearUserCache()
       user.locale = langCode || 'en'
       await this.tBot.sendMessage(msg.chat.id, user.__('get_started_guide'), {
         parse_mode: 'Markdown'
@@ -197,7 +201,7 @@ export default class TMHandler {
         { isTermsAccepted: true },
         { where: { id: tUser.userId } }
       )
-      await new CacheStore(tUser.id).clearUserCache()
+      await new CacheKeys(tUser.id).clearUserCache()
 
       let i = 0
       while (i < currencyList.length) {
@@ -222,7 +226,7 @@ export default class TMHandler {
         { currencyCode: getCurrencyCode(msg.text) },
         { where: { id: tUser.userId } }
       )
-      await new CacheStore(tUser.id).clearUserCache()
+      await new CacheKeys(tUser.id).clearUserCache()
       this.tBot.sendMessage(msg.chat.id, user.__('initial_message'), {
         parse_mode: 'Markdown',
         reply_markup: {
@@ -245,7 +249,7 @@ export default class TMHandler {
     tUser: TelegramAccount,
     _context: string
   ): Promise<boolean> {
-    const cacheKeys = new CacheStore(tUser.id).getKeys()
+    const cacheKeys = new CacheKeys(tUser.id).getKeys()
     const cacheClient = await cacheConnection.getCacheClient()
     if (
       msg.text === user.__('/cancel') ||

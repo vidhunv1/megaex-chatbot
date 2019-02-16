@@ -43,19 +43,6 @@ describe('Models Test', function() {
         expect(createdUser.wallets[0].address).to.not.be.null
       }
     })
-
-    it('should create a new address for currency', async function() {
-      for (let i = 0; i < createdUser.wallets.length; i++) {
-        const currentAddress = createdUser.wallets[i].address
-        await createdUser.wallets[i].newAddress()
-        const updatedWallet: Wallets | null = await Wallets.findOne({
-          where: { currencyCode: createdUser.wallets[i].currencyCode }
-        })
-        expect(updatedWallet).to.not.be.null
-        updatedWallet &&
-          expect(updatedWallet.address).to.not.equal(currentAddress)
-      }
-    })
   })
 
   describe('[Transactions]', function() {

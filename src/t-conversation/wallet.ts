@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import CacheStore from '../cache-keys'
+import { CacheKeys } from '../cache-keys'
 import {
   Wallet,
   TelegramAccount,
@@ -109,7 +109,7 @@ const walletCallback = async function(
   query: ICallbackQuery
 ): Promise<boolean> {
   const cacheClient = await cacheConnection.getCacheClient()
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   switch (query.callbackFunction) {
     case ICallbackFunction.CoinSend:
       if (query.coinSend && query.coinSend.coin) {
@@ -174,36 +174,6 @@ const walletCallback = async function(
       } else {
         logger.error('Error in callback query for ' + JSON.stringify(query))
         sendErrorMessage(user, tUser)
-      }
-      return true
-    case ICallbackFunction.NewAddress:
-      await tBot.sendChatAction(msg.chat.id, 'typing')
-      let newAddress = null
-      const [cCoin] = await cacheClient.hmgetAsync(
-        cacheKeys.tContext.key,
-        cacheKeys.tContext['Wallet.coin']
-      )
-      if (cCoin) {
-        const wallet = await Wallet.findOne({
-          where: { currencyCode: cCoin, userId: user.id }
-        })
-        if (wallet) {
-          newAddress = await wallet.newAddress()
-        }
-      }
-      if (newAddress) {
-        await tBot.sendMessage(
-          tUser.id,
-          user.__('new_address_generated %s', toTitleCase(user.__n(cCoin, 1))),
-          {
-            parse_mode: 'Markdown'
-          }
-        )
-        sendCurrentAddress(user, tUser, null)
-      } else {
-        tBot.sendMessage(tUser.id, user.__('error_new_address'), {
-          parse_mode: 'Markdown'
-        })
       }
       return true
     case ICallbackFunction.QRCode:
@@ -289,7 +259,7 @@ async function sendCurrentAddress(
   deleteMessageId: number | null = null
 ) {
   const cacheClient = await cacheConnection.getCacheClient()
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   const [currentCoin] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Wallet.coin']
@@ -345,9 +315,9 @@ async function handleCoinSend(
   tUser: TelegramAccount
 ) {
   const cacheClient = await cacheConnection.getCacheClient()
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   let coin: string, isInputContext
-  ; [coin, isInputContext] = await cacheClient.hmgetAsync(
+  ;[coin, isInputContext] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Wallet.coin'],
     cacheKeys.tContext['CoinSend.isInputAmount']
@@ -594,9 +564,9 @@ async function handleWallet(
   tUser: TelegramAccount
 ) {
   const cacheClient = await cacheConnection.getCacheClient()
-  const cacheKeys = new CacheStore(tUser.id).getKeys()
+  const cacheKeys = new CacheKeys(tUser.id).getKeys()
   let currentContext, currentCoin, currentPage
-  ; [currentContext, currentCoin] = await cacheClient.hmgetAsync(
+  ;[currentContext, currentCoin] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,
     cacheKeys.tContext['Wallet.coin']
