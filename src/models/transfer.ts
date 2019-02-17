@@ -77,7 +77,7 @@ export class Transfer extends Model<Transfer> {
     currencyCode: CryptoCurrency,
     amount: number
   ): Promise<{ paymentCode?: string | null }> {
-    const cacheClient = await cacheConnection.getCacheClient()
+    const cacheClient = await cacheConnection.getClient
     const wallet: Wallet | null = await Wallet.findOne({
       attributes: ['availableBalance', 'id', 'blockedBalance'],
       where: { currencyCode: currencyCode, userId: userId }
@@ -146,7 +146,7 @@ export class Transfer extends Model<Transfer> {
     currencyCode: string
     userId: string | number
   }> {
-    const cacheClient = await cacheConnection.getCacheClient()
+    const cacheClient = await cacheConnection.getClient
 
     const p: Transfer | null = await this.getBySecret(secret)
 

@@ -35,7 +35,7 @@ const tradeConversation = async function(
   tUser: TelegramAccount
 ): Promise<boolean> {
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   if (msg && msg.text === user.__('menu_buy_sell')) {
     const rate = await Market.getValue('btc', user.currencyCode)
     let localizedRate = 'N/A'
@@ -210,7 +210,7 @@ const tradeCallback = async function(
   tUser: TelegramAccount,
   query: ICallbackQuery
 ): Promise<boolean> {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   switch (query.callbackFunction) {
     case ICallbackFunction.Buy:
@@ -320,7 +320,7 @@ const tradeContext = async function(
   tUser: TelegramAccount,
   context: string
 ): Promise<boolean> {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   const [isInputPrice] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
@@ -480,7 +480,7 @@ async function handleOrderCreate(
   tUser: TelegramAccount,
   type: 'buy' | 'sell'
 ) {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   if (!msg) return
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
 
@@ -616,7 +616,7 @@ async function handleOrderCreateInputPrice(
   tUser: TelegramAccount
 ) {
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   if (fiatPrice && fiatPrice !== NaN && fiatPrice > 0) {
     const [maxAmount, minAmount] = await cacheClient.hmgetAsync(
       cacheKeys.tContext.key,

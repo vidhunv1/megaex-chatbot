@@ -109,7 +109,7 @@ const walletCallback = async function(
   tUser: TelegramAccount,
   query: ICallbackQuery
 ): Promise<boolean> {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   switch (query.callbackFunction) {
     case ICallbackFunction.CoinSend:
@@ -259,7 +259,7 @@ async function sendCurrentAddress(
   tUser: TelegramAccount,
   deleteMessageId: number | null = null
 ) {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   const [currentCoin] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
@@ -315,7 +315,7 @@ async function handleCoinSend(
   user: User,
   tUser: TelegramAccount
 ) {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   let coin: CryptoCurrency, isInputContext
   ; [coin, isInputContext] = await cacheClient.hmgetAsync(
@@ -564,7 +564,7 @@ async function handleWallet(
   user: User,
   tUser: TelegramAccount
 ) {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   let currentContext, currentCoin, currentPage
   ; [currentContext, currentCoin] = await cacheClient.hmgetAsync(

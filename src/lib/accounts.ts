@@ -17,7 +17,7 @@ export class Account {
    */
   constructor(
     telegramId: number,
-    telegramMessage: TelegramBot.Message['from']
+    telegramMessage?: TelegramBot.Message['from']
   ) {
     this.telegramId = telegramId
     this.keys = new CacheKeys(telegramId).getKeys()
@@ -25,7 +25,7 @@ export class Account {
   }
 
   private async saveToCache(tAccount: TelegramAccount) {
-    const cacheClient = await cacheConnection.getCacheClient()
+    const cacheClient = await cacheConnection.getClient
     cacheClient.setAsync(
       this.keys.telegramAccount.key,
       JSON.stringify(tAccount),
@@ -36,7 +36,7 @@ export class Account {
 
   // This will create account if it does not exist
   async createOrGetAccount(): Promise<TelegramAccount> {
-    const cacheClient = await cacheConnection.getCacheClient()
+    const cacheClient = await cacheConnection.getClient
 
     const accountCache = await cacheClient.getAsync(
       this.keys.telegramAccount.key

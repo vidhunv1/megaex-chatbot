@@ -59,7 +59,7 @@ const accountCallback = async function(
   tUser: TelegramAccount,
   query: ICallbackQuery
 ): Promise<boolean> {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const botUsername = CONFIG.BOT_USERNAME
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   switch (query.callbackFunction) {
@@ -356,7 +356,7 @@ const accountContext = async function(
   context: string
 ): Promise<boolean> {
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   await cacheClient.hmsetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,
@@ -540,7 +540,7 @@ async function showAddPayment(
   user: User,
   tUser: TelegramAccount
 ) {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   if (
     paymethod &&
@@ -670,7 +670,7 @@ async function showAccount(
       JSON.stringify(user)
   )
   if (!msg.text || !msg.entities) return
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   await cacheClient.hmsetAsync(
     cacheKeys.tContext.key,

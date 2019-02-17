@@ -40,3 +40,5 @@ export class I18n {
     return undefined
   }
 }
+
+export default new I18n()

@@ -66,7 +66,7 @@ export class CacheKeys {
   }
 
   async clearUserCache() {
-    const cacheClient = await cacheConnection.getCacheClient()
+    const cacheClient = cacheConnection.getClient
     await cacheClient.delAsync(this.getKeys().telegramAccount.key)
   }
 }

@@ -77,7 +77,7 @@ export default class TMHandler {
     user: User,
     tUser: TelegramAccount
   ) {
-    const cacheClient = await cacheConnection.getCacheClient()
+    const cacheClient = await cacheConnection.getClient
     const isConversationHandled: boolean =
       (await walletConversation(msg, user, tUser)) ||
       (await tradeConversation(msg, user, tUser)) ||
@@ -250,7 +250,7 @@ export default class TMHandler {
     _context: string
   ): Promise<boolean> {
     const cacheKeys = new CacheKeys(tUser.id).getKeys()
-    const cacheClient = await cacheConnection.getCacheClient()
+    const cacheClient = await cacheConnection.getClient
     if (
       msg.text === user.__('/cancel') ||
       msg.text === user.__('cancel_text')

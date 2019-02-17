@@ -63,7 +63,7 @@ export class Cache {
       this.pub.sendCommand(
         'config',
         ['set', 'notify-keyspace-events', 'Ex'],
-        async function() {
+        async () => {
           const expired_subKey =
             '__keyevent@' + CONFIG.REDIS_DATABASE + '__:expired'
           await sub.subscribe(expired_subKey, () => {
@@ -71,10 +71,7 @@ export class Cache {
               'Activated expiry pub subsciptions: notify-kespace-events(Ex) - Keyevent-expiry'
             )
 
-            sub!.on('message', async function(channel, message) {
-              logger.info(
-                'Received expiry message: ' + channel + ', ' + message
-              )
+            sub!.on('message', async (_channel, message) => {
               callback(message)
             })
           })
@@ -107,13 +104,11 @@ export class Cache {
     }
   }
 
-  async getCacheClient() {
+  get getClient() {
     if (!this.client) {
-      await this.init()
-    } else {
-      // any is used since we are using bluebird to promisify methods
-      return this.client as any
+      logger.error('FATAL! Client is not defined')
     }
+    return this.client as any
   }
 
   getCachePub() {

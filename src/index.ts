@@ -14,7 +14,7 @@ import { Cache } from './modules/cache'
 import { Account } from './lib/accounts'
 import TelegramHandler from './t-conversation/router'
 import { expirySubscription } from './t-conversation/subscriptions'
-;(async () => {
+; (async () => {
   /* 
     Initializations
   */

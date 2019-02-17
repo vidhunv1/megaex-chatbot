@@ -8,7 +8,7 @@ import { keyboardMenu } from '../../t-conversation/defaults'
 import { TelegramAccount, User, Transfer } from '../../models'
 
 export const expirySubscription = async (msg: string) => {
-  const cacheClient = await cacheConnection.getCacheClient()
+  const cacheClient = await cacheConnection.getClient
   const notificationManager = new NotificationManager()
   const tBot = telegramHook.getBot()
 
