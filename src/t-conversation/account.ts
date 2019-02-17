@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { CacheKeys } from '../cache-keys'
+import { CacheKeys } from '../lib/cache-keys'
 import { PaymentMethod, PaymentDetail, User, TelegramAccount } from '../models'
 import telegramHook from '../modules/telegram-hook'
 import cacheConnection from '../modules/cache'

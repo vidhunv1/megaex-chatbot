@@ -1,6 +1,6 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import telegramHook from '../modules/telegram-hook'
-import { CacheKeys } from '../cache-keys'
+import { CacheKeys } from '../lib/cache-keys'
 import logger from '../modules/logger'
 import cacheConnection from '../modules/cache'
 import { NotificationManager } from '../lib/notification-manager'

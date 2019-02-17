@@ -2,7 +2,7 @@ import cacheConnection from '../modules/cache'
 import * as TelegramBot from 'node-telegram-bot-api'
 import logger from '../modules/logger'
 
-import { CacheKeys } from '../cache-keys'
+import { CacheKeys } from './cache-keys'
 import { User, TelegramAccount, Wallet } from '../models'
 
 export class Account {

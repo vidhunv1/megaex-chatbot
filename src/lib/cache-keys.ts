@@ -1,5 +1,6 @@
-import { CONFIG } from './config'
-import cacheConnection from './modules/cache'
+import { CONFIG } from '../config'
+import cacheConnection from '../modules/cache'
+import logger from '../modules/logger'
 
 export class CacheKeys {
   id: string | number
@@ -11,14 +12,13 @@ export class CacheKeys {
   static getIdFromKey(key: string) {
     const id = key.split(':')[1]
     if (!id || id === '')
-      console.error(
+      logger.error(
         'Id is not available, maybe you passed undefined id when accessing id'
       )
     return id
   }
 
   static isKey(checkKey: string, actualKey: string) {
-    console.log('isKey() ' + checkKey + ', ' + actualKey)
     return (
       checkKey === actualKey ||
       checkKey.split(':')[0] === actualKey ||

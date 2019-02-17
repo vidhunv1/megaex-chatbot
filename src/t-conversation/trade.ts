@@ -18,7 +18,7 @@ import {
   keyboardMenu,
   parseRange
 } from './defaults'
-import { CacheKeys } from '../cache-keys'
+import { CacheKeys } from '../lib/cache-keys'
 import { CONFIG } from '../config'
 
 const tBot = telegramHook.getBot()
@@ -432,7 +432,7 @@ const tradeContext = async function(
     if (msg.text.indexOf('%') > -1) {
       const margin = parseFloat(msg.text)
       if (margin >= 0) {
-        ;[updatedRows] = await Order.update(
+        [updatedRows] = await Order.update(
           { marginPercentage: margin, price: null },
           { where: { id: orderId } }
         )
@@ -445,7 +445,7 @@ const tradeContext = async function(
     } else {
       const rate = parseInt(msg.text)
       if (rate >= 0) {
-        ;[updatedRows] = await Order.update(
+        [updatedRows] = await Order.update(
           { price: rate },
           { where: { id: orderId } }
         )
