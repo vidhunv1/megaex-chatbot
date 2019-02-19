@@ -21,7 +21,6 @@ export const CONFIG = {
   JWT_SECRET: getEnv('JWT_SECRET'),
   HASH_SALT: getEnv('HASH_SALT'),
   PAYMENT_EXPIRY_S: parseInt(getEnv('PAYMENT_EXPIRY_S')),
-  CONTEXT_EXPIRY_S: parseInt(getEnv('CONTEXT_EXPIRY_S')),
 
   DB_USERNAME: getEnv('DB_USERNAME'),
   DB_PASSWORD: getEnv('DB_PASSWORD'),
