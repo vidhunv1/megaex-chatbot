@@ -8,9 +8,9 @@ import { keyboardMenu } from '../../t-conversation/defaults'
 import { TelegramAccount, User, Transfer } from '../../models'
 
 export const expirySubscription = async (msg: string) => {
-  const cacheClient = await cacheConnection.getClient
+  const cacheClient = cacheConnection.getClient
   const notificationManager = new NotificationManager()
-  const tBot = telegramHook.getBot()
+  const tBot = telegramHook.getBot
 
   if (
     CacheKeys.isKey(msg, new CacheKeys(1).getKeys().messageCounter.shadowKey)
@@ -57,6 +57,7 @@ export const expirySubscription = async (msg: string) => {
           ', ' +
           JSON.stringify(e)
       )
+      throw e
     }
   } else if (CacheKeys.isKey(msg, new CacheKeys(1).getKeys().tContext.key)) {
     const telegramId = CacheKeys.getIdFromKey(msg)

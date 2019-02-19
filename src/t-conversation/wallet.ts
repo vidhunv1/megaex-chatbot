@@ -31,7 +31,7 @@ import { CryptoCurrency } from '../constants/currencies'
 const CONTEXT_WALLET = 'Wallet'
 const CONTEXT_COINSEND = 'CoinSend'
 
-const tBot = telegramHook.getBot()
+const tBot = telegramHook.getBot
 const notificationManager: NotificationManager = new NotificationManager()
 const walletConversation = async function(
   msg: TelegramBot.Message,

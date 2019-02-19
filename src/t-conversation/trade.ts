@@ -21,7 +21,7 @@ import {
 import { CacheKeys } from '../lib/cache-keys'
 import { CONFIG } from '../config'
 
-const tBot = telegramHook.getBot()
+const tBot = telegramHook.getBot
 
 const CONTEXT_TRADE_BUY = 'TRADE_BUY'
 const CONTEXT_TRADE_SELL = 'TRADE_SELL'

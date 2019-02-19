@@ -7,7 +7,7 @@ import {
   stringifyCallbackQuery
 } from './defaults'
 
-const tBot = telegramHook.getBot()
+const tBot = telegramHook.getBot
 const infoConversation = async function(
   msg: TelegramBot.Message | null,
   user: User,

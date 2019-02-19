@@ -18,7 +18,7 @@ export class NotificationManager {
   }
 
   async sendNotification(notificationType: NotificationType, data: any) {
-    const tBot = telegramHook.getBot()
+    const tBot = telegramHook.getBot
     let user
     switch (notificationType) {
       case NotificationType.NEW_TRANSACTION:

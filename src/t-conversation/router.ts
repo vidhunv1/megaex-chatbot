@@ -29,7 +29,7 @@ export default class TMHandler {
     if (TMHandler.instance) return TMHandler.instance
     this.notificationManager = new NotificationManager()
 
-    this.tBot = telegramHook.getBot()
+    this.tBot = telegramHook.getBot
     TMHandler.instance = this
   }
 

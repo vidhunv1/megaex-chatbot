@@ -19,7 +19,7 @@ const CONTEXT_ADDPAYMETHOD = 'CONTEXT_ADDPAYMETHOD'
 const CONTEXT_ENTERPAYMETHOD = 'CONTEXT_ENTERPAYMETHOD'
 // let ENTER_PAYMETHOD_EXPIRY = 30
 
-const tBot = telegramHook.getBot()
+const tBot = telegramHook.getBot
 const accountConversation = async function(
   msg: TelegramBot.Message,
   user: User,

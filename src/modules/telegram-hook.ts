@@ -29,7 +29,7 @@ export class TelegramHook {
     TelegramHook.instance = this
   }
 
-  getBot() {
+  get getBot() {
     return this.bot
   }
 }

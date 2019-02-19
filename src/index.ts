@@ -24,7 +24,7 @@ import { expirySubscription } from './t-conversation/subscriptions'
   // Queue Init
   await initializeQueues()
   // Telegram hook
-  const tBot = telegramHook.getBot()
+  const tBot = telegramHook.getBot
   // Postgres Init
   await new DB().init()
   cacheConnection.subscribeKeyExpiry(expirySubscription)
