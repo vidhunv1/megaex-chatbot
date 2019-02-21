@@ -1,4 +1,7 @@
 {
+  "signup.choose-language": "Welcome. Please choose your language from the options below.",
+
+
 	"error_unknown": "An error occured please try again later",
 	"get_started_guide": "Welcome to MegaEx, the fast and secure multi-cryptocurrency wallet and peer-to-peer Bitcoin exchange.\n\nYou can read the getting-started guide for more information on using MegaEx for using the crypto wallet, trading and security practices.",
   "tc_privacy": "Please read our [Terms](https://google.com) and [Privacy Policy](https://google.com). Tap on *I Agree* from input below to accept.",

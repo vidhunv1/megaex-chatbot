@@ -1,4 +1,13 @@
-export const getCommand = (message: string): BotCommand | null => {
+import{ BotCommand, DeepLink } from './types'
+import * as TelegramBot from 'node-telegram-bot-api'
+
+export const getBotCommand = (msg: TelegramBot.Message): BotCommand | null => {
+  if (!isBotCommand(msg)) {
+    return null
+  }
+
+  // This cannot be undefined, so casting it
+  const message = msg.text as string
   if (message.startsWith('/')) {
     if (message.startsWith(BotCommand.START)) {
       return BotCommand.START
@@ -8,6 +17,8 @@ export const getCommand = (message: string): BotCommand | null => {
       return BotCommand.HELP
     } else if (message.startsWith(BotCommand.USER)) {
       return BotCommand.USER
+    } else if (message.startsWith(BotCommand.TRANSACTIONS)) {
+      return BotCommand.TRANSACTIONS
     }
   }
 
@@ -15,13 +26,18 @@ export const getCommand = (message: string): BotCommand | null => {
 }
 
 export const parseDeepLink = (
-  message: string
+  msg: TelegramBot.Message
 ): { key: DeepLink; value: string } | null => {
-  if (getCommand(message) === BotCommand.START) {
-    const query = message.replace('/start', '').replace(' ', '')
+
+  if (getBotCommand(msg) === BotCommand.START && msg.text) {
+    const query = msg.text.replace('/start', '').replace(' ', '')
     const [key, value] = query.split('-')
     return { key: key as DeepLink, value }
   }
 
   return null
+}
+
+export const isBotCommand = (msg: TelegramBot.Message) => {
+  return msg.text && msg.entities && msg.entities[0].type === 'bot_command'
 }

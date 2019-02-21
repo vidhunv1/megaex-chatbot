@@ -12,7 +12,7 @@ import { initializeQueues, closeQueues } from './modules/queue'
 import { DB } from './modules/db'
 import { Cache } from './modules/cache'
 import { Account } from './lib/accounts'
-import TelegramHandler from './t-conversation/router'
+import { Router } from './t-conversation/router/'
 import { expirySubscription } from './t-conversation/subscriptions'
 ; (async () => {
   /* 
@@ -39,7 +39,7 @@ import { expirySubscription } from './t-conversation/subscriptions'
   END
   */
 
-  const tMessageHandler = new TelegramHandler()
+
   tBot.on('message', async function onMessage(msg: TelegramBot.Message) {
     try {
       if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
@@ -47,7 +47,7 @@ import { expirySubscription } from './t-conversation/subscriptions'
 
         try {
           const telegramAccount = await account.createOrGetAccount()
-          tMessageHandler.handleMessage(
+          Router.routeMessage(
             msg,
             telegramAccount.user,
             telegramAccount
@@ -86,7 +86,7 @@ import { expirySubscription } from './t-conversation/subscriptions'
       msg.chat.id,
       undefined
     ).createOrGetAccount()
-    tMessageHandler.handleCallbackQuery(
+    Router.routeCallback(
       callback.message,
       telegramAccount.user,
       telegramAccount,
