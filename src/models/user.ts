@@ -11,7 +11,7 @@ import {
   HasMany
 } from 'sequelize-typescript'
 import { TelegramAccount, Wallet, Transaction, PaymentMethod } from './'
-import { I18n } from '../modules/i18n'
+import i18n from '../modules/i18n'
 
 @Table({ timestamps: true, tableName: 'Users' })
 export class User extends Model<User> {
@@ -70,20 +70,20 @@ export class User extends Model<User> {
   messageCount!: number
 
   __(...args: any[]): string {
-    const locale = this.locale ? this.locale : 'en'
-    const i18n = new I18n().getI18n
-    args[0] = { phrase: args[0], locale: locale }
-    return i18n.__.apply(null, args as any)
+    return i18n.getI18n.t(args[0], { lng: this.locale })
+    // const locale = this.locale ? this.locale : 'en'
+    // const i18n = new I18n().getI18n
+    // args[0] = { phrase: args[0], locale: locale }
+    // return i18n.__.apply(null, args as any)
+
   }
 
-  __n(phrase: string, count: number): string {
-    const i18n = new I18n().getI18n
-    return i18n.__n({
-      singular: phrase,
-      plural: phrase,
-      count: count,
-      locale: 'en'
-    })
+  __n(phrase: string, _count: number): string {
+    return i18n.getI18n.t(phrase, { lng: this.locale })
+  }
+
+  t(key: string, values: any): string {
+    return i18n.getI18n.t(key, { ...values, lng: this.locale })
   }
 }
 
