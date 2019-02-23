@@ -3,5 +3,6 @@ export enum CryptoCurrency {
 }
 
 export enum FiatCurrency {
-  USD
+  USD,
+  INR
 }
