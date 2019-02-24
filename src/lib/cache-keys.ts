@@ -1,5 +1,7 @@
+// TODO: Delete this file
+
 import { CONFIG } from '../config'
-import cacheConnection from '../modules/cache'
+import cacheClient from '../modules/cache'
 import logger from '../modules/logger'
 
 export enum ROOT_KEYS {
@@ -87,7 +89,6 @@ export class CacheKeys {
   }
 
   async clearUserCache() {
-    const cacheClient = cacheConnection.getClient
-    await cacheClient.delAsync(this.getKeys().telegramAccount.key)
+    await cacheClient.getClient.delAsync(this.getKeys().telegramAccount.key)
   }
 }
