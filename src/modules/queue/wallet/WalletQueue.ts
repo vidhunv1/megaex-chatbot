@@ -66,7 +66,7 @@ export class WalletQueue {
   }
 
   initializeConsumers() {
-    this.queue.process(WalletJobs.GENERATED_ADDRESS, async (jobs) => {
+    this.queue.process(WalletJobs.GENERATED_ADDRESS, async (jobs: any) => {
       logger.error(
         `TODO: ${
           WalletJobs.GENERATED_ADDRESS
@@ -82,7 +82,7 @@ export class WalletQueue {
       return Wallet.updateNewAddress(userId, currency, address)
     })
 
-    this.queue.process(WalletJobs.DEPOSIT_ALERT, (_jobs) => {
+    this.queue.process(WalletJobs.DEPOSIT_ALERT, (_jobs: any) => {
       logger.error('TODO: wallet-queue Handle new deposits')
       // TODO: Handle new deposit
 

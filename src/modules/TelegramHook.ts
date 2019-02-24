@@ -3,7 +3,7 @@ import { CONFIG } from '../config'
 
 export class TelegramHook {
   static instance: TelegramHook
-  bot!: NodeTelegramBot
+  private bot!: NodeTelegramBot
 
   constructor() {
     if (TelegramHook.instance) {
@@ -29,7 +29,7 @@ export class TelegramHook {
     TelegramHook.instance = this
   }
 
-  get getBot() {
+  get getWebhook() {
     return this.bot
   }
 }

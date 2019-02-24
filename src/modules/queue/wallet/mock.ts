@@ -1,4 +1,4 @@
-import walletQueue, { ProducerTypes } from './wallet-queue'
+import walletQueue, { ProducerTypes } from './WalletQueue'
 import Queue = require('bull')
 import { WalletJobs, WalletJobProducer } from './types'
 import { CryptoCurrency } from '../../../constants/currencies'
