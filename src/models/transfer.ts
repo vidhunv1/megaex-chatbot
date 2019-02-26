@@ -16,7 +16,7 @@ import RandomGenerator from '../lib/random-generator'
 import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken'
 import logger from '../modules/logger'
-import cacheConnection from '../modules/cache'
+import cacheClient from '../modules/cache'
 import { CacheKeys } from '../lib/cache-keys'
 import { CONFIG } from '../config'
 import { TransactionError } from './transaction'
@@ -77,7 +77,6 @@ export class Transfer extends Model<Transfer> {
     currencyCode: CryptoCurrency,
     amount: number
   ): Promise<{ paymentCode?: string | null }> {
-    const cacheClient = await cacheConnection.getClient
     const wallet: Wallet | null = await Wallet.findOne({
       attributes: ['availableBalance', 'id', 'blockedBalance'],
       where: { currencyCode: currencyCode, userId: userId }
@@ -121,8 +120,11 @@ export class Transfer extends Model<Transfer> {
         return p
       })
       const cacheKeys = new CacheKeys(payment.id).getKeys()
-      await cacheClient.setAsync(cacheKeys.paymentExpiryTimer.key, payment.id)
-      await cacheClient.setAsync(
+      await cacheClient.getClient.setAsync(
+        cacheKeys.paymentExpiryTimer.key,
+        payment.id
+      )
+      await cacheClient.getClient.setAsync(
         cacheKeys.paymentExpiryTimer.shadowKey,
         '',
         'EX',
@@ -146,8 +148,6 @@ export class Transfer extends Model<Transfer> {
     currencyCode: string
     userId: string | number
   }> {
-    const cacheClient = await cacheConnection.getClient
-
     const p: Transfer | null = await this.getBySecret(secret)
 
     if (!p) throw new TransferError(TransferError.NOT_FOUND)
@@ -183,7 +183,7 @@ export class Transfer extends Model<Transfer> {
 
         // unset expiry on paymentlink
         const cacheKeys = new CacheKeys(p.id).getKeys()
-        cacheClient.delAsync(cacheKeys.paymentExpiryTimer.shadowKey)
+        cacheClient.getClient.delAsync(cacheKeys.paymentExpiryTimer.shadowKey)
 
         return await p.updateAttributes(
           { status: 'claimed', claimant: claimantUserId },
