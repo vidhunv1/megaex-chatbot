@@ -34,7 +34,20 @@ export interface ConversationParams {
 }
 
 export interface ChatHandler {
-  handleCommand: (msg: TelegramBot.Message, user: User, tUser: TelegramAccount) => Promise<boolean>
-  handleCallback: (msg: TelegramBot.Message, user: User, tUser: TelegramAccount, callback: TelegramBot.CallbackQuery) => Promise<boolean>
-  handleContext: (msg: TelegramBot.Message, user: User, tUser: TelegramAccount) => Promise<boolean>
+  handleCommand: (
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount
+  ) => Promise<boolean>
+  handleCallback: (
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount,
+    callback: TelegramBot.CallbackQuery
+  ) => Promise<boolean>
+  handleContext: (
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount
+  ) => Promise<boolean>
 }

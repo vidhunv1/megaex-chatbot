@@ -28,7 +28,6 @@ export const getBotCommand = (msg: TelegramBot.Message): BotCommand | null => {
 export const parseDeepLink = (
   msg: TelegramBot.Message
 ): { key: DeepLink; value: string } | null => {
-
   if (getBotCommand(msg) === BotCommand.START && msg.text) {
     const query = msg.text.replace('/start', '').replace(' ', '')
     const [key, value] = query.split('-')

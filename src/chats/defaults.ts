@@ -142,13 +142,13 @@ const stringifyCallbackQuery = function(
 
 const parseCallbackQuery = function(query: string): ICallbackQuery {
   let callbackFunction, obj, pairs: string[], tKey, tVal
-  [callbackFunction, obj] = query.split(':')
+  ;[callbackFunction, obj] = query.split(':')
   const res: any = { callbackFunction }
   res[callbackFunction] = {}
   pairs = obj ? obj.split(',') : []
   for (let i = 0; i < pairs.length; i++) {
     if (pairs.length > 0) {
-      [tKey, tVal] = pairs[i].split('=')
+      ;[tKey, tVal] = pairs[i].split('=')
       if (tKey === 'messageId') res[tKey] = tVal
       else res[callbackFunction][tKey] = tVal
     }

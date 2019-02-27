@@ -1,5 +1,8 @@
 import { CacheKeys } from '../../lib/cache-keys'
-import { NotificationManager, NotificationType } from '../../lib/NotificationManager'
+import {
+  NotificationManager,
+  NotificationType
+} from '../../lib/NotificationManager'
 import telegramHook from '../../modules/TelegramHook'
 import logger from '../../modules/Logger'
 import cacheConnection from '../../modules/Cache'
@@ -18,7 +21,7 @@ export const expirySubscription = async (msg: string) => {
     const telegramId = CacheKeys.getIdFromKey(msg)
     const rKeys = new CacheKeys(telegramId).getKeys()
     const cacheCount: number = parseInt(
-      await cacheClient.getAsync(rKeys.messageCounter.key) || '0'
+      (await cacheClient.getAsync(rKeys.messageCounter.key)) || '0'
     )
     const tUser = await TelegramAccount.findById(telegramId, {
       include: [{ model: User }]

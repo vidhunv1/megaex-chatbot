@@ -14,7 +14,10 @@ import * as QRCode from 'qrcode'
 import cacheConnection from '../modules/Cache'
 import telegramHook from '../modules/TelegramHook'
 import logger from '../modules/Logger'
-import { NotificationManager, NotificationType } from '../lib/NotificationManager'
+import {
+  NotificationManager,
+  NotificationType
+} from '../lib/NotificationManager'
 import { CONFIG } from '../config'
 
 import {
@@ -318,7 +321,7 @@ async function handleCoinSend(
   const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   let coin: CryptoCurrency, isInputContext
-  ; [coin, isInputContext] = await cacheClient.hmgetAsync(
+  ;[coin, isInputContext] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext['Wallet.coin'],
     cacheKeys.tContext['CoinSend.isInputAmount']
@@ -567,7 +570,7 @@ async function handleWallet(
   const cacheClient = await cacheConnection.getClient
   const cacheKeys = new CacheKeys(tUser.id).getKeys()
   let currentContext, currentCoin, currentPage
-  ; [currentContext, currentCoin] = await cacheClient.hmgetAsync(
+  ;[currentContext, currentCoin] = await cacheClient.hmgetAsync(
     cacheKeys.tContext.key,
     cacheKeys.tContext.currentContext,
     cacheKeys.tContext['Wallet.coin']

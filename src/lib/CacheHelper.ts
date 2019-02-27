@@ -5,19 +5,19 @@ import { State } from '../types'
 export const KEY_SEPERATOR = ':'
 
 export enum ChatContext {
-    Signup = 'signup'
+  Signup = 'signup'
 }
 
 export enum CacheKey {
-    TelegramAccount = 't-account',
-    Context = 't-context',
-    State = 't-state'
+  TelegramAccount = 't-account',
+  Context = 't-context',
+  State = 't-state'
 }
 
 export const CacheExpiry: Record<CacheKey, number | null> = {
-    [CacheKey.TelegramAccount]: 60 * 60,
-    [CacheKey.Context]: null,
-    [CacheKey.State]: null
+  [CacheKey.TelegramAccount]: 60 * 60,
+  [CacheKey.Context]: null,
+  [CacheKey.State]: null
 }
 
 const cacheKeys = Object.values(CacheKey)
@@ -41,11 +41,11 @@ export const CacheHelper = {
   },
 
   getNormalizedKey(formattedKey: string) {
-      if (formattedKey.includes(KEY_SEPERATOR)) {
-        return formattedKey.split(KEY_SEPERATOR)[0]
-      } else {
-          return formattedKey
-      }
+    if (formattedKey.includes(KEY_SEPERATOR)) {
+      return formattedKey.split(KEY_SEPERATOR)[0]
+    } else {
+      return formattedKey
+    }
   },
 
   getKeyForUser(key: CacheKey, id: number) {
@@ -54,7 +54,7 @@ export const CacheHelper = {
 
   isValidKey(key: string) {
     const normalizedKey = this.getNormalizedKey(key)
-    
+
     return cacheKeys.includes(normalizedKey)
   },
 
@@ -63,18 +63,29 @@ export const CacheHelper = {
   },
 
   async setContext(context: ChatContext, id: number) {
-    await cacheClient.setAsync(this.getKeyForUser(CacheKey.Context, id), context)
+    await cacheClient.setAsync(
+      this.getKeyForUser(CacheKey.Context, id),
+      context
+    )
   },
 
   async setState(state: State<any>, id: number) {
-    await cacheClient.setAsync(this.getKeyForUser(CacheKey.State, id), JSON.stringify(state))
+    await cacheClient.setAsync(
+      this.getKeyForUser(CacheKey.State, id),
+      JSON.stringify(state)
+    )
   },
 
   async getContext(id: number): Promise<ChatContext | null> {
-    return await cacheClient.getAsync(this.getKeyForUser(CacheKey.Context, id)) as ChatContext
+    return (await cacheClient.getAsync(
+      this.getKeyForUser(CacheKey.Context, id)
+    )) as ChatContext
   },
 
   async getState<T>(id: number): Promise<State<T>> {
-    return JSON.parse(await cacheClient.getAsync(this.getKeyForUser(CacheKey.State, id)) || '{}')
+    return JSON.parse(
+      (await cacheClient.getAsync(this.getKeyForUser(CacheKey.State, id))) ||
+        '{}'
+    )
   }
 }

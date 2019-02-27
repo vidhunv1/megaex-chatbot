@@ -1,3 +1,3 @@
 export default {
-    'hello': 'Welcome to megaex'
+  hello: 'Welcome to megaex'
 }

@@ -1,3 +1,3 @@
 export default {
-    'hello': ' {{ name }}Shusdihasfjsha'
+  hello: ' {{ name }}Shusdihasfjsha'
 }

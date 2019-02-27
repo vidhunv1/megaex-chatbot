@@ -6,7 +6,12 @@ import { CONFIG } from '../config'
 
 export interface RedisAPI {
   getAsync: (key: string) => Promise<string | null>
-  setAsync: (key: string, value: string | number, option1?: 'EX', value1?: number) => Promise<'OK' | string>
+  setAsync: (
+    key: string,
+    value: string | number,
+    option1?: 'EX',
+    value1?: number
+  ) => Promise<'OK' | string>
   delAsync: (key: string) => Promise<'OK' | string>
 }
 export class Cache {
@@ -113,7 +118,7 @@ export class Cache {
     if (!this.client) {
       logger.error('FATAL! Cache Client is not defined')
     }
-    return this.client as any as RedisAPI
+    return (this.client as any) as RedisAPI
   }
 
   getCachePub() {

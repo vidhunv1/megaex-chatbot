@@ -75,7 +75,6 @@ export class User extends Model<User> {
     // const i18n = new I18n().getI18n
     // args[0] = { phrase: args[0], locale: locale }
     // return i18n.__.apply(null, args as any)
-
   }
 
   __n(phrase: string, _count: number): string {
