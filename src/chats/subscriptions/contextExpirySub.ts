@@ -5,13 +5,15 @@ import {
 } from '../../lib/NotificationManager'
 import telegramHook from '../../modules/TelegramHook'
 import logger from '../../modules/Logger'
-import cacheConnection from '../../modules/Cache'
+import { RedisAPI } from '../../modules/Cache'
 import { keyboardMenu } from '../defaults'
 
 import { TelegramAccount, User, Transfer } from '../../models'
 
-export const expirySubscription = async (msg: string) => {
-  const cacheClient = cacheConnection.getClient
+export const expirySubscription = async (
+  msg: string,
+  cacheClient: RedisAPI
+) => {
   const notificationManager = new NotificationManager()
   const tBot = telegramHook.getWebhook
 

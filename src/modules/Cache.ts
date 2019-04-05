@@ -117,6 +117,7 @@ export class Cache {
   get getClient() {
     if (!this.client) {
       logger.error('FATAL! Cache Client is not defined')
+      throw new Error('cache.ts getClient() client not defined')
     }
     return (this.client as any) as RedisAPI
   }
