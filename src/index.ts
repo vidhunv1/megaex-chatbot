@@ -7,32 +7,14 @@ if (!process.env.NODE_ENV) {
 
 require('module-alias/register')
 
+import db from 'modules/DB'
+import cacheConnection from 'modules/Cache'
 import * as TelegramBot from 'node-telegram-bot-api'
-import logger from 'modules/Logger'
 import tHook from 'modules/TelegramHook'
-import { initializeQueues, closeQueues } from 'modules/queue'
-import { DB } from 'modules/db'
-import { Cache } from 'modules/cache'
 import { Account } from 'lib/Account'
 import { Router } from 'chats/router'
-import { expirySubscription } from 'chats/subscriptions'
+import logger from 'modules/Logger'
 ;(async () => {
-  /* 
-    Initializations
-  */
-  // Redis Init
-  const cacheConnection = new Cache()
-  await cacheConnection.init()
-
-  // Queue Init
-  await initializeQueues()
-  // Telegram hook
-  // Postgres Init
-  await new DB().init()
-  cacheConnection.subscribeKeyExpiry((msg: string) =>
-    expirySubscription(msg, cacheConnection.getClient)
-  )
-
   tHook.getWebhook.on('message', async function onMessage(
     msg: TelegramBot.Message
   ) {
@@ -45,12 +27,9 @@ import { expirySubscription } from 'chats/subscriptions'
           Router.routeMessage(msg, telegramAccount.user, telegramAccount)
         } catch (e) {
           logger.error('index.ts#44 Unable to create account')
-          tHook.getWebhook.sendMessage(msg.chat.id, 'Error creating account')
+          tHook.getWebhook.sendMessage(msg.chat.id, 'Error screating account')
           throw e
         }
-
-        // Message tracker.
-        // Implement message tracker to see message cound and last active time
       } else if (msg.chat.type === 'group') {
         tHook.getWebhook.sendMessage(
           msg.chat.id,
@@ -92,9 +71,9 @@ import { expirySubscription } from 'chats/subscriptions'
   process.on('SIGINT', async function() {
     logger.info('Ending process...')
     logger.info('closing sql')
-    await new DB().close()
+
+    await db.close()
     await cacheConnection.close()
-    await closeQueues()
     // await jobs.stop()
     process.exit(0)
   })

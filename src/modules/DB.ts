@@ -1,5 +1,12 @@
 import { Sequelize } from 'sequelize-typescript'
-import logger from '../modules/logger'
+import logger from 'modules/logger'
+import {
+  TelegramAccount,
+  User,
+  Wallet,
+  Transaction,
+  PaymentMethod
+} from 'models'
 import { CONFIG } from '../config'
 import path = require('path')
 
@@ -12,6 +19,7 @@ export class DB {
       return DB.instance
     } else {
       DB.instance = this
+      this.init()
     }
 
     if (!this.sequelize) {
@@ -32,7 +40,13 @@ export class DB {
           logger.info(sql)
         }
       })
-      sequelize.addModels([path.resolve('src/models/')])
+      sequelize.addModels([
+        TelegramAccount,
+        User,
+        Wallet,
+        Transaction,
+        PaymentMethod
+      ])
 
       DB.instance = this
       logger.info('OK: DB')

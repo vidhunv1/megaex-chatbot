@@ -1,4 +1,4 @@
-import { CacheKeys } from 'lib/cache-keys'
+import { CacheKeys } from 'lib/_cache-keys'
 import { NotificationManager, NotificationType } from 'lib/NotificationManager'
 import telegramHook from 'modules/TelegramHook'
 import logger from 'modules/Logger'

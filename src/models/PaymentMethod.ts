@@ -9,7 +9,7 @@ import {
   DataType,
   BelongsTo
 } from 'sequelize-typescript'
-import { User, PaymentDetail } from './'
+import { User, PaymentDetail } from '.'
 
 @Table({ timestamps: true, tableName: 'PaymentMethods', paranoid: true })
 export class PaymentMethod extends Model<PaymentMethod> {

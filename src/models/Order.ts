@@ -11,7 +11,7 @@ import {
   Default,
   Sequelize
 } from 'sequelize-typescript'
-import { User, Transaction, Wallet } from './'
+import { User, Transaction, Wallet } from '.'
 import logger from '../modules/logger'
 
 @Table({ timestamps: true, tableName: 'Orders' })

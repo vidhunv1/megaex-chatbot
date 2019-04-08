@@ -6,8 +6,8 @@ import logger from 'modules/logger'
 export * from './wallet/types'
 
 export async function initializeQueues() {
-  const walletQueue = new WalletQueue()
-  await walletQueue.init()
+  console.log('Init wallet queue')
+  new WalletQueue()
 
   // MOCKS
 

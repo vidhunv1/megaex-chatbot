@@ -10,7 +10,7 @@ import {
   Default,
   HasMany
 } from 'sequelize-typescript'
-import { TelegramAccount, Wallet, Transaction, PaymentMethod } from './'
+import { TelegramAccount, Wallet, Transaction, PaymentMethod } from '.'
 import i18n from '../modules/i18n'
 import logger from '../modules/Logger'
 import { LanguageISO, Language } from '../constants/languages'

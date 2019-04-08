@@ -1,6 +1,8 @@
 import * as Redis from 'redis'
 import * as Bluebird from 'bluebird'
 import logger from 'modules/logger'
+import { initializeQueues, closeQueues } from 'modules/queue'
+import { expirySubscription } from 'chats/subscriptions'
 
 import { CONFIG } from '../config'
 
@@ -14,21 +16,25 @@ export interface RedisAPI {
   ) => Promise<'OK' | string>
   delAsync: (key: string) => Promise<'OK' | string>
 }
+
 export class Cache {
-  static instance: Cache
+  static instance?: Cache = undefined
   private client!: Redis.RedisClient
   private pub!: Redis.RedisClient
   private sub!: Redis.RedisClient
+  private isExpirySubscriptionInitialized: boolean = false
 
   constructor() {
     if (Cache.instance) {
       return Cache.instance
     } else {
       Cache.instance = this
+
+      this.init()
     }
 
     if (!this.client || !this.pub || !this.sub) {
-      logger.warn('WalletQueue is not yet initialized.. call init()')
+      logger.warn('WalletQueue is not yet initialized..')
     }
   }
 
@@ -54,9 +60,15 @@ export class Cache {
       await this.client.select(CONFIG.REDIS_DATABASE)
       await this.pub.select(CONFIG.REDIS_DATABASE)
       await this.sub.select(CONFIG.REDIS_DATABASE)
-
       Cache.instance = this
       logger.info('OK: Redis')
+
+      logger.info('Initializing redis queues')
+      await initializeQueues()
+
+      this.subscribeKeyExpiry((msg: string) =>
+        expirySubscription(msg, this.getClient)
+      )
     } catch (e) {
       logger.error('Error: Redis')
       throw e
@@ -67,26 +79,28 @@ export class Cache {
     if (!this.isInitialized()) {
       throw Error('Error subscribing to redis pub/sub. pub/sub not initialized')
     } else {
-      logger.info('Initializing expiry subscriptions...')
-
       const sub = this.sub
-      this.pub.sendCommand(
-        'config',
-        ['set', 'notify-keyspace-events', 'Ex'],
-        async () => {
-          const expired_subKey =
-            '__keyevent@' + CONFIG.REDIS_DATABASE + '__:expired'
-          await sub.subscribe(expired_subKey, () => {
-            logger.info(
-              'Activated expiry pub subsciptions: notify-kespace-events(Ex) - Keyevent-expiry'
-            )
+      if (!this.isExpirySubscriptionInitialized) {
+        logger.info('Initializing expiry subscriptions...')
+        this.pub.sendCommand(
+          'config',
+          ['set', 'notify-keyspace-events', 'Ex'],
+          async () => {
+            const expired_subKey =
+              '__keyevent@' + CONFIG.REDIS_DATABASE + '__:expired'
+            await sub.subscribe(expired_subKey, () => {
+              logger.info(
+                'Activated expiry pub subsciptions: notify-kespace-events(Ex) - Keyevent-expiry'
+              )
 
-            sub!.on('message', async (_channel, message) => {
-              callback(message)
+              sub!.on('message', async (_channel, message) => {
+                callback(message)
+              })
             })
-          })
-        }
-      )
+          }
+        )
+        this.isExpirySubscriptionInitialized = true
+      }
     }
   }
 
@@ -111,6 +125,8 @@ export class Cache {
       await this.client!.quit()
       await this.sub!.quit()
       await this.pub!.quit()
+
+      await closeQueues()
     }
   }
 

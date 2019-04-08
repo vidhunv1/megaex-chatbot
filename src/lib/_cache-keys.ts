@@ -1,8 +1,8 @@
 // TODO: Delete this file
 
 import { CONFIG } from '../config'
-import cacheClient from '../modules/cache'
-import logger from '../modules/logger'
+import cacheClient from 'modules/Cache'
+import logger from 'modules/logger'
 
 logger.error('Delete lib/CacheKeys...')
 export enum ROOT_KEYS {

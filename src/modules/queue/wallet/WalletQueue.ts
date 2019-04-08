@@ -23,6 +23,7 @@ export class WalletQueue {
       return WalletQueue.instance
     } else {
       WalletQueue.instance = this
+      this.init()
     }
 
     if (!this.queue) {

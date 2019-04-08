@@ -1,15 +1,13 @@
-import cacheConnection from '../modules/Cache'
 import * as TelegramBot from 'node-telegram-bot-api'
-import logger from '../modules/Logger'
-
-import { CacheKeys } from './cache-keys'
-import { User, TelegramAccount, Wallet } from '../models'
+import logger from 'modules/Logger'
+import cacheConnection from 'modules/Cache'
+import { CacheKeys } from './_cache-keys'
+import { User, TelegramAccount, Wallet } from 'models'
 
 export class Account {
   keys: KeysInterface
   telegramId: number
   telegramMessage: TelegramBot.Message['from']
-
   /* 
     NOTE:
     telegramMessage contains info for creating new account. 
@@ -36,13 +34,12 @@ export class Account {
 
   // This will create account if it does not exist
   async createOrGetAccount(): Promise<TelegramAccount> {
-    const cacheClient = await cacheConnection.getClient
-
+    const cacheClient = cacheConnection.getClient
     const accountCache = await cacheClient.getAsync(
       this.keys.telegramAccount.key
     )
     if (accountCache) {
-      console.log('From cache')
+      console.log('from cache')
       // user exists in cache
 
       const parsed: TelegramAccount = JSON.parse(accountCache)

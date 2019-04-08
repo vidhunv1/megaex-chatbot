@@ -11,16 +11,16 @@ import {
   AutoIncrement
 } from 'sequelize-typescript'
 import * as moment from 'moment'
-import { User, Wallet, Transaction } from './'
+import { User, Wallet, Transaction } from '.'
 import RandomGenerator from '../lib/RandomGenerator'
 import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken'
 import logger from '../modules/logger'
-import cacheClient from '../modules/cache'
-import { CacheKeys } from '../lib/cache-keys'
+import cacheClient from '../modules/Cache'
+import { CacheKeys } from 'lib/_cache-keys'
 import { CONFIG } from '../config'
 import { TransactionError } from './transaction'
-import { WalletError } from './wallet'
+import { WalletError } from './Wallet'
 import { CryptoCurrency } from '../constants/currencies'
 
 enum TransferStatus {

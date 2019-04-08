@@ -4,10 +4,9 @@
   "description": "P2P crypto exchange bot for Telegram",
   "main": "index.js",
   "scripts": {
-    "serve": "yarn build && node dist/src/index.js",
+    "serve": "yarn build && node dist/index.js",
     "build": "./node_modules/typescript/bin/tsc",
-    "watch": "node_modules/nodemon/bin/nodemon.js -e ts -w ./src -x npm run watch:serve",
-    "watch:serve": "node_modules/ts-node/dist/bin.js --files src/index.ts",
+    "watch": "node_modules/nodemon/bin/nodemon.js -e ts -w ./src -x npm run serve",
     "db:create": "node_modules/.bin/sequelize db:create",
     "db:migrate": "node_modules/.bin/sequelize db:migrate",
     "test": "mocha -r ts-node/register src/**/*.test.ts",

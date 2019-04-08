@@ -7,7 +7,7 @@ import {
   AutoIncrement,
   Default
 } from 'sequelize-typescript'
-import { User } from './'
+import { User } from '.'
 
 @Table({ timestamps: true, tableName: 'PaymentDetails' })
 export class PaymentDetail extends Model<PaymentDetail> {
