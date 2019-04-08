@@ -41,8 +41,8 @@ export class PaymentDetail extends Model<PaymentDetail> {
   ): Promise<boolean> {
     const totalPaymethods: number = await PaymentDetail.count()
     for (let i = 1; i <= totalPaymethods; i++) {
-      console.log(paymethodName + ' === ' + user.__('paymethod' + i + '_name'))
-      if (paymethodName === user.__('paymethod' + i + '_name')) {
+      console.log(paymethodName + ' === ' + user.t('paymethod' + i + '_name'))
+      if (paymethodName === user.t('paymethod' + i + '_name')) {
         return true
       }
     }
@@ -70,7 +70,7 @@ export class PaymentDetail extends Model<PaymentDetail> {
       )
     }
     for (let i = 0; i < pd.length; i++) {
-      list.push(user.__('paymethod' + pd[i].id + '_name'))
+      list.push(user.t('paymethod' + pd[i].id + '_name'))
     }
     return list
   }
@@ -81,7 +81,7 @@ export class PaymentDetail extends Model<PaymentDetail> {
   ): Promise<number> {
     const totalPaymethods: number = await PaymentDetail.count()
     for (let i = 1; i <= totalPaymethods; i++) {
-      if (paymethodName === user.__('paymethod' + i + '_name')) {
+      if (paymethodName === user.t('paymethod' + i + '_name')) {
         return i
       }
     }
@@ -95,11 +95,11 @@ export class PaymentDetail extends Model<PaymentDetail> {
     const totalPaymethods: number = await PaymentDetail.count(),
       fields = []
     for (let i = 1; i <= totalPaymethods; i++) {
-      if (paymethodName === user.__('paymethod' + i + '_name')) {
+      if (paymethodName === user.t('paymethod' + i + '_name')) {
         const pD = await PaymentDetail.findOne({ where: { id: i } })
         if (!pD) return null
         for (let j = 1; j <= pD.totalFields; j++) {
-          fields.push(user.__('paymethod' + i + '_field' + j))
+          fields.push(user.t('paymethod' + i + '_field' + j))
         }
         return fields
       }

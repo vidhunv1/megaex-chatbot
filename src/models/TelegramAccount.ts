@@ -8,7 +8,7 @@ import {
   PrimaryKey,
   AllowNull
 } from 'sequelize-typescript'
-import { User } from './user'
+import { User } from './User'
 import RandomGenerator from '../lib/random-generator'
 
 @Table({ timestamps: true, tableName: 'TelegramUsers' })
