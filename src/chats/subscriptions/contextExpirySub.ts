@@ -1,14 +1,11 @@
-import { CacheKeys } from '../../lib/cache-keys'
-import {
-  NotificationManager,
-  NotificationType
-} from '../../lib/NotificationManager'
-import telegramHook from '../../modules/TelegramHook'
-import logger from '../../modules/Logger'
-import { RedisAPI } from '../../modules/Cache'
-import { keyboardMenu } from '../defaults'
+import { CacheKeys } from 'lib/cache-keys'
+import { NotificationManager, NotificationType } from 'lib/NotificationManager'
+import telegramHook from 'modules/TelegramHook'
+import logger from 'modules/Logger'
+import { RedisAPI } from 'modules/Cache'
+import { keyboardMenu } from 'chats/common'
 
-import { TelegramAccount, User, Transfer } from '../../models'
+import { TelegramAccount, User, Transfer } from 'models'
 
 export const expirySubscription = async (
   msg: string,

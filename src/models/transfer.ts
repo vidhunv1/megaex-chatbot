@@ -12,7 +12,7 @@ import {
 } from 'sequelize-typescript'
 import * as moment from 'moment'
 import { User, Wallet, Transaction } from './'
-import RandomGenerator from '../lib/random-generator'
+import RandomGenerator from '../lib/RandomGenerator'
 import * as Bcrypt from 'bcrypt'
 import * as JWT from 'jsonwebtoken'
 import logger from '../modules/logger'

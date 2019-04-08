@@ -4,6 +4,8 @@ import { Market } from '../models/Market'
 import * as moment from 'moment'
 import logger from '../modules/logger'
 import { Transfer } from '../models/Transfer'
+
+logger.error('Delete this file... lib/jobs')
 export default class Jobs {
   jobs: CronJob[]
   constructor() {

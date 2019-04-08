@@ -1,4 +1,4 @@
-import { State, StateFlow } from '../../types'
+import { State, StateFlow } from 'chats/types'
 
 export function getNextState<T extends State<T>>(
   flow: StateFlow<T>,

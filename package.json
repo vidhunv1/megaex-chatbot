@@ -15,6 +15,12 @@
   },
   "author": "",
   "license": "ISC",
+  "_moduleAliases": {
+    "modules": "dist/modules",
+    "lib": "dist/lib",
+    "chats": "dist/chats",
+    "models": "dist/models"
+  },
   "dependencies": {
     "bcrypt": "2.0.1",
     "bignumber.js": "8.0.1",
@@ -27,6 +33,7 @@
     "jsonwebtoken": "8.2.0",
     "kue": "0.11.6",
     "lodash": "4.17.11",
+    "module-alias": "2.2.0",
     "moment": "2.22.0",
     "node-telegram-bot-api": "0.30.0",
     "pg": "7.4.1",

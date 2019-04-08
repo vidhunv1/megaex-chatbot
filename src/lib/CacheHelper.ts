@@ -1,6 +1,6 @@
-import cacheClient from '../modules/Cache'
-import logger from '../modules/Logger'
-import { State } from '../types'
+import cacheClient from 'modules/Cache'
+import logger from 'modules/Logger'
+import { State } from 'chats/types'
 
 export const KEY_SEPERATOR = ':'
 
@@ -59,33 +59,36 @@ export const CacheHelper = {
   },
 
   async clearUserCache(id: number) {
-    await cacheClient.delAsync(this.getKeyForUser(CacheKey.TelegramAccount, id))
+    await cacheClient.getClient.delAsync(
+      this.getKeyForUser(CacheKey.TelegramAccount, id)
+    )
   },
 
   async setContext(context: ChatContext, id: number) {
-    await cacheClient.setAsync(
+    await cacheClient.getClient.setAsync(
       this.getKeyForUser(CacheKey.Context, id),
       context
     )
   },
 
   async setState(state: State<any>, id: number) {
-    await cacheClient.setAsync(
+    await cacheClient.getClient.setAsync(
       this.getKeyForUser(CacheKey.State, id),
       JSON.stringify(state)
     )
   },
 
   async getContext(id: number): Promise<ChatContext | null> {
-    return (await cacheClient.getAsync(
+    return (await cacheClient.getClient.getAsync(
       this.getKeyForUser(CacheKey.Context, id)
     )) as ChatContext
   },
 
   async getState<T>(id: number): Promise<State<T>> {
     return JSON.parse(
-      (await cacheClient.getAsync(this.getKeyForUser(CacheKey.State, id))) ||
-        '{}'
+      (await cacheClient.getClient.getAsync(
+        this.getKeyForUser(CacheKey.State, id)
+      )) || '{}'
     )
   }
 }

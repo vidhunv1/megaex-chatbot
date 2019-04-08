@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount } from './models'
+import { User, TelegramAccount } from 'models'
 
 // TODO: Add branching so it can be moved from one state to multiple other states;
 // current: Branch<keyof T>
@@ -24,7 +24,8 @@ export enum BotCommand {
 export enum DeepLink {
   REFERRAL = 'ref',
   ACCOUNT = 'acc',
-  ORDER = 'order'
+  ORDER = 'order',
+  TRACK = 'track'
 }
 
 export interface ConversationParams {

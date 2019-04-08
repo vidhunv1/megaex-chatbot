@@ -4,6 +4,7 @@ import { CONFIG } from '../config'
 import cacheClient from '../modules/cache'
 import logger from '../modules/logger'
 
+logger.error('Delete lib/CacheKeys...')
 export enum ROOT_KEYS {
   Account = 't-account',
   MessageCounter = 't-message-counter',

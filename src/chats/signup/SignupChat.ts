@@ -1,9 +1,9 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount } from '../../models'
-import { ChatHandler, DeepLink } from '../../types'
-import { parseDeepLink } from '../utils/chat-utils'
+import { User, TelegramAccount } from 'models'
+import { ChatHandler, DeepLink } from 'chats/types'
+import { parseDeepLink } from 'chats/utils'
 // import telegramHook from '../../modules/telegram-hook'
-// import { InitialState } from './signup-context'
+// import { InitialState } from './SignupState'
 
 /* 
     Signup conversation graph:
@@ -20,10 +20,8 @@ export const SignupChat: ChatHandler = {
     _tUser: TelegramAccount
   ) {
     // const tBot = telegramHook.getBot
-
     if (!user.isTermsAccepted || !user.currencyCode || !user.locale) {
       const deepLinks = parseDeepLink(msg)
-
       if (deepLinks != null) {
         const { key } = deepLinks
         if (key === DeepLink.ACCOUNT) {
@@ -32,13 +30,11 @@ export const SignupChat: ChatHandler = {
           throw Error('TODO: Handle show-order to show after signup')
         } else if (key === DeepLink.REFERRAL) {
           throw Error('TODO: Save referral')
+        } else if (key === DeepLink.TRACK) {
+          throw Error('TODO: Handle tracking')
         }
       }
 
-      // Handle signup
-      // const i18n = I18n.getI18n
-      // console.log('Sending message: ' + i18n.__('greeting.formal'))
-      // tBot.sendMessage(msg.chat.id, i18n.__('error_unknown'))
       return true
     } else {
       return false

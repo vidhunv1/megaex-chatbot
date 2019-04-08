@@ -1,4 +1,4 @@
-import { FiatCurrency } from '../../constants/currencies'
+import { FiatCurrency } from 'constants/currencies'
 
 export enum SIGNUP_CONTEXT {
   GetStarted = 'signup.get-started'

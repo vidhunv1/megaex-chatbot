@@ -1,7 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount } from '../../models'
-import { SignupChat } from '../signup'
-import { getBotCommand } from '../utils'
+import { User, TelegramAccount } from 'models'
+import { SignupChat } from 'chats/signup'
+import { getBotCommand } from 'chats/utils'
 
 export const Router = {
   async routeMessage(

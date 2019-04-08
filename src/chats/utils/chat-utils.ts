@@ -1,4 +1,4 @@
-import { BotCommand, DeepLink } from '../../types'
+import { BotCommand, DeepLink } from 'chats/types'
 import * as TelegramBot from 'node-telegram-bot-api'
 
 export const getBotCommand = (msg: TelegramBot.Message): BotCommand | null => {

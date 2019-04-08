@@ -1,3 +1,4 @@
 export * from './cache'
 export * from './db'
-export * from './telegram-hook'
+export * from './TelegramHook'
+export * from './TelegramHook'

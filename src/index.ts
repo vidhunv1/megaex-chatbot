@@ -5,15 +5,17 @@ if (!process.env.NODE_ENV) {
   console.log('Using system environment variables')
 }
 
+require('module-alias/register')
+
 import * as TelegramBot from 'node-telegram-bot-api'
-import logger from './modules/Logger'
-import tHook from './modules/TelegramHook'
-import { initializeQueues, closeQueues } from './modules/queue'
-import { DB } from './modules/db'
-import { Cache } from './modules/cache'
-import { Account } from './lib/accounts'
-import { Router } from './chats/router'
-import { expirySubscription } from './chats/subscriptions'
+import logger from 'modules/Logger'
+import tHook from 'modules/TelegramHook'
+import { initializeQueues, closeQueues } from 'modules/queue'
+import { DB } from 'modules/db'
+import { Cache } from 'modules/cache'
+import { Account } from 'lib/Account'
+import { Router } from 'chats/router'
+import { expirySubscription } from 'chats/subscriptions'
 ;(async () => {
   /* 
     Initializations

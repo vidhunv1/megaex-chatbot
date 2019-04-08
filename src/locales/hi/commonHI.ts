@@ -1,7 +1,6 @@
 export const commonHI = {
   error: {
-    unknown:
-      'An error occurred, we are working on fixing this. Please try again later.'
+    unknown: 'HInsabndsandsdiasd sadite;dsfa {{ language }}'
   },
   bot: {
     name: 'BTC Deals',

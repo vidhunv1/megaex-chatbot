@@ -9,7 +9,7 @@ import {
   AllowNull
 } from 'sequelize-typescript'
 import { User } from './User'
-import RandomGenerator from '../lib/random-generator'
+import RandomGenerator from '../lib/RandomGenerator'
 
 @Table({ timestamps: true, tableName: 'TelegramUsers' })
 export class TelegramAccount extends Model<TelegramAccount> {

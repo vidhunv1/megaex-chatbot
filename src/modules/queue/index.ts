@@ -1,7 +1,7 @@
 import { WalletQueue } from './wallet/WalletQueue'
 import { initWalletMockConsumers } from './wallet/mock'
 import { CONFIG } from '../../config'
-import logger from '../logger'
+import logger from 'modules/logger'
 
 export * from './wallet/types'
 

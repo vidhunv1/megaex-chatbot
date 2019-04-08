@@ -15,6 +15,13 @@ import i18n from '../modules/i18n'
 import logger from '../modules/Logger'
 import { LanguageISO, Language } from '../constants/languages'
 
+export enum ExchangeRateSource {
+  LBC = 'LBC',
+  COINBASE = 'coinbase',
+  BINANCE = 'binance',
+  SELF = 'self'
+}
+
 @Table({ timestamps: true, tableName: 'Users' })
 export class User extends Model<User> {
   @PrimaryKey
@@ -53,12 +60,7 @@ export class User extends Model<User> {
 
   @Default('localrate')
   @Column
-  exchangeRateSource!:
-    | 'localrate'
-    | 'localbitcoins'
-    | 'kraken'
-    | 'coinbase'
-    | 'bitfinex'
+  exchangeRateSource!: ExchangeRateSource
 
   @Column
   currencyCode!: string
