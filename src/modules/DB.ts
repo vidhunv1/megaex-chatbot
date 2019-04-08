@@ -1,14 +1,14 @@
 import { Sequelize } from 'sequelize-typescript'
-import logger from 'modules/logger'
+import logger from 'modules/Logger'
 import {
   TelegramAccount,
   User,
   Wallet,
   Transaction,
-  PaymentMethod
+  PaymentMethod,
+  Order
 } from 'models'
 import { CONFIG } from '../config'
-import path = require('path')
 
 export class DB {
   static instance: DB
@@ -45,7 +45,8 @@ export class DB {
         User,
         Wallet,
         Transaction,
-        PaymentMethod
+        PaymentMethod,
+        Order
       ])
 
       DB.instance = this

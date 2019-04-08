@@ -1,6 +1,6 @@
 import * as Redis from 'redis'
 import * as Bluebird from 'bluebird'
-import logger from 'modules/logger'
+import logger from 'modules/Logger'
 import { initializeQueues, closeQueues } from 'modules/queue'
 import { expirySubscription } from 'chats/subscriptions'
 

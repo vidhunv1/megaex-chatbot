@@ -2,7 +2,7 @@ import { CronJob } from 'cron'
 import * as request from 'request-promise'
 import { Market } from '../models/Market'
 import * as moment from 'moment'
-import logger from '../modules/logger'
+import logger from '../modules/Logger'
 import { Transfer } from '../models/Transfer'
 
 logger.error('Delete this file... lib/jobs')

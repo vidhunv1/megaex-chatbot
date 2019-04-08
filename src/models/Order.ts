@@ -12,7 +12,7 @@ import {
   Sequelize
 } from 'sequelize-typescript'
 import { User, Transaction, Wallet } from '.'
-import logger from '../modules/logger'
+import logger from '../modules/Logger'
 
 @Table({ timestamps: true, tableName: 'Orders' })
 export class Order extends Model<Order> {

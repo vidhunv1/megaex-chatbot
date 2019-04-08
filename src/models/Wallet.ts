@@ -12,7 +12,7 @@ import {
 } from 'sequelize-typescript'
 import { User } from './User'
 import walletQueue from '../modules/queue/wallet/WalletQueue'
-import logger from '../modules/logger'
+import logger from '../modules/Logger'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 import { CryptoCurrency } from '../constants/currencies'
 

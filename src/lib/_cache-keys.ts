@@ -2,7 +2,7 @@
 
 import { CONFIG } from '../config'
 import cacheClient from 'modules/Cache'
-import logger from 'modules/logger'
+import logger from 'modules/Logger'
 
 logger.error('Delete lib/CacheKeys...')
 export enum ROOT_KEYS {
