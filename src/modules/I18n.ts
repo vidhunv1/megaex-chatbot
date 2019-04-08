@@ -1,11 +1,12 @@
 import i18next from 'i18next'
 import { LanguageISO, Language } from '../constants/languages'
-import commonEN from '../locales/en/common'
-import commonHI from '../locales/hi/common'
+import { commonEN, signupEN } from '../locales/en'
+import { commonHI, signupHI } from '../locales/hi'
 import { CONFIG } from '../config'
 
 export enum Namespace {
-  Common = 'common'
+  Common = 'common',
+  Signup = 'signup'
 }
 
 export class I18n {
@@ -23,7 +24,7 @@ export class I18n {
         saveMissing: true,
 
         fallbackLng: LanguageISO[Language.ENGLISH],
-
+        preload: Object.values(LanguageISO),
         interpolation: {
           escapeValue: false
         },
@@ -34,10 +35,12 @@ export class I18n {
 
         resources: {
           [LanguageISO[Language.ENGLISH]]: {
-            [Namespace.Common]: commonEN
+            [Namespace.Common]: commonEN,
+            [Namespace.Signup]: signupEN
           },
           [LanguageISO[Language.HINDI]]: {
-            [Namespace.Common]: commonHI
+            [Namespace.Common]: commonHI,
+            [Namespace.Signup]: signupHI
           }
         }
       })
