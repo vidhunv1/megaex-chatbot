@@ -12,6 +12,8 @@ import {
 } from 'sequelize-typescript'
 import { TelegramAccount, Wallet, Transaction, PaymentMethod } from './'
 import i18n from '../modules/i18n'
+import logger from '../modules/Logger'
+import { LanguageISO, Language } from '../constants/languages'
 
 @Table({ timestamps: true, tableName: 'Users' })
 export class User extends Model<User> {
@@ -69,16 +71,24 @@ export class User extends Model<User> {
   @Column
   messageCount!: number
 
+  /*
+   * @deprecated `t(...)`
+   */
   __(...args: any[]): string {
+    logger.error('__ in translate is deprecated. This wont work correctly')
     return i18n.getI18n.t(args[0], { lng: this.locale })
   }
 
+  /*
+   * @deprecated `t(...)`
+   */
   __n(phrase: string, _count: number): string {
+    logger.error('__N in translate is deprecated. This wont work correctly')
     return i18n.getI18n.t(phrase, { lng: this.locale })
   }
 
   t(key: string, values?: any): string {
-    return i18n.getI18n.t(key, { ...values, lng: this.locale })
+    return i18n.getI18n.t(key, { ...values, lng: LanguageISO[Language.HINDI] })
   }
 }
 

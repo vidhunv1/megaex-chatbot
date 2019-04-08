@@ -21,12 +21,15 @@ import { expirySubscription } from './chats/subscriptions'
   // Redis Init
   const cacheConnection = new Cache()
   await cacheConnection.init()
+
   // Queue Init
   await initializeQueues()
   // Telegram hook
   // Postgres Init
   await new DB().init()
-  cacheConnection.subscribeKeyExpiry(expirySubscription)
+  cacheConnection.subscribeKeyExpiry((msg: string) =>
+    expirySubscription(msg, cacheConnection.getClient)
+  )
 
   tHook.getWebhook.on('message', async function onMessage(
     msg: TelegramBot.Message
@@ -39,6 +42,7 @@ import { expirySubscription } from './chats/subscriptions'
           const telegramAccount = await account.createOrGetAccount()
           Router.routeMessage(msg, telegramAccount.user, telegramAccount)
         } catch (e) {
+          logger.error('index.ts#44 Unable to create account')
           tHook.getWebhook.sendMessage(msg.chat.id, 'Error creating account')
           throw e
         }

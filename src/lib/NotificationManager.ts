@@ -38,7 +38,7 @@ export class NotificationManager {
         if (transaction.transactionType === 'receive') {
           message = user.__(
             'new_transaction_credit %s %s %s %s',
-            user.__(transaction.currencyCode),
+            user.t(transaction.currencyCode),
             transaction.amount,
             transaction.currencyCode,
             transaction.transactionId

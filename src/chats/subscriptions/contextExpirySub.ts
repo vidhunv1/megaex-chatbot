@@ -71,7 +71,7 @@ export const expirySubscription = async (
       include: [{ model: User }]
     })
     if (tUser) {
-      tBot.sendMessage(telegramId, tUser.user.__('context_action_expired'), {
+      tBot.sendMessage(telegramId, tUser.user.t('context_action_expired'), {
         parse_mode: 'Markdown',
         reply_markup: {
           keyboard: keyboardMenu(tUser.user),

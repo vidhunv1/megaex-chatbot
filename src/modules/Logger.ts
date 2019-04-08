@@ -40,7 +40,11 @@ export class Logger {
   }
 
   get getLogger() {
-    return this.logger
+    return this.logger as {
+      info: (s: string) => any
+      warn: (s: string) => any
+      error: (s: string) => any
+    }
   }
 }
 
