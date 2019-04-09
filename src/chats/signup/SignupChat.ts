@@ -1,41 +1,34 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
-import { ChatHandler, DeepLink } from 'chats/types'
-import { parseDeepLink } from 'chats/utils'
-// import telegramHook from '../../modules/telegram-hook'
-// import { InitialState } from './SignupState'
-
-/* 
-    Signup conversation graph:
-
-    -> /start -> May include referral, order or user information. This needs to be cached to be processed post sign-up.
-    -> Choose language
-    -> Choose currency 
-*/
+import { ChatHandler } from 'chats/types'
+import { parseDeepLink, moveToNextState } from 'chats/utils'
+import telegramHook from 'modules/TelegramHook'
+import { SignupState, initialState, signupFlow } from './SignupState'
+import { CacheHelper } from 'lib/CacheHelper'
+import { Namespace } from 'modules/I18n'
+import { get, findKey } from 'lodash'
+import logger from 'modules/Logger'
+import { LanguageView, Language } from 'constants/languages'
+import { languageKeyboard, currencyKeyboard } from './utils'
+import { FiatCurrency } from 'constants/currencies'
 
 export const SignupChat: ChatHandler = {
   async handleCommand(
     msg: TelegramBot.Message,
     user: User,
-    _tUser: TelegramAccount
+    tUser: TelegramAccount
   ) {
-    // const tBot = telegramHook.getBot
     if (!user.isTermsAccepted || !user.currencyCode || !user.locale) {
-      const deepLinks = parseDeepLink(msg)
-      if (deepLinks != null) {
-        const { key } = deepLinks
-        if (key === DeepLink.ACCOUNT) {
-          throw Error('TODO: Save show-account to show after signup')
-        } else if (key === DeepLink.ORDER) {
-          throw Error('TODO: Handle show-order to show after signup')
-        } else if (key === DeepLink.REFERRAL) {
-          throw Error('TODO: Save referral')
-        } else if (key === DeepLink.TRACK) {
-          throw Error('TODO: Handle tracking')
-        }
-      }
+      const currentState =
+        (await CacheHelper.getState<SignupState>(tUser.id)) || initialState
+      const nextState: SignupState = await parseInput(
+        msg,
+        tUser.id,
+        user.t,
+        currentState
+      )
 
-      return true
+      return sendResponse(msg, user.t, nextState)
     } else {
       return false
     }
@@ -47,16 +40,203 @@ export const SignupChat: ChatHandler = {
     _tUser: TelegramAccount,
     _callback: TelegramBot.CallbackQuery
   ) {
-    console.log('Handling signup callback')
     return false
   },
 
   async handleContext(
-    _msg: TelegramBot.Message,
-    _user: User,
-    _tUser: TelegramAccount
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount
   ) {
-    console.log('Handling signup context')
-    return false
+    if (!user.isTermsAccepted || !user.currencyCode || !user.locale) {
+      const currentState =
+        (await CacheHelper.getState<SignupState>(tUser.id)) || initialState
+      const nextState: SignupState = await parseInput(
+        msg,
+        tUser.id,
+        user.t,
+        currentState
+      )
+
+      return sendResponse(msg, user.t, nextState)
+    } else {
+      return false
+    }
   }
+}
+
+async function parseInput(
+  msg: TelegramBot.Message,
+  telegramId: number,
+  t: any,
+  currentState: SignupState
+): Promise<SignupState> {
+  switch (currentState.currentMessageKey) {
+    case 'start':
+      const deepLinks = parseDeepLink(msg)
+      currentState.start = {
+        deeplink: get(deepLinks, 'key', null),
+        value: get(deepLinks, 'value', null)
+      }
+      return await moveToNextState<SignupState>(
+        currentState,
+        signupFlow,
+        telegramId
+      )
+
+    case 'language':
+      const chosenLanguage = findKey(LanguageView, (v) => v === msg.text) as
+        | Language
+        | undefined
+
+      if (chosenLanguage) {
+        currentState.language = chosenLanguage
+        return await moveToNextState<SignupState>(
+          currentState,
+          signupFlow,
+          telegramId
+        )
+      } else {
+        logger.warn('User selected invalid language ' + msg.text)
+        return currentState
+      }
+
+    case 'welcome':
+      return await moveToNextState<SignupState>(
+        currentState,
+        signupFlow,
+        telegramId
+      )
+
+    case 'termsAndConditions':
+      if (msg.text === t(`${Namespace.Signup}:terms-agree-button`)) {
+        currentState.termsAndConditions = true
+        return await moveToNextState<SignupState>(
+          currentState,
+          signupFlow,
+          telegramId
+        )
+      }
+      return currentState
+
+    case 'fiatCurrency':
+      const chosenFiatCurrency: FiatCurrency | undefined = findKey(
+        FiatCurrency,
+        (c) => c === msg.text
+      ) as FiatCurrency
+      if (chosenFiatCurrency) {
+        currentState.fiatCurrency = chosenFiatCurrency
+        return await moveToNextState<SignupState>(
+          currentState,
+          signupFlow,
+          telegramId
+        )
+      } else {
+        logger.warn('User selected invalid fiat currency')
+        return currentState
+      }
+
+    case 'accountReady':
+      logger.error('Save to DB and end state')
+      return await moveToNextState<SignupState>(
+        currentState,
+        signupFlow,
+        telegramId
+      )
+  }
+}
+
+async function sendResponse(
+  msg: TelegramBot.Message,
+  t: any,
+  nextState: SignupState
+): Promise<boolean> {
+  switch (nextState.currentMessageKey) {
+    case 'language':
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        t(`${Namespace.Signup}:choose-language`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: languageKeyboard,
+            one_time_keyboard: true,
+            resize_keyboard: true
+          }
+        }
+      )
+      return true
+
+    case 'welcome':
+      await telegramHook.getWebhook.sendSticker(
+        msg.chat.id,
+        'CAADAgADKgMAAs-71A4f8rUYf2WfMAI'
+      )
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        t(`${Namespace.Signup}:welcome-message`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: [
+              [{ text: t(`${Namespace.Signup}:welcome-continue-button`) }]
+            ],
+            one_time_keyboard: true,
+            resize_keyboard: true
+          }
+        }
+      )
+      break
+
+    case 'termsAndConditions':
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        t(`${Namespace.Signup}:terms-and-conditions`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: [[{ text: t(`${Namespace.Signup}:terms-agree-button`) }]],
+            one_time_keyboard: true,
+            resize_keyboard: true
+          }
+        }
+      )
+      return true
+
+    case 'fiatCurrency':
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        t(`${Namespace.Signup}:select-currency`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: currencyKeyboard,
+            one_time_keyboard: true,
+            resize_keyboard: true
+          }
+        }
+      )
+      return true
+
+    case 'accountReady':
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        t(`${Namespace.Signup}:account-ready`, {
+          bitcoinAddress: '3QJmV3qfvL9SuYo34YihAf3sRCW3qSinyC'
+        }),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: [
+              [{ text: t(`${Namespace.Signup}:account-ready-continue-button`) }]
+            ],
+            one_time_keyboard: true,
+            resize_keyboard: true
+          }
+        }
+      )
+      return true
+  }
+
+  return false
 }

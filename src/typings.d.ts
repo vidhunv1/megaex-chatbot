@@ -5,6 +5,8 @@ declare module '*.json' {
   export default value
 }
 
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
 interface KeysInterface {
   telegramAccount: {
     key: string

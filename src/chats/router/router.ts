@@ -9,7 +9,6 @@ export const Router = {
     user: User,
     tUser: TelegramAccount
   ) {
-    console.log('Routing message')
     const botCommand = getBotCommand(msg)
     if (botCommand) {
       const isHandled = SignupChat.handleCommand(msg, user, tUser)

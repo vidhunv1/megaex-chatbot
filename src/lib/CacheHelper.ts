@@ -84,11 +84,13 @@ export const CacheHelper = {
     )) as ChatContext
   },
 
-  async getState<T>(id: number): Promise<State<T>> {
-    return JSON.parse(
-      (await cacheClient.getClient.getAsync(
-        this.getKeyForUser(CacheKey.State, id)
-      )) || '{}'
+  async getState<T>(id: number): Promise<T | null> {
+    const state = await cacheClient.getClient.getAsync(
+      this.getKeyForUser(CacheKey.State, id)
     )
+    if (state != null) {
+      return JSON.parse(state)
+    }
+    return null
   }
 }

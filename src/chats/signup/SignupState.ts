@@ -1,9 +1,9 @@
 import { Language } from 'constants/languages'
 import { FiatCurrency } from 'constants/currencies'
-import { State, StateFlow } from 'chats/types'
-// import { moveToNextState } from '../utils'
+import { State, StateFlow, DeepLink } from 'chats/types'
 
-interface ISignupState {
+export interface ISignupState {
+  start?: { deeplink: DeepLink | null; value: string | null }
   language?: Language
   welcome?: boolean
   termsAndConditions?: boolean
@@ -13,9 +13,8 @@ interface ISignupState {
 
 export interface SignupState extends State<ISignupState>, ISignupState {}
 
-// export const InitialState: keyof Signup = 'language'
-
-export const SignupFlow: StateFlow<ISignupState> = {
+export const signupFlow: StateFlow<ISignupState> = {
+  start: 'language',
   language: 'welcome',
   welcome: 'termsAndConditions',
   termsAndConditions: 'fiatCurrency',
@@ -23,17 +22,6 @@ export const SignupFlow: StateFlow<ISignupState> = {
   accountReady: null
 }
 
-export const InitialState: SignupState = {
-  language: undefined,
-  welcome: false,
-  termsAndConditions: false,
-  fiatCurrency: undefined,
-  accountReady: false,
-  current: 'language'
-}
-
-export const updateToNextState = (
-  current: keyof ISignupState
-): keyof ISignupState => {
-  return current
+export const initialState: SignupState = {
+  currentMessageKey: 'start'
 }

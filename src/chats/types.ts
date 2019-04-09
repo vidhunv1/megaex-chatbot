@@ -4,7 +4,7 @@ import { User, TelegramAccount } from 'models'
 // TODO: Add branching so it can be moved from one state to multiple other states;
 // current: Branch<keyof T>
 export interface State<T> {
-  current: keyof T
+  currentMessageKey: keyof T
 }
 
 // Record of [ currentState, nextState ]

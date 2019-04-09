@@ -1,21 +1,27 @@
 import { State, StateFlow } from 'chats/types'
+import { CacheHelper } from 'lib/CacheHelper'
 
-export function getNextState<T extends State<T>>(
-  flow: StateFlow<T>,
+export function getNextStateKey<T extends State<T>>(
+  flow: Omit<StateFlow<T>, 'currentMessageKey'>,
   current: keyof T | null
 ): keyof T | null {
   if (current) {
+    // @ts-ignore
     return flow[current]
   }
   return null
 }
 
-export function moveToNextState<T extends State<T>>(
+export async function moveToNextState<T extends State<T>>(
   state: T,
-  flow: Record<keyof T, keyof T | null>
-): T {
-  return {
+  flow: StateFlow<Omit<StateFlow<T>, 'currentMessageKey'>>,
+  id: number
+) {
+  const next = {
     ...state,
-    current: getNextState<T>(flow, state.current)
+    currentMessageKey: getNextStateKey<T>(flow, state.currentMessageKey)
   }
+  await CacheHelper.setState(next, id)
+
+  return next
 }
