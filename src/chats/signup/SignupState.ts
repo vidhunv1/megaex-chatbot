@@ -1,6 +1,9 @@
 import { Language } from 'constants/languages'
 import { FiatCurrency } from 'constants/currencies'
 import { State, StateFlow, DeepLink } from 'chats/types'
+import { moveToNextState } from 'chats/utils'
+
+export const STATE_EXPIRY = 86400
 
 export interface ISignupState {
   start?: { deeplink: DeepLink | null; value: string | null }
@@ -24,4 +27,16 @@ export const signupFlow: StateFlow<ISignupState> = {
 
 export const initialState: SignupState = {
   currentMessageKey: 'start'
+}
+
+export async function nextSignupState(
+  currentState: SignupState,
+  telegramId: number
+): Promise<SignupState> {
+  return await moveToNextState<SignupState>(
+    currentState,
+    signupFlow,
+    telegramId,
+    STATE_EXPIRY
+  )
 }

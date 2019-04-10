@@ -156,7 +156,12 @@ export class WalletError extends Error {
   constructor(status: number = 500, message: string = 'Wallet Error') {
     super(message)
     this.name = this.constructor.name
-    logger.error(this.constructor.name + ', ' + status)
+    logger.warn(this.constructor.name + ', ' + status)
+
+    if (status === WalletError.NOT_FOUND) {
+      logger.error('Wallet not found')
+      throw new Error('Wallet not found')
+    }
     this.status = status
   }
 }

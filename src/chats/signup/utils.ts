@@ -1,8 +1,8 @@
 import { Language, LanguageView } from 'constants/languages'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { FiatCurrency } from 'constants/currencies'
+import { FiatCurrency, CurrencySymbol } from 'constants/currencies'
 
-const languageKeyboard: TelegramBot.KeyboardButton[][] = []
+export const languageKeyboard: TelegramBot.KeyboardButton[][] = []
 Object.keys(Language).forEach((lang, index) => {
   if (index % 2 === 0) {
     languageKeyboard.push([{ text: LanguageView[lang as Language] }])
@@ -14,16 +14,24 @@ Object.keys(Language).forEach((lang, index) => {
   }
 })
 
-const currencyKeyboard: TelegramBot.KeyboardButton[][] = []
+export const currencyKeyboard: TelegramBot.KeyboardButton[][] = []
 Object.keys(FiatCurrency).forEach((fiatCurrency, index) => {
-  if (index % 4 === 0) {
-    currencyKeyboard.push([{ text: fiatCurrency }])
+  if (index % 3 === 0) {
+    currencyKeyboard.push([
+      { text: getCurrencyView(fiatCurrency as FiatCurrency) }
+    ])
   } else {
     currencyKeyboard[currencyKeyboard.length - 1] = [
       ...currencyKeyboard[currencyKeyboard.length - 1],
-      { text: fiatCurrency }
+      { text: getCurrencyView(fiatCurrency as FiatCurrency) }
     ]
   }
 })
 
-export { languageKeyboard, currencyKeyboard }
+export function getCurrencyView(currency: FiatCurrency) {
+  const currencyCode = CurrencySymbol[currency]
+  if (currencyCode) {
+    return `${currency} (${currencyCode})`
+  }
+  return currency
+}

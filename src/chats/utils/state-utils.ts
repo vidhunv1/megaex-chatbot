@@ -15,13 +15,14 @@ export function getNextStateKey<T extends State<T>>(
 export async function moveToNextState<T extends State<T>>(
   state: T,
   flow: StateFlow<Omit<StateFlow<T>, 'currentMessageKey'>>,
-  id: number
+  id: number,
+  expiry?: number // seconds
 ) {
   const next = {
     ...state,
     currentMessageKey: getNextStateKey<T>(flow, state.currentMessageKey)
   }
-  await CacheHelper.setState(next, id)
+  await CacheHelper.setState(next, id, expiry)
 
   return next
 }

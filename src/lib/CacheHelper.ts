@@ -71,10 +71,12 @@ export const CacheHelper = {
     )
   },
 
-  async setState(state: State<any>, id: number) {
+  async setState(state: State<any>, id: number, expiry?: number) {
     await cacheClient.getClient.setAsync(
       this.getKeyForUser(CacheKey.State, id),
-      JSON.stringify(state)
+      JSON.stringify(state),
+      'EX',
+      expiry
     )
   },
 

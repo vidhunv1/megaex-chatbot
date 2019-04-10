@@ -1,12 +1,12 @@
 export const signupEN = {
   'choose-language': 'Please select your language from options below',
 
-  'welcome-message': `Welcome to *MegaDeals*
+  'welcome-message': `*Hello {{ name }}*, welcome to MegaDeals
 
 Here you can find the best deals to exchange your bitcoins
 
 🤝 Bitcoin OTC trading (p2p) with rating system
-🔒 Fast bitcoin wallet secured with cold storage
+🔒 Fast bitcoin wallet secured in cold storage
 ⚡ Quick and fair customer care for escrow conflicts
 
 _Tap the button below to get started_`,
@@ -27,9 +27,11 @@ By continuing you agree to our [terms & conditions](https://google.com) and [pri
 
   'select-currency': 'Select your local currency',
 
-  'account-ready': `Your account is Ready:
+  'account-ready': `Your account is created.
 
 Bitcoin address: *{{ bitcoinAddress }}*
 `,
+
+  'account-ready-generating-address': 'Your account is ready.',
   'account-ready-continue-button': '🚀 Start'
 }
