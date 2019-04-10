@@ -1,11 +1,11 @@
 export const signupEN = {
-  'choose-language': `Hello *{{ name}}*
+  'choose-language': `Hello *{{ name }}*
 
-Please select your language from options below`,
+Please select your language from options`,
 
   'terms-and-conditions': `
 
-Make sure your Telegram account security is up to date.
+*Security*
 
 🔒 Enable Telegram password *security settings* -> *2 step verification* -> *Password*
 🔒 Always terminate all inactive sessions from *security settings* -> *Active sessions*

@@ -45,7 +45,7 @@ export class User extends Model<User> {
 
   @Default(Language.ENGLISH)
   @Column
-  public locale!: string
+  public locale!: Language
 
   @Unique
   @Column
@@ -91,7 +91,10 @@ export class User extends Model<User> {
   }
 
   t(key: string, values?: any): string {
-    return i18n.getI18n.t(key, { ...values, lng: LanguageISO[Language.HINDI] })
+    return i18n.getI18n.t(key, {
+      ...values,
+      lng: LanguageISO[this.locale] || LanguageISO[Language.ENGLISH]
+    })
   }
 }
 
