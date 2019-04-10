@@ -14,6 +14,7 @@ import { TelegramAccount, Wallet, Transaction, PaymentMethod } from '.'
 import i18n from '../modules/i18n'
 import logger from '../modules/Logger'
 import { LanguageISO, Language } from '../constants/languages'
+import { FiatCurrency } from 'constants/currencies'
 
 export enum ExchangeRateSource {
   LBC = 'LBC',
@@ -42,7 +43,7 @@ export class User extends Model<User> {
   @HasMany(() => PaymentMethod, 'userId')
   paymentMethods!: PaymentMethod[]
 
-  @Default('en')
+  @Default(Language.ENGLISH)
   @Column
   public locale!: string
 
@@ -58,12 +59,12 @@ export class User extends Model<User> {
   @Column
   isVerified!: boolean
 
-  @Default('localrate')
+  @Default(ExchangeRateSource.SELF)
   @Column
   exchangeRateSource!: ExchangeRateSource
 
   @Column
-  currencyCode!: string
+  currencyCode!: FiatCurrency
 
   @Default('[]')
   @Column

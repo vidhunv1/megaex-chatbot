@@ -4,20 +4,10 @@ import { State } from 'chats/types'
 
 export const KEY_SEPERATOR = ':'
 
-export enum ChatContext {
-  Signup = 'signup'
-}
-
 export enum CacheKey {
   TelegramAccount = 't-account',
   Context = 't-context',
   State = 't-state'
-}
-
-export const CacheExpiry: Record<CacheKey, number | null> = {
-  [CacheKey.TelegramAccount]: 60 * 60,
-  [CacheKey.Context]: null,
-  [CacheKey.State]: null
 }
 
 const cacheKeys = Object.values(CacheKey)
@@ -58,19 +48,6 @@ export const CacheHelper = {
     return cacheKeys.includes(normalizedKey)
   },
 
-  async clearUserCache(id: number) {
-    await cacheClient.getClient.delAsync(
-      this.getKeyForUser(CacheKey.TelegramAccount, id)
-    )
-  },
-
-  async setContext(context: ChatContext, id: number) {
-    await cacheClient.getClient.setAsync(
-      this.getKeyForUser(CacheKey.Context, id),
-      context
-    )
-  },
-
   async setState(state: State<any>, id: number, expiry?: number) {
     await cacheClient.getClient.setAsync(
       this.getKeyForUser(CacheKey.State, id),
@@ -80,10 +57,8 @@ export const CacheHelper = {
     )
   },
 
-  async getContext(id: number): Promise<ChatContext | null> {
-    return (await cacheClient.getClient.getAsync(
-      this.getKeyForUser(CacheKey.Context, id)
-    )) as ChatContext
+  async clearState(id: number) {
+    await cacheClient.getClient.delAsync(this.getKeyForUser(CacheKey.State, id))
   },
 
   async getState<T>(id: number): Promise<T | null> {

@@ -5,6 +5,7 @@ import { User, TelegramAccount } from 'models'
 // current: Branch<keyof T>
 export interface State<T> {
   currentMessageKey: keyof T
+  key: string
 }
 
 // Record of [ currentState, nextState ]
@@ -49,6 +50,7 @@ export interface ChatHandler {
   handleContext: (
     msg: TelegramBot.Message,
     user: User,
-    tUser: TelegramAccount
+    tUser: TelegramAccount,
+    state: any | null
   ) => Promise<boolean>
 }

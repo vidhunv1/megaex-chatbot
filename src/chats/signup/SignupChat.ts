@@ -3,7 +3,12 @@ import { User, TelegramAccount, Wallet } from 'models'
 import { ChatHandler } from 'chats/types'
 import { parseDeepLink } from 'chats/utils'
 import telegramHook from 'modules/TelegramHook'
-import { SignupState, initialState, nextSignupState } from './SignupState'
+import {
+  SignupState,
+  initialState,
+  nextSignupState,
+  SIGNUP_STATE_KEY
+} from './SignupState'
 import { CacheHelper } from 'lib/CacheHelper'
 import { Namespace } from 'modules/I18n'
 import { get, findKey } from 'lodash'
@@ -11,6 +16,8 @@ import logger from 'modules/Logger'
 import { LanguageView, Language } from 'constants/languages'
 import { languageKeyboard, currencyKeyboard } from './utils'
 import { FiatCurrency, CryptoCurrency } from 'constants/currencies'
+import { Account } from 'lib/Account'
+import { keyboardMenu } from 'chats/common'
 
 export const SignupChat: ChatHandler = {
   async handleCommand(
@@ -21,12 +28,17 @@ export const SignupChat: ChatHandler = {
     if (!user.isTermsAccepted || !user.currencyCode || !user.locale) {
       const currentState =
         (await CacheHelper.getState<SignupState>(tUser.id)) || initialState
-      const nextState: SignupState = await parseInput(
+
+      const nextState: SignupState | null = await parseInput(
         msg,
         tUser.id,
-        user.t,
+        user,
         currentState
       )
+
+      if (nextState === null) {
+        return false
+      }
 
       return sendResponse(msg, user, nextState)
     } else {
@@ -46,17 +58,27 @@ export const SignupChat: ChatHandler = {
   async handleContext(
     msg: TelegramBot.Message,
     user: User,
-    tUser: TelegramAccount
+    tUser: TelegramAccount,
+    state: any
   ) {
-    if (!user.isTermsAccepted || !user.currencyCode || !user.locale) {
-      const currentState =
-        (await CacheHelper.getState<SignupState>(tUser.id)) || initialState
-      const nextState: SignupState = await parseInput(
+    if (
+      (state && state.key === SIGNUP_STATE_KEY) ||
+      !user.isTermsAccepted ||
+      !user.currencyCode ||
+      !user.locale
+    ) {
+      const currentState = state as SignupState
+
+      const nextState: SignupState | null = await parseInput(
         msg,
         tUser.id,
-        user.t,
-        currentState
+        user,
+        currentState || initialState
       )
+
+      if (nextState === null) {
+        return false
+      }
 
       return sendResponse(msg, user, nextState)
     } else {
@@ -69,9 +91,9 @@ export const SignupChat: ChatHandler = {
 async function parseInput(
   msg: TelegramBot.Message,
   telegramId: number,
-  t: any,
+  user: User,
   currentState: SignupState
-): Promise<SignupState> {
+): Promise<SignupState | null> {
   switch (currentState.currentMessageKey) {
     case 'start':
       const deepLinks = parseDeepLink(msg)
@@ -94,11 +116,8 @@ async function parseInput(
         return currentState
       }
 
-    case 'welcome':
-      return await nextSignupState(currentState, telegramId)
-
     case 'termsAndConditions':
-      if (msg.text === t(`${Namespace.Signup}:terms-agree-button`)) {
+      if (msg.text === user.t(`${Namespace.Signup}:terms-agree-button`)) {
         currentState.termsAndConditions = true
         return await nextSignupState(currentState, telegramId)
       }
@@ -119,14 +138,41 @@ async function parseInput(
       ) as FiatCurrency
       if (chosenFiatCurrency) {
         currentState.fiatCurrency = chosenFiatCurrency
-        return await nextSignupState(currentState, telegramId)
+
+        try {
+          if (currentState.fiatCurrency && currentState.termsAndConditions) {
+            // TODO: Clear user cache in the User model. So everytime it updates cache is cleared.
+
+            await User.update(
+              {
+                locale: currentState.language,
+                isTermsAccepted: currentState.termsAndConditions,
+                currencyCode: currentState.fiatCurrency
+              },
+              { where: { id: user.id } }
+            )
+            await Account.clearUserCache(telegramId)
+            return await nextSignupState(currentState, telegramId)
+          } else {
+            throw new Error(
+              'fiatCurrency | termsAndConditions undefined.. this shouldnt have happened'
+            )
+          }
+        } catch (e) {
+          logger.error('accountReady error - SignupChat')
+          throw e
+        }
       } else {
         logger.warn('User selected invalid fiat currency')
         return currentState
       }
 
     case 'accountReady':
-      logger.error('Save to DB and end state')
+      // TODO: Handle deeplinks
+      logger.error(`Handle deeplinks ${JSON.stringify(currentState)}`)
+      return await nextSignupState(currentState, telegramId)
+
+    case 'homeScreen':
       return await nextSignupState(currentState, telegramId)
   }
 }
@@ -139,42 +185,25 @@ async function sendResponse(
 ): Promise<boolean> {
   switch (nextState.currentMessageKey) {
     case 'language':
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Signup}:choose-language`),
-        {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            keyboard: languageKeyboard,
-            one_time_keyboard: true,
-            resize_keyboard: true
-          }
-        }
-      )
-      return true
-
-    case 'welcome':
       await telegramHook.getWebhook.sendSticker(
         msg.chat.id,
         'CAADAgADKgMAAs-71A4f8rUYf2WfMAI'
       )
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
-        user.t(`${Namespace.Signup}:welcome-message`, {
-          name: msg.chat.first_name
+        user.t(`${Namespace.Signup}:choose-language`, {
+          name: msg.from && msg.from.first_name
         }),
         {
           parse_mode: 'Markdown',
           reply_markup: {
-            keyboard: [
-              [{ text: user.t(`${Namespace.Signup}:welcome-continue-button`) }]
-            ],
-            one_time_keyboard: true,
+            keyboard: languageKeyboard,
+            one_time_keyboard: false,
             resize_keyboard: true
           }
         }
       )
-      break
+      return true
 
     case 'termsAndConditions':
       await telegramHook.getWebhook.sendMessage(
@@ -186,7 +215,7 @@ async function sendResponse(
             keyboard: [
               [{ text: user.t(`${Namespace.Signup}:terms-agree-button`) }]
             ],
-            one_time_keyboard: true,
+            one_time_keyboard: false,
             resize_keyboard: true
           }
         }
@@ -201,8 +230,8 @@ async function sendResponse(
           parse_mode: 'Markdown',
           reply_markup: {
             keyboard: currencyKeyboard,
-            one_time_keyboard: true,
-            resize_keyboard: false
+            one_time_keyboard: false,
+            resize_keyboard: true
           }
         }
       )
@@ -237,10 +266,25 @@ async function sendResponse(
               }
             ]
           ],
-          one_time_keyboard: true,
+          one_time_keyboard: false,
           resize_keyboard: true
         }
       })
+      return true
+
+    case 'homeScreen':
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Signup}:home-screen`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: keyboardMenu(user),
+            one_time_keyboard: false,
+            resize_keyboard: true
+          }
+        }
+      )
       return true
   }
 

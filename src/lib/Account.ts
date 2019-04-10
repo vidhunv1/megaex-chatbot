@@ -1,11 +1,12 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import logger from 'modules/Logger'
 import cacheConnection from 'modules/Cache'
-import { CacheKeys } from './_cache-keys'
 import { User, TelegramAccount, Wallet } from 'models'
+import { CacheHelper, CacheKey } from './CacheHelper'
+
+export const ACCOUNT_CACHE_EXPIRY = 60 * 60
 
 export class Account {
-  keys: KeysInterface
   telegramId: number
   telegramMessage: TelegramBot.Message['from']
   /* 
@@ -18,17 +19,22 @@ export class Account {
     telegramMessage?: TelegramBot.Message['from']
   ) {
     this.telegramId = telegramId
-    this.keys = new CacheKeys(telegramId).getKeys()
     this.telegramMessage = telegramMessage
   }
 
-  private async saveToCache(tAccount: TelegramAccount) {
+  private async saveUserToCache(tAccount: TelegramAccount) {
     const cacheClient = await cacheConnection.getClient
     cacheClient.setAsync(
-      this.keys.telegramAccount.key,
+      CacheHelper.getKeyForUser(CacheKey.TelegramAccount, tAccount.id),
       JSON.stringify(tAccount),
       'EX',
-      this.keys.telegramAccount.expiry
+      ACCOUNT_CACHE_EXPIRY
+    )
+  }
+
+  static async clearUserCache(id: number) {
+    await cacheConnection.getClient.delAsync(
+      CacheHelper.getKeyForUser(CacheKey.TelegramAccount, id)
     )
   }
 
@@ -36,7 +42,7 @@ export class Account {
   async createOrGetAccount(): Promise<TelegramAccount> {
     const cacheClient = cacheConnection.getClient
     const accountCache = await cacheClient.getAsync(
-      this.keys.telegramAccount.key
+      CacheHelper.getKeyForUser(CacheKey.TelegramAccount, this.telegramId)
     )
     if (accountCache) {
       console.log('from cache')
@@ -45,6 +51,7 @@ export class Account {
       const parsed: TelegramAccount = JSON.parse(accountCache)
       const t: TelegramAccount = new TelegramAccount(parsed)
       t.user = new User(parsed.user)
+      console.log(`USER: ${JSON.stringify(t.user)}`)
 
       return t
     } else {
@@ -56,7 +63,7 @@ export class Account {
 
       if (getTAccount) {
         console.log('From DB')
-        this.saveToCache(getTAccount)
+        this.saveUserToCache(getTAccount)
         return getTAccount
       } else {
         console.log('Creating new User')
@@ -84,7 +91,6 @@ export class Account {
           const wallets = new Wallet({ userId: t.user.id })
           await wallets.createAll()
 
-          this.saveToCache(t)
           return t
         } catch (e) {
           logger.error(
