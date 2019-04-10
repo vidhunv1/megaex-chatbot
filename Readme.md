@@ -1,5 +1,8 @@
 # ! commands
 
+# Use serveo for easy webhhok
+    `ssh -R 80:localhost:443 serveo.net`
+
 ## Reset DB
     `sequelize db:migrate:undo:all`
     `sequelize db:migrate`
