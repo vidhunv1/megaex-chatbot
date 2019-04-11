@@ -18,9 +18,6 @@ export const CONFIG = {
   SUPPORT_USERNAME: getEnv('SUPPORT_USERNAME'),
   WEBHOOK_URL: getEnv('WEBHOOK_URL'),
   WEBHOOK_PORT: parseInt(getEnv('WEBHOOK_PORT')),
-  JWT_SECRET: getEnv('JWT_SECRET'),
-  HASH_SALT: getEnv('HASH_SALT'),
-  PAYMENT_EXPIRY_S: parseInt(getEnv('PAYMENT_EXPIRY_S')),
 
   DB_USERNAME: getEnv('DB_USERNAME'),
   DB_PASSWORD: getEnv('DB_PASSWORD'),

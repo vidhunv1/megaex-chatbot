@@ -17,7 +17,7 @@ import { LanguageView, Language } from 'constants/languages'
 import { languageKeyboard, currencyKeyboard } from './utils'
 import { FiatCurrency, CryptoCurrency } from 'constants/currencies'
 import { Account } from 'lib/Account'
-import { keyboardMenu } from 'chats/common'
+import { defaultKeyboardMenu } from 'chats/common'
 
 export const SignupChat: ChatHandler = {
   async handleCommand(
@@ -278,11 +278,7 @@ async function sendResponse(
         user.t(`${Namespace.Signup}:home-screen`),
         {
           parse_mode: 'Markdown',
-          reply_markup: {
-            keyboard: keyboardMenu(user),
-            one_time_keyboard: false,
-            resize_keyboard: true
-          }
+          reply_markup: defaultKeyboardMenu(user)
         }
       )
       return true

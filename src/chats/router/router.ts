@@ -1,6 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
 import { SignupChat } from 'chats/signup'
+import { ExchangeChat } from 'chats/exchange'
 import { getBotCommand } from 'chats/utils'
 import { CacheHelper } from 'lib/CacheHelper'
 
@@ -12,6 +13,7 @@ export const Router = {
   ) {
     const botCommand = getBotCommand(msg)
     if (botCommand) {
+      // Command handlers
       const isHandled = SignupChat.handleCommand(msg, user, tUser)
 
       if (!isHandled) {
@@ -19,7 +21,11 @@ export const Router = {
       }
     } else {
       const currentState = await CacheHelper.getState<any>(tUser.id)
-      const isHandled = SignupChat.handleContext(msg, user, tUser, currentState)
+
+      // Context Handlers
+      const isHandled =
+        (await SignupChat.handleContext(msg, user, tUser, currentState)) ||
+        (await ExchangeChat.handleContext(msg, user, tUser, currentState))
 
       if (!isHandled) {
         throw Error('TODO: Send unknown context message')

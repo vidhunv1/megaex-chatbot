@@ -1,7 +1,7 @@
 export * from './Order'
 export * from './PaymentDetail'
 export * from './PaymentMethod'
-export * from './Transfer'
+// export * from './Transfer'
 export * from './Market'
 export * from './TelegramAccount'
 export * from './Transaction'

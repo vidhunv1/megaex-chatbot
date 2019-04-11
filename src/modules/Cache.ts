@@ -2,7 +2,7 @@ import * as Redis from 'redis'
 import * as Bluebird from 'bluebird'
 import logger from 'modules/Logger'
 import { initializeQueues, closeQueues } from 'modules/queue'
-import { expirySubscription } from 'chats/subscriptions'
+// import { expirySubscription } from 'chats/subscriptions'
 
 import { CONFIG } from '../config'
 
@@ -66,9 +66,10 @@ export class Cache {
       logger.info('Initializing redis queues')
       await initializeQueues()
 
-      this.subscribeKeyExpiry((msg: string) =>
-        expirySubscription(msg, this.getClient)
-      )
+      logger.error('Init expiry subscription.. Cache.ts#L69')
+      // this.subscribeKeyExpiry((msg: string) =>
+      //   expirySubscription(msg, this.getClient)
+      // )
     } catch (e) {
       logger.error('Error: Redis')
       throw e

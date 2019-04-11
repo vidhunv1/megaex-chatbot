@@ -51,7 +51,6 @@ export class Account {
       const parsed: TelegramAccount = JSON.parse(accountCache)
       const t: TelegramAccount = new TelegramAccount(parsed)
       t.user = new User(parsed.user)
-      console.log(`USER: ${JSON.stringify(t.user)}`)
 
       return t
     } else {

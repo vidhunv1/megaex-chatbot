@@ -5,10 +5,8 @@ export const commonEN = {
   },
   bot: {
     name: 'BTC Deals',
-    username: 'btcdealsbot',
     support: {
-      name: 'BTC Deals support',
-      username: 'btcdealssupportbot'
+      name: 'BTC Deals support'
     }
   },
   app: {
@@ -16,10 +14,9 @@ export const commonEN = {
     terms: 'https://btcdeals.io/terms',
     'privacy-policy': 'https://btcdeals.io/privacy'
   },
-  'telegram-username-url': 'https://t.me{{ username }}',
   'main-menu': {
-    exchange: 'Exchange BTC/{{ fiatCurrency }}',
-    account: 'Account',
-    wallet: 'Wallet'
+    exchange: '💵 Exchange BTC/{{ fiatCurrency }}',
+    account: '👤 Account',
+    wallet: '💼 Wallet'
   }
 }
