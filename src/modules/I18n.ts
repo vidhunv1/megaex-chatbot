@@ -1,14 +1,14 @@
 import i18next from 'i18next'
 import { LanguageISO, Language } from '../constants/languages'
-import { commonEN, signupEN, exchangeEN } from '../locales/en'
-import { commonHI, signupHI, exchangeHI } from '../locales/hi'
+import { commonEN, signupEN, exchangeEN, walletEN } from '../locales/en'
+import { commonHI, signupHI, exchangeHI, walletHI } from '../locales/hi'
 import { CONFIG } from '../config'
 
 export enum Namespace {
   Common = 'common',
   Signup = 'signup',
-  Exchange = 'exchange'
-  // Wallet = 'wallet',
+  Exchange = 'exchange',
+  Wallet = 'wallet'
   // Account = 'account'
 }
 
@@ -40,12 +40,14 @@ export class I18n {
           [LanguageISO[Language.ENGLISH]]: {
             [Namespace.Common]: commonEN,
             [Namespace.Signup]: signupEN,
-            [Namespace.Exchange]: exchangeEN
+            [Namespace.Exchange]: exchangeEN,
+            [Namespace.Wallet]: walletEN
           },
           [LanguageISO[Language.HINDI]]: {
             [Namespace.Common]: commonHI,
             [Namespace.Signup]: signupHI,
-            [Namespace.Exchange]: exchangeHI
+            [Namespace.Exchange]: exchangeHI,
+            [Namespace.Wallet]: walletHI
           }
         }
       })
