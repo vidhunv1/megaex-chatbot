@@ -1,7 +1,20 @@
 export const commonEN = {
   error: {
     unknown:
-      'An error occurred, we are working on fixing this. Please try again later.'
+      'An error occurred, we are working on fixing this. Please try again later.',
+    'bad-message': `👮‍ *Support*
+
+If you are having any trouble please contact our support @{{ supportBotUsername }}
+
+⚠️ _Caution: Never do any deals outside this bot, we will not be able to protect and recover your funds_
+
+*Info*
+Find best deals to exchange bitcoins with your local currency here
+⚡️ Instant exchange with escrow protection
+🔒 Secure wallet
+
+
+`
   },
   bot: {
     name: 'BTC Deals',
@@ -15,7 +28,7 @@ export const commonEN = {
     'privacy-policy': 'https://btcdeals.io/privacy'
   },
   'main-menu': {
-    exchange: '💵 Exchange BTC/{{ fiatCurrency }}',
+    exchange: '💵 Buy/Sell BTC-{{ fiatCurrency }}',
     account: '👤 Account',
     wallet: '💼 Wallet'
   }

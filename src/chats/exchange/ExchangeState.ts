@@ -5,6 +5,7 @@ import { PaymentMethods } from 'constants/paymentMethods'
 export const EXCHANGE_STATE_KEY = 'exchange'
 
 export interface IExchangeState {
+  start?: boolean
   exchange?: boolean
   // BUY
   buy?: boolean
@@ -17,7 +18,8 @@ export interface IExchangeState {
 export interface ExchangeState extends State<IExchangeState>, IExchangeState {}
 
 export const exchangeFlow: StateFlow<IExchangeState> = {
-  exchange: 'exchange',
+  start: 'exchange',
+  exchange: null,
   buy: 'buyAmount',
   buyAmount: 'buyLimit',
   buyLimit: 'buyPrice',
@@ -26,7 +28,7 @@ export const exchangeFlow: StateFlow<IExchangeState> = {
 }
 
 export const initialState: ExchangeState = {
-  currentMessageKey: 'exchange',
+  currentMessageKey: 'start',
   key: EXCHANGE_STATE_KEY
 }
 

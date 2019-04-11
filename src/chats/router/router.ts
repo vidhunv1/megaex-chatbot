@@ -4,6 +4,9 @@ import { SignupChat } from 'chats/signup'
 import { ExchangeChat } from 'chats/exchange'
 import { getBotCommand } from 'chats/utils'
 import { CacheHelper } from 'lib/CacheHelper'
+import telegramHook from 'modules/TelegramHook'
+import { defaultKeyboardMenu } from 'chats/common'
+import { CONFIG } from '../../config'
 
 export const Router = {
   async routeMessage(
@@ -17,7 +20,16 @@ export const Router = {
       const isHandled = SignupChat.handleCommand(msg, user, tUser)
 
       if (!isHandled) {
-        throw Error('TODO: Send unknow command message')
+        await telegramHook.getWebhook.sendMessage(
+          msg.chat.id,
+          user.t('error.bad-message', {
+            supportBotUsername: CONFIG.SUPPORT_USERNAME
+          }),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: defaultKeyboardMenu(user)
+          }
+        )
       }
     } else {
       const currentState = await CacheHelper.getState<any>(tUser.id)
@@ -28,7 +40,16 @@ export const Router = {
         (await ExchangeChat.handleContext(msg, user, tUser, currentState))
 
       if (!isHandled) {
-        throw Error('TODO: Send unknown context message')
+        await telegramHook.getWebhook.sendMessage(
+          msg.chat.id,
+          user.t('error.bad-message', {
+            supportBotUsername: CONFIG.SUPPORT_USERNAME
+          }),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: defaultKeyboardMenu(user)
+          }
+        )
       }
     }
   },

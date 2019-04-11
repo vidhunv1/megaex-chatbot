@@ -40,3 +40,36 @@ export const parseDeepLink = (
 export const isBotCommand = (msg: TelegramBot.Message) => {
   return msg.text && msg.entities && msg.entities[0].type === 'bot_command'
 }
+
+export const stringifyCallbackQuery = function<CallbackTypes, Params>(
+  callbackType: CallbackTypes,
+  values?: Params
+) {
+  let q = callbackType + ':'
+  const t: any = values ? values : {}
+  Object.keys(t).forEach(function(key) {
+    q = q + key + '=' + t[key] + ','
+  })
+  return q.substring(0, q.length - 1)
+}
+
+export const parseCallbackQuery = function<CallbackTypes, CallbackParams>(
+  query: string
+): { type: CallbackTypes; params: CallbackParams } {
+  let callbackFunction, obj, pairs: string[], tKey, tVal
+  ;[callbackFunction, obj] = query.split(':')
+
+  const params: any = {}
+  pairs = obj ? obj.split(',') : []
+  for (let i = 0; i < pairs.length; i++) {
+    if (pairs.length > 0) {
+      ;[tKey, tVal] = pairs[i].split('=')
+      params[tKey] = tVal
+    }
+  }
+
+  return {
+    type: (callbackFunction as unknown) as CallbackTypes,
+    params: params as CallbackParams
+  }
+}
