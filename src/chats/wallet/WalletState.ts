@@ -20,7 +20,7 @@ export const initialState: WalletState = {
   key: WALLET_STATE_KEY
 }
 
-export async function nextExchangeState(
+export async function nextWalletState(
   currentState: WalletState,
   telegramId: number
 ): Promise<WalletState | null> {

@@ -1,20 +1,13 @@
-export enum ACCOUNT_CONTEXTS {
-  SendMessage = 'send-message',
-  AddPaymethod = 'add-paymethod'
+export enum CallbackTypes {
+  PAYMENT_METHODS = 'account.payment-methods',
+  REFERRAL_LINK = 'account.referral-link'
 }
 
-// TODO: Placeholder, fill with real requirements
-export interface AccountContextValues {
-  [ACCOUNT_CONTEXTS.SendMessage]: {
-    userId: string
-    message: string
-  }
-  [ACCOUNT_CONTEXTS.AddPaymethod]: {
-    paymentMethod: string
-  }
+export interface DefaultParams {
+  messageId: number // The message_id where the callback button is.
 }
 
-export const ACCOUNT_KEY_EXPIRY: Record<ACCOUNT_CONTEXTS, number> = {
-  [ACCOUNT_CONTEXTS.SendMessage]: 0,
-  [ACCOUNT_CONTEXTS.AddPaymethod]: 0
+export interface CallbackParams {
+  [CallbackTypes.PAYMENT_METHODS]: {} & DefaultParams
+  [CallbackTypes.REFERRAL_LINK]: {} & DefaultParams
 }

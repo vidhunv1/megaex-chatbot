@@ -2,18 +2,20 @@ import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
 import { ChatHandler } from 'chats/types'
 import {
-  WALLET_STATE_KEY,
-  WalletState,
+  ACCOUNT_STATE_KEY,
+  AccountState,
   initialState,
-  nextWalletState
-} from './WalletState'
+  nextAccountState
+} from './AccountState'
 import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/i18n'
+import { CryptoCurrency } from 'constants/currencies'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { CallbackTypes, CallbackParams } from './constants'
-import { CryptoCurrency } from 'constants/currencies'
+import logger from 'modules/Logger'
+import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
 
-export const WalletChat: ChatHandler = {
+export const AccountChat: ChatHandler = {
   async handleCommand(
     _msg: TelegramBot.Message,
     _user: User,
@@ -38,12 +40,11 @@ export const WalletChat: ChatHandler = {
     state
   ) {
     let currentState = state
-    if (msg.text === user.t('main-menu.wallet')) {
+    if (msg.text === user.t('main-menu.account')) {
       currentState = initialState
     }
-
-    if (currentState.key === WALLET_STATE_KEY) {
-      const nextState: WalletState | null = await parseInput(
+    if (currentState.key === ACCOUNT_STATE_KEY) {
+      const nextState: AccountState | null = await parseInput(
         msg,
         tUser.id,
         user,
@@ -65,11 +66,11 @@ async function parseInput(
   _msg: TelegramBot.Message,
   telegramId: number,
   _user: User,
-  currentState: WalletState
-): Promise<WalletState | null> {
+  currentState: AccountState
+): Promise<AccountState | null> {
   switch (currentState.currentMessageKey) {
     case 'start':
-      return await nextWalletState(currentState, telegramId)
+      return await nextAccountState(currentState, telegramId)
     default:
       return null
   }
@@ -78,20 +79,25 @@ async function parseInput(
 async function sendResponse(
   msg: TelegramBot.Message,
   user: User,
-  nextState: WalletState
+  nextState: AccountState
 ): Promise<boolean> {
   switch (nextState.currentMessageKey) {
-    case 'wallet':
+    case 'account':
+      logger.error('TODO: Add manage/edit payment methods')
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
-        user.t(`${Namespace.Wallet}:wallet-home`, {
-          fiatCurrencyCode: user.currencyCode,
+        user.t(`${Namespace.Account}:account-home`, {
+          accountID: 'U9SAE8',
+          dealCount: 100,
+          tradeVolume: 100,
           cryptoCurrencyCode: CryptoCurrency.BTC,
-          fiatBalance: 10000,
-          cryptoBalance: 0.1,
-          blockedBalance: 0.005,
+          tradeSpeed: '2 mins',
+          ratingPercentage: 98,
+          upvotes: 100,
+          downvotes: 3,
           referralCount: 100,
-          earnings: 0.05
+          earnings: 5,
+          paymentMethods: 'BankTransfer, PayTM'
         }),
         {
           parse_mode: 'Markdown',
@@ -99,33 +105,26 @@ async function sendResponse(
             inline_keyboard: [
               [
                 {
-                  text: user.t(`${Namespace.Wallet}:send-cryptocurrency`, {
-                    orderCount: 0
-                  }),
+                  text: user.t(`${Namespace.Account}:manage-payment-methods`),
                   callback_data: stringifyCallbackQuery<
-                    CallbackTypes.SEND_CURRENCY,
-                    CallbackParams[CallbackTypes.SEND_CURRENCY]
-                  >(CallbackTypes.SEND_CURRENCY, {
+                    CallbackTypes.PAYMENT_METHODS,
+                    CallbackParams[CallbackTypes.PAYMENT_METHODS]
+                  >(CallbackTypes.PAYMENT_METHODS, {
                     messageId: msg.message_id
                   })
                 }
               ],
               [
                 {
-                  text: user.t(`${Namespace.Wallet}:my-address`),
-                  callback_data: stringifyCallbackQuery<
-                    CallbackTypes.MY_ADDRESS,
-                    CallbackParams[CallbackTypes.MY_ADDRESS]
-                  >(CallbackTypes.MY_ADDRESS, {
-                    messageId: msg.message_id
-                  })
+                  text: user.t(`${Namespace.Account}:verify-account`),
+                  url: VERIFY_ACCOUNT_PATH
                 },
                 {
-                  text: user.t(`${Namespace.Wallet}:withdraw`),
+                  text: user.t(`${Namespace.Account}:referral-link`),
                   callback_data: stringifyCallbackQuery<
-                    CallbackTypes.WITHDRAW,
-                    CallbackParams[CallbackTypes.WITHDRAW]
-                  >(CallbackTypes.WITHDRAW, {
+                    CallbackTypes.REFERRAL_LINK,
+                    CallbackParams[CallbackTypes.REFERRAL_LINK]
+                  >(CallbackTypes.REFERRAL_LINK, {
                     messageId: msg.message_id
                   })
                 }

@@ -1,8 +1,11 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
+
 import { SignupChat } from 'chats/signup'
 import { ExchangeChat } from 'chats/exchange'
 import { WalletChat } from 'chats/wallet'
+import { AccountChat } from 'chats/account'
+
 import { getBotCommand } from 'chats/utils'
 import { CacheHelper } from 'lib/CacheHelper'
 import telegramHook from 'modules/TelegramHook'
@@ -21,7 +24,8 @@ export const Router = {
       const isHandled =
         (await SignupChat.handleCommand(msg, user, tUser)) ||
         (await ExchangeChat.handleCommand(msg, user, tUser)) ||
-        (await WalletChat.handleCommand(msg, user, tUser))
+        (await WalletChat.handleCommand(msg, user, tUser)) ||
+        (await AccountChat.handleCommand(msg, user, tUser))
 
       if (!isHandled) {
         await telegramHook.getWebhook.sendMessage(
@@ -40,9 +44,10 @@ export const Router = {
 
       // Context Handlers
       const isHandled =
-        (await SignupChat.handleContext(msg, user, tUser, currentState)) ||
         (await ExchangeChat.handleContext(msg, user, tUser, currentState)) ||
-        (await WalletChat.handleContext(msg, user, tUser, currentState))
+        (await WalletChat.handleContext(msg, user, tUser, currentState)) ||
+        (await AccountChat.handleContext(msg, user, tUser, currentState)) ||
+        (await SignupChat.handleContext(msg, user, tUser, currentState))
 
       if (!isHandled) {
         await telegramHook.getWebhook.sendMessage(

@@ -9,7 +9,8 @@ export const walletEN = {
 
 🤝 Invited:    {{ referralCount }} users
 💰 Earnings: {{ earnings }} {{ cryptoCurrencyCode }}
-💡 _Get your referral code from your account_
+
+💡 _Get your invite link from your account_
 `,
   'send-cryptocurrency': '⚡️  Send Bitcoin',
   'my-address': '📩  My Address',
