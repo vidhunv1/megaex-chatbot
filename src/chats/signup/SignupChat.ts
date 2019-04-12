@@ -23,9 +23,15 @@ export const SignupChat: ChatHandler = {
   async handleCommand(
     msg: TelegramBot.Message,
     user: User,
-    tUser: TelegramAccount
+    tUser: TelegramAccount,
+    state: any
   ) {
-    if (!user.isTermsAccepted || !user.currencyCode || !user.locale) {
+    if (
+      !user.isTermsAccepted ||
+      !user.currencyCode ||
+      !user.locale ||
+      (state && state.key === SIGNUP_STATE_KEY)
+    ) {
       const currentState =
         (await CacheHelper.getState<SignupState>(tUser.id)) || initialState
 
@@ -211,6 +217,7 @@ async function sendResponse(
         user.t(`${Namespace.Signup}:terms-and-conditions`),
         {
           parse_mode: 'Markdown',
+          disable_web_page_preview: true,
           reply_markup: {
             keyboard: [
               [{ text: user.t(`${Namespace.Signup}:terms-agree-button`) }]
@@ -248,10 +255,14 @@ async function sendResponse(
       let message
       if (wallet) {
         message = user.t(`${Namespace.Signup}:account-ready`, {
+          accountID: user.accountId,
           bitcoinAddress: wallet.address
         })
       } else {
-        message = user.t(`${Namespace.Signup}:account-ready-generating-address`)
+        message = user.t(
+          `${Namespace.Signup}:account-ready-generating-address`,
+          { accountID: user.accountId }
+        )
       }
 
       await telegramHook.getWebhook.sendMessage(msg.chat.id, message, {

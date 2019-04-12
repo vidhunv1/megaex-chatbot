@@ -18,14 +18,16 @@ export const Router = {
     user: User,
     tUser: TelegramAccount
   ) {
+    const currentState = await CacheHelper.getState<any>(tUser.id)
+
     const botCommand = getBotCommand(msg)
     if (botCommand) {
       // Command handlers
       const isHandled =
-        (await SignupChat.handleCommand(msg, user, tUser)) ||
-        (await ExchangeChat.handleCommand(msg, user, tUser)) ||
-        (await WalletChat.handleCommand(msg, user, tUser)) ||
-        (await AccountChat.handleCommand(msg, user, tUser))
+        (await SignupChat.handleCommand(msg, user, tUser, currentState)) ||
+        (await ExchangeChat.handleCommand(msg, user, tUser, currentState)) ||
+        (await WalletChat.handleCommand(msg, user, tUser, currentState)) ||
+        (await AccountChat.handleCommand(msg, user, tUser, currentState))
 
       if (!isHandled) {
         await telegramHook.getWebhook.sendMessage(
@@ -40,8 +42,6 @@ export const Router = {
         )
       }
     } else {
-      const currentState = await CacheHelper.getState<any>(tUser.id)
-
       // Context Handlers
       const isHandled =
         (await ExchangeChat.handleContext(msg, user, tUser, currentState)) ||

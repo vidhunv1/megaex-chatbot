@@ -1,14 +1,9 @@
 export const signupEN = {
-  'choose-language': `Hello *{{ name }}*
+  'choose-language': `Hello, *{{ name }}*!
 
 Please select your language from the options below`,
 
   'terms-and-conditions': `
-
-*Security*
-
-🔒 Enable Telegram password *security settings* -> *2 step verification* -> *Password*
-🔒 Always terminate all inactive sessions from *security settings* -> *Active sessions*
 
 By continuing you agree to our [terms & conditions](https://google.com) and [privacy policy](https://google.com)
 `,
@@ -17,12 +12,22 @@ By continuing you agree to our [terms & conditions](https://google.com) and [pri
 
   'select-currency': 'Select your local currency',
 
-  'account-ready': `Your account is created.
-
+  'account-ready': `*Account Created*
+  
+Account ID: /u{{ accountID }}
 Bitcoin address: *{{ bitcoinAddress }}*
-`,
 
-  'account-ready-generating-address': 'Your account is ready.',
+_Security Tip_
+🔒 _Enable Telegram password_ security settings -> 2 step verification -> Password
+🔒 _Always terminate all inactive sessions from_ security settings -> Active sessions`,
+
+  'account-ready-generating-address': `*Account Created*
+  
+Account ID: /u{{ accountID }}
+  
+_Security Tip_
+🔒 _Enable Telegram password_ security settings -> 2 step verification -> Password
+🔒 _Always terminate all inactive sessions from_ security settings -> Active sessions`,
   'account-ready-continue-button': '🚀 Start trading',
   'home-screen': `[Join our group](https://t.me/megadealsenglish)      /settings
 
