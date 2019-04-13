@@ -37,13 +37,13 @@ export const AccountChat: ChatHandler = {
     msg: TelegramBot.Message,
     user: User,
     tUser: TelegramAccount,
-    state
+    state: AccountState | null
   ) {
     let currentState = state
     if (msg.text === user.t('main-menu.account')) {
       currentState = initialState
     }
-    if (currentState.key === ACCOUNT_STATE_KEY) {
+    if (currentState && currentState.key === ACCOUNT_STATE_KEY) {
       const nextState: AccountState | null = await parseInput(
         msg,
         tUser.id,

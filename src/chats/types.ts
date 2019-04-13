@@ -46,7 +46,8 @@ export interface ChatHandler {
     msg: TelegramBot.Message,
     user: User,
     tUser: TelegramAccount,
-    callback: TelegramBot.CallbackQuery
+    callback: TelegramBot.CallbackQuery,
+    state: any | null
   ) => Promise<boolean>
   handleContext: (
     msg: TelegramBot.Message,

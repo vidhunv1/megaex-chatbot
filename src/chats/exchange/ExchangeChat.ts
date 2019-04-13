@@ -35,7 +35,7 @@ export const ExchangeChat: ChatHandler = {
     msg: TelegramBot.Message,
     user: User,
     tUser: TelegramAccount,
-    state
+    state: ExchangeState | null
   ) {
     let currentState = state
     if (
@@ -45,7 +45,7 @@ export const ExchangeChat: ChatHandler = {
       currentState = initialState
     }
 
-    if (currentState.key === EXCHANGE_STATE_KEY) {
+    if (currentState && currentState.key === EXCHANGE_STATE_KEY) {
       const nextState: ExchangeState | null = await parseInput(
         msg,
         tUser.id,

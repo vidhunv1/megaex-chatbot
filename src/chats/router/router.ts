@@ -9,6 +9,7 @@ import { AccountChat } from 'chats/account'
 import { getBotCommand } from 'chats/utils'
 import { CacheHelper } from 'lib/CacheHelper'
 import telegramHook from 'modules/TelegramHook'
+import logger from 'modules/Logger'
 import { defaultKeyboardMenu } from 'chats/common'
 import { CONFIG } from '../../config'
 
@@ -64,12 +65,56 @@ export const Router = {
     }
   },
 
-  routeCallback(
-    _msg: TelegramBot.Message,
-    _user: User,
-    _tUser: TelegramAccount,
-    _callback: TelegramBot.CallbackQuery
+  async routeCallback(
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount,
+    callback: TelegramBot.CallbackQuery
   ) {
-    throw Error('TODO: Not implemented')
+    const currentState = await CacheHelper.getState<any>(tUser.id)
+
+    const isHandled =
+      (await ExchangeChat.handleCallback(
+        msg,
+        user,
+        tUser,
+        callback,
+        currentState
+      )) ||
+      (await WalletChat.handleCallback(
+        msg,
+        user,
+        tUser,
+        callback,
+        currentState
+      )) ||
+      (await AccountChat.handleCallback(
+        msg,
+        user,
+        tUser,
+        callback,
+        currentState
+      )) ||
+      (await SignupChat.handleCallback(
+        msg,
+        user,
+        tUser,
+        callback,
+        currentState
+      ))
+
+    console.log('CALLBACK: ' + JSON.stringify(callback))
+
+    if (!isHandled) {
+      logger.error(`Callback query not handled: ${JSON.stringify(callback)}`)
+    }
+
+    if (!callback.data) {
+      logger.error(`Callback data is undefined: ${JSON.stringify(callback)}`)
+    }
+
+    telegramHook.getWebhook.answerCallbackQuery({
+      callback_query_id: callback.id
+    })
   }
 }
