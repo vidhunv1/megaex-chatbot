@@ -18,7 +18,7 @@ export const defaultKeyboardMenu = (
         { text: user.t('main-menu.account') }
       ]
     ],
-    one_time_keyboard: false,
+    one_time_keyboard: true,
     resize_keyboard: true
   }
 }

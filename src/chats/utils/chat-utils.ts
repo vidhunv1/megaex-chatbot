@@ -9,7 +9,9 @@ export const getBotCommand = (msg: TelegramBot.Message): BotCommand | null => {
   // This cannot be undefined, so casting it
   const message = msg.text as string
   if (message.startsWith('/')) {
-    if (message.startsWith(BotCommand.START)) {
+    if (message.startsWith(BotCommand.CANCEL)) {
+      return BotCommand.CANCEL
+    } else if (message.startsWith(BotCommand.START)) {
       return BotCommand.START
     } else if (message.startsWith(BotCommand.SETTINGS)) {
       return BotCommand.SETTINGS
@@ -53,9 +55,9 @@ export const stringifyCallbackQuery = function<CallbackTypes, Params>(
   return q.substring(0, q.length - 1)
 }
 
-export const parseCallbackQuery = function<CallbackTypes, CallbackParams>(
+export const parseCallbackQuery = function<CallbackTypes>(
   query: string
-): { type: CallbackTypes; params: CallbackParams } {
+): { type: CallbackTypes; params: any } {
   let callbackFunction, obj, pairs: string[], tKey, tVal
   ;[callbackFunction, obj] = query.split(':')
 
@@ -70,6 +72,6 @@ export const parseCallbackQuery = function<CallbackTypes, CallbackParams>(
 
   return {
     type: (callbackFunction as unknown) as CallbackTypes,
-    params: params as CallbackParams
+    params: params as any
   }
 }

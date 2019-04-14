@@ -13,7 +13,7 @@ By continuing you agree to our [terms & conditions](https://google.com) and [pri
   'select-currency': 'Select your local currency',
 
   'account-ready': `*Account Created*
-  
+
 Account ID: /u{{ accountID }}
 Bitcoin address: *{{ bitcoinAddress }}*
 
@@ -22,9 +22,9 @@ _Security Tip_
 🔒 _Always terminate all inactive sessions from_ security settings -> Active sessions`,
 
   'account-ready-generating-address': `*Account Created*
-  
+
 Account ID: /u{{ accountID }}
-  
+
 _Security Tip_
 🔒 _Enable Telegram password_ security settings -> 2 step verification -> Password
 🔒 _Always terminate all inactive sessions from_ security settings -> Active sessions`,

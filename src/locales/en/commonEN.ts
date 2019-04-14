@@ -1,4 +1,10 @@
 export const commonEN = {
+  cancel: 'cancel',
+  actions: {
+    'cancel-keyboard-button': 'Cancel',
+    'back-inline-button': '« back'
+  },
+  'action-canceled': 'This action was canceled.',
   error: {
     unknown:
       'An error occurred, we are working on fixing this. Please try again later.',

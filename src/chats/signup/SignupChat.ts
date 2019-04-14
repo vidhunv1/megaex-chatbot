@@ -24,7 +24,7 @@ export const SignupChat: ChatHandler = {
     msg: TelegramBot.Message,
     user: User,
     tUser: TelegramAccount,
-    state: any
+    state: SignupState | null
   ) {
     if (
       !user.isTermsAccepted ||
@@ -65,7 +65,7 @@ export const SignupChat: ChatHandler = {
     msg: TelegramBot.Message,
     user: User,
     tUser: TelegramAccount,
-    state: any
+    state: SignupState | null
   ) {
     if (
       (state && state.key === SIGNUP_STATE_KEY) ||

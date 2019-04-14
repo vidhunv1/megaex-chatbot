@@ -1,6 +1,9 @@
+import { IWalletState } from './WalletState'
+import { CryptoCurrency } from 'constants/currencies'
+
 export enum CallbackTypes {
   SEND_CURRENCY = 'wallet.send-currency',
-  MY_ADDRESS = 'wallet.my-address',
+  DEPOSIT = 'wallet.deposit',
   WITHDRAW = 'wallet.withdraw'
 }
 
@@ -9,7 +12,15 @@ export interface DefaultParams {
 }
 
 export interface CallbackParams {
-  [CallbackTypes.MY_ADDRESS]: {} & DefaultParams
-  [CallbackTypes.SEND_CURRENCY]: {} & DefaultParams
+  [CallbackTypes.DEPOSIT]: {} & DefaultParams
+  [CallbackTypes.SEND_CURRENCY]: {
+    currencyCode: CryptoCurrency
+  } & DefaultParams
   [CallbackTypes.WITHDRAW]: {} & DefaultParams
+}
+
+export const callbackStateMap: Record<CallbackTypes, keyof IWalletState> = {
+  [CallbackTypes.SEND_CURRENCY]: 'sendCoin',
+  [CallbackTypes.DEPOSIT]: 'deposit',
+  [CallbackTypes.WITHDRAW]: 'widthdraw'
 }

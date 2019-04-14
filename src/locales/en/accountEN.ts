@@ -18,5 +18,5 @@ Account ID: /u{{ accountID }}
   'manage-payment-methods': '💳  Payment Methods',
   'add-payment-method': '💳  Add payment Method',
   'verify-account': '✅  Verify Account',
-  'referral-link': '🤝  Referral Link'
+  'referral-link': '🤝  Invite Link'
 }

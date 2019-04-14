@@ -10,7 +10,7 @@ import { getBotCommand } from 'chats/utils'
 import { CacheHelper } from 'lib/CacheHelper'
 import telegramHook from 'modules/TelegramHook'
 import logger from 'modules/Logger'
-import { defaultKeyboardMenu } from 'chats/common'
+import { defaultKeyboardMenu, CommonChat } from 'chats/common'
 import { CONFIG } from '../../config'
 
 export const Router = {
@@ -25,6 +25,7 @@ export const Router = {
     if (botCommand) {
       // Command handlers
       const isHandled =
+        (await CommonChat.handleCommand(msg, user, tUser, currentState)) ||
         (await SignupChat.handleCommand(msg, user, tUser, currentState)) ||
         (await ExchangeChat.handleCommand(msg, user, tUser, currentState)) ||
         (await WalletChat.handleCommand(msg, user, tUser, currentState)) ||
@@ -45,6 +46,7 @@ export const Router = {
     } else {
       // Context Handlers
       const isHandled =
+        (await CommonChat.handleContext(msg, user, tUser, currentState)) ||
         (await ExchangeChat.handleContext(msg, user, tUser, currentState)) ||
         (await WalletChat.handleContext(msg, user, tUser, currentState)) ||
         (await AccountChat.handleContext(msg, user, tUser, currentState)) ||
@@ -74,6 +76,13 @@ export const Router = {
     const currentState = await CacheHelper.getState<any>(tUser.id)
 
     const isHandled =
+      (await CommonChat.handleCallback(
+        msg,
+        user,
+        tUser,
+        callback,
+        currentState
+      )) ||
       (await ExchangeChat.handleCallback(
         msg,
         user,
@@ -102,8 +111,6 @@ export const Router = {
         callback,
         currentState
       ))
-
-    console.log('CALLBACK: ' + JSON.stringify(callback))
 
     if (!isHandled) {
       logger.error(`Callback query not handled: ${JSON.stringify(callback)}`)

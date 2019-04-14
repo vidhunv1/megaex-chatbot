@@ -16,11 +16,14 @@ export async function moveToNextState<T extends State<T>>(
   state: T,
   flow: StateFlow<Omit<StateFlow<T>, 'currentMessageKey' | 'key'>>,
   id: number,
-  expiry?: number // seconds
+  expiry?: number, // seconds,
+  nextStateOverride?: keyof T
 ) {
   const next = {
     ...state,
-    currentMessageKey: getNextStateKey<T>(flow, state.currentMessageKey)
+    currentMessageKey: nextStateOverride
+      ? nextStateOverride
+      : getNextStateKey<T>(flow, state.currentMessageKey)
   }
 
   if (next.currentMessageKey === null) {

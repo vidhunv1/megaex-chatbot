@@ -16,6 +16,7 @@ export enum BotCommand {
   START = '/start',
   HELP = '/help',
   SETTINGS = '/settings',
+  CANCEL = '/cancel',
 
   // App commands
   USER = '/u',
