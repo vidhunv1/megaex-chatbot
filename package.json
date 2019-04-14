@@ -19,7 +19,8 @@
     "lib": "dist/lib",
     "chats": "dist/chats",
     "models": "dist/models",
-    "constants": "dist/constants"
+    "constants": "dist/constants",
+    "utils": "dist/utils"
   },
   "dependencies": {
     "bcrypt": "2.0.1",
