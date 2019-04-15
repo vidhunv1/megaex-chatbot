@@ -151,7 +151,7 @@ async function parseInput(
       if (msg.text && currentState.sendCoin) {
         const cryptocurrencyCode = currentState.sendCoin.currencyCode
         const fiatcurrencyCode = user.currencyCode
-        const parsedCurrency = parseCurrencyAmount(msg.text, user.currencyCode)
+        const parsedCurrency = parseCurrencyAmount(msg.text, cryptocurrencyCode)
 
         if (!parsedCurrency || (parsedCurrency && parsedCurrency.amount <= 0)) {
           // TODO: Have a retry count
@@ -253,7 +253,9 @@ async function sendResponse(
               [
                 {
                   text: user.t(`${Namespace.Wallet}:send-cryptocurrency`, {
-                    orderCount: 0
+                    cryptoCurrencyName: user.t(
+                      `cryptocurrency-names.${CURRENT_CRYPTOCURRENCY}`
+                    )
                   }),
                   callback_data: stringifyCallbackQuery<
                     CallbackTypes.SEND_CURRENCY,

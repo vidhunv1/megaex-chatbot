@@ -2,8 +2,8 @@ export const walletEN = {
   'wallet-home': `💼  *Bitcoin Wallet*
 
 *Balance*:      {{ cryptoBalance }}
-*Value*:          {{ fiatBalance }}
-*Blocked*:      {{ blockedBalance }}
+(Value:          {{ fiatBalance }})
+*In Order*:      {{ blockedBalance }}
 
 📗  /transactions
 
@@ -11,19 +11,22 @@ export const walletEN = {
 💰 Earnings: {{ earnings }}
 (_Get your invite link from your account_)
 `,
-  'send-cryptocurrency': '⚡️  Send Bitcoin',
+  'send-cryptocurrency': '⚡️  Send {{ cryptoCurrencyName }}',
   'my-address': '📩  Deposit',
   withdraw: '📤  Withdraw',
 
-  'send-cryptocurrency-amount': `Enter the amount you want to send in *{{ fiatCurrencyCode }}* or *{{ cryptoCurrencyCode }}* (_A private link to share with your friends will be generated_).
+  'send-cryptocurrency-amount': `*Enter amount*
 
 *Available*: {{ cryptoCurrencyBalance }}
-*Value*:       {{ fiatValue }}
+(Value:       {{ fiatValue }})
+
+Input your amount in  *{{ cryptoCurrencyCode }}* or *{{ fiatCurrencyCode }}*.
+_Example: {{ cryptoCurrencyBalance }}_
 `,
 
   'send-cryptocurrency-insufficient-balance': `❌ *Insufficient funds*
 
-  *Available balance*: {{ cryptoCurrencyBalance}}
+*Available balance*: {{ cryptoCurrencyBalance}}
 
 Please fund your {{ cryptoCurrencyCode }} wallet to make this payment.
 `,
@@ -32,17 +35,19 @@ Please fund your {{ cryptoCurrencyCode }} wallet to make this payment.
 Please enter a valid amount:
 Example: _100 INR or 0.0005 BTC_
 `,
-  'confirm-send-cryptocurrency': `✅ *Verify*
+  'confirm-send-cryptocurrency': `*Verify*
 
-*Amount*: {{ cryptoCurrencyAmount }}
-*Value*: {{ fiatValue }}
+Confirm your transaction:
+
+*Amount: {{ cryptoCurrencyAmount }}*
+(Value:   {{ fiatValue }})
 `,
   'confirm-send-cryptocurrency-button': '✅ Confirm',
   'show-payment-link': `*Link generated*
 
 {{ paymentLink }}
-(Share this link privately to send the funds. Anyone with access to this link will get the funds)
+(_Share this link privately to send the funds. Anyone with access to this link will get the funds_)
 
-_This link will expire in {{ expiryTime }}_
+This link will expire in *{{ expiryTime }}*
 `
 }

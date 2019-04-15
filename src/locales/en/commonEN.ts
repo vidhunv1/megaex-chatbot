@@ -1,7 +1,10 @@
 export const commonEN = {
+  'cryptocurrency-names': {
+    BTC: 'Bitcoin'
+  },
   cancel: 'cancel',
   actions: {
-    'cancel-keyboard-button': 'Cancel',
+    'cancel-keyboard-button': 'cancel',
     'back-inline-button': '« back'
   },
   'action-canceled': 'This action was canceled.',
@@ -35,7 +38,7 @@ Find best deals to exchange bitcoins with your local currency here
   },
   'main-menu': {
     exchange: '💵 Buy/Sell BTC-{{ fiatCurrency }}',
-    account: '👤 Account',
+    account: '👤 My Account',
     wallet: '💼 Wallet'
   }
 }

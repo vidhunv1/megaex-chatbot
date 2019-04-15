@@ -8,13 +8,12 @@ export const dataFormatter = {
   ) => {
     // TODO: Find all locale for correct groupings.
     const l = currency === FiatCurrency.INR ? 'en-IN' : locale
-    return amount.toLocaleString(l, {
+    return `${amount.toLocaleString(l, {
       currency,
-      currencyDisplay: 'symbol',
-      style: 'currency',
+      style: 'decimal',
       minimumFractionDigits: 0,
       maximumFractionDigits: 1
-    })
+    })}${currency ? ' ' + currency : ''}`
   },
 
   formatCryptoCurrency: (
