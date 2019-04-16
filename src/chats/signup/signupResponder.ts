@@ -3,7 +3,7 @@ import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/I18n'
 import { languageKeyboard, currencyKeyboard } from './utils'
 import { CryptoCurrency } from 'constants/currencies'
-import { defaultKeyboardMenu } from 'chats/common'
+import { keyboardMainMenu } from 'chats/common'
 import { User, Wallet } from 'models'
 import { SignupState } from './SignupState'
 
@@ -27,7 +27,6 @@ export async function signupResponder(
           parse_mode: 'Markdown',
           reply_markup: {
             keyboard: languageKeyboard,
-            one_time_keyboard: false,
             resize_keyboard: true
           }
         }
@@ -45,7 +44,6 @@ export async function signupResponder(
             keyboard: [
               [{ text: user.t(`${Namespace.Signup}:terms-agree-button`) }]
             ],
-            one_time_keyboard: false,
             resize_keyboard: true
           }
         }
@@ -60,7 +58,6 @@ export async function signupResponder(
           parse_mode: 'Markdown',
           reply_markup: {
             keyboard: currencyKeyboard,
-            one_time_keyboard: false,
             resize_keyboard: true
           }
         }
@@ -100,7 +97,6 @@ export async function signupResponder(
               }
             ]
           ],
-          one_time_keyboard: false,
           resize_keyboard: true
         }
       })
@@ -112,7 +108,7 @@ export async function signupResponder(
         user.t(`${Namespace.Signup}:home-screen`),
         {
           parse_mode: 'Markdown',
-          reply_markup: defaultKeyboardMenu(user)
+          reply_markup: keyboardMainMenu(user)
         }
       )
       return true

@@ -10,7 +10,7 @@ import { getBotCommand } from 'chats/utils'
 import { CacheHelper } from 'lib/CacheHelper'
 import telegramHook from 'modules/TelegramHook'
 import logger from 'modules/Logger'
-import { defaultKeyboardMenu, CommonChat } from 'chats/common'
+import { CommonChat, keyboardMainMenu } from 'chats/common'
 import { CONFIG } from '../../config'
 
 export const Router = {
@@ -39,7 +39,7 @@ export const Router = {
           }),
           {
             parse_mode: 'Markdown',
-            reply_markup: defaultKeyboardMenu(user)
+            reply_markup: keyboardMainMenu(user)
           }
         )
       }
@@ -60,7 +60,7 @@ export const Router = {
           }),
           {
             parse_mode: 'Markdown',
-            reply_markup: defaultKeyboardMenu(user)
+            reply_markup: keyboardMainMenu(user)
           }
         )
       }

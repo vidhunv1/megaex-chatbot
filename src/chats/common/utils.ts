@@ -1,7 +1,7 @@
 import { User } from 'models'
 import * as TelegramBot from 'node-telegram-bot-api'
 
-export const defaultKeyboardMenu = (
+export const keyboardMainMenu = (
   user: User
 ): TelegramBot.ReplyKeyboardMarkup => {
   return {
@@ -18,7 +18,7 @@ export const defaultKeyboardMenu = (
         { text: user.t('main-menu.account') }
       ]
     ],
-    one_time_keyboard: true,
+    one_time_keyboard: false,
     resize_keyboard: true
   }
 }

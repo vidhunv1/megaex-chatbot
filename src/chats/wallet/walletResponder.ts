@@ -5,9 +5,13 @@ import { stringifyCallbackQuery } from 'chats/utils'
 import { CallbackTypes, CallbackParams } from './constants'
 import { User } from 'models'
 import { WalletState } from './WalletState'
-import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import {
+  CryptoCurrency,
+  FiatCurrency,
+  cryptoCurrencyInfo
+} from 'constants/currencies'
 import logger from 'modules/Logger'
-import { defaultKeyboardMenu } from 'chats/common'
+import { keyboardMainMenu } from 'chats/common'
 import { dataFormatter } from 'utils/dataFormatter'
 
 // TODO: Implement these functions
@@ -199,7 +203,8 @@ export async function walletResponder(
                 }
               ]
             ],
-            one_time_keyboard: true,
+            // TODO: some telegram issue, keyboard comes up if set to true ... ??
+            one_time_keyboard: false,
             resize_keyboard: true
           }
         }
@@ -218,7 +223,7 @@ export async function walletResponder(
         }),
         {
           parse_mode: 'Markdown',
-          reply_markup: defaultKeyboardMenu(user)
+          reply_markup: keyboardMainMenu(user)
         }
       )
       return true

@@ -2,7 +2,7 @@ import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
 import telegramHook from 'modules/TelegramHook'
-import { defaultKeyboardMenu } from './utils'
+import { keyboardMainMenu } from './utils'
 import { CacheHelper } from 'lib/CacheHelper'
 import { getBotCommand } from 'chats/utils'
 
@@ -18,7 +18,7 @@ export const CommonChat: ChatHandler = {
         user.t('action-canceled'),
         {
           parse_mode: 'Markdown',
-          reply_markup: defaultKeyboardMenu(user)
+          reply_markup: keyboardMainMenu(user)
         }
       )
       await CacheHelper.clearState(tUser.id)
@@ -51,7 +51,7 @@ export const CommonChat: ChatHandler = {
         user.t('action-canceled'),
         {
           parse_mode: 'Markdown',
-          reply_markup: defaultKeyboardMenu(user)
+          reply_markup: keyboardMainMenu(user)
         }
       )
       await CacheHelper.clearState(tUser.id)
