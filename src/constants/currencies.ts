@@ -2,6 +2,17 @@ export enum CryptoCurrency {
   BTC = 'BTC'
 }
 
+export const cryptoCurrencyInfo: Record<
+  CryptoCurrency,
+  { confirmations: number; fee: number; minWithdrawalAmount: number }
+> = {
+  [CryptoCurrency.BTC]: {
+    confirmations: 1,
+    fee: 0.0002,
+    minWithdrawalAmount: 0.002
+  }
+}
+
 export enum FiatCurrency {
   RUB = 'RUB',
   NGN = 'NGN',

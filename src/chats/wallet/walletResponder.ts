@@ -13,6 +13,7 @@ import {
 import logger from 'modules/Logger'
 import { keyboardMainMenu } from 'chats/common'
 import { dataFormatter } from 'utils/dataFormatter'
+import { CONFIG } from '../../config'
 
 // TODO: Implement these functions
 const getFiatValue = (
@@ -58,9 +59,9 @@ const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
 export async function walletResponder(
   msg: TelegramBot.Message,
   user: User,
-  nextState: WalletState
+  currentState: WalletState
 ): Promise<boolean> {
-  switch (nextState.currentMessageKey) {
+  switch (currentState.currentMessageKey) {
     case 'wallet':
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
@@ -123,7 +124,8 @@ export async function walletResponder(
                     CallbackTypes.WITHDRAW,
                     CallbackParams[CallbackTypes.WITHDRAW]
                   >(CallbackTypes.WITHDRAW, {
-                    messageId: msg.message_id
+                    messageId: msg.message_id,
+                    currencyCode: CURRENT_CRYPTOCURRENCY
                   })
                 }
               ]
@@ -134,19 +136,24 @@ export async function walletResponder(
       return true
 
     case 'sendCoinAmount':
+      if (!currentState.sendCoin) {
+        return false
+      }
+
+      const cryptoCurrencyCode = currentState.sendCoin.currencyCode
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Wallet}:send-cryptocurrency-amount`, {
-          cryptoCurrencyCode: CURRENT_CRYPTOCURRENCY,
+          cryptoCurrencyCode: cryptoCurrencyCode,
           fiatCurrencyCode: user.currencyCode,
           cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
-            getWalletBalance(CURRENT_CRYPTOCURRENCY),
-            CURRENT_CRYPTOCURRENCY
+            getWalletBalance(cryptoCurrencyCode),
+            cryptoCurrencyCode
           ),
           fiatValue: dataFormatter.formatFiatCurrency(
             getFiatValue(
-              getWalletBalance(CURRENT_CRYPTOCURRENCY),
-              CURRENT_CRYPTOCURRENCY,
+              getWalletBalance(cryptoCurrencyCode),
+              cryptoCurrencyCode,
               user.currencyCode
             ),
             user.currencyCode
@@ -170,7 +177,7 @@ export async function walletResponder(
       return true
 
     case 'paymentLinkConfirm':
-      if (!nextState.sendCoinAmount) {
+      if (!currentState.sendCoinAmount) {
         return false
       }
 
@@ -178,12 +185,12 @@ export async function walletResponder(
         msg.chat.id,
         user.t(`${Namespace.Wallet}:confirm-send-cryptocurrency`, {
           cryptoCurrencyAmount: dataFormatter.formatCryptoCurrency(
-            nextState.sendCoinAmount.cryptoCurrencyAmount,
-            nextState.sendCoinAmount.cryptoCurrency
+            currentState.sendCoinAmount.cryptoCurrencyAmount,
+            currentState.sendCoinAmount.cryptoCurrency
           ),
           fiatValue: dataFormatter.formatFiatCurrency(
-            nextState.sendCoinAmount.fiatValue,
-            nextState.sendCoinAmount.fiatCurrency
+            currentState.sendCoinAmount.fiatValue,
+            currentState.sendCoinAmount.fiatCurrency
           )
         }),
         {
@@ -212,13 +219,16 @@ export async function walletResponder(
       return true
 
     case 'insufficientSendAmount':
+      if (!currentState.withdraw) {
+        return false
+      }
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Wallet}:send-cryptocurrency-insufficient-balance`, {
-          cryptoCurrencyCode: CURRENT_CRYPTOCURRENCY,
+          cryptoCurrencyCode: currentState.withdraw.currencyCode,
           cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
-            getWalletBalance(CURRENT_CRYPTOCURRENCY),
-            CURRENT_CRYPTOCURRENCY
+            getWalletBalance(currentState.withdraw.currencyCode),
+            currentState.withdraw.currencyCode
           )
         }),
         {
@@ -237,16 +247,207 @@ export async function walletResponder(
         }),
         {
           parse_mode: 'Markdown',
-          reply_markup: defaultKeyboardMenu(user),
+          reply_markup: keyboardMainMenu(user),
           disable_web_page_preview: true
         }
       )
       return true
 
-    case 'deposit':
+    case 'showDepositAddress':
+      if (!currentState.showDepositAddress) {
+        return false
+      }
+
+      const currencyCode = currentState.showDepositAddress.currencyCode
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Wallet}:show-deposit-address`, {
+          cryptoCurrencyCode: currencyCode,
+          confirmations: cryptoCurrencyInfo[currencyCode].confirmations
+        }),
+        {
+          parse_mode: 'Markdown'
+        }
+      )
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        `*${currentState.showDepositAddress.address}*`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
       return true
 
-    case 'widthdraw':
+    case 'withdrawCoinAmount':
+      if (!currentState.withdraw) {
+        return false
+      }
+
+      const cryptoCurrencyCode1 = currentState.withdraw.currencyCode
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-amount`, {
+          cryptoCurrencyCode: cryptoCurrencyCode1,
+          cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
+            getWalletBalance(cryptoCurrencyCode1),
+            cryptoCurrencyCode1
+          ),
+          fiatValue: dataFormatter.formatFiatCurrency(
+            getFiatValue(
+              getWalletBalance(cryptoCurrencyCode1),
+              cryptoCurrencyCode1,
+              user.currencyCode
+            ),
+            user.currencyCode
+          )
+        }),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: [
+              [
+                {
+                  text: user.t('actions.cancel-keyboard-button')
+                }
+              ]
+            ],
+            one_time_keyboard: true,
+            resize_keyboard: true
+          }
+        }
+      )
+      return true
+
+    case 'insufficientWithdrawAmount':
+      if (!currentState.withdraw) {
+        return false
+      }
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(
+          `${Namespace.Wallet}:withdraw-cryptocurrency-insufficient-balance`,
+          {
+            cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
+              getWalletBalance(currentState.withdraw.currencyCode),
+              currentState.withdraw.currencyCode
+            )
+          }
+        ),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
+      return true
+
+    case 'withdrawAddress':
+      if (!currentState.withdraw) {
+        return false
+      }
+
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-address`, {
+          cryptoCurrencyName: user.t(
+            `cryptocurrency-names.${currentState.withdraw.currencyCode}`
+          )
+        }),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
+      return true
+
+    case 'withdrawConfirm':
+      if (!currentState.withdrawCoinAmount || !currentState.withdrawAddress) {
+        return false
+      }
+
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Wallet}:confirm-withdraw-cryptocurrency`, {
+          cryptoCurrencyAmount: dataFormatter.formatCryptoCurrency(
+            currentState.withdrawCoinAmount.cryptoCurrencyAmount,
+            currentState.withdrawCoinAmount.cryptoCurrency
+          ),
+          fiatValue: dataFormatter.formatFiatCurrency(
+            currentState.withdrawCoinAmount.fiatValue,
+            currentState.withdrawCoinAmount.fiatCurrency
+          ),
+          toAddress: currentState.withdrawAddress
+        }),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: [
+              [
+                {
+                  text: user.t(
+                    `${Namespace.Wallet}:confirm-withdraw-cryptocurrency-button`
+                  )
+                }
+              ],
+              [
+                {
+                  text: user.t('actions.cancel-keyboard-button')
+                }
+              ]
+            ],
+            // TODO: some telegram issue, keyboard comes up if set to true ... ??
+            one_time_keyboard: false,
+            resize_keyboard: true
+          }
+        }
+      )
+      return true
+
+    case 'invalidWithdrawAddress':
+      if (!currentState.withdraw) {
+        return false
+      }
+
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-invalid-address`, {
+          cryptoCurrencyName: user.t(
+            `cryptocurrency-names.${currentState.withdraw.currencyCode}`
+          )
+        }),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
+      return true
+
+    case 'showWithdrawSuccess':
+      if (!currentState.withdrawCoinAmount || !currentState.withdrawAddress) {
+        return false
+      }
+
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-success`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
+      return true
+
+    case 'showWithdrawError':
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-error`, {
+          supportUsername: CONFIG.SUPPORT_USERNAME
+        }),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
       return true
 
     default:

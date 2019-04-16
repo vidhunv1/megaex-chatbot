@@ -5,6 +5,7 @@ import logger from 'modules/Logger'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User } from 'models'
 import { Namespace } from 'modules/i18n'
+const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
 
 // TODO: Implement these functions
 const getCryptoValue = (
@@ -30,6 +31,22 @@ const getWalletBalance = (_cryptoCurrency: CryptoCurrency) => {
   return 0.2
 }
 
+const getWalletAddress = (_cryptoCurrency: CryptoCurrency) => {
+  return '1b4e8hq51051b4e8hq51051b4e8hq51051b4e8hq5105'
+}
+
+const processWithdrawal = (
+  _amount: number,
+  _address: string,
+  _currencyCode: CryptoCurrency
+) => {
+  return true
+}
+
+const isValidAddress = (_address: string, _currencyCode: CryptoCurrency) => {
+  return true
+}
+
 export async function walletParser(
   msg: TelegramBot.Message,
   telegramId: number,
@@ -40,6 +57,8 @@ export async function walletParser(
     case 'start':
       return await nextWalletState(currentState, telegramId)
     case 'sendCoin':
+      return await nextWalletState(currentState, telegramId)
+    case 'withdraw':
       return await nextWalletState(currentState, telegramId)
     case 'sendCoinAmount':
       if (msg.text && currentState.sendCoin) {
@@ -101,6 +120,112 @@ export async function walletParser(
           user.t(`${Namespace.Wallet}:confirm-send-cryptocurrency-button`)
       ) {
         return await nextWalletState(currentState, telegramId)
+      }
+      return null
+    case 'deposit':
+      currentState.showDepositAddress = {
+        currencyCode: CURRENT_CRYPTOCURRENCY,
+        address: getWalletAddress(CURRENT_CRYPTOCURRENCY)
+      }
+      return await nextWalletState(currentState, telegramId)
+    case 'withdrawCoinAmount':
+      if (msg.text && currentState.withdraw) {
+        const cryptocurrencyCode = currentState.withdraw.currencyCode
+        const fiatcurrencyCode = user.currencyCode
+        const parsedCurrency = parseCurrencyAmount(msg.text, cryptocurrencyCode)
+
+        if (!parsedCurrency || (parsedCurrency && parsedCurrency.amount <= 0)) {
+          // TODO: Have a retry count
+          logger.error('TODO: Retry count for errored input')
+          return currentState
+        }
+
+        const { currencyKind, amount } = parsedCurrency
+
+        let cryptocurrencyValue, fiatValue
+        if (currencyKind === 'crypto') {
+          cryptocurrencyValue = amount
+          fiatValue = getFiatValue(amount, cryptocurrencyCode, fiatcurrencyCode)
+        } else {
+          return currentState
+        }
+
+        if (cryptocurrencyValue <= getWalletBalance(cryptocurrencyCode)) {
+          currentState.withdrawCoinAmount = {
+            cryptoCurrencyAmount: cryptocurrencyValue,
+            cryptoCurrency: cryptocurrencyCode,
+            fiatValue,
+            fiatCurrency: fiatcurrencyCode
+          }
+
+          return await nextWalletState(
+            currentState,
+            telegramId,
+            'withdrawAddress'
+          )
+        } else {
+          return await nextWalletState(
+            currentState,
+            telegramId,
+            'insufficientWithdrawAmount'
+          )
+        }
+      } else {
+        return null
+      }
+    case 'withdrawAddress':
+      if (msg.text && currentState.withdraw) {
+        if (isValidAddress(msg.text, currentState.withdraw.currencyCode)) {
+          currentState.withdrawAddress = msg.text
+          return await nextWalletState(
+            currentState,
+            telegramId,
+            'withdrawConfirm'
+          )
+        } else {
+          return await nextWalletState(
+            currentState,
+            telegramId,
+            'invalidWithdrawAddress'
+          )
+        }
+      }
+      return null
+    case 'withdrawConfirm':
+      if (
+        currentState.withdrawCoinAmount &&
+        currentState.withdrawAddress &&
+        msg.text &&
+        msg.text ===
+          user.t(`${Namespace.Wallet}:confirm-withdraw-cryptocurrency-button`)
+      ) {
+        const {
+          cryptoCurrencyAmount,
+          cryptoCurrency
+        } = currentState.withdrawCoinAmount
+        if (
+          processWithdrawal(
+            cryptoCurrencyAmount,
+            currentState.withdrawAddress,
+            cryptoCurrency
+          )
+        ) {
+          return await nextWalletState(
+            currentState,
+            telegramId,
+            'showWithdrawSuccess'
+          )
+        } else {
+          logger.error(`Withdraw processing error: walletParser#withdrawConfirm 
+          
+          ${JSON.stringify(currentState)}
+          `)
+          return await nextWalletState(
+            currentState,
+            telegramId,
+            'showWithdrawError'
+          )
+        }
       }
       return null
     default:

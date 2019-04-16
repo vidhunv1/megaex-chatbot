@@ -8,6 +8,8 @@ export const WALLET_STATE_KEY = 'wallet'
 export interface IWalletState {
   start?: boolean
   wallet?: boolean
+
+  // Send coin
   sendCoinAmount?: {
     cryptoCurrencyAmount: number
     cryptoCurrency: CryptoCurrency
@@ -18,9 +20,29 @@ export interface IWalletState {
   paymentLinkConfirm?: boolean
   paymentLink?: string
 
+  // Deposit
+  showDepositAddress?: {
+    currencyCode: CryptoCurrency
+    address: string
+  }
+
+  // withdraw
+  withdrawCoinAmount?: {
+    cryptoCurrencyAmount: number
+    cryptoCurrency: CryptoCurrency
+    fiatValue: number
+    fiatCurrency: FiatCurrency
+  }
+  withdrawAddress?: string
+  insufficientWithdrawAmount?: boolean
+  withdrawConfirm?: boolean
+  showWithdrawSuccess?: string
+  showWithdrawError?: string
+  invalidWithdrawAddress?: string
+
   // callbacks
   sendCoin?: CallbackParams['wallet.send-currency']
-  widthdraw?: CallbackParams['wallet.withdraw']
+  withdraw?: CallbackParams['wallet.withdraw']
   deposit?: CallbackParams['wallet.deposit']
 }
 
@@ -35,10 +57,20 @@ export const exchangeFlow: StateFlow<IWalletState> = {
   paymentLink: null,
   insufficientSendAmount: null,
 
+  // @ts-ignore
+  withdrawCoinAmount: 'withdrawAddress' | 'insufficientWithdrawAmount',
+  // @ts-ignore
+  withdrawAddress: 'invalidWithdrawAddress' | 'withdrawConfirm',
+  // @ts-ignore
+  withdrawConfirm: 'showWithdrawSuccess' | 'showWithdrawError',
+  insufficientWithdrawAmount: null,
+  showWithdrawSuccess: null,
+  showWithdrawError: null,
+
   // Callbacks
   sendCoin: 'sendCoinAmount',
-  widthdraw: null,
-  deposit: null
+  deposit: 'showDepositAddress',
+  withdraw: 'withdrawCoinAmount'
 }
 
 export const initialState: WalletState = {

@@ -16,11 +16,13 @@ export interface CallbackParams {
   [CallbackTypes.SEND_CURRENCY]: {
     currencyCode: CryptoCurrency
   } & DefaultParams
-  [CallbackTypes.WITHDRAW]: {} & DefaultParams
+  [CallbackTypes.WITHDRAW]: {
+    currencyCode: CryptoCurrency
+  } & DefaultParams
 }
 
 export const callbackStateMap: Record<CallbackTypes, keyof IWalletState> = {
   [CallbackTypes.SEND_CURRENCY]: 'sendCoin',
   [CallbackTypes.DEPOSIT]: 'deposit',
-  [CallbackTypes.WITHDRAW]: 'widthdraw'
+  [CallbackTypes.WITHDRAW]: 'withdraw'
 }
