@@ -4,12 +4,10 @@ import { User, TelegramAccount } from 'models'
 // TODO: Add branching so it can be moved from one state to multiple other states;
 // current: Branch<keyof T>
 export interface State<T> {
-  currentMessageKey: keyof T
+  currentStateKey: T
+  previousStateKey: T | null
   key: string
 }
-
-// Record of [ currentState, nextState ]
-export type StateFlow<T> = Record<keyof T, keyof T | null>
 
 export enum BotCommand {
   // Global commands
@@ -28,6 +26,10 @@ export enum DeepLink {
   ACCOUNT = 'acc',
   ORDER = 'order',
   TRACK = 'track'
+}
+
+export interface CallbackDefaults {
+  messageId: number
 }
 
 export interface ConversationParams {

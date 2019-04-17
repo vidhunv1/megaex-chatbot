@@ -1,9 +1,14 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
 import { ChatHandler } from 'chats/types'
-import { WALLET_STATE_KEY, WalletState, initialState } from './WalletState'
+import {
+  WALLET_STATE_LABEL,
+  WalletState,
+  initialState,
+  WalletStateKey,
+  nextWalletState
+} from './WalletState'
 import { parseCallbackQuery } from 'chats/utils'
-import { CallbackTypes, callbackStateMap } from './constants'
 import { walletParser } from './walletParser'
 import { walletResponder } from './walletResponder'
 
@@ -24,24 +29,26 @@ export const WalletChat: ChatHandler = {
     state: WalletState | null
   ) {
     if (callback.data && state) {
-      const { type, params } = parseCallbackQuery<CallbackTypes>(callback.data)
+      const { type, params } = parseCallbackQuery(callback.data)
 
-      const callbackState = callbackStateMap[type]
-      state.currentMessageKey = callbackState
-      state[callbackState] = params
-
-      const nextState: WalletState | null = await walletParser(
-        msg,
-        tUser.id,
-        user,
-        state
-      )
-
-      if (nextState === null) {
+      if (WalletStateKey[type as any] == null) {
         return false
       }
 
-      return await walletResponder(msg, user, nextState)
+      const callbackName = (type as any) as WalletStateKey
+      state.currentStateKey = callbackName
+      // @ts-ignore
+      state[callbackName] = params
+
+      const updatedState: WalletState | null = walletParser(msg, user, state)
+
+      const nextState = await nextWalletState(updatedState, tUser.id)
+
+      if (nextState == null) {
+        return false
+      }
+
+      return walletResponder(msg, user, nextState)
     }
     return false
   },
@@ -57,12 +64,16 @@ export const WalletChat: ChatHandler = {
       currentState = initialState
     }
 
-    if (currentState && currentState.key === WALLET_STATE_KEY) {
-      const nextState: WalletState | null = await walletParser(
+    if (currentState && currentState.key === WALLET_STATE_LABEL) {
+      const updatedState: WalletState | null = walletParser(
         msg,
-        tUser.id,
         user,
         currentState
+      )
+
+      const nextState: WalletState | null = await nextWalletState(
+        updatedState,
+        tUser.id
       )
 
       if (nextState === null) {

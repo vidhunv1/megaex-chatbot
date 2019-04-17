@@ -1,94 +1,161 @@
-import { State, StateFlow } from 'chats/types'
+import { State, CallbackDefaults } from 'chats/types'
 import { moveToNextState } from 'chats/utils'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { CallbackParams } from './constants'
+import * as _ from 'lodash'
 
-export const WALLET_STATE_KEY = 'wallet'
+export const WALLET_STATE_LABEL = 'wallet'
+
+export enum WalletStateKey {
+  start = 'start',
+  wallet = 'wallet',
+
+  sendCoin = 'sendCoin',
+  sendCoin_amount = 'sendCoin_amount',
+  sendCoin_confirm = 'sendCoin_confirm',
+  sendCoin_show = 'sendCoin_show',
+  sendCoin_error = 'sencCoin_error',
+
+  withdrawCoin = 'withdrawCoin',
+  withdrawCoin_amount = 'withdrawCoin_amount',
+  withdrawCoin_address = 'withdrawCoin_address',
+  withdrawCoin_confirm = 'withdrawCoin_confirm',
+  withdrawCoin_show = 'withdrawCoin_show',
+  withdrawCoin_error = 'withdrawCoin_error',
+
+  depositCoin = 'depositCoin',
+  depositCoin_show = 'depositCoin_show'
+}
+
+export enum SendCoinError {
+  INSUFFICIENT_BALANCE = 'insufficientBalance'
+}
+
+export enum WithdrawCoinError {
+  INVALID_ADDRESS = 'invalidAddress',
+  CREATE_ERROR = 'createError',
+  INSUFFICIENT_BALANCE = 'insufficientBalance'
+}
 
 export interface IWalletState {
-  start?: boolean
-  wallet?: boolean
-
   // Send coin
-  sendCoinAmount?: {
-    cryptoCurrencyAmount: number
-    cryptoCurrency: CryptoCurrency
-    fiatValue: number
-    fiatCurrency: FiatCurrency
+  [WalletStateKey.sendCoin]?: {
+    currencyCode: CryptoCurrency
+  } & CallbackDefaults
+  [WalletStateKey.sendCoin_amount]?: {
+    data: {
+      cryptoCurrencyAmount: number
+      cryptoCurrency: CryptoCurrency
+      fiatValue: number
+      fiatCurrency: FiatCurrency
+    } | null
+    error: SendCoinError.INSUFFICIENT_BALANCE | null
   }
-  insufficientSendAmount?: boolean
-  paymentLinkConfirm?: boolean
-  paymentLink?: string
 
   // Deposit
-  showDepositAddress?: {
+  [WalletStateKey.depositCoin]?: {
+    currencyCode: CryptoCurrency
+  } & CallbackDefaults
+  [WalletStateKey.depositCoin_show]?: {
     currencyCode: CryptoCurrency
     address: string
   }
 
   // withdraw
-  withdrawCoinAmount?: {
-    cryptoCurrencyAmount: number
-    cryptoCurrency: CryptoCurrency
-    fiatValue: number
-    fiatCurrency: FiatCurrency
+  [WalletStateKey.withdrawCoin]?: {
+    currencyCode: CryptoCurrency
+  } & CallbackDefaults
+  [WalletStateKey.withdrawCoin_amount]?: {
+    data: {
+      cryptoCurrencyAmount: number
+      cryptoCurrency: CryptoCurrency
+      fiatValue: number
+      fiatCurrency: FiatCurrency
+    } | null
+    error: WithdrawCoinError.INSUFFICIENT_BALANCE | null
   }
-  withdrawAddress?: string
-  insufficientWithdrawAmount?: boolean
-  withdrawConfirm?: boolean
-  showWithdrawSuccess?: string
-  showWithdrawError?: string
-  invalidWithdrawAddress?: string
-
-  // callbacks
-  sendCoin?: CallbackParams['wallet.send-currency']
-  withdraw?: CallbackParams['wallet.withdraw']
-  deposit?: CallbackParams['wallet.deposit']
+  [WalletStateKey.withdrawCoin_address]?: {
+    data: {
+      address: string
+    } | null
+    error: WithdrawCoinError.INVALID_ADDRESS | null
+  }
+  [WalletStateKey.withdrawCoin_confirm]?: {
+    error: WithdrawCoinError.CREATE_ERROR | null
+  }
 }
 
-export interface WalletState extends State<IWalletState>, IWalletState {}
-
-export const exchangeFlow: StateFlow<IWalletState> = {
-  start: 'wallet',
-  wallet: null,
-  // @ts-ignore
-  sendCoinAmount: 'paymentLinkConfirm' | 'isufficientSendAmount',
-  paymentLinkConfirm: 'paymentLink',
-  paymentLink: null,
-  insufficientSendAmount: null,
-
-  // @ts-ignore
-  withdrawCoinAmount: 'withdrawAddress' | 'insufficientWithdrawAmount',
-  // @ts-ignore
-  withdrawAddress: 'invalidWithdrawAddress' | 'withdrawConfirm',
-  // @ts-ignore
-  withdrawConfirm: 'showWithdrawSuccess' | 'showWithdrawError',
-  insufficientWithdrawAmount: null,
-  showWithdrawSuccess: null,
-  showWithdrawError: null,
-
-  // Callbacks
-  sendCoin: 'sendCoinAmount',
-  deposit: 'showDepositAddress',
-  withdraw: 'withdrawCoinAmount'
-}
+export interface WalletState extends State<WalletStateKey>, IWalletState {}
 
 export const initialState: WalletState = {
-  currentMessageKey: 'start',
-  key: WALLET_STATE_KEY
+  currentStateKey: WalletStateKey.start,
+  previousStateKey: null,
+  key: WALLET_STATE_LABEL
+}
+
+export function getNextStateKey(
+  currentState: WalletState | null
+): WalletStateKey | null {
+  if (!currentState) {
+    return null
+  }
+
+  const stateKey = currentState.currentStateKey
+  switch (stateKey) {
+    case WalletStateKey.start:
+      return WalletStateKey.wallet
+    case WalletStateKey.wallet:
+      return null
+
+    case WalletStateKey.sendCoin:
+      return WalletStateKey.sendCoin_amount
+    case WalletStateKey.sendCoin_amount:
+      return null // TODO: bRanch
+    case WalletStateKey.sendCoin_confirm:
+      return WalletStateKey.sendCoin_show
+    case WalletStateKey.sendCoin_show:
+      return null
+    case WalletStateKey.sendCoin_error:
+      return null
+
+    case WalletStateKey.withdrawCoin:
+      return WalletStateKey.withdrawCoin_amount
+    case WalletStateKey.withdrawCoin_amount: {
+      const amountState = currentState[WalletStateKey.withdrawCoin_amount]
+      if (!amountState) {
+        return null
+      }
+
+      if (amountState.error) {
+        return WalletStateKey.withdrawCoin_error
+      } else {
+        return WalletStateKey.withdrawCoin_address
+      }
+      // return null // TODO: bRanch
+    }
+    case WalletStateKey.withdrawCoin_address:
+      return null // TODO: bRanch
+    case WalletStateKey.withdrawCoin_confirm:
+      return null // TOD : bRanch
+    case WalletStateKey.withdrawCoin_show:
+      return null
+    case WalletStateKey.withdrawCoin_error:
+      return null
+
+    case WalletStateKey.depositCoin:
+      return WalletStateKey.depositCoin_show
+    case WalletStateKey.depositCoin_show:
+      return null
+  }
 }
 
 export async function nextWalletState(
-  currentState: WalletState,
-  telegramId: number,
-  nextStateOverride?: keyof WalletState | null
+  currentState: WalletState | null,
+  telegramId: number
 ): Promise<WalletState | null> {
-  return await moveToNextState<WalletState>(
+  const nextStateKey = getNextStateKey(currentState)
+  return await moveToNextState<WalletStateKey>(
     currentState,
-    exchangeFlow,
     telegramId,
-    undefined,
-    // @ts-ignore
-    nextStateOverride
+    nextStateKey
   )
 }

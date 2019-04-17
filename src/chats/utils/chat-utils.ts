@@ -43,8 +43,9 @@ export const isBotCommand = (msg: TelegramBot.Message) => {
   return msg.text && msg.entities && msg.entities[0].type === 'bot_command'
 }
 
-export const stringifyCallbackQuery = function<CallbackTypes, Params>(
-  callbackType: CallbackTypes,
+// { wallet, { currencyCode: 1, b = 2 }} => wallet:currencyCode=1,b=2
+export const stringifyCallbackQuery = function<StateKey, Params>(
+  callbackType: StateKey,
   values?: Params
 ) {
   let q = callbackType + ':'
@@ -55,9 +56,9 @@ export const stringifyCallbackQuery = function<CallbackTypes, Params>(
   return q.substring(0, q.length - 1)
 }
 
-export const parseCallbackQuery = function<CallbackTypes>(
+export const parseCallbackQuery = function(
   query: string
-): { type: CallbackTypes; params: any } {
+): { type: string; params: any } {
   let callbackFunction, obj, pairs: string[], tKey, tVal
   ;[callbackFunction, obj] = query.split(':')
 
@@ -71,7 +72,7 @@ export const parseCallbackQuery = function<CallbackTypes>(
   }
 
   return {
-    type: (callbackFunction as unknown) as CallbackTypes,
+    type: callbackFunction,
     params: params as any
   }
 }
