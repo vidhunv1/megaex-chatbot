@@ -70,7 +70,13 @@ export function walletParser(
         if (!parsedCurrency || (parsedCurrency && parsedCurrency.amount <= 0)) {
           // TODO: Have a retry count
           logger.error('TODO: Retry count for errored input')
-          return currentState
+          return {
+            ...currentState,
+            [WalletStateKey.sendCoin_amount]: {
+              data: null,
+              error: SendCoinError.INVALID_AMOUNT
+            }
+          }
         }
 
         const { currencyCode, currencyKind, amount } = parsedCurrency

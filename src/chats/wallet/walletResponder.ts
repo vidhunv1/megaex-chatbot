@@ -231,15 +231,12 @@ export async function walletResponder(
     }
 
     case WalletStateKey.sendCoin_error: {
-      if (!currentState.previousStateKey) {
-        return false
-      }
-
       const errorType: SendCoinError | null = _.get(
         currentState,
         `${currentState.previousStateKey}.error`,
         null
       )
+
       if (!errorType) {
         return false
       }
@@ -271,9 +268,26 @@ export async function walletResponder(
           return true
         }
 
+        case SendCoinError.INVALID_AMOUNT: {
+          const sendCoinState = currentState[WalletStateKey.sendCoin]
+          if (!sendCoinState) {
+            return false
+          }
+
+          await telegramHook.getWebhook.sendMessage(
+            msg.chat.id,
+            user.t(`${Namespace.Wallet}:send-cryptocurrency-invalid-amount`),
+            {
+              parse_mode: 'Markdown',
+              reply_markup: keyboardMainMenu(user)
+            }
+          )
+          return true
+        }
+
         default:
           logger.error(
-            `alletResponder: ${WalletStateKey.sendCoin_error} -> 'default'`
+            `walletResponder: ${WalletStateKey.sendCoin_error} -> 'default'`
           )
           return false
       }
@@ -390,10 +404,6 @@ export async function walletResponder(
     }
 
     case WalletStateKey.withdrawCoin_error: {
-      if (!currentState.previousStateKey) {
-        return false
-      }
-
       const errorType: WithdrawCoinError | null = _.get(
         currentState,
         `${currentState.previousStateKey}.error`,

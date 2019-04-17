@@ -15,7 +15,7 @@ export function parseCurrencyAmount(
   defaultCurrencyCode: FiatCurrency | CryptoCurrency
 ): {
   currencyCode: FiatCurrency | CryptoCurrency
-  currencyKind: 'fiat' | 'crypto' | 'unknown'
+  currencyKind: 'fiat' | 'crypto'
   amount: number
 } | null {
   const value = parseFloat(amount.replace(/[^\d\.]/g, ''))
@@ -32,14 +32,13 @@ export function parseCurrencyAmount(
     (k: CryptoCurrency) => CryptoCurrency[k] === currency
   )
 
+  if (!isFiatCurrency && !isCryptoCurrency) {
+    return null
+  }
+
   return {
     currencyCode: currency as FiatCurrency | CryptoCurrency,
-    currencyKind: isCryptoCurrency
-      ? 'crypto'
-      : isFiatCurrency
-      ? 'fiat'
-      : 'unknown',
+    currencyKind: isCryptoCurrency ? 'crypto' : 'fiat',
     amount: value
   }
-  return null
 }

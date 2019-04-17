@@ -13,7 +13,7 @@ export enum WalletStateKey {
   sendCoin_amount = 'sendCoin_amount',
   sendCoin_confirm = 'sendCoin_confirm',
   sendCoin_show = 'sendCoin_show',
-  sendCoin_error = 'sencCoin_error',
+  sendCoin_error = 'sendCoin_error',
 
   withdrawCoin = 'withdrawCoin',
   withdrawCoin_amount = 'withdrawCoin_amount',
@@ -27,7 +27,8 @@ export enum WalletStateKey {
 }
 
 export enum SendCoinError {
-  INSUFFICIENT_BALANCE = 'insufficientBalance'
+  INSUFFICIENT_BALANCE = 'insufficientBalance',
+  INVALID_AMOUNT = 'invalidAmount'
 }
 
 export enum WithdrawCoinError {
@@ -48,7 +49,10 @@ export interface IWalletState {
       fiatValue: number
       fiatCurrency: FiatCurrency
     } | null
-    error: SendCoinError.INSUFFICIENT_BALANCE | null
+    error:
+      | SendCoinError.INSUFFICIENT_BALANCE
+      | SendCoinError.INVALID_AMOUNT
+      | null
   }
 
   // Deposit
@@ -108,14 +112,29 @@ export function getNextStateKey(
 
     case WalletStateKey.sendCoin:
       return WalletStateKey.sendCoin_amount
-    case WalletStateKey.sendCoin_amount:
-      return null // TODO: bRanch
+    case WalletStateKey.sendCoin_amount: {
+      const amountState = currentState[WalletStateKey.sendCoin_amount]
+      if (!amountState) {
+        return null
+      }
+
+      const { error } = amountState
+      if (error) {
+        if (error === SendCoinError.INVALID_AMOUNT) {
+          return WalletStateKey.sendCoin_amount
+        }
+        return WalletStateKey.sendCoin_error
+      } else {
+        return WalletStateKey.sendCoin_confirm
+      }
+    }
     case WalletStateKey.sendCoin_confirm:
       return WalletStateKey.sendCoin_show
     case WalletStateKey.sendCoin_show:
       return null
-    case WalletStateKey.sendCoin_error:
+    case WalletStateKey.sendCoin_error: {
       return null
+    }
 
     case WalletStateKey.withdrawCoin:
       return WalletStateKey.withdrawCoin_amount
@@ -130,12 +149,29 @@ export function getNextStateKey(
       } else {
         return WalletStateKey.withdrawCoin_address
       }
-      // return null // TODO: bRanch
     }
     case WalletStateKey.withdrawCoin_address:
-      return null // TODO: bRanch
+      const addressState = currentState[WalletStateKey.withdrawCoin_address]
+      if (!addressState) {
+        return null
+      }
+
+      if (addressState.error) {
+        return WalletStateKey.withdrawCoin_error
+      } else {
+        return WalletStateKey.withdrawCoin_confirm
+      }
     case WalletStateKey.withdrawCoin_confirm:
-      return null // TOD : bRanch
+      const confirmStateError = _.get(
+        currentState[WalletStateKey.withdrawCoin_confirm],
+        'error',
+        null
+      )
+      if (confirmStateError) {
+        return WalletStateKey.withdrawCoin_error
+      } else {
+        return WalletStateKey.withdrawCoin_show
+      }
     case WalletStateKey.withdrawCoin_show:
       return null
     case WalletStateKey.withdrawCoin_error:

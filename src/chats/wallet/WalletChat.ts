@@ -36,14 +36,25 @@ export const WalletChat: ChatHandler = {
       }
 
       const callbackName = (type as any) as WalletStateKey
+
+      if (state.key != WALLET_STATE_LABEL) {
+        // Callback types allowed to answer indirectly
+        if (
+          [
+            WalletStateKey.sendCoin,
+            WalletStateKey.depositCoin,
+            WalletStateKey.withdrawCoin
+          ].includes(callbackName)
+        ) {
+          state = initialState
+        }
+      }
+
       state.currentStateKey = callbackName
       // @ts-ignore
       state[callbackName] = params
-
       const updatedState: WalletState | null = walletParser(msg, user, state)
-
       const nextState = await nextWalletState(updatedState, tUser.id)
-
       if (nextState == null) {
         return false
       }

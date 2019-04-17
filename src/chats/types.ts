@@ -6,6 +6,7 @@ import { User, TelegramAccount } from 'models'
 export interface State<T> {
   currentStateKey: T
   previousStateKey: T | null
+  // TODO: Rename to label
   key: string
 }
 
