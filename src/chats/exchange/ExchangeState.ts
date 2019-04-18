@@ -1,44 +1,114 @@
-import { State, StateFlow } from 'chats/types'
+import { State, CallbackDefaults } from 'chats/types'
 import { moveToNextState } from 'chats/utils'
 import { PaymentMethods } from 'constants/paymentMethods'
+import logger from 'modules/Logger'
+import { CryptoCurrency } from 'constants/currencies'
 
-export const EXCHANGE_STATE_KEY = 'exchange'
+export const EXCHANGE_STATE_LABEL = 'exchange'
+export enum ExchangeStateKey {
+  start = 'start',
+  exchange = 'exchange',
 
-export interface IExchangeState {
-  start?: boolean
-  exchange?: boolean
-  // BUY
-  buy?: boolean
-  buyAmount?: number
-  buyPrice?: number
-  buyLimit?: { max: number; min: number }
-  buyPaymentMethods?: [PaymentMethods]
+  cb_myOrders = 'cb_myOrders',
+  cb_createOrder = 'cb_createOrder',
+
+  cb_buy = 'cb_buy',
+  buy_amount = 'buy_amount',
+  buy_price = 'buy_price',
+  buy_limit = 'buy_limit',
+  buy_paymentMethods = 'buy_paymentMethods',
+
+  cb_sell = 'sb_sell'
 }
 
-export interface ExchangeState extends State<IExchangeState>, IExchangeState {}
+export interface IExchangeState {
+  [ExchangeStateKey.cb_buy]?: {
+    currencyCode: CryptoCurrency
+  } & CallbackDefaults
+  [ExchangeStateKey.buy_amount]?: {
+    data?: {
+      amount: number
+    }
+  }
+  [ExchangeStateKey.buy_price]?: {
+    data?: {
+      price: number
+    }
+  }
+  [ExchangeStateKey.buy_limit]?: {
+    data?: {
+      max: number
+      min: number
+    }
+  }
+  [ExchangeStateKey.buy_paymentMethods]?: {
+    data?: {
+      paymentMethods: [PaymentMethods]
+    }
+  }
 
-export const exchangeFlow: StateFlow<IExchangeState> = {
-  start: 'exchange',
-  exchange: null,
-  buy: 'buyAmount',
-  buyAmount: 'buyLimit',
-  buyLimit: 'buyPrice',
-  buyPrice: 'buyPaymentMethods',
-  buyPaymentMethods: null
+  [ExchangeStateKey.cb_myOrders]?: {
+    currencyCode: CryptoCurrency
+  } & CallbackDefaults
+  [ExchangeStateKey.cb_createOrder]?: {
+    currencyCode: CryptoCurrency
+  } & CallbackDefaults
+  [ExchangeStateKey.cb_sell]?: {
+    currencyCode: CryptoCurrency
+  } & CallbackDefaults
+}
+
+export interface ExchangeState
+  extends State<ExchangeStateKey>,
+    IExchangeState {}
+
+export function getNextStateKey(
+  currentState: ExchangeState | null
+): ExchangeStateKey | null {
+  if (!currentState) {
+    return null
+  }
+  const stateKey = currentState.currentStateKey
+
+  switch (stateKey) {
+    case ExchangeStateKey.start:
+      return ExchangeStateKey.exchange
+    case ExchangeStateKey.exchange:
+      return null
+    case ExchangeStateKey.cb_buy:
+      return ExchangeStateKey.buy_amount
+    case ExchangeStateKey.buy_amount:
+      return ExchangeStateKey.buy_limit
+    case ExchangeStateKey.buy_price:
+      return ExchangeStateKey.buy_paymentMethods
+    case ExchangeStateKey.buy_paymentMethods:
+      return null
+
+    default:
+      logger.error(
+        `Unhandled at ExchangeState getNextStateKey ${JSON.stringify(
+          currentState
+        )}`
+      )
+      return null
+  }
 }
 
 export const initialState: ExchangeState = {
-  currentMessageKey: 'start',
-  key: EXCHANGE_STATE_KEY
+  currentStateKey: ExchangeStateKey.start,
+  previousStateKey: null,
+  key: EXCHANGE_STATE_LABEL
 }
 
 export async function nextExchangeState(
-  currentState: ExchangeState,
+  currentState: ExchangeState | null,
   telegramId: number
 ): Promise<ExchangeState | null> {
-  return await moveToNextState<ExchangeState>(
+  const stateKey = getNextStateKey(currentState)
+
+  return await moveToNextState<ExchangeStateKey>(
     currentState,
-    exchangeFlow,
-    telegramId
+    telegramId,
+    stateKey
   )
 }

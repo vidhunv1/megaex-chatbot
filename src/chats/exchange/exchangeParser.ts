@@ -1,16 +1,16 @@
-import { ExchangeState, nextExchangeState } from './ExchangeState'
+import { ExchangeState, ExchangeStateKey } from './ExchangeState'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User } from 'models'
 
-export async function exchangeParser(
+export function exchangeParser(
   _msg: TelegramBot.Message,
-  telegramId: number,
   _user: User,
   currentState: ExchangeState
-): Promise<ExchangeState | null> {
-  switch (currentState.currentMessageKey) {
-    case 'start':
-      return await nextExchangeState(currentState, telegramId)
+): ExchangeState | null {
+  const stateKey = currentState.currentStateKey
+  switch (stateKey) {
+    case ExchangeStateKey.start:
+      return currentState
     default:
       return null
   }

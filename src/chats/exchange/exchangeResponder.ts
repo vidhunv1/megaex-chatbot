@@ -4,16 +4,19 @@ import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/i18n'
 import { CONFIG } from '../../config'
 import { stringifyCallbackQuery } from 'chats/utils'
-import { CallbackTypes, CallbackParams } from './constants'
-import { ExchangeState } from './ExchangeState'
+import { ExchangeState, ExchangeStateKey } from './ExchangeState'
+import { CryptoCurrency } from 'constants/currencies'
+
+const CURRENT_CURRENCY_CODE = CryptoCurrency.BTC
 
 export async function exchangeResponder(
   msg: TelegramBot.Message,
   user: User,
   nextState: ExchangeState
 ): Promise<boolean> {
-  switch (nextState.currentMessageKey) {
-    case 'exchange':
+  const stateKey = nextState.currentStateKey
+  switch (stateKey) {
+    case ExchangeStateKey.exchange:
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Exchange}:exchange-home`, {
@@ -30,19 +33,21 @@ export async function exchangeResponder(
                     orderCount: 0
                   }),
                   callback_data: stringifyCallbackQuery<
-                    CallbackTypes.MY_ORDERS,
-                    CallbackParams[CallbackTypes.MY_ORDERS]
-                  >(CallbackTypes.MY_ORDERS, {
-                    messageId: msg.message_id
+                    ExchangeStateKey.cb_myOrders,
+                    ExchangeState[ExchangeStateKey.cb_myOrders]
+                  >(ExchangeStateKey.cb_myOrders, {
+                    messageId: msg.message_id,
+                    currencyCode: CURRENT_CURRENCY_CODE
                   })
                 },
                 {
                   text: user.t(`${Namespace.Exchange}:create-order`),
                   callback_data: stringifyCallbackQuery<
-                    CallbackTypes.CREATE_ORDER,
-                    CallbackParams[CallbackTypes.CREATE_ORDER]
-                  >(CallbackTypes.CREATE_ORDER, {
-                    messageId: msg.message_id
+                    ExchangeStateKey.cb_createOrder,
+                    ExchangeState[ExchangeStateKey.cb_createOrder]
+                  >(ExchangeStateKey.cb_createOrder, {
+                    messageId: msg.message_id,
+                    currencyCode: CURRENT_CURRENCY_CODE
                   })
                 }
               ],
@@ -50,10 +55,11 @@ export async function exchangeResponder(
                 {
                   text: user.t(`${Namespace.Exchange}:buy`),
                   callback_data: stringifyCallbackQuery<
-                    CallbackTypes.BUY,
-                    CallbackParams[CallbackTypes.BUY]
-                  >(CallbackTypes.BUY, {
-                    messageId: msg.message_id
+                    ExchangeStateKey.cb_buy,
+                    ExchangeState[ExchangeStateKey.cb_buy]
+                  >(ExchangeStateKey.cb_buy, {
+                    messageId: msg.message_id,
+                    currencyCode: CURRENT_CURRENCY_CODE
                   })
                 }
               ],
@@ -61,10 +67,11 @@ export async function exchangeResponder(
                 {
                   text: user.t(`${Namespace.Exchange}:sell`),
                   callback_data: stringifyCallbackQuery<
-                    CallbackTypes.SELL,
-                    CallbackParams[CallbackTypes.SELL]
-                  >(CallbackTypes.SELL, {
-                    messageId: msg.message_id
+                    ExchangeStateKey.cb_sell,
+                    ExchangeState[ExchangeStateKey.cb_sell]
+                  >(ExchangeStateKey.cb_sell, {
+                    messageId: msg.message_id,
+                    currencyCode: CURRENT_CURRENCY_CODE
                   })
                 }
               ]
