@@ -374,7 +374,17 @@ export async function walletResponder(
         }),
         {
           parse_mode: 'Markdown',
-          reply_markup: keyboardMainMenu(user)
+          reply_markup: {
+            keyboard: [
+              [
+                {
+                  text: user.t('actions.cancel-keyboard-button')
+                }
+              ]
+            ],
+            one_time_keyboard: true,
+            resize_keyboard: true
+          }
         }
       )
       return true
