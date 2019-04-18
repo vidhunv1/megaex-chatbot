@@ -1,32 +1,58 @@
-import { State, StateFlow } from 'chats/types'
+import { State, CallbackDefaults } from 'chats/types'
 import { moveToNextState } from 'chats/utils'
+import logger from 'modules/Logger'
 
-export const ACCOUNT_STATE_KEY = 'account'
+export const ACCOUNT_STATE_LABEL = 'account'
 
-export interface IAccountState {
-  start?: boolean
-  account?: boolean
+export enum AccountStateKey {
+  start = 'start',
+  account = 'account',
+  cb_paymentMethods = 'cb_paymentMethods',
+  cb_referralLink = 'cb_referralLink'
 }
 
-export interface AccountState extends State<IAccountState>, IAccountState {}
+export interface IAccountState {
+  [AccountStateKey.cb_paymentMethods]?: {} & CallbackDefaults
+  [AccountStateKey.cb_referralLink]?: {} & CallbackDefaults
+}
 
-export const exchangeFlow: StateFlow<IAccountState> = {
-  start: 'account',
-  account: null
+export interface AccountState extends State<AccountStateKey>, IAccountState {}
+
+export function getNextStateKey(
+  currentState: AccountState | null
+): AccountStateKey | null {
+  if (!currentState) {
+    return null
+  }
+
+  const stateKey = currentState.currentStateKey
+
+  switch (stateKey) {
+    case AccountStateKey.start:
+      return AccountStateKey.account
+    case AccountStateKey.account:
+      return null
+  }
+
+  logger.error(`Unhandled case: AccountState.getNextStateKey ${stateKey}`)
+  return null
 }
 
 export const initialState: AccountState = {
-  currentMessageKey: 'start',
-  key: ACCOUNT_STATE_KEY
+  currentStateKey: AccountStateKey.start,
+  previousStateKey: null,
+  key: ACCOUNT_STATE_LABEL
 }
 
 export async function nextAccountState(
-  currentState: AccountState,
+  currentState: AccountState | null,
   telegramId: number
 ): Promise<AccountState | null> {
-  return await moveToNextState<AccountState>(
+  const nextStateKey = getNextStateKey(currentState)
+
+  return await moveToNextState<AccountStateKey>(
     currentState,
-    exchangeFlow,
-    telegramId
+    telegramId,
+    nextStateKey
   )
 }

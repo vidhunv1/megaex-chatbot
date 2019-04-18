@@ -1,17 +1,23 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User } from 'models'
-import { AccountState, nextAccountState } from './AccountState'
+import { AccountState, AccountStateKey } from './AccountState'
+import logger from 'modules/Logger'
 
-export async function accountParser(
+export function accountParser(
   _msg: TelegramBot.Message,
-  telegramId: number,
   _user: User,
   currentState: AccountState
-): Promise<AccountState | null> {
-  switch (currentState.currentMessageKey) {
-    case 'start':
-      return await nextAccountState(currentState, telegramId)
+): AccountState | null {
+  const stateKey = currentState.currentStateKey
+  switch (stateKey) {
+    case AccountStateKey.start:
+      return currentState
+    case AccountStateKey.account:
+      return null
     default:
+      logger.error(
+        `Unhandled accountParser: default ${currentState.currentStateKey}`
+      )
       return null
   }
 }

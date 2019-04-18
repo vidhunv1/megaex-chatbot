@@ -1,9 +1,17 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
 import { ChatHandler } from 'chats/types'
-import { ACCOUNT_STATE_KEY, AccountState, initialState } from './AccountState'
+import {
+  ACCOUNT_STATE_LABEL,
+  AccountState,
+  initialState,
+  AccountStateKey,
+  nextAccountState
+} from './AccountState'
 import { accountParser } from './accountParser'
 import { accountResponder } from './accountResponder'
+import { parseCallbackQuery } from 'chats/utils'
+import * as _ from 'lodash'
 
 export const AccountChat: ChatHandler = {
   async handleCommand(
@@ -15,11 +23,46 @@ export const AccountChat: ChatHandler = {
   },
 
   async handleCallback(
-    _msg: TelegramBot.Message,
-    _user: User,
-    _tUser: TelegramAccount,
-    _callback: TelegramBot.CallbackQuery
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount,
+    callback: TelegramBot.CallbackQuery,
+    state: AccountState | null
   ) {
+    if (callback.data) {
+      const { type, params } = parseCallbackQuery(callback.data)
+      if (AccountStateKey[type as any] == null) {
+        return false
+      }
+      const callbackName = (type as any) as AccountStateKey
+      if (_.get(state, 'key', null) != ACCOUNT_STATE_LABEL) {
+        // Callback types allowed to answer indirectly
+        if (
+          [
+            AccountStateKey.cb_paymentMethods,
+            AccountStateKey.cb_referralLink
+          ].includes(callbackName)
+        ) {
+          state = initialState
+        }
+      }
+
+      if (!state) {
+        return false
+      }
+
+      state.currentStateKey = callbackName
+      // @ts-ignore
+      state[callbackName] = params
+
+      const updatedState: AccountState | null = accountParser(msg, user, state)
+      const nextState = await nextAccountState(updatedState, tUser.id)
+      if (nextState == null) {
+        return false
+      }
+
+      return accountResponder(msg, user, nextState)
+    }
     return false
   },
 
@@ -33,12 +76,17 @@ export const AccountChat: ChatHandler = {
     if (msg.text === user.t('main-menu.account')) {
       currentState = initialState
     }
-    if (currentState && currentState.key === ACCOUNT_STATE_KEY) {
-      const nextState: AccountState | null = await accountParser(
+
+    if (currentState && currentState.key === ACCOUNT_STATE_LABEL) {
+      const updatedState: AccountState | null = await accountParser(
         msg,
-        tUser.id,
         user,
         currentState
+      )
+
+      const nextState: AccountState | null = await nextAccountState(
+        updatedState,
+        tUser.id
       )
 
       if (nextState === null) {

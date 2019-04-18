@@ -1,11 +1,10 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User } from 'models'
-import { AccountState } from './AccountState'
+import { AccountState, AccountStateKey } from './AccountState'
 import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/i18n'
 import { CryptoCurrency } from 'constants/currencies'
 import { stringifyCallbackQuery } from 'chats/utils'
-import { CallbackTypes, CallbackParams } from './constants'
 import logger from 'modules/Logger'
 import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
 
@@ -14,7 +13,7 @@ export async function accountResponder(
   user: User,
   nextState: AccountState
 ): Promise<boolean> {
-  switch (nextState.currentMessageKey) {
+  switch (nextState.currentStateKey) {
     case 'account':
       logger.error('TODO: Add manage/edit payment methods')
       await telegramHook.getWebhook.sendMessage(
@@ -40,9 +39,9 @@ export async function accountResponder(
                 {
                   text: user.t(`${Namespace.Account}:manage-payment-methods`),
                   callback_data: stringifyCallbackQuery<
-                    CallbackTypes.PAYMENT_METHODS,
-                    CallbackParams[CallbackTypes.PAYMENT_METHODS]
-                  >(CallbackTypes.PAYMENT_METHODS, {
+                    AccountStateKey.cb_paymentMethods,
+                    AccountState[AccountStateKey.cb_paymentMethods]
+                  >(AccountStateKey.cb_paymentMethods, {
                     messageId: msg.message_id
                   })
                 }
@@ -55,9 +54,9 @@ export async function accountResponder(
                 {
                   text: user.t(`${Namespace.Account}:referral-link`),
                   callback_data: stringifyCallbackQuery<
-                    CallbackTypes.REFERRAL_LINK,
-                    CallbackParams[CallbackTypes.REFERRAL_LINK]
-                  >(CallbackTypes.REFERRAL_LINK, {
+                    AccountStateKey.cb_referralLink,
+                    AccountState[AccountStateKey.cb_referralLink]
+                  >(AccountStateKey.cb_referralLink, {
                     messageId: msg.message_id
                   })
                 }
