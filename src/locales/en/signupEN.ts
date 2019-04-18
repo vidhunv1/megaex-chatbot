@@ -34,5 +34,7 @@ _Security Tip_
 _Earn bitcoins using our referral program. Get your referral link inside_ *Account* _below_
 
 Use the *main menu* below to *exchange* or use your *wallet*
-`
+`,
+  'signup-error':
+    'An error occurred while registering. Please try again later or contact support if this problem persists.'
 }

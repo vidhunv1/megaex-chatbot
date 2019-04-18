@@ -5,15 +5,29 @@ import { languageKeyboard, currencyKeyboard } from './utils'
 import { CryptoCurrency } from 'constants/currencies'
 import { keyboardMainMenu } from 'chats/common'
 import { User, Wallet } from 'models'
-import { SignupState } from './SignupState'
+import { SignupState, SignupStateKey } from './SignupState'
 
 export async function signupResponder(
   msg: TelegramBot.Message,
   user: User,
   nextState: SignupState
 ): Promise<boolean> {
-  switch (nextState.currentMessageKey) {
-    case 'language':
+  const stateKey = nextState.currentStateKey
+  switch (stateKey) {
+    case SignupStateKey.signupError:
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Signup}:signup-error`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            keyboard: [[]],
+            resize_keyboard: true
+          }
+        }
+      )
+      return true
+    case SignupStateKey.language:
       await telegramHook.getWebhook.sendSticker(
         msg.chat.id,
         'CAADAgADKgMAAs-71A4f8rUYf2WfMAI'
@@ -33,7 +47,7 @@ export async function signupResponder(
       )
       return true
 
-    case 'termsAndConditions':
+    case SignupStateKey.termsAndConditions:
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Signup}:terms-and-conditions`),
@@ -50,7 +64,7 @@ export async function signupResponder(
       )
       return true
 
-    case 'fiatCurrency':
+    case SignupStateKey.fiatCurrency:
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Signup}:select-currency`),
@@ -64,7 +78,7 @@ export async function signupResponder(
       )
       return true
 
-    case 'accountReady':
+    case SignupStateKey.accountReady:
       const wallet = await Wallet.findOne({
         where: {
           userId: user.id,
@@ -102,7 +116,7 @@ export async function signupResponder(
       })
       return true
 
-    case 'homeScreen':
+    case SignupStateKey.homeScreen:
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Signup}:home-screen`),
