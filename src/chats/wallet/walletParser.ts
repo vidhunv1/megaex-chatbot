@@ -10,6 +10,7 @@ import logger from 'modules/Logger'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User } from 'models'
 import { Namespace } from 'modules/i18n'
+import * as _ from 'lodash'
 
 // TODO: Implement these functions
 const getCryptoValue = (
@@ -19,20 +20,6 @@ const getCryptoValue = (
 ) => {
   logger.error('TODO: Not implemented getCryptoValue WalletChat#20')
   return amount / 300000
-}
-
-const getFiatValue = (
-  amount: number,
-  _fromCurrency: CryptoCurrency,
-  _toCurrency: FiatCurrency
-) => {
-  logger.error('TODO: Not implemented getCryptoValue WalletChat#20')
-  return amount * 300000
-}
-
-const getWalletBalance = (_cryptoCurrency: CryptoCurrency) => {
-  logger.error('TODO: Not implemented getWalletBalance WalletChat#25')
-  return 0.2
 }
 
 const getWalletAddress = (_cryptoCurrency: CryptoCurrency) => {
@@ -51,17 +38,78 @@ const isValidAddress = (_address: string, _currencyCode: CryptoCurrency) => {
   return true
 }
 
+const getFiatValue = (
+  amount: number,
+  _fromCurrency: CryptoCurrency,
+  _toCurrency: FiatCurrency
+) => {
+  logger.error('TODO: Not implemented getCryptoValue WalletChat#20')
+  return amount * 300000
+}
+
+const getWalletBalance = (_cryptoCurrency: CryptoCurrency) => {
+  logger.error('TODO: Not implemented getWalletBalance WalletChat#25')
+  return 0.2
+}
+
+const getBlockedBalance = (_cryptoCurrency: CryptoCurrency) => {
+  logger.error('TODO: Not implemented getWalletBalance WalletChat#25')
+  return 0.01
+}
+
+const getEarnings = () => {
+  logger.error('TODO: Not implemented getEarnings WalletChat#25')
+  return 0.1
+}
+
+const getReferralCount = () => {
+  logger.error('TODO: Not implemented getReferralCount WalletChat#25')
+  return 100
+}
+
+const getPaymentLink = () => {
+  logger.error('TODO: Not implemented getPaymentLink WalletChat#25')
+  return 'https://t.me/megadealsbot?start=saddawq213123'
+}
+
+const getExpiryTime = () => {
+  return 6 * 60 * 60
+}
+
+const CURRENT_CURRENCY_CODE = CryptoCurrency.BTC
+
 export function walletParser(
   msg: TelegramBot.Message,
   user: User,
   currentState: WalletState
 ): WalletState | null {
   switch (currentState.currentStateKey) {
-    case WalletStateKey.start:
-      return currentState
+    case WalletStateKey.start: {
+      const cryptoCurrencyCode = CURRENT_CURRENCY_CODE
+      const cryptoBalance = getWalletBalance(cryptoCurrencyCode)
+      const fiatCurrencyCode = user.currencyCode
+      return {
+        ...currentState,
+        [WalletStateKey.wallet]: {
+          data: {
+            cryptoCurrencyCode,
+            cryptoBalance,
+            fiatValue: getFiatValue(
+              cryptoBalance,
+              cryptoCurrencyCode,
+              fiatCurrencyCode
+            ),
+            fiatCurrencyCode,
+            blockedBalance: getBlockedBalance(cryptoCurrencyCode),
+            earnings: getEarnings(),
+            referralCount: getReferralCount()
+          }
+        }
+      }
+    }
     // SendCoin
     case WalletStateKey.sendCoin_amount: {
-      const sendCoinState = currentState[WalletStateKey.sendCoin]
+      const sendCoinState = currentState[WalletStateKey.cb_sendCoin]
       if (msg.text && sendCoinState) {
         const cryptocurrencyCode = sendCoinState.currencyCode
         const fiatcurrencyCode = user.currencyCode
@@ -126,14 +174,22 @@ export function walletParser(
       return null
     }
     case WalletStateKey.sendCoin_confirm: {
-      const sendCoinState = currentState[WalletStateKey.sendCoin]
+      const sendCoinState = currentState[WalletStateKey.cb_sendCoin]
       if (
         msg.text &&
         sendCoinState &&
         msg.text ===
           user.t(`${Namespace.Wallet}:confirm-send-cryptocurrency-button`)
       ) {
-        return currentState
+        return {
+          ...currentState,
+          [WalletStateKey.sendCoin_confirm]: {
+            data: {
+              paymentLink: getPaymentLink(),
+              expiryTimeS: getExpiryTime()
+            }
+          }
+        }
       }
 
       logger.error(
@@ -143,10 +199,12 @@ export function walletParser(
     }
 
     // DepositCoin
-    case WalletStateKey.depositCoin: {
-      const depositCoinState = currentState[WalletStateKey.depositCoin]
+    case WalletStateKey.cb_depositCoin: {
+      const depositCoinState = currentState[WalletStateKey.cb_depositCoin]
       if (!depositCoinState) {
-        logger.error(`unhandled at WalletParser ${WalletStateKey.depositCoin}`)
+        logger.error(
+          `unhandled at WalletParser ${WalletStateKey.cb_depositCoin}`
+        )
         return null
       }
 
@@ -162,7 +220,7 @@ export function walletParser(
 
     // WithdrawCoin
     case WalletStateKey.withdrawCoin_address: {
-      const withdrawState = currentState[WalletStateKey.withdrawCoin]
+      const withdrawState = currentState[WalletStateKey.cb_withdrawCoin]
       if (msg.text && withdrawState) {
         if (isValidAddress(msg.text, withdrawState.currencyCode)) {
           return {
@@ -192,7 +250,7 @@ export function walletParser(
     }
 
     case WalletStateKey.withdrawCoin_amount: {
-      const withdrawState = currentState[WalletStateKey.withdrawCoin]
+      const withdrawState = currentState[WalletStateKey.cb_withdrawCoin]
       if (msg.text && withdrawState) {
         const cryptocurrencyCode = withdrawState.currencyCode
         const fiatcurrencyCode = user.currencyCode
@@ -201,7 +259,13 @@ export function walletParser(
         if (!parsedCurrency || (parsedCurrency && parsedCurrency.amount <= 0)) {
           // TODO: Have a retry count
           logger.error('TODO: Retry count for errored input')
-          return currentState
+          return {
+            ...currentState,
+            [WalletStateKey.withdrawCoin_amount]: {
+              data: null,
+              error: WithdrawCoinError.INVALID_AMOUNT
+            }
+          }
         }
 
         const { currencyKind, amount } = parsedCurrency
@@ -211,7 +275,13 @@ export function walletParser(
           cryptocurrencyValue = amount
           fiatValue = getFiatValue(amount, cryptocurrencyCode, fiatcurrencyCode)
         } else {
-          return currentState
+          return {
+            ...currentState,
+            [WalletStateKey.withdrawCoin_amount]: {
+              data: null,
+              error: WithdrawCoinError.INVALID_AMOUNT
+            }
+          }
         }
 
         if (cryptocurrencyValue <= getWalletBalance(cryptocurrencyCode)) {
@@ -292,14 +362,61 @@ export function walletParser(
     }
 
     // Callbacks
-    case WalletStateKey.sendCoin:
-    case WalletStateKey.withdrawCoin:
-    case WalletStateKey.depositCoin:
+    case WalletStateKey.cb_sendCoin:
+      const cbState = _.get(currentState, WalletStateKey.cb_sendCoin, null)
+      if (!cbState) {
+        return null
+      }
+      const cryptoCurrencyCode = cbState.currencyCode
+      const cryptoBalance = getWalletBalance(cryptoCurrencyCode)
+      const fiatCurrencyCode = user.currencyCode
+      return {
+        ...currentState,
+        [WalletStateKey.cb_sendCoin]: {
+          ...cbState,
+          data: {
+            cryptoBalance,
+            fiatValue: getFiatValue(
+              cryptoBalance,
+              cryptoCurrencyCode,
+              fiatCurrencyCode
+            ),
+            fiatCurrencyCode
+          }
+        }
+      }
+    case WalletStateKey.cb_withdrawCoin: {
+      const cbState = _.get(currentState, WalletStateKey.cb_withdrawCoin, null)
+      if (!cbState) {
+        return null
+      }
+      const cryptoCurrencyCode = cbState.currencyCode
+      const cryptoBalance = getWalletBalance(cryptoCurrencyCode)
+      const fiatCurrencyCode = user.currencyCode
+      return {
+        ...currentState,
+        [WalletStateKey.cb_withdrawCoin]: {
+          ...cbState,
+          data: {
+            cryptoBalance,
+            fiatValue: getFiatValue(
+              cryptoBalance,
+              cryptoCurrencyCode,
+              fiatCurrencyCode
+            ),
+            fiatCurrencyCode
+          }
+        }
+      }
+    }
+    case WalletStateKey.cb_depositCoin:
       return currentState
 
     // Should never come here...
     default:
-      logger.error(`unhandled at WalletParser 'default'`)
+      logger.error(
+        `unhandled at WalletParser 'default' ${JSON.stringify(currentState)}`
+      )
       return null
   }
 }

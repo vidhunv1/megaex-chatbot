@@ -11,6 +11,7 @@ import {
 import { parseCallbackQuery } from 'chats/utils'
 import { walletParser } from './walletParser'
 import { walletResponder } from './walletResponder'
+import * as _ from 'lodash'
 
 export const WalletChat: ChatHandler = {
   async handleCommand(
@@ -28,31 +29,33 @@ export const WalletChat: ChatHandler = {
     callback: TelegramBot.CallbackQuery,
     state: WalletState | null
   ) {
-    if (callback.data && state) {
+    if (callback.data) {
       const { type, params } = parseCallbackQuery(callback.data)
-
       if (WalletStateKey[type as any] == null) {
         return false
       }
-
       const callbackName = (type as any) as WalletStateKey
-
-      if (state.key != WALLET_STATE_LABEL) {
+      if (_.get(state, 'key', null) != WALLET_STATE_LABEL) {
         // Callback types allowed to answer indirectly
         if (
           [
-            WalletStateKey.sendCoin,
-            WalletStateKey.depositCoin,
-            WalletStateKey.withdrawCoin
+            WalletStateKey.cb_sendCoin,
+            WalletStateKey.cb_depositCoin,
+            WalletStateKey.cb_withdrawCoin
           ].includes(callbackName)
         ) {
           state = initialState
         }
       }
 
+      if (!state) {
+        return false
+      }
+
       state.currentStateKey = callbackName
       // @ts-ignore
       state[callbackName] = params
+
       const updatedState: WalletState | null = walletParser(msg, user, state)
       const nextState = await nextWalletState(updatedState, tUser.id)
       if (nextState == null) {

@@ -9,38 +9,55 @@ export enum WalletStateKey {
   start = 'start',
   wallet = 'wallet',
 
-  sendCoin = 'sendCoin',
+  cb_sendCoin = 'cb_sendCoin',
   sendCoin_amount = 'sendCoin_amount',
   sendCoin_confirm = 'sendCoin_confirm',
   sendCoin_show = 'sendCoin_show',
   sendCoin_error = 'sendCoin_error',
 
-  withdrawCoin = 'withdrawCoin',
+  cb_withdrawCoin = 'cb_withdrawCoin',
   withdrawCoin_amount = 'withdrawCoin_amount',
   withdrawCoin_address = 'withdrawCoin_address',
   withdrawCoin_confirm = 'withdrawCoin_confirm',
   withdrawCoin_show = 'withdrawCoin_show',
   withdrawCoin_error = 'withdrawCoin_error',
 
-  depositCoin = 'depositCoin',
+  cb_depositCoin = 'cb_depositCoin',
   depositCoin_show = 'depositCoin_show'
 }
 
 export enum SendCoinError {
-  INSUFFICIENT_BALANCE = 'insufficientBalance',
-  INVALID_AMOUNT = 'invalidAmount'
+  INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
+  INVALID_AMOUNT = 'INVALID_AMOUNT'
 }
 
 export enum WithdrawCoinError {
-  INVALID_ADDRESS = 'invalidAddress',
-  CREATE_ERROR = 'createError',
-  INSUFFICIENT_BALANCE = 'insufficientBalance'
+  INVALID_ADDRESS = 'INVALID_ADDRESS',
+  INVALID_AMOUNT = 'INVALID_AMOUNT',
+  CREATE_ERROR = 'CREATE_ERROR',
+  INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE'
 }
 
 export interface IWalletState {
+  [WalletStateKey.wallet]?: {
+    data: {
+      cryptoCurrencyCode: CryptoCurrency
+      cryptoBalance: number
+      fiatValue: number
+      fiatCurrencyCode: FiatCurrency
+      blockedBalance: number
+      earnings: number
+      referralCount: number
+    } | null
+  }
   // Send coin
-  [WalletStateKey.sendCoin]?: {
+  [WalletStateKey.cb_sendCoin]?: {
     currencyCode: CryptoCurrency
+    data: {
+      cryptoBalance: number
+      fiatValue: number
+      fiatCurrencyCode: FiatCurrency
+    } | null
   } & CallbackDefaults
   [WalletStateKey.sendCoin_amount]?: {
     data: {
@@ -54,9 +71,15 @@ export interface IWalletState {
       | SendCoinError.INVALID_AMOUNT
       | null
   }
+  [WalletStateKey.sendCoin_confirm]?: {
+    data: {
+      paymentLink: string
+      expiryTimeS: number
+    } | null
+  }
 
   // Deposit
-  [WalletStateKey.depositCoin]?: {
+  [WalletStateKey.cb_depositCoin]?: {
     currencyCode: CryptoCurrency
   } & CallbackDefaults
   [WalletStateKey.depositCoin_show]?: {
@@ -65,8 +88,13 @@ export interface IWalletState {
   }
 
   // withdraw
-  [WalletStateKey.withdrawCoin]?: {
+  [WalletStateKey.cb_withdrawCoin]?: {
     currencyCode: CryptoCurrency
+    data: {
+      cryptoBalance: number
+      fiatValue: number
+      fiatCurrencyCode: FiatCurrency
+    } | null
   } & CallbackDefaults
   [WalletStateKey.withdrawCoin_amount]?: {
     data: {
@@ -75,7 +103,10 @@ export interface IWalletState {
       fiatValue: number
       fiatCurrency: FiatCurrency
     } | null
-    error: WithdrawCoinError.INSUFFICIENT_BALANCE | null
+    error:
+      | WithdrawCoinError.INSUFFICIENT_BALANCE
+      | WithdrawCoinError.INVALID_AMOUNT
+      | null
   }
   [WalletStateKey.withdrawCoin_address]?: {
     data: {
@@ -110,7 +141,7 @@ export function getNextStateKey(
     case WalletStateKey.wallet:
       return null
 
-    case WalletStateKey.sendCoin:
+    case WalletStateKey.cb_sendCoin:
       return WalletStateKey.sendCoin_amount
     case WalletStateKey.sendCoin_amount: {
       const amountState = currentState[WalletStateKey.sendCoin_amount]
@@ -136,7 +167,7 @@ export function getNextStateKey(
       return null
     }
 
-    case WalletStateKey.withdrawCoin:
+    case WalletStateKey.cb_withdrawCoin:
       return WalletStateKey.withdrawCoin_amount
     case WalletStateKey.withdrawCoin_amount: {
       const amountState = currentState[WalletStateKey.withdrawCoin_amount]
@@ -145,6 +176,9 @@ export function getNextStateKey(
       }
 
       if (amountState.error) {
+        if (amountState.error === WithdrawCoinError.INVALID_AMOUNT) {
+          return WalletStateKey.withdrawCoin_amount
+        }
         return WalletStateKey.withdrawCoin_error
       } else {
         return WalletStateKey.withdrawCoin_address
@@ -177,7 +211,7 @@ export function getNextStateKey(
     case WalletStateKey.withdrawCoin_error:
       return null
 
-    case WalletStateKey.depositCoin:
+    case WalletStateKey.cb_depositCoin:
       return WalletStateKey.depositCoin_show
     case WalletStateKey.depositCoin_show:
       return null

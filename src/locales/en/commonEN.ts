@@ -18,11 +18,11 @@ If you are having any trouble please contact our support @{{ supportBotUsername 
 ⚠️ _Caution: Never do any deals outside this bot, we will not be able to protect and recover your funds_
 
 *Info*
-Find best deals to exchange bitcoins with your local currency here
+
+Here you can find best deals to exchange bitcoins with your local currency here
+
 ⚡️ Instant exchange with escrow protection
 🔒 Secure wallet
-
-
 `
   },
   bot: {
@@ -40,5 +40,6 @@ Find best deals to exchange bitcoins with your local currency here
     exchange: '💵 Buy/Sell BTC-{{ fiatCurrency }}',
     account: '👤 My Account',
     wallet: '💼 Wallet'
-  }
+  },
+  'unhandled-callback': `Session on this button expired. Please create a new request.`
 }

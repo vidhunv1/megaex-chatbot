@@ -114,6 +114,15 @@ export const Router = {
 
     if (!isHandled) {
       logger.error(`Callback query not handled: ${JSON.stringify(callback)}`)
+
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t('unhandled-callback'),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
     }
 
     if (!callback.data) {
