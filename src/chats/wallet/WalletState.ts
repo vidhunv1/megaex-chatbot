@@ -4,6 +4,7 @@ import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import * as _ from 'lodash'
 
 export const WALLET_STATE_LABEL = 'wallet'
+export const STATE_EXPIRY = 86400
 
 export enum WalletStateKey {
   start = 'start',
@@ -121,11 +122,11 @@ export interface IWalletState {
 
 export interface WalletState extends State<WalletStateKey>, IWalletState {}
 
-export const initialState: WalletState = {
+export const initialState: WalletState = Object.freeze({
   currentStateKey: WalletStateKey.start,
   previousStateKey: null,
   key: WALLET_STATE_LABEL
-}
+})
 
 export function getNextStateKey(
   currentState: WalletState | null
@@ -226,6 +227,7 @@ export async function nextWalletState(
   return await moveToNextState<WalletStateKey>(
     currentState,
     telegramId,
-    nextStateKey
+    nextStateKey,
+    STATE_EXPIRY
   )
 }

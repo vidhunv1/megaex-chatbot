@@ -125,11 +125,11 @@ export function getNextStateKey(
   }
 }
 
-export const initialState: SignupState = {
+export const initialState: SignupState = Object.freeze({
   currentStateKey: SignupStateKey.start,
   previousStateKey: null,
   key: SIGNUP_STATE_LABEL
-}
+})
 
 export async function nextSignupState(
   currentState: SignupState | null,

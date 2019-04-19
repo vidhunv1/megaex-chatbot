@@ -11,6 +11,8 @@ export enum AccountStateKey {
   cb_referralLink = 'cb_referralLink'
 }
 
+export const STATE_EXPIRY = 86400
+
 export interface IAccountState {
   [AccountStateKey.cb_paymentMethods]?: {} & CallbackDefaults
   [AccountStateKey.cb_referralLink]?: {} & CallbackDefaults
@@ -38,11 +40,11 @@ export function getNextStateKey(
   return null
 }
 
-export const initialState: AccountState = {
+export const initialState: AccountState = Object.freeze({
   currentStateKey: AccountStateKey.start,
   previousStateKey: null,
   key: ACCOUNT_STATE_LABEL
-}
+})
 
 export async function nextAccountState(
   currentState: AccountState | null,
@@ -53,6 +55,7 @@ export async function nextAccountState(
   return await moveToNextState<AccountStateKey>(
     currentState,
     telegramId,
-    nextStateKey
+    nextStateKey,
+    STATE_EXPIRY
   )
 }

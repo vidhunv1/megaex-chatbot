@@ -73,7 +73,8 @@ export const WalletChat: ChatHandler = {
     tUser: TelegramAccount,
     state: WalletState | null
   ) {
-    let currentState = state
+    let currentState: WalletState | null = state
+
     if (msg.text === user.t('main-menu.wallet')) {
       currentState = initialState
     }

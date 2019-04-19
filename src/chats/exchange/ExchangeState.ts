@@ -21,6 +21,8 @@ export enum ExchangeStateKey {
   cb_sell = 'sb_sell'
 }
 
+export const STATE_EXPIRY = 86400
+
 export interface IExchangeState {
   [ExchangeStateKey.cb_buy]?: {
     currencyCode: CryptoCurrency
@@ -94,11 +96,11 @@ export function getNextStateKey(
   }
 }
 
-export const initialState: ExchangeState = {
+export const initialState: ExchangeState = Object.freeze({
   currentStateKey: ExchangeStateKey.start,
   previousStateKey: null,
   key: EXCHANGE_STATE_LABEL
-}
+})
 
 export async function nextExchangeState(
   currentState: ExchangeState | null,
@@ -109,6 +111,7 @@ export async function nextExchangeState(
   return await moveToNextState<ExchangeStateKey>(
     currentState,
     telegramId,
-    stateKey
+    stateKey,
+    STATE_EXPIRY
   )
 }
