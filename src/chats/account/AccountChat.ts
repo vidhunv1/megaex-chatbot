@@ -40,10 +40,12 @@ export const AccountChat: ChatHandler = {
         if (
           [
             AccountStateKey.cb_paymentMethods,
-            AccountStateKey.cb_referralLink
+            AccountStateKey.cb_referralLink,
+            AccountStateKey.cb_editPaymentMethods,
+            AccountStateKey.cb_addPaymentMethod
           ].includes(callbackName)
         ) {
-          state = initialState
+          state = _.clone(initialState)
         }
       }
 

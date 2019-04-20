@@ -40,7 +40,7 @@ export enum WithdrawCoinError {
 }
 
 export interface IWalletState {
-  [WalletStateKey.wallet]?: {
+  [WalletStateKey.start]?: {
     data: {
       cryptoCurrencyCode: CryptoCurrency
       cryptoBalance: number

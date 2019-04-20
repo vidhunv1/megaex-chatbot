@@ -23,11 +23,7 @@ export async function walletResponder(
 ): Promise<boolean> {
   switch (currentState.currentStateKey) {
     case WalletStateKey.wallet: {
-      const walletData = _.get(
-        currentState[WalletStateKey.wallet],
-        'data',
-        null
-      )
+      const walletData = _.get(currentState[WalletStateKey.start], 'data', null)
       if (!walletData) {
         return false
       }
@@ -203,6 +199,7 @@ export async function walletResponder(
       )
 
       if (!errorType) {
+        logger.error('Wallet responder#sendCoin unhandled error ' + errorType)
         return false
       }
 

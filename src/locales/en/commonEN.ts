@@ -1,3 +1,5 @@
+import { PaymentMethods } from 'constants/paymentMethods'
+
 export const commonEN = {
   'cryptocurrency-names': {
     BTC: 'Bitcoin'
@@ -31,15 +33,34 @@ Here you can find best deals to exchange bitcoins with your local currency here
       name: 'BTC Deals support'
     }
   },
-  app: {
-    website: 'https://btcdeals.io',
-    terms: 'https://btcdeals.io/terms',
-    'privacy-policy': 'https://btcdeals.io/privacy'
-  },
   'main-menu': {
     exchange: '💵 Buy/Sell BTC-{{ fiatCurrency }}',
     account: '👤 My Account',
     wallet: '💼 Wallet'
   },
-  'unhandled-callback': `Session on this button expired. Please create a new request.`
+  'unhandled-callback': `Session on this button expired. Please create a new request.`,
+  'payment-methods': {
+    names: {
+      [PaymentMethods.PAYTM]: 'PayTM',
+      [PaymentMethods.UPI]: 'UPI',
+      [PaymentMethods.CASH]: 'Direct cash',
+      [PaymentMethods.BANK_TRANSFER_INR]: 'Bank transfer'
+    },
+    fields: {
+      [PaymentMethods.PAYTM]: {
+        field1: 'Mobile number'
+      },
+      [PaymentMethods.UPI]: {
+        field1: 'UPI ID'
+      },
+      [PaymentMethods.CASH]: {
+        field1: 'location'
+      },
+      [PaymentMethods.BANK_TRANSFER_INR]: {
+        field1: 'Bank name',
+        field2: 'Account Number',
+        field3: 'IFSC Code'
+      }
+    }
+  }
 }

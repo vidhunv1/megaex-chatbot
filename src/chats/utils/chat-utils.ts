@@ -43,7 +43,7 @@ export const isBotCommand = (msg: TelegramBot.Message) => {
   return msg.text && msg.entities && msg.entities[0].type === 'bot_command'
 }
 
-// { wallet, { currencyCode: 1, b = 2 }} => wallet:currencyCode=1,b=2
+// { wallet, { currencyCode: 1, b = 2 }} => wallet:currencyCode=1,b=2, skips data field
 export const stringifyCallbackQuery = function<StateKey, Params>(
   callbackType: StateKey,
   values?: Params
@@ -51,9 +51,12 @@ export const stringifyCallbackQuery = function<StateKey, Params>(
   let q = callbackType + ':'
   const t: any = values ? values : {}
   Object.keys(t).forEach(function(key) {
-    q = q + key + '=' + t[key] + ','
+    if (key != 'data') {
+      q = q + key + '=' + t[key] + ','
+    }
   })
-  return q.substring(0, q.length - 1)
+  const a = q.substring(0, q.length - 1)
+  return a
 }
 
 export const parseCallbackQuery = function(

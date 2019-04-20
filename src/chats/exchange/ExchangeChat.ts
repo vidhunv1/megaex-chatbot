@@ -83,7 +83,7 @@ export const ExchangeChat: ChatHandler = {
       msg.text ===
       user.t('main-menu.exchange', { fiatCurrency: user.currencyCode })
     ) {
-      currentState = initialState
+      currentState = _.clone(initialState)
     }
 
     if (currentState && currentState.key === EXCHANGE_STATE_LABEL) {

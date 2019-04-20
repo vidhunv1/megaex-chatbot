@@ -90,7 +90,7 @@ export function walletParser(
       const fiatCurrencyCode = user.currencyCode
       return {
         ...currentState,
-        [WalletStateKey.wallet]: {
+        [WalletStateKey.start]: {
           data: {
             cryptoCurrencyCode,
             cryptoBalance,

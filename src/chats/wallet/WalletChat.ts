@@ -44,7 +44,7 @@ export const WalletChat: ChatHandler = {
             WalletStateKey.cb_withdrawCoin
           ].includes(callbackName)
         ) {
-          state = initialState
+          state = _.clone(initialState)
         }
       }
 
