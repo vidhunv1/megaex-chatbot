@@ -229,8 +229,7 @@ export function accountParser(
               data: {
                 inputs: {
                   ...inputs,
-                  fields: inputs.fields.concat(msg.text),
-                  editId: null
+                  fields: inputs.fields.concat(msg.text)
                 },
                 isSaved: false
               },
@@ -249,8 +248,7 @@ export function accountParser(
                 data: {
                   inputs: {
                     ...inputs,
-                    fields: inputs.fields.concat(msg.text),
-                    editId: null
+                    fields: inputs.fields.concat(msg.text)
                   },
                   isSaved: true
                 },
@@ -276,15 +274,22 @@ export function accountParser(
       const findPM = getAllPaymentMethods(user.currencyCode).find(
         (pm) => msg.text === user.t(`payment-methods.names.${pm}`)
       )
+
+      const inputs = _.get(
+        currentState,
+        `${AccountStateKey.paymentMethodInput}.data.inputs`,
+        null
+      )
+
       if (findPM) {
         return {
           ...currentState,
           [AccountStateKey.paymentMethodInput]: {
             data: {
               inputs: {
+                ...inputs,
                 paymentMethod: findPM as PaymentMethods,
-                fields: [],
-                editId: null
+                fields: []
               },
               isSaved: false
             },
@@ -319,7 +324,7 @@ export function accountParser(
             inputs: {
               paymentMethod: getAddedPaymentMethods(+cbState.paymentMethodId)[0]
                 .paymentMethod,
-              editId: cbState.paymentMethodId,
+              editId: parseInt(cbState.paymentMethodId + ''),
               fields: []
             },
             isSaved: false

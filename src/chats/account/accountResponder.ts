@@ -298,16 +298,35 @@ export async function accountResponder(
         return false
       }
 
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Account}:payment-method-created`, {
-          paymentMethodInfo: stringifyPaymentMethodsFields([data.inputs], user)
-        }),
-        {
-          parse_mode: 'Markdown',
-          reply_markup: keyboardMainMenu(user)
-        }
-      )
+      if (data.inputs.editId) {
+        await telegramHook.getWebhook.sendMessage(
+          msg.chat.id,
+          user.t(`${Namespace.Account}:payment-method-updated`, {
+            paymentMethodInfo: stringifyPaymentMethodsFields(
+              [data.inputs],
+              user
+            )
+          }),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(user)
+          }
+        )
+      } else {
+        await telegramHook.getWebhook.sendMessage(
+          msg.chat.id,
+          user.t(`${Namespace.Account}:payment-method-created`, {
+            paymentMethodInfo: stringifyPaymentMethodsFields(
+              [data.inputs],
+              user
+            )
+          }),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(user)
+          }
+        )
+      }
       return true
     }
 

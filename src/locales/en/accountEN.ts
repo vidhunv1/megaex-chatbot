@@ -61,5 +61,11 @@ You can request @{{ supportBotUsername }} to get a valid payment method added.`,
 Your payment method was created.
 
 {{ paymentMethodInfo }}
+`,
+  'payment-method-updated': `✅ *Updated*
+
+Your payment method was updated.
+
+{{ paymentMethodInfo }}
 `
 }
