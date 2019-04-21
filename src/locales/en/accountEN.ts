@@ -14,12 +14,13 @@ Account ID: /u{{ accountID }}
 💳  *Payment Methods:* {{ paymentMethods }}
 `,
 
-  'manage-payment-methods': '💳  Payment Methods',
-  'add-payment-method': '➕  Add payment Method',
-  'edit-payment-method': '🖋  Edit payment Methods',
-  'verify-account': '✅  Verify Account',
-  'referral-link': '🤝  Referrals',
-  'referral-info': `🤝 *Referrals*
+  'manage-payment-methods-cbbutton': '💳  Payment Methods',
+  'add-payment-method-cbbutton': '➕  Add payment Method',
+  'edit-payment-method-cbbutton': '🖋  Edit payment Methods',
+  'verify-account-cbbutton': '✅  Verify Account',
+  'referral-link-cbbutton': '🤝  Referral',
+  'settings-cbbutton': '⚙ Settings',
+  'referral-info-button': `🤝 *Referral*
 
 * Invited*: {{ referralCount }} users
 * Referral fees*: {{ referralFeesPercentage }}% 
@@ -67,5 +68,14 @@ Your payment method was created.
 Your payment method was updated.
 
 {{ paymentMethodInfo }}
-`
+`,
+
+  'settings-show': `*⚙ Settings*
+
+Select the option you want to edit
+`,
+  'settings-currency-cbbutton': '💵  Currency',
+  'settings-language-cbbutton': '🌎  Language',
+  'settings-rate-source-cbbutton': '📊  Rate source',
+  'settings-username-cbbutton': '👤  Change Acc ID'
 }

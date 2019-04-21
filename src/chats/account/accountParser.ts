@@ -337,6 +337,13 @@ export function accountParser(
     case AccountStateKey.editPaymentMethod_show:
       return currentState
 
+    case AccountStateKey.cb_settings: {
+      return currentState
+    }
+
+    case AccountStateKey.settings_show:
+      return currentState
+
     default:
       logger.error(
         `Unhandled accountParser: default ${currentState.currentStateKey}`

@@ -25,6 +25,14 @@ export enum AccountStateKey {
   cb_referralLink = 'cb_referralLink',
   referralLink_show = 'referralLink_show',
 
+  cb_settings = 'cb_settings',
+  settings_show = 'settings_show',
+
+  cb_settingsCurrency = 'cb_settingsCurrency',
+  cb_settingsLanguage = 'cb_settingsLanguage',
+  cb_settingsRate = 'cb_settingsRate',
+  cb_settingsUsername = 'cb_settingsUsername',
+
   paymentMethod_error = 'paymentMethod_error'
 }
 
@@ -63,6 +71,23 @@ export interface IAccountState {
     data: {
       addedPaymentMethods: PaymentMethodFields[]
     } | null
+  } & CallbackDefaults
+
+  [AccountStateKey.cb_settings]?: {
+    data: {} | null
+  } & CallbackDefaults
+
+  [AccountStateKey.cb_settingsCurrency]?: {
+    data: {} | null
+  } & CallbackDefaults
+  [AccountStateKey.cb_settingsLanguage]?: {
+    data: {} | null
+  } & CallbackDefaults
+  [AccountStateKey.cb_settingsRate]?: {
+    data: {} | null
+  } & CallbackDefaults
+  [AccountStateKey.cb_settingsUsername]?: {
+    data: {} | null
   } & CallbackDefaults
 
   [AccountStateKey.cb_referralLink]?: {
@@ -144,13 +169,17 @@ export function getNextStateKey(
     case AccountStateKey.referralLink_show:
       return null
 
+    case AccountStateKey.cb_settings:
+      return AccountStateKey.settings_show
+    case AccountStateKey.settings_show:
+      return null
+
     case AccountStateKey.paymentMethodInput: {
       const pmInputState = _.get(
         currentState,
         AccountStateKey.paymentMethodInput,
         null
       )
-      console.log(`P: ${JSON.stringify(pmInputState)}`)
 
       if (pmInputState && pmInputState.error) {
         return AccountStateKey.paymentMethod_error

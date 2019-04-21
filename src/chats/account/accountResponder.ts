@@ -79,6 +79,51 @@ export async function accountResponder(
         return false
       }
 
+      const inline: TelegramBot.InlineKeyboardButton[][] = [
+        [
+          {
+            text: user.t(
+              `${Namespace.Account}:manage-payment-methods-cbbutton`
+            ),
+            callback_data: stringifyCallbackQuery<
+              AccountStateKey.cb_paymentMethods,
+              AccountState[AccountStateKey.cb_paymentMethods]
+            >(AccountStateKey.cb_paymentMethods, {
+              mId: msg.message_id,
+              data: null
+            })
+          }
+        ],
+        [
+          {
+            text: user.t(`${Namespace.Account}:referral-link-cbbutton`),
+            callback_data: stringifyCallbackQuery<
+              AccountStateKey.cb_referralLink,
+              AccountState[AccountStateKey.cb_referralLink]
+            >(AccountStateKey.cb_referralLink, {
+              mId: msg.message_id,
+              data: null
+            })
+          },
+          {
+            text: user.t(`${Namespace.Account}:settings-cbbutton`),
+            callback_data: stringifyCallbackQuery<
+              AccountStateKey.cb_settings,
+              AccountState[AccountStateKey.cb_settings]
+            >(AccountStateKey.cb_settings, {
+              mId: msg.message_id,
+              data: null
+            })
+          }
+        ]
+      ]
+
+      !user.isVerified &&
+        inline[0].push({
+          text: user.t(`${Namespace.Account}:verify-account-cbbutton`),
+          url: VERIFY_ACCOUNT_PATH
+        })
+
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Account}:account-home`, {
@@ -100,36 +145,7 @@ export async function accountResponder(
         {
           parse_mode: 'Markdown',
           reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: user.t(`${Namespace.Account}:manage-payment-methods`),
-                  callback_data: stringifyCallbackQuery<
-                    AccountStateKey.cb_paymentMethods,
-                    AccountState[AccountStateKey.cb_paymentMethods]
-                  >(AccountStateKey.cb_paymentMethods, {
-                    mId: msg.message_id,
-                    data: null
-                  })
-                }
-              ],
-              [
-                {
-                  text: user.t(`${Namespace.Account}:verify-account`),
-                  url: VERIFY_ACCOUNT_PATH
-                },
-                {
-                  text: user.t(`${Namespace.Account}:referral-link`),
-                  callback_data: stringifyCallbackQuery<
-                    AccountStateKey.cb_referralLink,
-                    AccountState[AccountStateKey.cb_referralLink]
-                  >(AccountStateKey.cb_referralLink, {
-                    mId: msg.message_id,
-                    data: null
-                  })
-                }
-              ]
-            ]
+            inline_keyboard: inline
           }
         }
       )
@@ -150,7 +166,7 @@ export async function accountResponder(
       data.addedPaymentMethods.length > 0 &&
         inline.push([
           {
-            text: user.t(`${Namespace.Account}:edit-payment-method`),
+            text: user.t(`${Namespace.Account}:edit-payment-method-cbbutton`),
             callback_data: stringifyCallbackQuery<
               AccountStateKey.cb_editPaymentMethods,
               AccountState[AccountStateKey.cb_paymentMethods]
@@ -162,7 +178,7 @@ export async function accountResponder(
         ])
       inline.push([
         {
-          text: user.t(`${Namespace.Account}:add-payment-method`),
+          text: user.t(`${Namespace.Account}:add-payment-method-cbbutton`),
           callback_data: stringifyCallbackQuery<
             AccountStateKey.cb_addPaymentMethod,
             AccountState[AccountStateKey.cb_addPaymentMethod]
@@ -343,7 +359,7 @@ export async function accountResponder(
       const { referralCount, referralLink, referralFeesPercentage } = data
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
-        user.t(`${Namespace.Account}:referral-info`, {
+        user.t(`${Namespace.Account}:referral-info-button`, {
           referralCount,
           referralFeesPercentage
         }),
@@ -355,6 +371,74 @@ export async function accountResponder(
         disable_web_page_preview: true
       })
       return true
+
+    case AccountStateKey.settings_show: {
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Account}:settings-show`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: user.t(
+                    `${Namespace.Account}:settings-currency-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    AccountStateKey.cb_settingsCurrency,
+                    AccountState[AccountStateKey.cb_settingsCurrency]
+                  >(AccountStateKey.cb_settingsCurrency, {
+                    mId: msg.message_id,
+                    data: null
+                  })
+                },
+                {
+                  text: user.t(
+                    `${Namespace.Account}:settings-language-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    AccountStateKey.cb_settingsLanguage,
+                    AccountState[AccountStateKey.cb_settingsLanguage]
+                  >(AccountStateKey.cb_settingsLanguage, {
+                    mId: msg.message_id,
+                    data: null
+                  })
+                }
+              ],
+              [
+                {
+                  text: user.t(
+                    `${Namespace.Account}:settings-rate-source-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    AccountStateKey.cb_settingsRate,
+                    AccountState[AccountStateKey.cb_settingsRate]
+                  >(AccountStateKey.cb_settingsRate, {
+                    mId: msg.message_id,
+                    data: null
+                  })
+                },
+                {
+                  text: user.t(
+                    `${Namespace.Account}:settings-username-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    AccountStateKey.cb_settingsUsername,
+                    AccountState[AccountStateKey.cb_settingsUsername]
+                  >(AccountStateKey.cb_settingsUsername, {
+                    mId: msg.message_id,
+                    data: null
+                  })
+                }
+              ]
+            ]
+          }
+        }
+      )
+
+      return true
+    }
 
     case AccountStateKey.paymentMethod_error: {
       const errorType: AccountError | null = _.get(
