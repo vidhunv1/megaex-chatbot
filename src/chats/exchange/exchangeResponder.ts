@@ -36,7 +36,7 @@ export async function exchangeResponder(
                     ExchangeStateKey.cb_myOrders,
                     ExchangeState[ExchangeStateKey.cb_myOrders]
                   >(ExchangeStateKey.cb_myOrders, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     currencyCode: CURRENT_CURRENCY_CODE
                   })
                 },
@@ -46,7 +46,7 @@ export async function exchangeResponder(
                     ExchangeStateKey.cb_createOrder,
                     ExchangeState[ExchangeStateKey.cb_createOrder]
                   >(ExchangeStateKey.cb_createOrder, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     currencyCode: CURRENT_CURRENCY_CODE
                   })
                 }
@@ -58,7 +58,7 @@ export async function exchangeResponder(
                     ExchangeStateKey.cb_buy,
                     ExchangeState[ExchangeStateKey.cb_buy]
                   >(ExchangeStateKey.cb_buy, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     currencyCode: CURRENT_CURRENCY_CODE
                   })
                 }
@@ -70,7 +70,7 @@ export async function exchangeResponder(
                     ExchangeStateKey.cb_sell,
                     ExchangeState[ExchangeStateKey.cb_sell]
                   >(ExchangeStateKey.cb_sell, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     currencyCode: CURRENT_CURRENCY_CODE
                   })
                 }

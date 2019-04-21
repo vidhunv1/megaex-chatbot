@@ -30,7 +30,7 @@ export enum DeepLink {
 }
 
 export interface CallbackDefaults {
-  messageId: number
+  mId: number
 }
 
 export interface ConversationParams {

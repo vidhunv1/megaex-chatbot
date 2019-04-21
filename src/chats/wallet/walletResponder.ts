@@ -63,7 +63,7 @@ export async function walletResponder(
                     WalletStateKey.cb_sendCoin,
                     WalletState[WalletStateKey.cb_sendCoin]
                   >(WalletStateKey.cb_sendCoin, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     currencyCode: walletData.cryptoCurrencyCode,
                     data: null
                   })
@@ -76,7 +76,7 @@ export async function walletResponder(
                     WalletStateKey.cb_depositCoin,
                     WalletState[WalletStateKey.cb_depositCoin]
                   >(WalletStateKey.cb_depositCoin, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     currencyCode: walletData.cryptoCurrencyCode
                   })
                 },
@@ -86,7 +86,7 @@ export async function walletResponder(
                     WalletStateKey.cb_withdrawCoin,
                     WalletState[WalletStateKey.cb_withdrawCoin]
                   >(WalletStateKey.cb_withdrawCoin, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     currencyCode: walletData.cryptoCurrencyCode,
                     data: null
                   })

@@ -108,7 +108,7 @@ export async function accountResponder(
                     AccountStateKey.cb_paymentMethods,
                     AccountState[AccountStateKey.cb_paymentMethods]
                   >(AccountStateKey.cb_paymentMethods, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     data: null
                   })
                 }
@@ -124,7 +124,7 @@ export async function accountResponder(
                     AccountStateKey.cb_referralLink,
                     AccountState[AccountStateKey.cb_referralLink]
                   >(AccountStateKey.cb_referralLink, {
-                    messageId: msg.message_id,
+                    mId: msg.message_id,
                     data: null
                   })
                 }
@@ -155,7 +155,7 @@ export async function accountResponder(
               AccountStateKey.cb_editPaymentMethods,
               AccountState[AccountStateKey.cb_paymentMethods]
             >(AccountStateKey.cb_editPaymentMethods, {
-              messageId: msg.message_id,
+              mId: msg.message_id,
               data: null
             })
           }
@@ -167,7 +167,7 @@ export async function accountResponder(
             AccountStateKey.cb_addPaymentMethod,
             AccountState[AccountStateKey.cb_addPaymentMethod]
           >(AccountStateKey.cb_addPaymentMethod, {
-            messageId: msg.message_id,
+            mId: msg.message_id,
             data: null
           })
         }
@@ -209,7 +209,7 @@ export async function accountResponder(
               AccountStateKey.cb_editPaymentMethodId,
               AccountState[AccountStateKey.cb_editPaymentMethodId]
             >(AccountStateKey.cb_editPaymentMethodId, {
-              messageId: msg.message_id,
+              mId: msg.message_id,
               paymentMethodId: pm.id,
               data: null
             })
