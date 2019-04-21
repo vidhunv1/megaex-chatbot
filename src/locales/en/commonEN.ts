@@ -62,5 +62,11 @@ Here you can find best deals to exchange bitcoins with your local currency here
         field3: 'IFSC Code'
       }
     }
-  }
+  },
+  'show-transactions-title': `📗 *Transactions*
+
+      *Coin*        *Amount*           *Type*{{ transactionsData }}
+`,
+  'transaction-row':
+    '```{{ cryptoCurrency }} {{ amount }} {{ transactionType }}```'
 }

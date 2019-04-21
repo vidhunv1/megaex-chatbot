@@ -22,3 +22,13 @@ export const keyboardMainMenu = (
     resize_keyboard: true
   }
 }
+
+export const centerJustify = function(str: string | number, length: number) {
+  const char = ' '
+  str = str + ''
+  return (
+    char.repeat((length - str.length) / 2) +
+    str +
+    char.repeat((length - str.length) / 2)
+  )
+}

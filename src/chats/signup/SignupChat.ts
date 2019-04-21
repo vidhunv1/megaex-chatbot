@@ -1,6 +1,6 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
-import { ChatHandler } from 'chats/types'
+import { ChatHandler, BotCommand } from 'chats/types'
 import {
   SignupState,
   initialState,
@@ -14,6 +14,7 @@ import { signupResponder } from './signupResponder'
 export const SignupChat: ChatHandler = {
   async handleCommand(
     msg: TelegramBot.Message,
+    _command: BotCommand,
     user: User,
     tUser: TelegramAccount,
     state: SignupState | null

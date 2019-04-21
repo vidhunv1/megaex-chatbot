@@ -25,11 +25,41 @@ export const Router = {
     if (botCommand) {
       // Command handlers
       const isHandled =
-        (await CommonChat.handleCommand(msg, user, tUser, currentState)) ||
-        (await SignupChat.handleCommand(msg, user, tUser, currentState)) ||
-        (await ExchangeChat.handleCommand(msg, user, tUser, currentState)) ||
-        (await WalletChat.handleCommand(msg, user, tUser, currentState)) ||
-        (await AccountChat.handleCommand(msg, user, tUser, currentState))
+        (await CommonChat.handleCommand(
+          msg,
+          botCommand,
+          user,
+          tUser,
+          currentState
+        )) ||
+        (await SignupChat.handleCommand(
+          msg,
+          botCommand,
+          user,
+          tUser,
+          currentState
+        )) ||
+        (await ExchangeChat.handleCommand(
+          msg,
+          botCommand,
+          user,
+          tUser,
+          currentState
+        )) ||
+        (await WalletChat.handleCommand(
+          msg,
+          botCommand,
+          user,
+          tUser,
+          currentState
+        )) ||
+        (await AccountChat.handleCommand(
+          msg,
+          botCommand,
+          user,
+          tUser,
+          currentState
+        ))
 
       if (!isHandled) {
         await telegramHook.getWebhook.sendMessage(

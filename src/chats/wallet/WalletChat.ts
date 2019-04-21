@@ -1,6 +1,6 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
-import { ChatHandler } from 'chats/types'
+import { ChatHandler, BotCommand } from 'chats/types'
 import {
   WALLET_STATE_LABEL,
   WalletState,
@@ -16,6 +16,7 @@ import * as _ from 'lodash'
 export const WalletChat: ChatHandler = {
   async handleCommand(
     _msg: TelegramBot.Message,
+    _command: BotCommand,
     _user: User,
     _tUser: TelegramAccount
   ) {

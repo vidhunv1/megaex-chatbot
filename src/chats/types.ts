@@ -19,7 +19,7 @@ export enum BotCommand {
 
   // App commands
   USER = '/u',
-  TRANSACTIONS = '/tx'
+  TRANSACTIONS = '/transactions'
 }
 
 export enum DeepLink {
@@ -33,6 +33,10 @@ export interface CallbackDefaults {
   mId: number
 }
 
+export interface CommandState {
+  command: BotCommand
+}
+
 export interface ConversationParams {
   msg: TelegramBot.Message
   user: User
@@ -42,6 +46,7 @@ export interface ConversationParams {
 export interface ChatHandler {
   handleCommand: (
     msg: TelegramBot.Message,
+    command: BotCommand,
     user: User,
     tUser: TelegramAccount,
     state: any | null

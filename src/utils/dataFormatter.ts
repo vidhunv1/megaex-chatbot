@@ -24,7 +24,7 @@ export const dataFormatter = {
     return amount.toLocaleString(locale, {
       currency,
       currencyDisplay: 'name',
-      style: 'currency',
+      style: currency ? 'currency' : 'decimal',
       minimumFractionDigits: 7,
       maximumFractionDigits: 7,
       useGrouping: false
