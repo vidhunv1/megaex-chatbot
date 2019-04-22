@@ -77,5 +77,35 @@ Select the option you want to edit
   'settings-currency-cbbutton': '💵  Currency',
   'settings-language-cbbutton': '🌎  Language',
   'settings-rate-source-cbbutton': '📊  Rate source',
-  'settings-username-cbbutton': '👤  Change Acc ID'
+  'settings-username-cbbutton': '👤  Change Acc ID',
+
+  'settings-currency-show': `💵 *Currency*
+  
+Click to change your currency.
+
+Currently active: *{{ fiatCurrencyCode }}*`,
+  'settings-currency-updated': `✅ *Updated*
+  
+Your currency was updated to *{{ updatedCurrencyCode }}*`,
+
+  'settings-rate-source-show': `📊 *Rate source*
+
+Select the exchange rate source you want to use.
+
+⚠️ Changing this will affect your active orders if a margin pricing was used.
+`,
+  'settings-username-show': `👤 *Change Account ID*
+
+Enter your Account ID:
+(only english letters and numbers not more than 15 characters)
+
+This action will finalize your Account ID, you wont be able to change it again.
+`,
+  'settings-language-show': `🌎 *Language*
+  
+`,
+
+  'back-to-settings-cbbutton': '⬅️  Back',
+  'show-more': 'more »',
+  'settings-updated': 'updated!'
 }

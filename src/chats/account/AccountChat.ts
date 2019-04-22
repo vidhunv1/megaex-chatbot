@@ -43,7 +43,12 @@ export const AccountChat: ChatHandler = {
             AccountStateKey.cb_paymentMethods,
             AccountStateKey.cb_referralLink,
             AccountStateKey.cb_editPaymentMethods,
-            AccountStateKey.cb_addPaymentMethod
+            AccountStateKey.cb_addPaymentMethod,
+            AccountStateKey.cb_settings,
+            AccountStateKey.cb_settingsLanguage,
+            AccountStateKey.cb_settingsCurrency,
+            AccountStateKey.cb_settingsRate,
+            AccountStateKey.cb_settingsUsername
           ].includes(callbackName)
         ) {
           state = _.clone(initialState)
@@ -58,13 +63,18 @@ export const AccountChat: ChatHandler = {
       // @ts-ignore
       state[callbackName] = params
 
-      const updatedState: AccountState | null = accountParser(msg, user, state)
+      const updatedState: AccountState | null = await accountParser(
+        msg,
+        user,
+        tUser,
+        state
+      )
       const nextState = await nextAccountState(updatedState, tUser.id)
       if (nextState == null) {
         return false
       }
 
-      return accountResponder(msg, user, nextState)
+      return accountResponder(msg, user, tUser, nextState)
     }
     return false
   },
@@ -84,6 +94,7 @@ export const AccountChat: ChatHandler = {
       const updatedState: AccountState | null = await accountParser(
         msg,
         user,
+        tUser,
         currentState
       )
 
@@ -96,7 +107,7 @@ export const AccountChat: ChatHandler = {
         return false
       }
 
-      return accountResponder(msg, user, nextState)
+      return accountResponder(msg, user, tUser, nextState)
     } else {
       return false
     }

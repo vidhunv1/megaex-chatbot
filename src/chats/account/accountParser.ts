@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User } from 'models'
+import { User, ExchangeRateSource, TelegramAccount } from 'models'
 import {
   AccountState,
   AccountStateKey,
@@ -14,6 +14,8 @@ import {
   PaymentMethodsFieldsLocale
 } from 'constants/paymentMethods'
 import { FiatCurrency } from 'constants/currencies'
+import { Language } from 'constants/languages'
+import { Account } from 'lib/Account'
 
 const getReferralLink = () => {
   return 'https://t.me/megadealsbot?start=ref-fqwkjqel'
@@ -59,6 +61,33 @@ const savePaymentMethod = (_pm: any) => {
   return true
 }
 
+const updateCurrency = async (
+  currencyCode: FiatCurrency,
+  user: User,
+  tUser: TelegramAccount
+) => {
+  await User.update(
+    {
+      currencyCode: currencyCode
+    },
+    { where: { id: user.id } }
+  )
+  await Account.clearUserCache(tUser.id)
+  return true
+}
+const updateRateSource = (source: ExchangeRateSource) => {
+  logger.error('TODO: Update exchange rate source ' + source)
+  return true
+}
+const updateLangiage = (language: Language) => {
+  logger.error('TODO: Update language ' + language)
+  return true
+}
+const updateusername = (username: string) => {
+  logger.error('TODO: Update username ' + username)
+  return true
+}
+
 const getAllPaymentMethods = (currencyCode: FiatCurrency): PaymentMethods[] =>
   // @ts-ignore
   Object.keys(PaymentMethodAvailability).filter(
@@ -91,11 +120,12 @@ const getAddedPaymentMethods = (id?: number): PaymentMethodFields[] => {
   return pms
 }
 
-export function accountParser(
+export async function accountParser(
   msg: TelegramBot.Message,
   user: User,
+  tUser: TelegramAccount,
   currentState: AccountState
-): AccountState | null {
+): Promise<AccountState | null> {
   const stateKey = currentState.currentStateKey
   switch (stateKey) {
     case AccountStateKey.start:
@@ -341,8 +371,122 @@ export function accountParser(
       return currentState
     }
 
+    case AccountStateKey.cb_settingsCurrency: {
+      return {
+        ...currentState,
+        [AccountStateKey.settingsCurrency_show]: {
+          data: {
+            cursor: 0
+          }
+        }
+      }
+    }
+
+    case AccountStateKey.cb_settingsLanguage: {
+      return currentState
+    }
+
+    case AccountStateKey.cb_settingsRate: {
+      return currentState
+    }
+
+    case AccountStateKey.cb_settingsUsername: {
+      return currentState
+    }
+
+    case AccountStateKey.cb_loadMore: {
+      const cursor = _.get(
+        currentState[AccountStateKey.cb_loadMore],
+        'cursor',
+        null
+      )
+
+      return {
+        ...currentState,
+        [AccountStateKey.settingsCurrency_show]: {
+          data: {
+            cursor: cursor || 0
+          }
+        }
+      }
+    }
+
+    case AccountStateKey.settingsCurrency_show: {
+      return currentState
+    }
+
     case AccountStateKey.settings_show:
       return currentState
+
+    case AccountStateKey.cb_settingsCurrency_update: {
+      const currencyCode = _.get(
+        currentState[AccountStateKey.cb_settingsCurrency_update],
+        'currency',
+        null
+      )
+      if (currencyCode == null) {
+        return null
+      }
+
+      await updateCurrency(currencyCode, user, tUser)
+      return currentState
+    }
+
+    case AccountStateKey.cb_settingsLanguage_update: {
+      const language = _.get(
+        currentState[AccountStateKey.cb_settingsLanguage_update],
+        'lang',
+        null
+      )
+      if (language == null) {
+        return null
+      }
+
+      updateLangiage(language)
+      return currentState
+    }
+
+    case AccountStateKey.cb_settingsRate_update: {
+      const rateSource = _.get(
+        currentState[AccountStateKey.cb_settingsRate_update],
+        'rateSource'
+      )
+      if (rateSource == null) {
+        return null
+      }
+
+      updateRateSource(rateSource)
+      return currentState
+    }
+
+    case AccountStateKey.cb_settingsUsername_update: {
+      const username = _.get(
+        currentState[AccountStateKey.cb_settingsUsername_update],
+        'username',
+        null
+      )
+
+      const errorResp: AccountState = {
+        ...currentState,
+        [AccountStateKey.cb_settingsUsername_update]: {
+          username: username || '',
+          data: null,
+          error: AccountError.INVALID_USERNAME
+        }
+      }
+
+      if (username == null) {
+        return errorResp
+      }
+
+      const isSuccess = updateusername(username || '')
+
+      if (!isSuccess) {
+        return errorResp
+      }
+
+      return currentState
+    }
 
     default:
       logger.error(

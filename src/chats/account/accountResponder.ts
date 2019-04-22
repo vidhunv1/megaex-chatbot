@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User } from 'models'
+import { User, TelegramAccount } from 'models'
 import {
   AccountState,
   AccountStateKey,
@@ -8,7 +8,7 @@ import {
 } from './AccountState'
 import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/i18n'
-import { CryptoCurrency } from 'constants/currencies'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
 import * as _ from 'lodash'
@@ -19,6 +19,7 @@ import {
 import logger from 'modules/Logger'
 import { keyboardMainMenu } from 'chats/common'
 import { CONFIG } from '../../config'
+import { getCurrencyView } from 'chats/signup/utils'
 
 const stringifyPaymentMethods = (
   paymentMethods: PaymentMethods[],
@@ -70,6 +71,7 @@ const stringifyPaymentMethodsFields = (
 export async function accountResponder(
   msg: TelegramBot.Message,
   user: User,
+  tUser: TelegramAccount,
   currentState: AccountState
 ): Promise<boolean> {
   switch (currentState.currentStateKey) {
@@ -112,6 +114,7 @@ export async function accountResponder(
               AccountState[AccountStateKey.cb_settings]
             >(AccountStateKey.cb_settings, {
               mId: msg.message_id,
+              isFromBack: false,
               data: null
             })
           }
@@ -373,74 +376,216 @@ export async function accountResponder(
       return true
 
     case AccountStateKey.settings_show: {
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Account}:settings-show`),
+      const isFromBack =
+        // @ts-ignore
+        _.get(currentState[AccountStateKey.cb_settings], 'isFromBack', null) ===
+        'true'
+
+      if (isFromBack === null) {
+        return false
+      }
+
+      const inline: TelegramBot.InlineKeyboardButton[][] = [
+        [
+          {
+            text: user.t(`${Namespace.Account}:settings-currency-cbbutton`),
+            callback_data: stringifyCallbackQuery<
+              AccountStateKey.cb_settingsCurrency,
+              AccountState[AccountStateKey.cb_settingsCurrency]
+            >(AccountStateKey.cb_settingsCurrency, {
+              mId: msg.message_id,
+              data: null
+            })
+          },
+          {
+            text: user.t(`${Namespace.Account}:settings-language-cbbutton`),
+            callback_data: stringifyCallbackQuery<
+              AccountStateKey.cb_settingsLanguage,
+              AccountState[AccountStateKey.cb_settingsLanguage]
+            >(AccountStateKey.cb_settingsLanguage, {
+              mId: msg.message_id,
+              data: null
+            })
+          }
+        ],
+        [
+          {
+            text: user.t(`${Namespace.Account}:settings-rate-source-cbbutton`),
+            callback_data: stringifyCallbackQuery<
+              AccountStateKey.cb_settingsRate,
+              AccountState[AccountStateKey.cb_settingsRate]
+            >(AccountStateKey.cb_settingsRate, {
+              mId: msg.message_id,
+              data: null
+            })
+          },
+          {
+            text: user.t(`${Namespace.Account}:settings-username-cbbutton`),
+            callback_data: stringifyCallbackQuery<
+              AccountStateKey.cb_settingsUsername,
+              AccountState[AccountStateKey.cb_settingsUsername]
+            >(AccountStateKey.cb_settingsUsername, {
+              mId: msg.message_id,
+              data: null
+            })
+          }
+        ]
+      ]
+      const sendMessage = user.t(`${Namespace.Account}:settings-show`)
+      const opts = {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: inline
+        }
+      }
+
+      if (isFromBack) {
+        await telegramHook.getWebhook.editMessageText(sendMessage, {
+          ...opts,
+          chat_id: tUser.id,
+          message_id: msg.message_id
+        })
+      } else {
+        await telegramHook.getWebhook.sendMessage(msg.chat.id, sendMessage, {
+          ...opts
+        })
+      }
+      return true
+    }
+
+    case AccountStateKey.settingsCurrency_show: {
+      const updatedUser: TelegramAccount | null = await TelegramAccount.findById(
+        tUser.id,
+        {
+          include: [{ model: User }]
+        }
+      )
+      if (!updatedUser) {
+        return false
+      }
+
+      const cbData = _.get(
+        currentState[AccountStateKey.settingsCurrency_show],
+        'data',
+        null
+      )
+      const cursor = parseInt(_.get(cbData, 'cursor', 0) + '')
+      const ITEMS_PER_PAGE = 15
+      const currentCurrencyCode = updatedUser.user.currencyCode
+
+      const allFiatCurrencies = Object.keys(FiatCurrency)
+      const initialList = _.take(
+        _.drop(allFiatCurrencies, cursor),
+        ITEMS_PER_PAGE
+      )
+      const finalist = [
+        ...initialList,
+        ..._.take(allFiatCurrencies, ITEMS_PER_PAGE - initialList.length)
+      ]
+
+      const list = finalist.map((fiatCurrency) => ({
+        text:
+          (currentCurrencyCode === fiatCurrency ? '☑️  ' : '') +
+          getCurrencyView(fiatCurrency as FiatCurrency),
+        callback_data: stringifyCallbackQuery<
+          AccountStateKey.cb_settingsCurrency_update,
+          AccountState[AccountStateKey.cb_settingsCurrency_update]
+        >(AccountStateKey.cb_settingsCurrency_update, {
+          currency: fiatCurrency as FiatCurrency,
+          data: null
+        })
+      }))
+
+      const inline: TelegramBot.InlineKeyboardButton[][] = _.chunk(list, 3)
+      inline.push([
+        {
+          text: user.t(`${Namespace.Account}:back-to-settings-cbbutton`),
+          callback_data: stringifyCallbackQuery<
+            AccountStateKey.cb_settings,
+            AccountState[AccountStateKey.cb_settings]
+          >(AccountStateKey.cb_settings, {
+            mId: msg.message_id,
+            isFromBack: true,
+            data: null
+          })
+        },
+        {
+          text: user.t(`${Namespace.Account}:show-more`),
+          callback_data: stringifyCallbackQuery<
+            AccountStateKey.cb_loadMore,
+            AccountState[AccountStateKey.cb_loadMore]
+          >(AccountStateKey.cb_loadMore, {
+            mId: msg.message_id,
+            cursor:
+              initialList.length < ITEMS_PER_PAGE
+                ? ITEMS_PER_PAGE - initialList.length
+                : cursor + ITEMS_PER_PAGE
+          })
+        }
+      ])
+
+      await telegramHook.getWebhook.editMessageText(
+        user.t(`${Namespace.Account}:settings-currency-show`, {
+          fiatCurrencyCode: user.currencyCode
+        }),
         {
           parse_mode: 'Markdown',
+          chat_id: tUser.id,
+          message_id: msg.message_id,
           reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: user.t(
-                    `${Namespace.Account}:settings-currency-cbbutton`
-                  ),
-                  callback_data: stringifyCallbackQuery<
-                    AccountStateKey.cb_settingsCurrency,
-                    AccountState[AccountStateKey.cb_settingsCurrency]
-                  >(AccountStateKey.cb_settingsCurrency, {
-                    mId: msg.message_id,
-                    data: null
-                  })
-                },
-                {
-                  text: user.t(
-                    `${Namespace.Account}:settings-language-cbbutton`
-                  ),
-                  callback_data: stringifyCallbackQuery<
-                    AccountStateKey.cb_settingsLanguage,
-                    AccountState[AccountStateKey.cb_settingsLanguage]
-                  >(AccountStateKey.cb_settingsLanguage, {
-                    mId: msg.message_id,
-                    data: null
-                  })
-                }
-              ],
-              [
-                {
-                  text: user.t(
-                    `${Namespace.Account}:settings-rate-source-cbbutton`
-                  ),
-                  callback_data: stringifyCallbackQuery<
-                    AccountStateKey.cb_settingsRate,
-                    AccountState[AccountStateKey.cb_settingsRate]
-                  >(AccountStateKey.cb_settingsRate, {
-                    mId: msg.message_id,
-                    data: null
-                  })
-                },
-                {
-                  text: user.t(
-                    `${Namespace.Account}:settings-username-cbbutton`
-                  ),
-                  callback_data: stringifyCallbackQuery<
-                    AccountStateKey.cb_settingsUsername,
-                    AccountState[AccountStateKey.cb_settingsUsername]
-                  >(AccountStateKey.cb_settingsUsername, {
-                    mId: msg.message_id,
-                    data: null
-                  })
-                }
-              ]
-            ]
+            inline_keyboard: inline
           }
         }
       )
 
+      if (updatedUser.user.currencyCode !== user.currencyCode) {
+        await telegramHook.getWebhook.sendMessage(
+          msg.chat.id,
+          user.t(`${Namespace.Account}:settings-updated`),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(updatedUser.user)
+          }
+        )
+      }
+
       return true
     }
 
-    case AccountStateKey.paymentMethod_error: {
+    case AccountStateKey.settingsLanguage_show:
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Account}:payment-method-create-error`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
+      return true
+
+    case AccountStateKey.settingsRate_show:
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Account}:payment-method-create-error`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
+      return true
+
+    case AccountStateKey.settingsUsername_show:
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Account}:payment-method-create-error`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(user)
+        }
+      )
+      return true
+
+    case AccountStateKey.account_error: {
       const errorType: AccountError | null = _.get(
         currentState,
         `${currentState.previousStateKey}.error`,
@@ -475,10 +620,42 @@ export async function accountResponder(
             }
           )
           return true
+        case AccountError.INVALID_USERNAME: {
+          await telegramHook.getWebhook.sendMessage(
+            msg.chat.id,
+            user.t(`[TODO]: Username is invalid`),
+            {
+              parse_mode: 'Markdown',
+              reply_markup: keyboardMainMenu(user)
+            }
+          )
+        }
       }
 
       logger.error('Unhandled error type in AccountResponder ' + errorType)
       return false
+    }
+
+    case AccountStateKey.settingsUpdateResult: {
+      const updatedUser: TelegramAccount | null = await TelegramAccount.findById(
+        tUser.id,
+        {
+          include: [{ model: User }]
+        }
+      )
+      if (!updatedUser) {
+        return false
+      }
+
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Account}:settings-updated`),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboardMainMenu(updatedUser.user)
+        }
+      )
+      return true
     }
 
     default:

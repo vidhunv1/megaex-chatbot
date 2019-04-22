@@ -3,6 +3,9 @@ import { moveToNextState } from 'chats/utils'
 import logger from 'modules/Logger'
 import { PaymentMethods } from 'constants/paymentMethods'
 import * as _ from 'lodash'
+import { FiatCurrency } from 'constants/currencies'
+import { Language } from 'constants/languages'
+import { ExchangeRateSource } from 'models'
 
 export const ACCOUNT_STATE_LABEL = 'account'
 
@@ -29,11 +32,24 @@ export enum AccountStateKey {
   settings_show = 'settings_show',
 
   cb_settingsCurrency = 'cb_settingsCurrency',
-  cb_settingsLanguage = 'cb_settingsLanguage',
-  cb_settingsRate = 'cb_settingsRate',
-  cb_settingsUsername = 'cb_settingsUsername',
+  settingsCurrency_show = 'settingsCurrency_show',
 
-  paymentMethod_error = 'paymentMethod_error'
+  cb_settingsLanguage = 'cb_settingsLanguage',
+  settingsLanguage_show = 'settingsLanguage_show',
+  cb_settingsRate = 'cb_settingsRate',
+  settingsRate_show = 'settingsRate_show',
+  cb_settingsUsername = 'cb_settingsUsername',
+  settingsUsername_show = 'settingsUsername_show',
+
+  account_error = 'account_error',
+
+  cb_loadMore = 'cb_loadMore',
+
+  cb_settingsCurrency_update = 'cb_settingsCurrency_update',
+  cb_settingsLanguage_update = 'cb_settingsLanguage_update',
+  cb_settingsRate_update = 'cb_settingsRate_update',
+  cb_settingsUsername_update = 'cb_settingsUsername_update',
+  settingsUpdateResult = 'cb_settingsUpdateResult'
 }
 
 export const STATE_EXPIRY = 86400
@@ -46,7 +62,8 @@ export type PaymentMethodFields = {
 
 export enum AccountError {
   INVALID_PAYMENT_METHOD = 'INVALID_PAYMENT_METHOD',
-  ERROR_CREATING_PAYMENT_METHOD = 'ERROR_CREATING_PAYMENT_METHOD'
+  ERROR_CREATING_PAYMENT_METHOD = 'ERROR_CREATING_PAYMENT_METHOD',
+  INVALID_USERNAME = 'INVALID_USERNAME'
 }
 
 export interface IAccountState {
@@ -74,11 +91,20 @@ export interface IAccountState {
   } & CallbackDefaults
 
   [AccountStateKey.cb_settings]?: {
+    isFromBack: boolean
     data: {} | null
   } & CallbackDefaults
 
   [AccountStateKey.cb_settingsCurrency]?: {
     data: {} | null
+  } & CallbackDefaults
+  [AccountStateKey.settingsCurrency_show]?: {
+    data: {
+      cursor: number
+    } | null
+  }
+  [AccountStateKey.cb_loadMore]?: {
+    cursor: number
   } & CallbackDefaults
   [AccountStateKey.cb_settingsLanguage]?: {
     data: {} | null
@@ -129,6 +155,24 @@ export interface IAccountState {
       | AccountError.ERROR_CREATING_PAYMENT_METHOD
       | null
   }
+
+  [AccountStateKey.cb_settingsCurrency_update]?: {
+    currency: FiatCurrency
+    data: {} | null
+  }
+  [AccountStateKey.cb_settingsLanguage_update]?: {
+    lang: Language
+    data: {} | null
+  }
+  [AccountStateKey.cb_settingsRate_update]?: {
+    rateSource: ExchangeRateSource
+    data: {} | null
+  }
+  [AccountStateKey.cb_settingsUsername_update]?: {
+    username: string
+    data: {} | null
+    error: AccountError.INVALID_USERNAME
+  }
 }
 
 export interface AccountState extends State<AccountStateKey>, IAccountState {}
@@ -174,6 +218,15 @@ export function getNextStateKey(
     case AccountStateKey.settings_show:
       return null
 
+    case AccountStateKey.cb_settingsLanguage:
+      return AccountStateKey.settingsLanguage_show
+    case AccountStateKey.cb_settingsCurrency:
+      return AccountStateKey.settingsCurrency_show
+    case AccountStateKey.cb_settingsRate:
+      return AccountStateKey.settingsRate_show
+    case AccountStateKey.cb_settingsUsername:
+      return AccountStateKey.settingsUsername_show
+
     case AccountStateKey.paymentMethodInput: {
       const pmInputState = _.get(
         currentState,
@@ -182,7 +235,7 @@ export function getNextStateKey(
       )
 
       if (pmInputState && pmInputState.error) {
-        return AccountStateKey.paymentMethod_error
+        return AccountStateKey.account_error
       }
 
       if (!pmInputState || !pmInputState.data) {
@@ -198,6 +251,36 @@ export function getNextStateKey(
 
     case AccountStateKey.paymentMethodCreated: {
       return null
+    }
+
+    case AccountStateKey.account_error: {
+      return null
+    }
+
+    case AccountStateKey.cb_loadMore: {
+      return AccountStateKey.settingsCurrency_show
+    }
+
+    case AccountStateKey.cb_settingsCurrency_update: {
+      return AccountStateKey.settingsCurrency_show
+    }
+    case AccountStateKey.cb_settingsUsername_update: {
+      const isError = _.get(
+        currentState[AccountStateKey.cb_settingsUsername_update],
+        'error',
+        null
+      )
+
+      if (isError == null || isError === AccountError.INVALID_USERNAME) {
+        return AccountStateKey.account_error
+      }
+      return AccountStateKey.settingsUpdateResult
+    }
+    case AccountStateKey.cb_settingsRate_update: {
+      return AccountStateKey.settingsUpdateResult
+    }
+    case AccountStateKey.cb_settingsLanguage_update: {
+      return AccountStateKey.settingsUpdateResult
     }
   }
 

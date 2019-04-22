@@ -1,13 +1,15 @@
 import { PaymentMethods } from 'constants/paymentMethods'
 
 export const commonEN = {
+  updated: 'Updated!',
   'cryptocurrency-names': {
     BTC: 'Bitcoin'
   },
   cancel: 'cancel',
   actions: {
     'cancel-keyboard-button': 'cancel',
-    'back-inline-button': '« back'
+    'back-inline-button': '« back',
+    'more-inline-button': 'more'
   },
   'action-canceled': 'This action was canceled.',
   error: {
