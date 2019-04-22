@@ -91,6 +91,7 @@ Your currency was updated to *{{ updatedCurrencyCode }}*`,
   'settings-rate-source-show': `📊 *Rate source*
 
 Select the exchange rate source you want to use.
+Active «*{{ exchangeSource }}*»
 
 ⚠️ Changing this will affect your active orders if a margin pricing was used.
 `,

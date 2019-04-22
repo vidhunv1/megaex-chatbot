@@ -15,13 +15,7 @@ import i18n from '../modules/i18n'
 import logger from '../modules/Logger'
 import { LanguageISO, Language } from '../constants/languages'
 import { FiatCurrency } from 'constants/currencies'
-
-export enum ExchangeRateSource {
-  LBC = 'LBC',
-  COINBASE = 'coinbase',
-  BINANCE = 'binance',
-  SELF = 'self'
-}
+import { ExchangeSource } from 'constants/exchangeSource'
 
 @Table({ timestamps: true, tableName: 'Users' })
 export class User extends Model<User> {
@@ -59,9 +53,9 @@ export class User extends Model<User> {
   @Column
   isVerified!: boolean
 
-  @Default(ExchangeRateSource.SELF)
+  @Default(ExchangeSource.BINANCE)
   @Column
-  exchangeRateSource!: ExchangeRateSource
+  exchangeRateSource!: ExchangeSource
 
   @Column
   currencyCode!: FiatCurrency

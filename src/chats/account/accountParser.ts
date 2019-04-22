@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, ExchangeRateSource, TelegramAccount } from 'models'
+import { User, TelegramAccount } from 'models'
 import {
   AccountState,
   AccountStateKey,
@@ -16,6 +16,7 @@ import {
 import { FiatCurrency } from 'constants/currencies'
 import { Language } from 'constants/languages'
 import { Account } from 'lib/Account'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 const getReferralLink = () => {
   return 'https://t.me/megadealsbot?start=ref-fqwkjqel'
@@ -75,8 +76,19 @@ const updateCurrency = async (
   await Account.clearUserCache(tUser.id)
   return true
 }
-const updateRateSource = (source: ExchangeRateSource) => {
-  logger.error('TODO: Update exchange rate source ' + source)
+const updateRateSource = async (
+  source: ExchangeSource,
+  user: User,
+  tUser: TelegramAccount
+) => {
+  await User.update(
+    {
+      exchangeRateSource: source
+    },
+    { where: { id: user.id } }
+  )
+  await Account.clearUserCache(tUser.id)
+
   return true
 }
 
@@ -467,7 +479,7 @@ export async function accountParser(
         return null
       }
 
-      updateRateSource(rateSource)
+      await updateRateSource(rateSource, user, tUser)
       return currentState
     }
 

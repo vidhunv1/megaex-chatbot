@@ -21,6 +21,7 @@ import { keyboardMainMenu } from 'chats/common'
 import { CONFIG } from '../../config'
 import { getCurrencyView } from 'chats/signup/utils'
 import { Language, LanguageView } from 'constants/languages'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 const stringifyPaymentMethods = (
   paymentMethods: PaymentMethods[],
@@ -612,7 +613,7 @@ export async function accountResponder(
         }
       )
 
-      if (updatedUser.user.currencyCode !== user.currencyCode) {
+      if (updatedUser.user.locale !== user.locale) {
         await telegramHook.getWebhook.sendMessage(
           msg.chat.id,
           user.t(`${Namespace.Account}:settings-updated`),
@@ -625,16 +626,79 @@ export async function accountResponder(
 
       return true
 
-    case AccountStateKey.settingsRate_show:
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Account}:payment-method-create-error`),
+    case AccountStateKey.settingsRate_show: {
+      const updatedUser: TelegramAccount | null = await TelegramAccount.findById(
+        tUser.id,
         {
-          parse_mode: 'Markdown',
-          reply_markup: keyboardMainMenu(user)
+          include: [{ model: User }]
         }
       )
+      if (!updatedUser) {
+        return false
+      }
+
+      const sourcesList = Object.keys(ExchangeSource).map((source) => ({
+        text:
+          (source === updatedUser.user.exchangeRateSource ? '☑️  ' : '') +
+          user.t(`exchange-source.${source}`),
+        callback_data: stringifyCallbackQuery<
+          AccountStateKey.cb_settingsRate_update,
+          AccountState[AccountStateKey.cb_settingsRate_update]
+        >(AccountStateKey.cb_settingsRate_update, {
+          rateSource: source as ExchangeSource,
+          data: null
+        })
+      }))
+
+      const inline: TelegramBot.InlineKeyboardButton[][] = _.chunk(
+        sourcesList,
+        2
+      )
+
+      inline.push([
+        {
+          text: updatedUser.user.t(
+            `${Namespace.Account}:back-to-settings-cbbutton`
+          ),
+          callback_data: stringifyCallbackQuery<
+            AccountStateKey.cb_settings,
+            AccountState[AccountStateKey.cb_settings]
+          >(AccountStateKey.cb_settings, {
+            mId: msg.message_id,
+            isFromBack: true,
+            data: null
+          })
+        }
+      ])
+      await telegramHook.getWebhook.editMessageText(
+        updatedUser.user.t(`${Namespace.Account}:settings-rate-source-show`, {
+          exchangeSource: user.t(
+            `exchange-source.${updatedUser.user.exchangeRateSource}`
+          )
+        }),
+        {
+          parse_mode: 'Markdown',
+          chat_id: tUser.id,
+          message_id: msg.message_id,
+          reply_markup: {
+            inline_keyboard: inline
+          }
+        }
+      )
+
+      if (updatedUser.user.exchangeRateSource !== user.exchangeRateSource) {
+        await telegramHook.getWebhook.sendMessage(
+          msg.chat.id,
+          user.t(`${Namespace.Account}:settings-updated`),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(updatedUser.user)
+          }
+        )
+      }
+
       return true
+    }
 
     case AccountStateKey.settingsUsername_show:
       await telegramHook.getWebhook.sendMessage(

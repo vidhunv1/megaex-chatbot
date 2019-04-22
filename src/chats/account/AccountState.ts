@@ -5,7 +5,7 @@ import { PaymentMethods } from 'constants/paymentMethods'
 import * as _ from 'lodash'
 import { FiatCurrency } from 'constants/currencies'
 import { Language } from 'constants/languages'
-import { ExchangeRateSource } from 'models'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 export const ACCOUNT_STATE_LABEL = 'account'
 
@@ -165,7 +165,7 @@ export interface IAccountState {
     data: {} | null
   }
   [AccountStateKey.cb_settingsRate_update]?: {
-    rateSource: ExchangeRateSource
+    rateSource: ExchangeSource
     data: {} | null
   }
   [AccountStateKey.cb_settingsUsername_update]?: {
@@ -277,7 +277,7 @@ export function getNextStateKey(
       return AccountStateKey.settingsUpdateResult
     }
     case AccountStateKey.cb_settingsRate_update: {
-      return AccountStateKey.settingsUpdateResult
+      return AccountStateKey.settingsRate_show
     }
     case AccountStateKey.cb_settingsLanguage_update: {
       return AccountStateKey.settingsLanguage_show

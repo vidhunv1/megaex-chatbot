@@ -1,6 +1,13 @@
 import { PaymentMethods } from 'constants/paymentMethods'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 export const commonEN = {
+  'exchange-source': {
+    [ExchangeSource.BINANCE]: 'Binance',
+    [ExchangeSource.LBC]: 'LocalBitcoins',
+    [ExchangeSource.COINBASE]: 'Coinbase',
+    [ExchangeSource.BITMEX]: 'Bitmex'
+  },
   updated: 'Updated!',
   'cryptocurrency-names': {
     BTC: 'Bitcoin'
