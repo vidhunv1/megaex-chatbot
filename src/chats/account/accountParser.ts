@@ -107,9 +107,10 @@ const updateLanguage = async (
 
   return true
 }
+
 const updateusername = (username: string) => {
   logger.error('TODO: Update username ' + username)
-  return true
+  return false
 }
 
 const getAllPaymentMethods = (currencyCode: FiatCurrency): PaymentMethods[] =>
@@ -439,6 +440,38 @@ export async function accountParser(
       return currentState
     }
 
+    case AccountStateKey.settingsUsername_show: {
+      const username = msg.text
+
+      const errorResp: AccountState = {
+        ...currentState,
+        [AccountStateKey.settingsUsername_show]: {
+          username: username || '',
+          data: null,
+          error: AccountError.INVALID_USERNAME
+        }
+      }
+
+      if (username == null) {
+        return errorResp
+      }
+
+      const isSuccess = updateusername(username || '')
+
+      if (!isSuccess) {
+        return errorResp
+      }
+
+      return {
+        ...currentState,
+        [AccountStateKey.settingsUsername_show]: {
+          username: username || '',
+          data: null,
+          error: null
+        }
+      }
+    }
+
     case AccountStateKey.settings_show:
       return currentState
 
@@ -480,35 +513,6 @@ export async function accountParser(
       }
 
       await updateRateSource(rateSource, user, tUser)
-      return currentState
-    }
-
-    case AccountStateKey.cb_settingsUsername_update: {
-      const username = _.get(
-        currentState[AccountStateKey.cb_settingsUsername_update],
-        'username',
-        null
-      )
-
-      const errorResp: AccountState = {
-        ...currentState,
-        [AccountStateKey.cb_settingsUsername_update]: {
-          username: username || '',
-          data: null,
-          error: AccountError.INVALID_USERNAME
-        }
-      }
-
-      if (username == null) {
-        return errorResp
-      }
-
-      const isSuccess = updateusername(username || '')
-
-      if (!isSuccess) {
-        return errorResp
-      }
-
       return currentState
     }
 

@@ -48,7 +48,6 @@ export enum AccountStateKey {
   cb_settingsCurrency_update = 'cb_settingsCurrency_update',
   cb_settingsLanguage_update = 'cb_settingsLanguage_update',
   cb_settingsRate_update = 'cb_settingsRate_update',
-  cb_settingsUsername_update = 'cb_settingsUsername_update',
   settingsUpdateResult = 'cb_settingsUpdateResult'
 }
 
@@ -168,10 +167,10 @@ export interface IAccountState {
     rateSource: ExchangeSource
     data: {} | null
   }
-  [AccountStateKey.cb_settingsUsername_update]?: {
+  [AccountStateKey.settingsUsername_show]?: {
     username: string
     data: {} | null
-    error: AccountError.INVALID_USERNAME
+    error: AccountError.INVALID_USERNAME | null
   }
 }
 
@@ -220,12 +219,28 @@ export function getNextStateKey(
 
     case AccountStateKey.cb_settingsLanguage:
       return AccountStateKey.settingsLanguage_show
+
     case AccountStateKey.cb_settingsCurrency:
       return AccountStateKey.settingsCurrency_show
+
     case AccountStateKey.cb_settingsRate:
       return AccountStateKey.settingsRate_show
+
     case AccountStateKey.cb_settingsUsername:
       return AccountStateKey.settingsUsername_show
+
+    case AccountStateKey.settingsUsername_show: {
+      const isError = _.get(
+        currentState[AccountStateKey.settingsUsername_show],
+        'error',
+        null
+      )
+
+      if (isError === AccountError.INVALID_USERNAME) {
+        return AccountStateKey.account_error
+      }
+      return AccountStateKey.settingsUpdateResult
+    }
 
     case AccountStateKey.paymentMethodInput: {
       const pmInputState = _.get(
@@ -264,18 +279,7 @@ export function getNextStateKey(
     case AccountStateKey.cb_settingsCurrency_update: {
       return AccountStateKey.settingsCurrency_show
     }
-    case AccountStateKey.cb_settingsUsername_update: {
-      const isError = _.get(
-        currentState[AccountStateKey.cb_settingsUsername_update],
-        'error',
-        null
-      )
 
-      if (isError == null || isError === AccountError.INVALID_USERNAME) {
-        return AccountStateKey.account_error
-      }
-      return AccountStateKey.settingsUpdateResult
-    }
     case AccountStateKey.cb_settingsRate_update: {
       return AccountStateKey.settingsRate_show
     }

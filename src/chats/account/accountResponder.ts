@@ -420,17 +420,17 @@ export async function accountResponder(
               mId: msg.message_id,
               data: null
             })
-          },
-          {
-            text: user.t(`${Namespace.Account}:settings-username-cbbutton`),
-            callback_data: stringifyCallbackQuery<
-              AccountStateKey.cb_settingsUsername,
-              AccountState[AccountStateKey.cb_settingsUsername]
-            >(AccountStateKey.cb_settingsUsername, {
-              mId: msg.message_id,
-              data: null
-            })
           }
+          // {
+          //   text: user.t(`${Namespace.Account}:settings-username-cbbutton`),
+          //   callback_data: stringifyCallbackQuery<
+          //     AccountStateKey.cb_settingsUsername,
+          //     AccountState[AccountStateKey.cb_settingsUsername]
+          //   >(AccountStateKey.cb_settingsUsername, {
+          //     mId: msg.message_id,
+          //     data: null
+          //   })
+          // }
         ]
       ]
       const sendMessage = user.t(`${Namespace.Account}:settings-show`)
@@ -703,10 +703,12 @@ export async function accountResponder(
     case AccountStateKey.settingsUsername_show:
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
-        user.t(`${Namespace.Account}:payment-method-create-error`),
+        user.t(`${Namespace.Account}:settings-username-show`),
         {
           parse_mode: 'Markdown',
-          reply_markup: keyboardMainMenu(user)
+          reply_markup: {
+            keyboard: [[{ text: user.t('actions.cancel-keyboard-button') }]]
+          }
         }
       )
       return true
@@ -755,6 +757,7 @@ export async function accountResponder(
               reply_markup: keyboardMainMenu(user)
             }
           )
+          return true
         }
       }
 

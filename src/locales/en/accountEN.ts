@@ -95,13 +95,15 @@ Active «*{{ exchangeSource }}*»
 
 ⚠️ Changing this will affect your active orders if a margin pricing was used.
 `,
-  'settings-username-show': `👤 *Change Account ID*
+  'settings-username-show': `👤 *Enter Account ID*
 
-Enter your Account ID:
-(only english letters and numbers not more than 15 characters)
+Only english letters and numbers between 3 and 15 characters.
 
-This action will finalize your Account ID, you wont be able to change it again.
+NOTE: This action is final, you wont be able to change your Account ID again.
 `,
+  'settings-username-invalid': `❌ *Error*
+  
+Invalid Account ID. Please try again later.`,
   'settings-language-show': `🌎 *Language*
 
 Choose your language.
