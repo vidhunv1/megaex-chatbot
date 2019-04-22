@@ -83,7 +83,7 @@ Select the option you want to edit
   
 Click to change your currency.
 
-Currently active: *{{ fiatCurrencyCode }}*`,
+Active «*{{ fiatCurrencyCode }}*»`,
   'settings-currency-updated': `✅ *Updated*
   
 Your currency was updated to *{{ updatedCurrencyCode }}*`,
@@ -102,7 +102,10 @@ Enter your Account ID:
 This action will finalize your Account ID, you wont be able to change it again.
 `,
   'settings-language-show': `🌎 *Language*
-  
+
+Choose your language.
+
+Active «*{{ language }}*»
 `,
 
   'back-to-settings-cbbutton': '⬅️  Back',

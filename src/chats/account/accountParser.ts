@@ -79,8 +79,20 @@ const updateRateSource = (source: ExchangeRateSource) => {
   logger.error('TODO: Update exchange rate source ' + source)
   return true
 }
-const updateLangiage = (language: Language) => {
-  logger.error('TODO: Update language ' + language)
+
+const updateLanguage = async (
+  language: Language,
+  user: User,
+  tUser: TelegramAccount
+) => {
+  await User.update(
+    {
+      locale: language
+    },
+    { where: { id: user.id } }
+  )
+  await Account.clearUserCache(tUser.id)
+
   return true
 }
 const updateusername = (username: string) => {
@@ -442,7 +454,7 @@ export async function accountParser(
         return null
       }
 
-      updateLangiage(language)
+      await updateLanguage(language, user, tUser)
       return currentState
     }
 

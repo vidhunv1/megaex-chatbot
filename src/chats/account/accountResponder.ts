@@ -20,6 +20,7 @@ import logger from 'modules/Logger'
 import { keyboardMainMenu } from 'chats/common'
 import { CONFIG } from '../../config'
 import { getCurrencyView } from 'chats/signup/utils'
+import { Language, LanguageView } from 'constants/languages'
 
 const stringifyPaymentMethods = (
   paymentMethods: PaymentMethods[],
@@ -553,14 +554,75 @@ export async function accountResponder(
     }
 
     case AccountStateKey.settingsLanguage_show:
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Account}:payment-method-create-error`),
+      const updatedUser: TelegramAccount | null = await TelegramAccount.findById(
+        tUser.id,
         {
-          parse_mode: 'Markdown',
-          reply_markup: keyboardMainMenu(user)
+          include: [{ model: User }]
         }
       )
+      if (!updatedUser) {
+        return false
+      }
+
+      const languageList = Object.keys(Language).map((lang) => ({
+        text:
+          (lang === updatedUser.user.locale ? '☑️  ' : '     ') +
+          LanguageView[lang as Language],
+        callback_data: stringifyCallbackQuery<
+          AccountStateKey.cb_settingsLanguage_update,
+          AccountState[AccountStateKey.cb_settingsLanguage_update]
+        >(AccountStateKey.cb_settingsLanguage_update, {
+          lang: lang as Language,
+          data: null
+        })
+      }))
+
+      const inline: TelegramBot.InlineKeyboardButton[][] = _.chunk(
+        languageList,
+        2
+      )
+      inline.push([
+        {
+          text: updatedUser.user.t(
+            `${Namespace.Account}:back-to-settings-cbbutton`
+          ),
+          callback_data: stringifyCallbackQuery<
+            AccountStateKey.cb_settings,
+            AccountState[AccountStateKey.cb_settings]
+          >(AccountStateKey.cb_settings, {
+            mId: msg.message_id,
+            isFromBack: true,
+            data: null
+          })
+        }
+      ])
+      await telegramHook.getWebhook.editMessageText(
+        updatedUser.user.t(`${Namespace.Account}:settings-language-show`, {
+          language:
+            updatedUser.user.locale.charAt(0).toUpperCase() +
+            updatedUser.user.locale.slice(1).toLowerCase()
+        }),
+        {
+          parse_mode: 'Markdown',
+          chat_id: tUser.id,
+          message_id: msg.message_id,
+          reply_markup: {
+            inline_keyboard: inline
+          }
+        }
+      )
+
+      if (updatedUser.user.currencyCode !== user.currencyCode) {
+        await telegramHook.getWebhook.sendMessage(
+          msg.chat.id,
+          user.t(`${Namespace.Account}:settings-updated`),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(updatedUser.user)
+          }
+        )
+      }
+
       return true
 
     case AccountStateKey.settingsRate_show:

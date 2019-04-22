@@ -280,7 +280,7 @@ export function getNextStateKey(
       return AccountStateKey.settingsUpdateResult
     }
     case AccountStateKey.cb_settingsLanguage_update: {
-      return AccountStateKey.settingsUpdateResult
+      return AccountStateKey.settingsLanguage_show
     }
   }
 
