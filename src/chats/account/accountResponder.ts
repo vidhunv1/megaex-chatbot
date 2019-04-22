@@ -526,7 +526,7 @@ export async function accountResponder(
 
       await telegramHook.getWebhook.editMessageText(
         user.t(`${Namespace.Account}:settings-currency-show`, {
-          fiatCurrencyCode: user.currencyCode
+          fiatCurrencyCode: updatedUser.user.currencyCode
         }),
         {
           parse_mode: 'Markdown',
