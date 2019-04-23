@@ -48,7 +48,7 @@ Check and confirm your transaction:
 {{ paymentLink }}
 (_Share this link privately to send the funds. Anyone with access to this link will get the funds_)
 
-This OTP link will expire in *{{ expiryTime }}*
+This OTP link will expire in *{{ expiryTime }}* hours
 `,
 
   'show-deposit-address': `

@@ -3,27 +3,37 @@ import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/i18n'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { User } from 'models'
-import {
-  WalletState,
-  WalletStateKey,
-  SendCoinError,
-  WithdrawCoinError
-} from './WalletState'
-import { cryptoCurrencyInfo } from 'constants/currencies'
+import { WalletState, WalletHomeKey, WithdrawCoinError } from './WalletState'
 import logger from 'modules/Logger'
 import { keyboardMainMenu } from 'chats/common'
 import { dataFormatter } from 'utils/dataFormatter'
 import { CONFIG } from '../../config'
 import * as _ from 'lodash'
+import { DepositStateKey, DepositState, DepositResponder } from './deposit'
+import { SendCoinStateKey, SendCoinState } from './sendCoin/types'
+import { SendCoinResponder } from './sendCoin/responder'
 
 export async function walletResponder(
   msg: TelegramBot.Message,
   user: User,
   currentState: WalletState
 ): Promise<boolean> {
+  // Deposit
+  if (Object.keys(DepositStateKey).includes(currentState.currentStateKey)) {
+    return await DepositResponder(msg, user, currentState)[
+      currentState.currentStateKey
+    ]()
+  }
+
+  if (Object.keys(SendCoinStateKey).includes(currentState.currentStateKey)) {
+    return await SendCoinResponder(msg, user, currentState)[
+      currentState.currentStateKey
+    ]()
+  }
+
   switch (currentState.currentStateKey) {
-    case WalletStateKey.wallet: {
-      const walletData = _.get(currentState[WalletStateKey.start], 'data', null)
+    case WalletHomeKey.wallet: {
+      const walletData = _.get(currentState[WalletHomeKey.start], 'data', null)
       if (!walletData) {
         return false
       }
@@ -60,9 +70,9 @@ export async function walletResponder(
                     )
                   }),
                   callback_data: stringifyCallbackQuery<
-                    WalletStateKey.cb_sendCoin,
-                    WalletState[WalletStateKey.cb_sendCoin]
-                  >(WalletStateKey.cb_sendCoin, {
+                    SendCoinStateKey.cb_sendCoin,
+                    SendCoinState[SendCoinStateKey.cb_sendCoin]
+                  >(SendCoinStateKey.cb_sendCoin, {
                     mId: msg.message_id,
                     currencyCode: walletData.cryptoCurrencyCode,
                     data: null
@@ -73,9 +83,9 @@ export async function walletResponder(
                 {
                   text: user.t(`${Namespace.Wallet}:my-address`),
                   callback_data: stringifyCallbackQuery<
-                    WalletStateKey.cb_depositCoin,
-                    WalletState[WalletStateKey.cb_depositCoin]
-                  >(WalletStateKey.cb_depositCoin, {
+                    DepositStateKey.cb_depositCoin,
+                    DepositState[DepositStateKey.cb_depositCoin]
+                  >(DepositStateKey.cb_depositCoin, {
                     mId: msg.message_id,
                     currencyCode: walletData.cryptoCurrencyCode
                   })
@@ -83,9 +93,9 @@ export async function walletResponder(
                 {
                   text: user.t(`${Namespace.Wallet}:withdraw`),
                   callback_data: stringifyCallbackQuery<
-                    WalletStateKey.cb_withdrawCoin,
-                    WalletState[WalletStateKey.cb_withdrawCoin]
-                  >(WalletStateKey.cb_withdrawCoin, {
+                    WalletHomeKey.cb_withdrawCoin,
+                    WalletState[WalletHomeKey.cb_withdrawCoin]
+                  >(WalletHomeKey.cb_withdrawCoin, {
                     mId: msg.message_id,
                     currencyCode: walletData.cryptoCurrencyCode,
                     data: null
@@ -100,224 +110,17 @@ export async function walletResponder(
     }
 
     // Send Coin
-    case WalletStateKey.sendCoin_amount: {
-      const sendCoinState = _.get(
-        currentState[WalletStateKey.cb_sendCoin],
-        'data',
-        null
-      )
-      const cryptoCurrencyCode = _.get(
-        currentState[WalletStateKey.cb_sendCoin],
-        'currencyCode',
-        null
-      )
-      if (!sendCoinState || !cryptoCurrencyCode) {
-        return false
-      }
-
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Wallet}:send-cryptocurrency-amount`, {
-          cryptoCurrencyCode: cryptoCurrencyCode,
-          fiatCurrencyCode: user.currencyCode,
-          cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
-            sendCoinState.cryptoBalance,
-            cryptoCurrencyCode
-          ),
-          fiatValue: dataFormatter.formatFiatCurrency(
-            sendCoinState.fiatValue,
-            sendCoinState.fiatCurrencyCode
-          )
-        }),
-        {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            keyboard: [
-              [
-                {
-                  text: user.t('actions.cancel-keyboard-button')
-                }
-              ]
-            ],
-            one_time_keyboard: true,
-            resize_keyboard: true
-          }
-        }
-      )
-      return true
-    }
-
-    case WalletStateKey.sendCoin_confirm: {
-      const sendCoinAmountState = currentState[WalletStateKey.sendCoin_amount]
-      if (!sendCoinAmountState || !sendCoinAmountState.data) {
-        return false
-      }
-
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Wallet}:confirm-send-cryptocurrency`, {
-          cryptoCurrencyAmount: dataFormatter.formatCryptoCurrency(
-            sendCoinAmountState.data.cryptoCurrencyAmount,
-            sendCoinAmountState.data.cryptoCurrency
-          ),
-          fiatValue: dataFormatter.formatFiatCurrency(
-            sendCoinAmountState.data.fiatValue,
-            sendCoinAmountState.data.fiatCurrency
-          )
-        }),
-        {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            keyboard: [
-              [
-                {
-                  text: user.t(
-                    `${Namespace.Wallet}:confirm-send-cryptocurrency-button`
-                  )
-                }
-              ],
-              [
-                {
-                  text: user.t('actions.cancel-keyboard-button')
-                }
-              ]
-            ],
-            // TODO: some telegram issue, keyboard comes up if set to true ... ??
-            one_time_keyboard: false,
-            resize_keyboard: true
-          }
-        }
-      )
-      return true
-    }
-
-    case WalletStateKey.sendCoin_error: {
-      const errorType: SendCoinError | null = _.get(
-        currentState,
-        `${currentState.previousStateKey}.error`,
-        null
-      )
-
-      if (!errorType) {
-        logger.error('Wallet responder#sendCoin unhandled error ' + errorType)
-        return false
-      }
-
-      switch (errorType) {
-        case SendCoinError.INSUFFICIENT_BALANCE: {
-          const sendCoinState = currentState[WalletStateKey.cb_sendCoin]
-          if (!sendCoinState || !sendCoinState.data) {
-            return false
-          }
-
-          await telegramHook.getWebhook.sendMessage(
-            msg.chat.id,
-            user.t(
-              `${Namespace.Wallet}:send-cryptocurrency-insufficient-balance`,
-              {
-                cryptoCurrencyCode: sendCoinState.currencyCode,
-                cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
-                  sendCoinState.data.cryptoBalance,
-                  sendCoinState.currencyCode
-                )
-              }
-            ),
-            {
-              parse_mode: 'Markdown',
-              reply_markup: keyboardMainMenu(user)
-            }
-          )
-          return true
-        }
-
-        case SendCoinError.INVALID_AMOUNT: {
-          const sendCoinState = currentState[WalletStateKey.cb_sendCoin]
-          if (!sendCoinState) {
-            return false
-          }
-
-          await telegramHook.getWebhook.sendMessage(
-            msg.chat.id,
-            user.t(`${Namespace.Wallet}:send-cryptocurrency-invalid-amount`),
-            {
-              parse_mode: 'Markdown',
-              reply_markup: keyboardMainMenu(user)
-            }
-          )
-          return true
-        }
-
-        default:
-          logger.error(
-            `walletResponder: ${WalletStateKey.sendCoin_error} -> 'default'`
-          )
-          return false
-      }
-    }
-
-    case WalletStateKey.sendCoin_show: {
-      const createdPayment = _.get(
-        currentState[WalletStateKey.sendCoin_confirm],
-        'data',
-        null
-      )
-      if (!createdPayment) {
-        return false
-      }
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Wallet}:show-payment-link`, {
-          paymentLink: createdPayment.paymentLink,
-          expiryTime: `${createdPayment.expiryTimeS / 360} hours`
-        }),
-        {
-          parse_mode: 'Markdown',
-          reply_markup: keyboardMainMenu(user),
-          disable_web_page_preview: true
-        }
-      )
-      return true
-    }
-
-    // Deposit Coin
-    case WalletStateKey.depositCoin_show: {
-      const addressState = currentState[WalletStateKey.depositCoin_show]
-      if (!addressState) {
-        return false
-      }
-
-      const currencyCode = addressState.currencyCode
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        user.t(`${Namespace.Wallet}:show-deposit-address`, {
-          cryptoCurrencyCode: currencyCode,
-          confirmations: cryptoCurrencyInfo[currencyCode].confirmations
-        }),
-        {
-          parse_mode: 'Markdown'
-        }
-      )
-      await telegramHook.getWebhook.sendMessage(
-        msg.chat.id,
-        `*${addressState.address}*`,
-        {
-          parse_mode: 'Markdown',
-          reply_markup: keyboardMainMenu(user)
-        }
-      )
-      return true
-    }
 
     // Withdraw coin
 
-    case WalletStateKey.withdrawCoin_amount: {
+    case WalletHomeKey.withdrawCoin_amount: {
       const withdrawCoinState = _.get(
-        currentState[WalletStateKey.cb_withdrawCoin],
+        currentState[WalletHomeKey.cb_withdrawCoin],
         'data',
         null
       )
       const cryptoCurrencyCode = _.get(
-        currentState[WalletStateKey.cb_withdrawCoin],
+        currentState[WalletHomeKey.cb_withdrawCoin],
         'currencyCode',
         null
       )
@@ -356,8 +159,8 @@ export async function walletResponder(
       return true
     }
 
-    case WalletStateKey.withdrawCoin_address: {
-      const withdrawState = currentState[WalletStateKey.cb_withdrawCoin]
+    case WalletHomeKey.withdrawCoin_address: {
+      const withdrawState = currentState[WalletHomeKey.cb_withdrawCoin]
       if (!withdrawState) {
         return false
       }
@@ -387,7 +190,7 @@ export async function walletResponder(
       return true
     }
 
-    case WalletStateKey.withdrawCoin_error: {
+    case WalletHomeKey.withdrawCoin_error: {
       const errorType: WithdrawCoinError | null = _.get(
         currentState,
         `${currentState.previousStateKey}.error`,
@@ -400,12 +203,12 @@ export async function walletResponder(
       switch (errorType) {
         case WithdrawCoinError.INSUFFICIENT_BALANCE: {
           const withdrawCoinState = _.get(
-            currentState[WalletStateKey.cb_withdrawCoin],
+            currentState[WalletHomeKey.cb_withdrawCoin],
             'data',
             null
           )
           const cryptoCurrencyCode = _.get(
-            currentState[WalletStateKey.cb_withdrawCoin],
+            currentState[WalletHomeKey.cb_withdrawCoin],
             'currencyCode',
             null
           )
@@ -434,7 +237,7 @@ export async function walletResponder(
         }
 
         case WithdrawCoinError.INVALID_ADDRESS: {
-          const withdrawState = currentState[WalletStateKey.cb_withdrawCoin]
+          const withdrawState = currentState[WalletHomeKey.cb_withdrawCoin]
           if (!withdrawState) {
             return false
           }
@@ -475,14 +278,14 @@ export async function walletResponder(
       return false
     }
 
-    case WalletStateKey.withdrawCoin_confirm: {
+    case WalletHomeKey.withdrawCoin_confirm: {
       const amountState = _.get(
-        currentState[WalletStateKey.withdrawCoin_amount],
+        currentState[WalletHomeKey.withdrawCoin_amount],
         'data',
         null
       )
       const addressState = _.get(
-        currentState[WalletStateKey.withdrawCoin_address],
+        currentState[WalletHomeKey.withdrawCoin_address],
         'data',
         null
       )
@@ -529,14 +332,14 @@ export async function walletResponder(
       return true
     }
 
-    case WalletStateKey.withdrawCoin_show: {
+    case WalletHomeKey.withdrawCoin_show: {
       const amountState = _.get(
-        currentState[WalletStateKey.withdrawCoin_amount],
+        currentState[WalletHomeKey.withdrawCoin_amount],
         'data',
         null
       )
       const addressState = _.get(
-        currentState[WalletStateKey.withdrawCoin_address],
+        currentState[WalletHomeKey.withdrawCoin_address],
         'data',
         null
       )

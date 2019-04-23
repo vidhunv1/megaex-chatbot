@@ -6,12 +6,15 @@ import {
   WalletState,
   initialState,
   WalletStateKey,
-  nextWalletState
+  nextWalletState,
+  WalletHomeKey
 } from './WalletState'
 import { parseCallbackQuery } from 'chats/utils'
 import { walletParser } from './walletParser'
 import { walletResponder } from './walletResponder'
 import * as _ from 'lodash'
+import { DepositStateKey } from './deposit'
+import { SendCoinStateKey } from './sendCoin/types'
 
 export const WalletChat: ChatHandler = {
   async handleCommand(
@@ -32,17 +35,15 @@ export const WalletChat: ChatHandler = {
   ) {
     if (callback.data) {
       const { type, params } = parseCallbackQuery(callback.data)
-      if (WalletStateKey[type as any] == null) {
-        return false
-      }
+
       const callbackName = (type as any) as WalletStateKey
       if (_.get(state, 'key', null) != WALLET_STATE_LABEL) {
         // Callback types allowed to answer indirectly
         if (
           [
-            WalletStateKey.cb_sendCoin,
-            WalletStateKey.cb_depositCoin,
-            WalletStateKey.cb_withdrawCoin
+            SendCoinStateKey.cb_sendCoin,
+            DepositStateKey.cb_depositCoin,
+            WalletHomeKey.cb_withdrawCoin
           ].includes(callbackName)
         ) {
           state = _.clone(initialState)
@@ -57,8 +58,13 @@ export const WalletChat: ChatHandler = {
       // @ts-ignore
       state[callbackName] = params
 
-      const updatedState: WalletState | null = walletParser(msg, user, state)
+      const updatedState: WalletState | null = await walletParser(
+        msg,
+        user,
+        state
+      )
       const nextState = await nextWalletState(updatedState, tUser.id)
+
       if (nextState == null) {
         return false
       }
@@ -81,7 +87,7 @@ export const WalletChat: ChatHandler = {
     }
 
     if (currentState && currentState.key === WALLET_STATE_LABEL) {
-      const updatedState: WalletState | null = walletParser(
+      const updatedState: WalletState | null = await walletParser(
         msg,
         user,
         currentState

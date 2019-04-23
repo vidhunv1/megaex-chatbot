@@ -10,6 +10,17 @@ export interface State<T> {
   key: string
 }
 
+export type Parser<RootState> = (
+  msg: TelegramBot.Message,
+  user: User,
+  currentState: RootState
+) => Record<string, () => Promise<RootState | null>>
+export type Responder<RootState> = (
+  msg: TelegramBot.Message,
+  user: User,
+  currentState: RootState
+) => Record<string, () => Promise<boolean>>
+
 export enum BotCommand {
   // Global commands
   START = '/start',
