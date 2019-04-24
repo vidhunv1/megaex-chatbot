@@ -1,17 +1,21 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
-import {
-  ACCOUNT_STATE_LABEL,
-  AccountState,
-  initialState,
-  AccountStateKey,
-  nextAccountState
-} from './AccountState'
-import { accountParser } from './accountParser'
-import { accountResponder } from './accountResponder'
+import { ACCOUNT_STATE_LABEL, AccountState, initialState } from './AccountState'
 import { parseCallbackQuery } from 'chats/utils'
 import * as _ from 'lodash'
+import { ReferralStateKey, ReferralParser, ReferralResponder } from './referral'
+import { SettingsStateKey, SettingsParser, SettingsResponder } from './settings'
+import {
+  PaymentMethodStateKey,
+  PaymentMethodParser,
+  PaymentMethodResponder
+} from './paymentMethods'
+import {
+  AccountHomeStateKey,
+  AccountHomeParser,
+  AccountHomeResponder
+} from './home'
 
 export const AccountChat: ChatHandler = {
   async handleCommand(
@@ -32,23 +36,21 @@ export const AccountChat: ChatHandler = {
   ) {
     if (callback.data) {
       const { type, params } = parseCallbackQuery(callback.data)
-      if (AccountStateKey[type as any] == null) {
-        return false
-      }
-      const callbackName = (type as any) as AccountStateKey
+
+      const callbackName = type as any
       if (_.get(state, 'key', null) != ACCOUNT_STATE_LABEL) {
         // Callback types allowed to answer indirectly
         if (
           [
-            AccountStateKey.cb_paymentMethods,
-            AccountStateKey.cb_referralLink,
-            AccountStateKey.cb_editPaymentMethods,
-            AccountStateKey.cb_addPaymentMethod,
-            AccountStateKey.cb_settings,
-            AccountStateKey.cb_settingsLanguage,
-            AccountStateKey.cb_settingsCurrency,
-            AccountStateKey.cb_settingsRate,
-            AccountStateKey.cb_settingsUsername
+            PaymentMethodStateKey.cb_paymentMethods,
+            ReferralStateKey.cb_referralLink,
+            PaymentMethodStateKey.cb_editPaymentMethods,
+            PaymentMethodStateKey.cb_addPaymentMethod,
+            SettingsStateKey.cb_settings,
+            SettingsStateKey.cb_settingsLanguage,
+            SettingsStateKey.cb_settingsCurrency,
+            SettingsStateKey.cb_settingsRate,
+            SettingsStateKey.cb_settingsUsername
           ].includes(callbackName)
         ) {
           state = _.clone(initialState)
@@ -63,18 +65,7 @@ export const AccountChat: ChatHandler = {
       // @ts-ignore
       state[callbackName] = params
 
-      const updatedState: AccountState | null = await accountParser(
-        msg,
-        user,
-        tUser,
-        state
-      )
-      const nextState = await nextAccountState(updatedState, tUser.id)
-      if (nextState == null) {
-        return false
-      }
-
-      return accountResponder(msg, user, tUser, nextState)
+      return await processMessage(msg, user, tUser, state)
     }
     return false
   },
@@ -91,25 +82,53 @@ export const AccountChat: ChatHandler = {
     }
 
     if (currentState && currentState.key === ACCOUNT_STATE_LABEL) {
-      const updatedState: AccountState | null = await accountParser(
-        msg,
-        user,
-        tUser,
-        currentState
-      )
-
-      const nextState: AccountState | null = await nextAccountState(
-        updatedState,
-        tUser.id
-      )
-
-      if (nextState === null) {
-        return false
-      }
-
-      return accountResponder(msg, user, tUser, nextState)
+      return await processMessage(msg, user, tUser, currentState)
     } else {
       return false
     }
   }
+}
+
+const accountHomeStateKeys = Object.keys(AccountHomeStateKey)
+const paymentMethodStateKeys = Object.keys(PaymentMethodStateKey)
+const referralStateKeys = Object.keys(ReferralStateKey)
+const settingsStateKeys = Object.keys(SettingsStateKey)
+
+async function processMessage(
+  msg: TelegramBot.Message,
+  user: User,
+  tUser: TelegramAccount,
+  state: AccountState
+) {
+  let nextState = null
+
+  // Input parse
+  if (accountHomeStateKeys.includes(state.currentStateKey))
+    nextState = await AccountHomeParser(msg, user, tUser, state)
+  if (paymentMethodStateKeys.includes(state.currentStateKey))
+    nextState = await PaymentMethodParser(msg, user, tUser, state)
+  if (referralStateKeys.includes(state.currentStateKey))
+    nextState = await ReferralParser(msg, user, tUser, state)
+  if (settingsStateKeys.includes(state.currentStateKey))
+    nextState = await SettingsParser(msg, user, tUser, state)
+
+  if (nextState === null) {
+    return false
+  }
+
+  // Response
+  if (accountHomeStateKeys.includes(nextState.currentStateKey)) {
+    return await AccountHomeResponder(msg, user, nextState)
+  }
+  if (paymentMethodStateKeys.includes(nextState.currentStateKey)) {
+    return await PaymentMethodResponder(msg, user, nextState)
+  }
+  if (referralStateKeys.includes(nextState.currentStateKey)) {
+    return await ReferralResponder(msg, user, nextState)
+  }
+  if (settingsStateKeys.includes(nextState.currentStateKey)) {
+    return await SettingsResponder(msg, user, nextState)
+  }
+
+  return false
 }
