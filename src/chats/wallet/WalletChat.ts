@@ -1,20 +1,13 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
-import {
-  WALLET_STATE_LABEL,
-  WalletState,
-  initialState,
-  WalletStateKey,
-  nextWalletState,
-  WalletHomeKey
-} from './WalletState'
+import { WALLET_STATE_LABEL, WalletState, initialState } from './WalletState'
 import { parseCallbackQuery } from 'chats/utils'
-import { walletParser } from './walletParser'
-import { walletResponder } from './walletResponder'
 import * as _ from 'lodash'
-import { DepositStateKey } from './deposit'
-import { SendCoinStateKey } from './sendCoin/types'
+import { DepositStateKey, DepositParser, DepositResponder } from './deposit'
+import { WithdrawStateKey, WithdrawParser, WithdrawResponder } from './withdraw'
+import { WalletHomeParser, WalletHomeStateKey, WalletResponder } from './home'
+import { SendCoinParser, SendCoinStateKey, SendCoinResponder } from './sendCoin'
 
 export const WalletChat: ChatHandler = {
   async handleCommand(
@@ -36,14 +29,14 @@ export const WalletChat: ChatHandler = {
     if (callback.data) {
       const { type, params } = parseCallbackQuery(callback.data)
 
-      const callbackName = (type as any) as WalletStateKey
+      const callbackName = type as any
       if (_.get(state, 'key', null) != WALLET_STATE_LABEL) {
         // Callback types allowed to answer indirectly
         if (
           [
             SendCoinStateKey.cb_sendCoin,
             DepositStateKey.cb_depositCoin,
-            WalletHomeKey.cb_withdrawCoin
+            WithdrawStateKey.cb_withdrawCoin
           ].includes(callbackName)
         ) {
           state = _.clone(initialState)
@@ -58,18 +51,7 @@ export const WalletChat: ChatHandler = {
       // @ts-ignore
       state[callbackName] = params
 
-      const updatedState: WalletState | null = await walletParser(
-        msg,
-        user,
-        state
-      )
-      const nextState = await nextWalletState(updatedState, tUser.id)
-
-      if (nextState == null) {
-        return false
-      }
-
-      return walletResponder(msg, user, nextState)
+      return await processMessage(msg, user, tUser, state)
     }
     return false
   },
@@ -87,24 +69,53 @@ export const WalletChat: ChatHandler = {
     }
 
     if (currentState && currentState.key === WALLET_STATE_LABEL) {
-      const updatedState: WalletState | null = await walletParser(
-        msg,
-        user,
-        currentState
-      )
-
-      const nextState: WalletState | null = await nextWalletState(
-        updatedState,
-        tUser.id
-      )
-
-      if (nextState === null) {
-        return false
-      }
-
-      return walletResponder(msg, user, nextState)
+      return await processMessage(msg, user, tUser, currentState)
     } else {
       return false
     }
   }
+}
+
+const walletHomeStateKeys = Object.keys(WalletHomeStateKey)
+const depositStateKeys = Object.keys(DepositStateKey)
+const sendCoinStateKeys = Object.keys(SendCoinStateKey)
+const withdrawStateKeys = Object.keys(WithdrawStateKey)
+
+async function processMessage(
+  msg: TelegramBot.Message,
+  user: User,
+  tUser: TelegramAccount,
+  state: WalletState
+) {
+  let nextState = null
+
+  // Input parse
+  if (walletHomeStateKeys.includes(state.currentStateKey))
+    nextState = await WalletHomeParser(msg, user, tUser, state)
+  if (depositStateKeys.includes(state.currentStateKey))
+    nextState = await DepositParser(msg, user, tUser, state)
+  if (sendCoinStateKeys.includes(state.currentStateKey))
+    nextState = await SendCoinParser(msg, user, tUser, state)
+  if (withdrawStateKeys.includes(state.currentStateKey))
+    nextState = await WithdrawParser(msg, user, tUser, state)
+
+  if (nextState === null) {
+    return false
+  }
+
+  // Response
+  if (walletHomeStateKeys.includes(nextState.currentStateKey)) {
+    return await WalletResponder(msg, user, nextState)
+  }
+  if (depositStateKeys.includes(nextState.currentStateKey)) {
+    return await DepositResponder(msg, user, nextState)
+  }
+  if (sendCoinStateKeys.includes(nextState.currentStateKey)) {
+    return await SendCoinResponder(msg, user, nextState)
+  }
+  if (Object.keys(WithdrawStateKey).includes(nextState.currentStateKey)) {
+    return await WithdrawResponder(msg, user, nextState)
+  }
+
+  return false
 }

@@ -13,13 +13,15 @@ export interface State<T> {
 export type Parser<RootState> = (
   msg: TelegramBot.Message,
   user: User,
+  tUser: TelegramAccount,
   currentState: RootState
-) => Record<string, () => Promise<RootState | null>>
+) => Promise<RootState | null>
+
 export type Responder<RootState> = (
   msg: TelegramBot.Message,
   user: User,
   currentState: RootState
-) => Record<string, () => Promise<boolean>>
+) => Promise<boolean>
 
 export enum BotCommand {
   // Global commands

@@ -2,14 +2,19 @@ import logger from 'modules/Logger'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { SendCoinStateKey, SendCoinError } from './types'
 import { Parser } from 'chats/types'
-import { WalletStateKey, WalletState } from '../WalletState'
-import { parseCurrencyAmount } from '../utils'
+import {
+  WalletStateKey,
+  WalletState,
+  updateNextWalletState
+} from '../WalletState'
+import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { Namespace } from 'modules/i18n'
 import * as _ from 'lodash'
 
-export const SendCoinParser: Parser<WalletState> = (
+export const SendCoinParser: Parser<WalletState> = async (
   msg,
   user,
+  tUser,
   currentState
 ) => {
   const parser: Record<SendCoinStateKey, () => Promise<WalletState | null>> = {
@@ -138,10 +143,21 @@ export const SendCoinParser: Parser<WalletState> = (
     }
   }
 
-  return parser
+  const updatedState = await parser[
+    currentState.currentStateKey as SendCoinStateKey
+  ]()
+  const nextStateKey = nextSendCoinState(updatedState)
+  const nextState = updateNextWalletState(updatedState, nextStateKey, tUser.id)
+
+  return nextState
 }
 
-export function nextSendCoinState(state: WalletState): WalletStateKey | null {
+export function nextSendCoinState(
+  state: WalletState | null
+): WalletStateKey | null {
+  if (state === null) {
+    return null
+  }
   switch (state.currentStateKey) {
     case SendCoinStateKey.cb_sendCoin:
       return SendCoinStateKey.sendCoin_amount
@@ -168,9 +184,9 @@ export function nextSendCoinState(state: WalletState): WalletStateKey | null {
     case SendCoinStateKey.sendCoin_error: {
       return null
     }
+    default:
+      return null
   }
-
-  return null
 }
 
 // Getters

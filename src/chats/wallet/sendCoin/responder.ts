@@ -2,7 +2,6 @@ import { SendCoinStateKey, SendCoinError } from './types'
 import { Responder } from 'chats/types'
 import { WalletState } from '../WalletState'
 import * as _ from 'lodash'
-import { dataFormatter } from 'utils/dataFormatter'
 import logger from 'modules/Logger'
 import { SendCoinMessage } from './messages'
 
@@ -27,18 +26,11 @@ export const SendCoinResponder: Responder<WalletState> = (
         return false
       }
 
-      const formattedCryptoBalance = dataFormatter.formatCryptoCurrency(
-        sendCoinState.cryptoBalance,
-        cryptoCurrencyCode
-      )
-      const formattedFiatBalance = dataFormatter.formatFiatCurrency(
-        sendCoinState.fiatValue,
-        sendCoinState.fiatCurrencyCode
-      )
       await SendCoinMessage(msg, user).askCryptocurrencyAmount(
         cryptoCurrencyCode,
-        formattedCryptoBalance,
-        formattedFiatBalance
+        sendCoinState.cryptoBalance,
+        user.currencyCode,
+        sendCoinState.fiatValue
       )
 
       return true
@@ -50,17 +42,17 @@ export const SendCoinResponder: Responder<WalletState> = (
         return false
       }
 
-      const formattedCryptoAmount = dataFormatter.formatCryptoCurrency(
-        sendCoinAmountState.data.cryptoCurrencyAmount,
-        sendCoinAmountState.data.cryptoCurrency
-      )
-      const formattedFiatValue = dataFormatter.formatFiatCurrency(
-        sendCoinAmountState.data.fiatValue,
-        sendCoinAmountState.data.fiatCurrency
-      )
+      const {
+        cryptoCurrencyAmount,
+        cryptoCurrency,
+        fiatValue,
+        fiatCurrency
+      } = sendCoinAmountState.data
       await SendCoinMessage(msg, user).sendCoinConfirm(
-        formattedCryptoAmount,
-        formattedFiatValue
+        cryptoCurrency,
+        cryptoCurrencyAmount,
+        fiatCurrency,
+        fiatValue
       )
 
       return true
@@ -85,13 +77,9 @@ export const SendCoinResponder: Responder<WalletState> = (
             return false
           }
 
-          const formattedCryptoBalance = dataFormatter.formatCryptoCurrency(
-            sendCoinState.data.cryptoBalance,
-            sendCoinState.currencyCode
-          )
           await SendCoinMessage(msg, user).errorInsufficientBalance(
             sendCoinState.currencyCode,
-            formattedCryptoBalance
+            sendCoinState.data.cryptoBalance
           )
 
           return true
@@ -137,5 +125,5 @@ export const SendCoinResponder: Responder<WalletState> = (
     }
   }
 
-  return resp
+  return resp[currentState.currentStateKey as SendCoinStateKey]()
 }

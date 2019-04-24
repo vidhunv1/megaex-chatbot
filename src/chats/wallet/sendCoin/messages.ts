@@ -1,23 +1,34 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { CryptoCurrency } from 'constants/currencies'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { User } from 'models'
 import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/i18n'
 import { keyboardMainMenu } from 'chats/common'
+import { dataFormatter } from 'utils/dataFormatter'
 
 export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
   askCryptocurrencyAmount: async (
     cryptocurrencyCode: CryptoCurrency,
-    formattedCryptoBalance: string,
-    formattedFiatBalance: string
+    cryptoBalance: number,
+    fiatCurrencyCode: FiatCurrency,
+    fiatValue: number
   ) => {
+    const formattedCryptoBalance = dataFormatter.formatCryptoCurrency(
+      cryptoBalance,
+      cryptocurrencyCode
+    )
+    const formattedFiatValue = dataFormatter.formatFiatCurrency(
+      fiatValue,
+      fiatCurrencyCode
+    )
+
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Wallet}:send-cryptocurrency-amount`, {
         cryptoCurrencyCode: cryptocurrencyCode,
-        fiatCurrencyCode: user.currencyCode,
+        fiatCurrencyCode: fiatCurrencyCode,
         cryptoCurrencyBalance: formattedCryptoBalance,
-        fiatValue: formattedFiatBalance
+        fiatValue: formattedFiatValue
       }),
       {
         parse_mode: 'Markdown',
@@ -37,9 +48,20 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
   },
 
   sendCoinConfirm: async (
-    formattedCryptoAmount: string,
-    formattedFiatValue: string
+    cryptocurrencyCode: CryptoCurrency,
+    cryptoAmount: number,
+    fiatCurrencyCode: FiatCurrency,
+    fiatValue: number
   ) => {
+    const formattedCryptoAmount = dataFormatter.formatCryptoCurrency(
+      cryptoAmount,
+      cryptocurrencyCode
+    )
+    const formattedFiatValue = dataFormatter.formatFiatCurrency(
+      fiatValue,
+      fiatCurrencyCode
+    )
+
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Wallet}:confirm-send-cryptocurrency`, {
@@ -73,13 +95,17 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
 
   errorInsufficientBalance: async (
     cryptocurrencyCode: CryptoCurrency,
-    formattedCryptobalance: string
+    cryptoBalance: number
   ) => {
+    const formattedCryptoBalance = dataFormatter.formatCryptoCurrency(
+      cryptoBalance,
+      cryptocurrencyCode
+    )
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Wallet}:send-cryptocurrency-insufficient-balance`, {
         cryptoCurrencyCode: cryptocurrencyCode,
-        cryptoCurrencyBalance: formattedCryptobalance
+        cryptoCurrencyBalance: formattedCryptoBalance
       }),
       {
         parse_mode: 'Markdown',

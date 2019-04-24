@@ -28,5 +28,5 @@ export const DepositResponder: Responder<WalletState> = (
     }
   }
 
-  return resp
+  return resp[currentState.currentStateKey as DepositStateKey]()
 }
