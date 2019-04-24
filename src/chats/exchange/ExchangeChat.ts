@@ -4,14 +4,23 @@ import { ChatHandler, BotCommand } from 'chats/types'
 import {
   EXCHANGE_STATE_LABEL,
   ExchangeState,
-  initialState,
-  nextExchangeState,
-  ExchangeStateKey
+  initialState
 } from './ExchangeState'
-import { exchangeParser } from './exchangeParser'
-import { exchangeResponder } from './exchangeResponder'
 import { parseCallbackQuery } from 'chats/utils'
 import * as _ from 'lodash'
+import {
+  ExchangeHomeStateKey,
+  ExchangeHomeResponder,
+  ExchangeParser
+} from './home'
+import { BuyStateKey, BuyParser, BuyResponder } from './buy'
+import { SellStateKey, SellParser, SellResponder } from './sell'
+import { MyOrdersStateKey, MyOrdersParser, MyOrdersResponder } from './myOrders'
+import {
+  CreateOrderStateKey,
+  CreateOrderParser,
+  CreateOrderResponder
+} from './createOrder'
 
 export const ExchangeChat: ChatHandler = {
   async handleCommand(
@@ -32,21 +41,20 @@ export const ExchangeChat: ChatHandler = {
   ) {
     if (callback.data) {
       const { type, params } = parseCallbackQuery(callback.data)
-      if (ExchangeStateKey[type as any] == null) {
-        return false
-      }
-      const callbackName = (type as any) as ExchangeStateKey
+
+      const callbackName = type as any
       if (_.get(state, 'key', null) != EXCHANGE_STATE_LABEL) {
-        // Callback types allowed to answer indirectly
         if (
           [
-            ExchangeStateKey.cb_buy,
-            ExchangeStateKey.cb_sell,
-            ExchangeStateKey.cb_myOrders,
-            ExchangeStateKey.cb_createOrder
+            BuyStateKey.cb_buy,
+            SellStateKey.cb_sell,
+            MyOrdersStateKey.cb_myOrders,
+            CreateOrderStateKey.cb_createOrder
           ].includes(callbackName)
         ) {
-          state = initialState
+          state = _.clone(initialState)
+        } else {
+          return false
         }
       }
 
@@ -58,17 +66,7 @@ export const ExchangeChat: ChatHandler = {
       // @ts-ignore
       state[callbackName] = params
 
-      const updatedState: ExchangeState | null = exchangeParser(
-        msg,
-        user,
-        state
-      )
-      const nextState = await nextExchangeState(updatedState, tUser.id)
-      if (nextState == null) {
-        return false
-      }
-
-      return exchangeResponder(msg, user, nextState)
+      return await processMessage(msg, user, tUser, state)
     }
     return false
   },
@@ -88,24 +86,59 @@ export const ExchangeChat: ChatHandler = {
     }
 
     if (currentState && currentState.key === EXCHANGE_STATE_LABEL) {
-      const updatedState: ExchangeState | null = exchangeParser(
-        msg,
-        user,
-        currentState
-      )
-
-      const nextState: ExchangeState | null = await nextExchangeState(
-        updatedState,
-        tUser.id
-      )
-
-      if (nextState === null) {
-        return false
-      }
-
-      return exchangeResponder(msg, user, nextState)
+      return await processMessage(msg, user, tUser, currentState)
     } else {
       return false
     }
   }
+}
+
+const exchangeHomeStateKeys = Object.keys(ExchangeHomeStateKey)
+const buyStateKeys = Object.keys(BuyStateKey)
+const sellStateKeys = Object.keys(SellStateKey)
+const myOrdersKeys = Object.keys(MyOrdersStateKey)
+const createOrderKeys = Object.keys(CreateOrderStateKey)
+
+async function processMessage(
+  msg: TelegramBot.Message,
+  user: User,
+  tUser: TelegramAccount,
+  state: ExchangeState
+) {
+  let nextState = null
+
+  // Input parse
+  if (exchangeHomeStateKeys.includes(state.currentStateKey))
+    nextState = await ExchangeParser(msg, user, tUser, state)
+  if (buyStateKeys.includes(state.currentStateKey))
+    nextState = await BuyParser(msg, user, tUser, state)
+  if (sellStateKeys.includes(state.currentStateKey))
+    nextState = await SellParser(msg, user, tUser, state)
+  if (myOrdersKeys.includes(state.currentStateKey))
+    nextState = await MyOrdersParser(msg, user, tUser, state)
+  if (createOrderKeys.includes(state.currentStateKey))
+    nextState = await CreateOrderParser(msg, user, tUser, state)
+
+  if (nextState === null) {
+    return false
+  }
+
+  // Response
+  if (exchangeHomeStateKeys.includes(nextState.currentStateKey)) {
+    return await ExchangeHomeResponder(msg, user, nextState)
+  }
+  if (buyStateKeys.includes(nextState.currentStateKey)) {
+    return await BuyResponder(msg, user, nextState)
+  }
+  if (sellStateKeys.includes(nextState.currentStateKey)) {
+    return await SellResponder(msg, user, nextState)
+  }
+  if (myOrdersKeys.includes(nextState.currentStateKey)) {
+    return await MyOrdersResponder(msg, user, nextState)
+  }
+  if (createOrderKeys.includes(nextState.currentStateKey)) {
+    return await CreateOrderResponder(msg, user, nextState)
+  }
+
+  return false
 }

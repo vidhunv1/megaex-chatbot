@@ -40,6 +40,8 @@ export const WalletChat: ChatHandler = {
           ].includes(callbackName)
         ) {
           state = _.clone(initialState)
+        } else {
+          return false
         }
       }
 

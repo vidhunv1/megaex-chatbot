@@ -43,7 +43,7 @@ Here you can find best deals to exchange bitcoins with your local currency here
     }
   },
   'main-menu': {
-    exchange: '💵 Buy/Sell BTC-{{ fiatCurrency }}',
+    exchange: '💵 Exchange BTC-{{ fiatCurrency }}',
     account: '👤 My Account',
     wallet: '💼 Wallet'
   },
