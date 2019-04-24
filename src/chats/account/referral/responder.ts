@@ -4,6 +4,7 @@ import { Responder } from 'chats/types'
 import { AccountState } from '../AccountState'
 import * as _ from 'lodash'
 import { Namespace } from 'modules/i18n'
+import { ReferralMessage } from './messages'
 
 export const ReferralResponder: Responder<AccountState> = (
   msg,
@@ -26,6 +27,11 @@ export const ReferralResponder: Responder<AccountState> = (
       }
 
       const { referralCount, referralLink, referralFeesPercentage } = data
+      await ReferralMessage(msg, user).showReferralInfo(
+        referralLink,
+        referralCount,
+        referralFeesPercentage
+      )
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Account}:referral-info-button`, {

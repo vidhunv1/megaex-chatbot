@@ -17,7 +17,7 @@ Account ID: /u{{ accountID }}
   'manage-payment-methods-cbbutton': '💳  Payment Methods',
   'add-payment-method-cbbutton': '➕  Add payment Method',
   'edit-payment-method-cbbutton': '🖋  Edit payment Methods',
-  'verify-account-cbbutton': '✅  Verify Account',
+  'verify-account-cbbutton': '✅  Verify identity',
   'referral-link-cbbutton': '🤝  Referral',
   'settings-cbbutton': '⚙ Settings',
   'referral-info-button': `🤝 *Referral*

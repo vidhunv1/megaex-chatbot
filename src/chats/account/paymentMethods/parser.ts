@@ -12,7 +12,8 @@ import {
 import * as _ from 'lodash'
 import {
   PaymentMethodsFieldsLocale,
-  PaymentMethods
+  PaymentMethods,
+  PaymentMethodAvailability
 } from 'constants/paymentMethods'
 import logger from 'modules/Logger'
 import { FiatCurrency } from 'constants/currencies'
