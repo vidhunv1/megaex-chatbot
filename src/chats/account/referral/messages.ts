@@ -11,7 +11,7 @@ export const ReferralMessage = (msg: TelegramBot.Message, user: User) => ({
   ) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:referral-info-button`, {
+      user.t(`${Namespace.Account}:referral.show-info`, {
         referralCount,
         referralFeesPercentage
       }),

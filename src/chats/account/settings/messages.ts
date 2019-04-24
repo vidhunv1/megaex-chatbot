@@ -15,7 +15,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
   async errorInvalidUsername() {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:settings-username-invalid`),
+      user.t(`${Namespace.Account}:settings.invalid-username`),
       {
         parse_mode: 'Markdown',
         reply_markup: keyboardMainMenu(user)
@@ -26,7 +26,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
   async settingsUpdateSuccess(updatedUser: User) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:settings-updated`),
+      user.t(`${Namespace.Account}:settings.update-success`),
       {
         parse_mode: 'Markdown',
         reply_markup: keyboardMainMenu(updatedUser)
@@ -37,7 +37,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
   async showUsernameInput() {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:settings-username-show`),
+      user.t(`${Namespace.Account}:settings.username-show`),
       {
         parse_mode: 'Markdown',
         reply_markup: {
@@ -65,7 +65,9 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
 
     inline.push([
       {
-        text: updatedUser.t(`${Namespace.Account}:back-to-settings-cbbutton`),
+        text: updatedUser.t(
+          `${Namespace.Account}:settings.back-to-settings-cbbutton`
+        ),
         callback_data: stringifyCallbackQuery<
           SettingsStateKey.cb_settings,
           SettingsState[SettingsStateKey.cb_settings]
@@ -77,7 +79,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     ])
     await telegramHook.getWebhook.editMessageText(
-      updatedUser.t(`${Namespace.Account}:settings-rate-source-show`, {
+      updatedUser.t(`${Namespace.Account}:settings.show-rate-source`, {
         exchangeSource: user.t(
           `exchange-source.${updatedUser.exchangeRateSource}`
         )
@@ -123,7 +125,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
     const inline: TelegramBot.InlineKeyboardButton[][] = _.chunk(list, 3)
     inline.push([
       {
-        text: user.t(`${Namespace.Account}:back-to-settings-cbbutton`),
+        text: user.t(`${Namespace.Account}:settings.back-to-settings-cbbutton`),
         callback_data: stringifyCallbackQuery<
           SettingsStateKey.cb_settings,
           SettingsState[SettingsStateKey.cb_settings]
@@ -134,7 +136,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
         })
       },
       {
-        text: user.t(`${Namespace.Account}:show-more`),
+        text: user.t(`${Namespace.Account}:settings.show-more`),
         callback_data: stringifyCallbackQuery<
           SettingsStateKey.cb_loadMore,
           SettingsState[SettingsStateKey.cb_loadMore]
@@ -149,7 +151,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
     ])
 
     await telegramHook.getWebhook.editMessageText(
-      user.t(`${Namespace.Account}:settings-currency-show`, {
+      user.t(`${Namespace.Account}:settings.show-currency`, {
         fiatCurrencyCode: updatedUser.currencyCode
       }),
       {
@@ -183,7 +185,9 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
     )
     inline.push([
       {
-        text: updatedUser.t(`${Namespace.Account}:back-to-settings-cbbutton`),
+        text: updatedUser.t(
+          `${Namespace.Account}:settings.back-to-settings-cbbutton`
+        ),
         callback_data: stringifyCallbackQuery<
           SettingsStateKey.cb_settings,
           SettingsState[SettingsStateKey.cb_settings]
@@ -195,7 +199,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     ])
     await telegramHook.getWebhook.editMessageText(
-      updatedUser.t(`${Namespace.Account}:settings-language-show`, {
+      updatedUser.t(`${Namespace.Account}:settings.show-language`, {
         language:
           updatedUser.locale.charAt(0).toUpperCase() +
           updatedUser.locale.slice(1).toLowerCase()
@@ -215,7 +219,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
     const inline: TelegramBot.InlineKeyboardButton[][] = [
       [
         {
-          text: user.t(`${Namespace.Account}:settings-currency-cbbutton`),
+          text: user.t(`${Namespace.Account}:settings.currency-cbbutton`),
           callback_data: stringifyCallbackQuery<
             SettingsStateKey.cb_settingsCurrency,
             SettingsState[SettingsStateKey.cb_settingsCurrency]
@@ -225,7 +229,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
           })
         },
         {
-          text: user.t(`${Namespace.Account}:settings-language-cbbutton`),
+          text: user.t(`${Namespace.Account}:settings.language-cbbutton`),
           callback_data: stringifyCallbackQuery<
             SettingsStateKey.cb_settingsLanguage,
             SettingsState[SettingsStateKey.cb_settingsLanguage]
@@ -237,7 +241,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
       ],
       [
         {
-          text: user.t(`${Namespace.Account}:settings-rate-source-cbbutton`),
+          text: user.t(`${Namespace.Account}:settings.rate-source-cbbutton`),
           callback_data: stringifyCallbackQuery<
             SettingsStateKey.cb_settingsRate,
             SettingsState[SettingsStateKey.cb_settingsRate]
@@ -247,7 +251,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
           })
         }
         // {
-        //   text: user.t(`${Namespace.Account}:settings-username-cbbutton`),
+        //   text: user.t(`${Namespace.Account}:settings.username-cbbutton`),
         //   callback_data: stringifyCallbackQuery<
         //     AccountStateKey.cb_settingsUsername,
         //     AccountState[AccountStateKey.cb_settingsUsername]
@@ -258,7 +262,7 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
         // }
       ]
     ]
-    const sendMessage = user.t(`${Namespace.Account}:settings-show`)
+    const sendMessage = user.t(`${Namespace.Account}:settings.show-settings`)
     const opts = {
       parse_mode: 'Markdown',
       reply_markup: {

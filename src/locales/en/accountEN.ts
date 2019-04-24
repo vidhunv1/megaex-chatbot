@@ -1,117 +1,119 @@
 export const accountEN = {
-  'account-home': `👤  *My Account*
+  home: {
+    account: `👤  *My Account*
     
-Account ID: /u{{ accountID }}
+    Account ID: /u{{ accountID }}
+    
+    💵  *Total Deals:* {{ dealCount }}
+    💎  *Volume:*        {{ tradeVolume }} {{ cryptoCurrencyCode }}
+    🕒  *Avg speed:*   {{ tradeSpeed }}
+    ⭐  *Rating:*           {{ ratingPercentage }}% 👍({{ upvotes }}) 👎({{ downvotes }})
+    
+    🤝 Invited:           {{ referralCount }} users
+    💰 Earnings:        {{ earnings }} {{ cryptoCurrencyCode }}
+    
+    💳  *Payment Methods:* {{ paymentMethods }}
+    `,
+    'verify-account-cbbutton': '✅  Verify identity',
+    'manage-payment-methods-cbbutton': '💳  Payment Methods',
+    'referral-link-cbbutton': '🤝  Referral',
+    'settings-cbbutton': '⚙ Settings',
+    'no-payment-method': `None`
+  },
 
-💵  *Total Deals:* {{ dealCount }}
-💎  *Volume:*        {{ tradeVolume }} {{ cryptoCurrencyCode }}
-🕒  *Avg speed:*   {{ tradeSpeed }}
-⭐  *Rating:*           {{ ratingPercentage }}% 👍({{ upvotes }}) 👎({{ downvotes }})
+  'payment-method': {
+    'does-not-exist': `❌ *Error*
 
-🤝 Invited:           {{ referralCount }} users
-💰 Earnings:        {{ earnings }} {{ cryptoCurrencyCode }}
+    This payment method does not exist.
+    
+    You can request @{{ supportBotUsername }} to get a valid payment method added.`,
 
-💳  *Payment Methods:* {{ paymentMethods }}
-`,
+    'create-error':
+      'Could not create this payment method. Please try again later.',
+    'edit-cbbutton': '🖋  Edit payment Methods',
+    'add-cbbutton': '➕  Add payment Method',
+    'show-all': `💳 *Payment Methods*
 
-  'manage-payment-methods-cbbutton': '💳  Payment Methods',
-  'add-payment-method-cbbutton': '➕  Add payment Method',
-  'edit-payment-method-cbbutton': '🖋  Edit payment Methods',
-  'verify-account-cbbutton': '✅  Verify identity',
-  'referral-link-cbbutton': '🤝  Referral',
-  'settings-cbbutton': '⚙ Settings',
-  'referral-info-button': `🤝 *Referral*
-
-* Invited*: {{ referralCount }} users
-* Referral fees*: {{ referralFeesPercentage }}% 
-_(from the fees we take from your referral)_
-
-💰Invite your friends using your referral link to earn bitcoins from their transactions.
-Payouts are processed *every day*, credited directly to your wallet.
-`,
-
-  'account-no-payment-method': `None`,
-
-  'payment-method-none': `⚠️ You dont have any payment methods added.`,
-
-  'payment-methods-show': `💳 *Payment Methods*
-
-{{ paymentMethodsList }}
-`,
-
-  'edit-payment-method-show': `
+{{ paymentMethodsList }}`,
+    'show-edit': `
 *Edit Payment Method*
 
 Click on the payment method you want to edit.
 `,
-
-  'add-payment-method-select': `*Select*
+    'select-to-add': `*Select*
 
 Select your payment method to add from the options below.
 `,
-  'payment-method-does-not-exist': `❌ *Error*
-
-This payment method does not exist.
-
-You can request @{{ supportBotUsername }} to get a valid payment method added.`,
-  'edit-payment-method-enter-field': 'Enter the *{{ fieldName }}*',
-  'payment-method-create-error':
-    'Could not create this payment method. Please try again later.',
-  'payment-method-created': `✅ *Created*
+    'edit-enter-field': 'Enter the *{{ fieldName }}*',
+    created: `✅ *Created*
 
 Your payment method was created.
 
 {{ paymentMethodInfo }}
 `,
-  'payment-method-updated': `✅ *Updated*
+    updated: `✅ *Updated*
 
 Your payment method was updated.
 
 {{ paymentMethodInfo }}
 `,
+    'none-added': `⚠️ You dont have any payment methods added.`
+  },
 
-  'settings-show': `*⚙ Settings*
+  referral: {
+    'show-info': `🤝 *Referral*
 
-Select the option you want to edit
-`,
-  'settings-currency-cbbutton': '💵  Currency',
-  'settings-language-cbbutton': '🌎  Language',
-  'settings-rate-source-cbbutton': '📊  Rate source',
-  'settings-username-cbbutton': '👤  Change Acc ID',
+    * Invited*: {{ referralCount }} users
+    * Referral fees*: {{ referralFeesPercentage }}% 
+    _(from the fees we take from your referral)_
+    
+    💰Invite your friends using your referral link to earn bitcoins from their transactions.
+    Payouts are processed *every day*, credited directly to your wallet.
+    `
+  },
 
-  'settings-currency-show': `💵 *Currency*
+  settings: {
+    'invalid-username': `❌ *Error*
   
-Click to change your currency.
+Invalid Account ID. Please try again later.`,
 
-Active «*{{ fiatCurrencyCode }}*»`,
-  'settings-currency-updated': `✅ *Updated*
+    'update-success': 'changed',
+    'username-show': `👤 *Enter Account ID*
+
+Only english letters and numbers between 3 and 15 characters.
+
+NOTE: This action is final, you wont be able to change your Account ID again.
+`,
+    'back-to-settings-cbbutton': '⬅️  Back',
+    'settings-currency-updated': `✅ *Updated*
   
 Your currency was updated to *{{ updatedCurrencyCode }}*`,
-
-  'settings-rate-source-show': `📊 *Rate source*
+    'show-rate-source': `📊 *Rate source*
 
 Select the exchange rate source you want to use.
 Active «*{{ exchangeSource }}*»
 
 ⚠️ Changing this will affect your active orders if a margin pricing was used.
 `,
-  'settings-username-show': `👤 *Enter Account ID*
-
-Only english letters and numbers between 3 and 15 characters.
-
-NOTE: This action is final, you wont be able to change your Account ID again.
-`,
-  'settings-username-invalid': `❌ *Error*
+    'show-more': 'more »',
+    'show-currency': `💵 *Currency*
   
-Invalid Account ID. Please try again later.`,
-  'settings-language-show': `🌎 *Language*
+Click to change your currency.
+
+Active «*{{ fiatCurrencyCode }}*»`,
+    'show-language': `🌎 *Language*
 
 Choose your language.
 
 Active «*{{ language }}*»
 `,
+    'currency-cbbutton': '💵  Currency',
+    'language-cbbutton': '🌎  Language',
+    'rate-source-cbbutton': '📊  Rate source',
+    'show-settings': `*⚙ Settings*
 
-  'back-to-settings-cbbutton': '⬅️  Back',
-  'show-more': 'more »',
-  'settings-updated': 'updated!'
+Select the option you want to edit
+`,
+    'username-cbbutton': '👤  Change Acc ID'
+  }
 }

@@ -29,7 +29,9 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
     const inline: TelegramBot.InlineKeyboardButton[][] = [
       [
         {
-          text: user.t(`${Namespace.Account}:manage-payment-methods-cbbutton`),
+          text: user.t(
+            `${Namespace.Account}:home.manage-payment-methods-cbbutton`
+          ),
           callback_data: stringifyCallbackQuery<
             PaymentMethodStateKey.cb_paymentMethods,
             PaymentMethodState[PaymentMethodStateKey.cb_paymentMethods]
@@ -41,7 +43,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       ],
       [
         {
-          text: user.t(`${Namespace.Account}:referral-link-cbbutton`),
+          text: user.t(`${Namespace.Account}:home.referral-link-cbbutton`),
           callback_data: stringifyCallbackQuery<
             ReferralStateKey.cb_referralLink,
             ReferralState[ReferralStateKey.cb_referralLink]
@@ -51,7 +53,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
           })
         },
         {
-          text: user.t(`${Namespace.Account}:settings-cbbutton`),
+          text: user.t(`${Namespace.Account}:home.settings-cbbutton`),
           callback_data: stringifyCallbackQuery<
             SettingsStateKey.cb_settings,
             SettingsState[SettingsStateKey.cb_settings]
@@ -66,13 +68,13 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
 
     !user.isVerified &&
       inline[0].push({
-        text: user.t(`${Namespace.Account}:verify-account-cbbutton`),
+        text: user.t(`${Namespace.Account}:home.verify-account-cbbutton`),
         url: VERIFY_ACCOUNT_PATH
       })
 
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:account-home`, {
+      user.t(`${Namespace.Account}:home.account`, {
         accountID: accountId,
         dealCount: totalDeals,
         tradeVolume: tradeVolume,
@@ -100,7 +102,7 @@ const stringifyPaymentMethods = (
   user: User
 ) => {
   if (paymentMethods.length === 0) {
-    return user.t(`${Namespace.Account}:account-no-payment-method`)
+    return user.t(`${Namespace.Account}:home.no-payment-method`)
   }
   let pmStringified = '\n'
   paymentMethods.forEach((pm, index) => {

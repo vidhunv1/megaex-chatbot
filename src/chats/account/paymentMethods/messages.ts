@@ -16,7 +16,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
   async pmDoesNotExist() {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:payment-method-does-not-exist`, {
+      user.t(`${Namespace.Account}:payment-method.does-not-exist`, {
         supportBotUsername: CONFIG.SUPPORT_USERNAME
       }),
       {
@@ -29,7 +29,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
   async pmCreateError() {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:payment-method-create-error`),
+      user.t(`${Namespace.Account}:payment-method.create-error`),
       {
         parse_mode: 'Markdown',
         reply_markup: keyboardMainMenu(user)
@@ -42,7 +42,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
     addedPaymentMethods.length > 0 &&
       inline.push([
         {
-          text: user.t(`${Namespace.Account}:edit-payment-method-cbbutton`),
+          text: user.t(`${Namespace.Account}:payment-method.edit-cbbutton`),
           callback_data: stringifyCallbackQuery<
             PaymentMethodStateKey.cb_editPaymentMethods,
             PaymentMethodState[PaymentMethodStateKey.cb_paymentMethods]
@@ -54,7 +54,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
       ])
     inline.push([
       {
-        text: user.t(`${Namespace.Account}:add-payment-method-cbbutton`),
+        text: user.t(`${Namespace.Account}:payment-method.add-cbbutton`),
         callback_data: stringifyCallbackQuery<
           PaymentMethodStateKey.cb_addPaymentMethod,
           PaymentMethodState[PaymentMethodStateKey.cb_addPaymentMethod]
@@ -67,7 +67,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
 
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:payment-methods-show`, {
+      user.t(`${Namespace.Account}:payment-method.show-all`, {
         paymentMethodsList: stringifyPaymentMethodsFields(
           addedPaymentMethods,
           user
@@ -100,7 +100,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
     )
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:edit-payment-method-show`),
+      user.t(`${Namespace.Account}:payment-method.show-edit`),
       {
         parse_mode: 'Markdown',
         reply_markup: {
@@ -117,7 +117,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
     keyboard.push([{ text: user.t('actions.cancel-keyboard-button') }])
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:add-payment-method-select`),
+      user.t(`${Namespace.Account}:payment-method.select-to-add`),
       {
         parse_mode: 'Markdown',
         reply_markup: {
@@ -137,7 +137,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
     )
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:edit-payment-method-enter-field`, {
+      user.t(`${Namespace.Account}:payment-method.edit-enter-field`, {
         fieldName
       }),
       {
@@ -153,7 +153,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
   async showPMCreateSuccess(paymentMethod: PaymentMethods, fields: string[]) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:payment-method-created`, {
+      user.t(`${Namespace.Account}:payment-method.created`, {
         paymentMethodInfo: stringifyPaymentMethodsFields(
           [
             {
@@ -174,7 +174,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
   async showPMEditSuccess(paymentMethod: PaymentMethods, fields: string[]) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Account}:payment-method-updated`, {
+      user.t(`${Namespace.Account}:payment-method.updated`, {
         paymentMethodInfo: stringifyPaymentMethodsFields(
           [
             {
@@ -198,7 +198,7 @@ const stringifyPaymentMethodsFields = (
   user: User
 ) => {
   if (paymentMethods.length === 0) {
-    return user.t(`${Namespace.Account}:payment-method-none`)
+    return user.t(`${Namespace.Account}:payment-method.none-added`)
   }
 
   let pmStringified = ''
