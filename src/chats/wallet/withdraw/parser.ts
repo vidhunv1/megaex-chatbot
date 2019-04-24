@@ -124,8 +124,7 @@ export const WithdrawParser: Parser<WalletState> = async (
         withdrawAmountState &&
         withdrawAmountState.data &&
         msg.text &&
-        msg.text ===
-          user.t(`${Namespace.Wallet}:confirm-withdraw-cryptocurrency-button`)
+        msg.text === user.t(`${Namespace.Wallet}:withdraw.confirm-button`)
       ) {
         const {
           cryptoCurrencyAmount,

@@ -24,7 +24,7 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
 
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:send-cryptocurrency-amount`, {
+      user.t(`${Namespace.Wallet}:send-coin.input-amount`, {
         cryptoCurrencyCode: cryptocurrencyCode,
         fiatCurrencyCode: fiatCurrencyCode,
         cryptoCurrencyBalance: formattedCryptoBalance,
@@ -64,7 +64,7 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
 
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:confirm-send-cryptocurrency`, {
+      user.t(`${Namespace.Wallet}:send-coin.confirm`, {
         cryptoCurrencyAmount: formattedCryptoAmount,
         fiatValue: formattedFiatValue
       }),
@@ -74,9 +74,7 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
           keyboard: [
             [
               {
-                text: user.t(
-                  `${Namespace.Wallet}:confirm-send-cryptocurrency-button`
-                )
+                text: user.t(`${Namespace.Wallet}:send-coin.confirm-button`)
               }
             ],
             [
@@ -103,7 +101,7 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
     )
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:send-cryptocurrency-insufficient-balance`, {
+      user.t(`${Namespace.Wallet}:send-coin.insufficient-balance`, {
         cryptoCurrencyCode: cryptocurrencyCode,
         cryptoCurrencyBalance: formattedCryptoBalance
       }),
@@ -117,7 +115,7 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
   errorInvalidAmount: async () => {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:send-cryptocurrency-invalid-amount`),
+      user.t(`${Namespace.Wallet}:send-coin.invalid-amount`),
       {
         parse_mode: 'Markdown',
         reply_markup: keyboardMainMenu(user)
@@ -128,7 +126,7 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
   showCreated: async (paymentLink: string, expiryTimeS: number) => {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:show-payment-link`, {
+      user.t(`${Namespace.Wallet}:send-coin.show-created-link`, {
         paymentLink: paymentLink,
         expiryTime: expiryTimeS / 360
       }),

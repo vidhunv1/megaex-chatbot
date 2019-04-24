@@ -114,8 +114,7 @@ export const SendCoinParser: Parser<WalletState> = async (
       if (
         msg.text &&
         sendCoinState &&
-        msg.text ===
-          user.t(`${Namespace.Wallet}:confirm-send-cryptocurrency-button`)
+        msg.text === user.t(`${Namespace.Wallet}:send-coin.confirm-button`)
       ) {
         return {
           ...currentState,

@@ -38,7 +38,7 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
 
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:wallet-home`, {
+      user.t(`${Namespace.Wallet}:home.wallet`, {
         fiatBalance: formattedFiatBalance,
         cryptoBalance: formattedCryptoBalance,
         blockedBalance: formattedBlockedBalance,
@@ -51,11 +51,14 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
           inline_keyboard: [
             [
               {
-                text: user.t(`${Namespace.Wallet}:send-cryptocurrency`, {
-                  cryptoCurrencyName: user.t(
-                    `cryptocurrency-names.${cryptocurrencyCode}`
-                  )
-                }),
+                text: user.t(
+                  `${Namespace.Wallet}:home.send-cryptocurrency-cbbutton`,
+                  {
+                    cryptoCurrencyName: user.t(
+                      `cryptocurrency-names.${cryptocurrencyCode}`
+                    )
+                  }
+                ),
                 callback_data: stringifyCallbackQuery<
                   SendCoinStateKey.cb_sendCoin,
                   SendCoinState[SendCoinStateKey.cb_sendCoin]
@@ -68,7 +71,7 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
             ],
             [
               {
-                text: user.t(`${Namespace.Wallet}:my-address`),
+                text: user.t(`${Namespace.Wallet}:home.my-address`),
                 callback_data: stringifyCallbackQuery<
                   DepositStateKey.cb_depositCoin,
                   DepositState[DepositStateKey.cb_depositCoin]
@@ -78,7 +81,7 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                 })
               },
               {
-                text: user.t(`${Namespace.Wallet}:withdraw`),
+                text: user.t(`${Namespace.Wallet}:home.withdraw`),
                 callback_data: stringifyCallbackQuery<
                   WithdrawStateKey.cb_withdrawCoin,
                   WithdrawState[WithdrawStateKey.cb_withdrawCoin]

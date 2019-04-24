@@ -15,7 +15,7 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
   ) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-amount`, {
+      user.t(`${Namespace.Wallet}:withdraw.input-amount`, {
         cryptoCurrencyCode: currencyCode,
         cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
           cryptocurrencyBalance,
@@ -46,7 +46,7 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
   async enterWithdrawAddress(currencyCode: CryptoCurrency) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-address`, {
+      user.t(`${Namespace.Wallet}:withdraw.input-address`, {
         cryptoCurrencyName: user.t(`cryptocurrency-names.${currencyCode}`)
       }),
       {
@@ -72,15 +72,12 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
   ) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(
-        `${Namespace.Wallet}:withdraw-cryptocurrency-insufficient-balance`,
-        {
-          cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
-            cryptobalance,
-            currencyCode
-          )
-        }
-      ),
+      user.t(`${Namespace.Wallet}:withdraw.insufficient-balance`, {
+        cryptoCurrencyBalance: dataFormatter.formatCryptoCurrency(
+          cryptobalance,
+          currencyCode
+        )
+      }),
       {
         parse_mode: 'Markdown',
         reply_markup: keyboardMainMenu(user)
@@ -91,7 +88,7 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
   async errorInvalidAddress(currencyCode: CryptoCurrency) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-invalid-address`, {
+      user.t(`${Namespace.Wallet}:withdraw.invalid-address`, {
         cryptoCurrencyName: user.t(`cryptocurrency-names.${currencyCode}`)
       }),
       {
@@ -104,7 +101,7 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
   async errorCreateWithdraw() {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-error`, {
+      user.t(`${Namespace.Wallet}:withdraw.create-error`, {
         supportUsername: CONFIG.SUPPORT_USERNAME
       }),
       {
@@ -123,7 +120,7 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
   ) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:confirm-withdraw-cryptocurrency`, {
+      user.t(`${Namespace.Wallet}:withdraw.confirm`, {
         cryptoCurrencyAmount: dataFormatter.formatCryptoCurrency(
           cryptoAmount,
           cryptoCurrency
@@ -137,9 +134,7 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
           keyboard: [
             [
               {
-                text: user.t(
-                  `${Namespace.Wallet}:confirm-withdraw-cryptocurrency-button`
-                )
+                text: user.t(`${Namespace.Wallet}:withdraw.confirm-button`)
               }
             ],
             [
@@ -159,7 +154,7 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
   async showCreatedWithdrawalSuccess() {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:withdraw-cryptocurrency-success`),
+      user.t(`${Namespace.Wallet}:withdraw.create-success`),
       {
         parse_mode: 'Markdown',
         reply_markup: keyboardMainMenu(user)

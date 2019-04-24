@@ -12,7 +12,7 @@ export const DepositMessage = (msg: TelegramBot.Message, user: User) => ({
   ) => {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Wallet}:show-deposit-address`, {
+      user.t(`${Namespace.Wallet}:deposit.show-address`, {
         cryptoCurrencyCode: currencyCode,
         confirmations: cryptoCurrencyInfo[currencyCode].confirmations
       }),
