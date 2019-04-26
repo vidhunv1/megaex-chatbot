@@ -38,9 +38,9 @@ export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   `${Namespace.Exchange}:home.create-order-cbbutton`
                 ),
                 callback_data: stringifyCallbackQuery<
-                  CreateOrderStateKey.cb_createOrder,
-                  CreateOrderState[CreateOrderStateKey.cb_createOrder]
-                >(CreateOrderStateKey.cb_createOrder, {
+                  CreateOrderStateKey.cb_showCreateOrder,
+                  CreateOrderState[CreateOrderStateKey.cb_showCreateOrder]
+                >(CreateOrderStateKey.cb_showCreateOrder, {
                   data: null
                 })
               }

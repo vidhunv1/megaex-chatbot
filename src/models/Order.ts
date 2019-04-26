@@ -14,6 +14,10 @@ import {
 import { User, Transaction, Wallet } from '.'
 import logger from '../modules/Logger'
 
+export enum OrderType {
+  BUY = 'BUY',
+  SELL = 'SELL'
+}
 @Table({ timestamps: true, tableName: 'Orders' })
 export class Order extends Model<Order> {
   @PrimaryKey
@@ -49,7 +53,7 @@ export class Order extends Model<Order> {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  type!: 'buy' | 'sell'
+  type!: OrderType
 
   @AllowNull(false)
   @Column(DataType.STRING)
@@ -118,7 +122,7 @@ export class Order extends Model<Order> {
           maxAmount,
           userId,
           status: 'active',
-          type: 'sell',
+          type: OrderType.SELL,
           currencyCode
         },
         { transaction: t }
@@ -140,7 +144,7 @@ export class Order extends Model<Order> {
         minAmount,
         maxAmount,
         status: 'active',
-        type: 'buy',
+        type: OrderType.BUY,
         currencyCode,
         price
       },

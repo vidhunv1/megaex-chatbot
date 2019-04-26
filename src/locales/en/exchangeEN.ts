@@ -24,6 +24,34 @@ export const exchangeEN = {
   },
 
   'create-order': {
-    show: 'TODO: Show create order'
+    show: `📊 *Create Order*
+
+Select the order type.`,
+    'new-buy-order-cbbutton': '📗  New buy order',
+    'new-sell-order-cbbutton': '📕  New sell order',
+    'input-fixed-rate': `*Rate {{ cryptoCurrencyCode }}*
+
+Enter the fixed rate of {{ cryptoCurrencyCode }} for this order (in {{ fiatCurrencyCode }}).
+
+Example: *{{ marketRate }}*`,
+    'input-margin-rate': `*Rate {{ cryptoCurrencyCode }}*
+
+Enter the margin in percentage you want over the bitcoin market price. 
+
+*Current Market rate*: {{ marketRate }} ({{ marketRateSource }})
+_Use a negative value for buying or selling under the market price to attract more contacts._
+
+Example: *2%*`,
+    'use-margin-price-cbbutton': 'Use margin pricing (%) ➡️',
+    'use-fixed-price-cbbutton': '⬅️ Use fixed pricing',
+    'back-cbbutton': '⬅️  Back',
+    'input-amount-limits': `⚖️ *Order amount*
+
+Enter the amount in *{{ fiatCurrencyCode }}* for this order.
+
+Example: *{{ marketRate }}* or *100-1000* (min-max limit)
+`,
+    'buy-order-created': '✅ *Buy order created*',
+    'create-error': '❌ Could not create this order. Please try again later.'
   }
 }
