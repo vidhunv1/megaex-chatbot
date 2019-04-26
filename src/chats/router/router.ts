@@ -74,25 +74,34 @@ export const Router = {
         )
       }
     } else {
-      // Context Handlers
-      const isHandled =
-        (await CommonChat.handleContext(msg, user, tUser, currentState)) ||
-        (await ExchangeChat.handleContext(msg, user, tUser, currentState)) ||
-        (await WalletChat.handleContext(msg, user, tUser, currentState)) ||
-        (await AccountChat.handleContext(msg, user, tUser, currentState)) ||
-        (await SignupChat.handleContext(msg, user, tUser, currentState))
+      // handle base
+      if (msg.text === user.t('main-menu.wallet')) {
+        await WalletChat.handleContext(msg, user, tUser, currentState)
+      } else if (msg.text === user.t('main-menu.exchange')) {
+        await ExchangeChat.handleContext(msg, user, tUser, currentState)
+      } else if (msg.text === user.t('main-menu.account')) {
+        await SignupChat.handleContext(msg, user, tUser, currentState)
+      } else {
+        // Context Handlers
+        const isHandled =
+          (await CommonChat.handleContext(msg, user, tUser, currentState)) ||
+          (await ExchangeChat.handleContext(msg, user, tUser, currentState)) ||
+          (await WalletChat.handleContext(msg, user, tUser, currentState)) ||
+          (await AccountChat.handleContext(msg, user, tUser, currentState)) ||
+          (await SignupChat.handleContext(msg, user, tUser, currentState))
 
-      if (!isHandled) {
-        await telegramHook.getWebhook.sendMessage(
-          msg.chat.id,
-          user.t('error.bad-message', {
-            supportBotUsername: CONFIG.SUPPORT_USERNAME
-          }),
-          {
-            parse_mode: 'Markdown',
-            reply_markup: keyboardMainMenu(user)
-          }
-        )
+        if (!isHandled) {
+          await telegramHook.getWebhook.sendMessage(
+            msg.chat.id,
+            user.t('error.bad-message', {
+              supportBotUsername: CONFIG.SUPPORT_USERNAME
+            }),
+            {
+              parse_mode: 'Markdown',
+              reply_markup: keyboardMainMenu(user)
+            }
+          )
+        }
       }
     }
   },
