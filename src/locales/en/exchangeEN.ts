@@ -20,7 +20,29 @@ export const exchangeEN = {
   },
 
   'my-orders': {
-    'show-orders': 'TODO: Show my orders'
+    'show-orders': 'TODO: Show my orders',
+
+    'terms-not-added': 'None (Click on edit to add terms)',
+    'my-buy-order-info': `*📗 My Buy Order* - /o{{orderId}}
+
+*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
+*Payment method*: {{ paymentMethod }}
+*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
+*Status*: {{ status }}
+Terms: _{{ terms }}_
+
+*Order share link*: {{ orderLink }}
+(_Anyone who clicks on this link can directly open a deal with you._)
+`,
+    'my-sell-order-info': '',
+    'edit-amount-cbbutton': '⚖️ Amount',
+    'edit-rate-cbbutton': '💸 Rate BTC',
+    'edit-terms-cbbutton': '📝 Terms',
+    'edit-payment-method-cbbutton': '💳 Payment details',
+    'toggle-active-cbbutton': 'Active',
+    'delete-order-cbbutton': '🗑️ Delete!',
+    'edit-order': '✏️  Edit order',
+    'go-back': '⬅️  Back'
   },
 
   'create-order': {
@@ -58,26 +80,5 @@ Example: *{{ marketRate }}* or *100-1000* (min-max limit)
 Select the payment method`
   },
 
-  'active-orders': {
-    'terms-not-added': 'None (Click on edit to add terms)',
-    'my-buy-order-info': `*📗 My Buy Order* - /o{{orderId}}
-
-*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Payment method*: {{ paymentMethod }}
-*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
-*Status*: {{ status }}
-Terms: _{{ terms }}_
-
-*Order share link*: {{ orderLink }}
-(_Anyone who clicks on this link can directly open a deal with you._)
-`,
-    'my-sell-order-info': '',
-    'edit-amount-cbbutton': '⚖️ Amount',
-    'edit-rate-cbbutton': '💸 Rate BTC',
-    'edit-terms-cbbutton': 'Terms',
-    'edit-payment-method-cbbutton': 'Payment details',
-    'toggle-active-cbbutton': '☑️ Active',
-    'toggle-inactive-cbbutton': 'Active',
-    'delete-cbbutton': '🗑️ Delete!'
-  }
+  'active-orders': {}
 }

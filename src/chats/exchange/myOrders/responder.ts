@@ -16,6 +16,30 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     [MyOrdersStateKey.myOrders_show]: async () => {
       await MyOrdersMessage(msg, user).showMyOrdersMessage()
       return true
+    },
+    [MyOrdersStateKey.cb_deleteOrder]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.cb_editAmount]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.cb_editOrder]: async () => {
+      return true
+    },
+    [MyOrdersStateKey.cb_editPaymentMethod]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.cb_editRate]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.cb_editTerms]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.cb_showOrder_back]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.cb_toggleActive]: async () => {
+      return false
     }
   }
 

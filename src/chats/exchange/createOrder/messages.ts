@@ -181,15 +181,16 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     )
 
-    await MyOrdersMessage(msg, user).showOrder(
-      OrderType.BUY,
+    await MyOrdersMessage(msg, user).showBuyOrder(
       orderId,
       cryptoCurrencyCode,
       rate,
       amount,
       paymentMethod,
       status,
-      terms
+      terms,
+      false,
+      false
     )
   },
 
