@@ -18,6 +18,16 @@ export enum OrderType {
   BUY = 'BUY',
   SELL = 'SELL'
 }
+
+export enum OrderStatus {
+  ACTIVE = 'ACTIVE',
+  OFF = 'OFF',
+  INSUFFICIENT_FUNDS = 'INSUFFICIENT_FUNDS'
+}
+
+export const isOrderActive = (orderStatus: OrderStatus) =>
+  orderStatus === OrderStatus.ACTIVE
+
 @Table({ timestamps: true, tableName: 'Orders' })
 export class Order extends Model<Order> {
   @PrimaryKey
@@ -57,7 +67,7 @@ export class Order extends Model<Order> {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  status!: 'active' | 'matched' | 'accepted' | 'completed' | 'stopped'
+  status!: OrderStatus
 
   @AllowNull(false)
   @Column(DataType.STRING)
@@ -121,7 +131,7 @@ export class Order extends Model<Order> {
           minAmount,
           maxAmount,
           userId,
-          status: 'active',
+          status: OrderStatus.ACTIVE,
           type: OrderType.SELL,
           currencyCode
         },
@@ -143,7 +153,7 @@ export class Order extends Model<Order> {
         userId,
         minAmount,
         maxAmount,
-        status: 'active',
+        status: OrderStatus.ACTIVE,
         type: OrderType.BUY,
         currencyCode,
         price

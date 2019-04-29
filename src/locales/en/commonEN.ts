@@ -1,5 +1,6 @@
 import { PaymentMethods } from 'constants/paymentMethods'
 import { ExchangeSource } from 'constants/exchangeSource'
+import { OrderStatus } from 'models'
 
 export const commonEN = {
   'exchange-source': {
@@ -70,6 +71,13 @@ Here you can find best deals to exchange bitcoins with your local currency here
         field2: 'Account Number',
         field3: 'IFSC Code'
       }
+    }
+  },
+  order: {
+    'status-name': {
+      [OrderStatus.ACTIVE]: 'Active',
+      [OrderStatus.INSUFFICIENT_FUNDS]: 'Insufficient funds',
+      [OrderStatus.OFF]: 'Inactive'
     }
   },
   'show-transactions-title': `📗 *Transactions*

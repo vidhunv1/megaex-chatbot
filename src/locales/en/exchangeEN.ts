@@ -5,7 +5,7 @@ export const exchangeEN = {
 ✅  24/7 support via {{ supportBotUsername }}
 🔒  All deals are secured with escrow protection`,
 
-    'my-orders-cbbutton': '📖 My Orders ({{ orderCount }})',
+    'my-orders-cbbutton': 'Active Orders ({{ orderCount }})',
     'create-order-cbbutton': '📊 Create Order',
     'buy-cbbutton': '📉 Quick Buy',
     'sell-cbbutton': '📈 Quick Sell'
@@ -29,7 +29,7 @@ export const exchangeEN = {
 Select the order type.`,
     'new-buy-order-cbbutton': '📗  New buy order',
     'new-sell-order-cbbutton': '📕  New sell order',
-    'input-fixed-rate': `*Rate {{ cryptoCurrencyCode }}*
+    'input-fixed-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
 
 Enter the fixed rate of {{ cryptoCurrencyCode }} for this order (in {{ fiatCurrencyCode }}).
 
@@ -56,5 +56,28 @@ Example: *{{ marketRate }}* or *100-1000* (min-max limit)
     'select-payment-method': `💳 *Payment Method*
 
 Select the payment method`
+  },
+
+  'active-orders': {
+    'terms-not-added': 'None (Click on edit to add terms)',
+    'my-buy-order-info': `*📗 My Buy Order* - /o{{orderId}}
+
+*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
+*Payment method*: {{ paymentMethod }}
+*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
+*Status*: {{ status }}
+Terms: _{{ terms }}_
+
+*Order share link*: {{ orderLink }}
+(_Anyone who clicks on this link can directly open a deal with you._)
+`,
+    'my-sell-order-info': '',
+    'edit-amount-cbbutton': '⚖️ Amount',
+    'edit-rate-cbbutton': '💸 Rate BTC',
+    'edit-terms-cbbutton': 'Terms',
+    'edit-payment-method-cbbutton': 'Payment details',
+    'toggle-active-cbbutton': '☑️ Active',
+    'toggle-inactive-cbbutton': 'Active',
+    'delete-cbbutton': '🗑️ Delete!'
   }
 }

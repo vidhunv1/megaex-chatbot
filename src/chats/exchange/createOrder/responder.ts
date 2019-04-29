@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { CreateOrderMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { OrderType } from 'models'
+import { OrderType, OrderStatus } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethods } from 'constants/paymentMethods'
 
@@ -91,7 +91,25 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       return true
     },
     [CreateOrderStateKey.createdOrder]: async () => {
-      await CreateOrderMessage(msg, user).buyOrderCreated()
+      const orderData = _.get(
+        state[CreateOrderStateKey.inputAmountLimit],
+        'data',
+        null
+      )
+      if (orderData === null) {
+        return false
+      }
+
+      const orderInfo = await getOrderInfo(orderData.createdOrderId)
+      await CreateOrderMessage(msg, user).buyOrderCreated(
+        orderInfo.orderId,
+        orderInfo.cryptoCurrencyCode,
+        orderInfo.rate,
+        orderInfo.amount,
+        orderInfo.paymentMethod,
+        orderInfo.status,
+        orderInfo.terms
+      )
       return true
     }
   }
@@ -108,4 +126,19 @@ async function getMarketRate(
 
 async function getMarketRateSource(): Promise<ExchangeSource> {
   return ExchangeSource.BINANCE
+}
+
+async function getOrderInfo(orderId: number) {
+  return {
+    orderId,
+    cryptoCurrencyCode: CryptoCurrency.BTC,
+    rate: 382000,
+    amount: {
+      min: 0.1,
+      max: 0.5
+    },
+    paymentMethod: PaymentMethods.BANK_TRANSFER_INR,
+    status: OrderStatus.ACTIVE,
+    terms: null
+  }
 }

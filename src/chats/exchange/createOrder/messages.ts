@@ -1,6 +1,6 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, OrderType } from 'models'
+import { User, OrderType, OrderStatus } from 'models'
 import { Namespace } from 'modules/i18n'
 import { stringifyCallbackQuery } from 'chats/utils'
 import {
@@ -11,6 +11,7 @@ import {
 import { CryptoCurrency } from 'constants/currencies'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethods } from 'constants/paymentMethods'
+import { MyOrdersMessage } from '../myOrders'
 
 export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   async showCreateOrderMessage() {
@@ -160,10 +161,35 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
-  async buyOrderCreated() {
+  async buyOrderCreated(
+    orderId: number,
+    cryptoCurrencyCode: CryptoCurrency,
+    rate: number,
+    amount: {
+      min: number
+      max: number
+    },
+    paymentMethod: PaymentMethods,
+    status: OrderStatus,
+    terms: string | null
+  ) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Exchange}:create-order.buy-order-created`)
+      user.t(`${Namespace.Exchange}:create-order.buy-order-created`),
+      {
+        parse_mode: 'Markdown'
+      }
+    )
+
+    await MyOrdersMessage(msg, user).showOrder(
+      OrderType.BUY,
+      orderId,
+      cryptoCurrencyCode,
+      rate,
+      amount,
+      paymentMethod,
+      status,
+      terms
     )
   },
 
