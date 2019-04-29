@@ -6,6 +6,7 @@ import { CreateOrderMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { OrderType } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
+import { PaymentMethods } from 'constants/paymentMethods'
 
 const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
 
@@ -78,6 +79,15 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       await CreateOrderMessage(msg, user).inputLimits(
         await getMarketRate(CURRENT_CRYPTOCURRENCY, user.currencyCode)
       )
+      return true
+    },
+    [CreateOrderStateKey.cb_selectPaymentMethod]: async () => {
+      return false
+    },
+    [CreateOrderStateKey.selectPaymentMethod]: async () => {
+      await CreateOrderMessage(msg, user).selectPaymentMethod(Object.keys(
+        PaymentMethods
+      ) as PaymentMethods[])
       return true
     },
     [CreateOrderStateKey.createdOrder]: async () => {

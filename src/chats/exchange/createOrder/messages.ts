@@ -10,6 +10,7 @@ import {
 } from './types'
 import { CryptoCurrency } from 'constants/currencies'
 import { ExchangeSource } from 'constants/exchangeSource'
+import { PaymentMethods } from 'constants/paymentMethods'
 
 export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   async showCreateOrderMessage() {
@@ -169,7 +170,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   async showCreateOrderError(errorType: CreateOrderError): Promise<boolean> {
     switch (errorType) {
       case CreateOrderError.ERROR_CREATE_BUY_ORDER:
-        await await telegramHook.getWebhook.sendMessage(
+        await telegramHook.getWebhook.sendMessage(
           msg.chat.id,
           user.t(`${Namespace.Exchange}:create-order.create-error`),
           {
@@ -178,7 +179,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
         )
         return true
       case CreateOrderError.ERROR_CREATE_SELL_ORDER:
-        await await telegramHook.getWebhook.sendMessage(
+        await telegramHook.getWebhook.sendMessage(
           msg.chat.id,
           user.t(`${Namespace.Exchange}:create-order.create-error`),
           {
@@ -187,5 +188,30 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
         )
         return true
     }
+  },
+
+  async selectPaymentMethod(pmList: PaymentMethods[]) {
+    const inline: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
+      {
+        text: user.t(`payment-methods.names.${pm}`),
+        callback_data: stringifyCallbackQuery<
+          CreateOrderStateKey.cb_selectPaymentMethod,
+          CreateOrderState[CreateOrderStateKey.cb_selectPaymentMethod]
+        >(CreateOrderStateKey.cb_selectPaymentMethod, {
+          pm
+        })
+      }
+    ])
+
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: inline
+        }
+      }
+    )
   }
 })

@@ -52,6 +52,9 @@ Enter the amount in *{{ fiatCurrencyCode }}* for this order.
 Example: *{{ marketRate }}* or *100-1000* (min-max limit)
 `,
     'buy-order-created': '✅ *Buy order created*',
-    'create-error': '❌ Could not create this order. Please try again later.'
+    'create-error': '❌ Could not create this order. Please try again later.',
+    'select-payment-method': `💳 *Payment Method*
+
+Select the payment method`
   }
 }

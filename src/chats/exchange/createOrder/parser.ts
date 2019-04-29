@@ -8,6 +8,8 @@ import {
 import * as _ from 'lodash'
 import { OrderType } from 'models'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
+import { PaymentMethods } from 'constants/paymentMethods'
+import logger from 'modules/Logger'
 
 export const CreateOrderParser: Parser<ExchangeState> = async (
   msg,
@@ -86,8 +88,17 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
         'data',
         null
       )
+      const paymentMethod = _.get(
+        state[CreateOrderStateKey.cb_selectPaymentMethod],
+        'pm'
+      )
 
-      if (orderType == null || rateInput == null || !msg.text) {
+      if (
+        orderType == null ||
+        rateInput == null ||
+        paymentMethod == null ||
+        !msg.text
+      ) {
         return null
       }
 
@@ -111,7 +122,8 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
         min,
         max,
         rateInput.valueType,
-        rateInput.value
+        rateInput.value,
+        paymentMethod
       )
 
       if (orderId != null) {
@@ -138,6 +150,12 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
     },
     [CreateOrderStateKey.createdOrder]: async () => {
       return null
+    },
+    [CreateOrderStateKey.cb_selectPaymentMethod]: async () => {
+      return state
+    },
+    [CreateOrderStateKey.selectPaymentMethod]: async () => {
+      return state
     }
   }
 
@@ -164,10 +182,23 @@ function nextCreateOrderState(
     case CreateOrderStateKey.inputRate: {
       const data = _.get(state[CreateOrderStateKey.inputRate], 'data', null)
       if (data != null && data.value != null) {
-        return CreateOrderStateKey.inputAmountLimit
+        return CreateOrderStateKey.selectPaymentMethod
       } else {
         return CreateOrderStateKey.inputRate
       }
+    }
+
+    case CreateOrderStateKey.cb_selectPaymentMethod: {
+      const selectedPm = _.get(
+        state[CreateOrderStateKey.cb_selectPaymentMethod],
+        'pm',
+        null
+      )
+      if (selectedPm == null) {
+        return null
+      }
+
+      return CreateOrderStateKey.inputAmountLimit
     }
 
     case CreateOrderStateKey.inputAmountLimit: {
@@ -223,11 +254,15 @@ function nextCreateOrderState(
 }
 
 async function createOrder(
-  _orderType: OrderType,
-  _minAmount: number,
-  _maxAmount: number,
-  _rateType: 'fixed' | 'margin',
-  _rateValue: number
+  orderType: OrderType,
+  minAmount: number,
+  maxAmount: number,
+  rateType: 'fixed' | 'margin',
+  rateValue: number,
+  paymentMethod: PaymentMethods
 ): Promise<number | null> {
+  logger.error(
+    `TODO: create order ${orderType}, ${minAmount}-${maxAmount} ${rateType} ${rateValue} via ${paymentMethod}`
+  )
   return 12234
 }

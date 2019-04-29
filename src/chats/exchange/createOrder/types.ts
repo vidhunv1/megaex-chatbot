@@ -1,4 +1,5 @@
 import { OrderType } from 'models'
+import { PaymentMethods } from 'constants/paymentMethods'
 
 export enum CreateOrderStateKey {
   cb_showCreateOrder = 'cb_showCreateOrder',
@@ -13,7 +14,10 @@ export enum CreateOrderStateKey {
 
   inputRate = 'inputRate',
   inputAmountLimit = 'inputAmountLimit',
-  createdOrder = 'createdOrder'
+  selectPaymentMethod = 'selectPaymentMethod',
+  createdOrder = 'createdOrder',
+
+  cb_selectPaymentMethod = 'cb_selectPaymentMethod'
 }
 
 export enum CreateOrderError {
@@ -59,5 +63,15 @@ export interface CreateOrderState {
       valueType: 'fixed' | 'margin'
       value: number
     } | null
+  }
+
+  [CreateOrderStateKey.selectPaymentMethod]?: {
+    data: {
+      paymentMethod: PaymentMethods
+    }
+  }
+
+  [CreateOrderStateKey.cb_selectPaymentMethod]?: {
+    pm: PaymentMethods
   }
 }

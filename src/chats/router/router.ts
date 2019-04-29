@@ -77,10 +77,13 @@ export const Router = {
       // handle base
       if (msg.text === user.t('main-menu.wallet')) {
         await WalletChat.handleContext(msg, user, tUser, currentState)
-      } else if (msg.text === user.t('main-menu.exchange')) {
+      } else if (
+        msg.text ===
+        user.t('main-menu.exchange', { fiatCurrency: user.currencyCode })
+      ) {
         await ExchangeChat.handleContext(msg, user, tUser, currentState)
       } else if (msg.text === user.t('main-menu.account')) {
-        await SignupChat.handleContext(msg, user, tUser, currentState)
+        await AccountChat.handleContext(msg, user, tUser, currentState)
       } else {
         // Context Handlers
         const isHandled =
