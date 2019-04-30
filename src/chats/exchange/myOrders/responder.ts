@@ -3,7 +3,9 @@ import { Responder } from 'chats/types'
 import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { MyOrdersMessage } from './messages'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 
+const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 export const MyOrdersResponder: Responder<ExchangeState> = (
   msg,
   user,
@@ -29,9 +31,34 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     [MyOrdersStateKey.cb_editPaymentMethod]: async () => {
       return false
     },
+
     [MyOrdersStateKey.cb_editRate]: async () => {
       return false
     },
+    [MyOrdersStateKey.editRate_show]: async () => {
+      const marketRate = await getMarketRate(
+        CURRENT_CRYPTOCURRENCY_CODE,
+        user.currencyCode
+      )
+      await MyOrdersMessage(msg, user).showEditRate(
+        CURRENT_CRYPTOCURRENCY_CODE,
+        marketRate
+      )
+      return true
+    },
+
+    [MyOrdersStateKey.cb_editAmount]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.editAmount_show]: async () => {
+      const marketRate = await getMarketRate(
+        CURRENT_CRYPTOCURRENCY_CODE,
+        user.currencyCode
+      )
+      await MyOrdersMessage(msg, user).showEditAmount(marketRate)
+      return true
+    },
+
     [MyOrdersStateKey.cb_editTerms]: async () => {
       return false
     },
@@ -40,8 +67,19 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     },
     [MyOrdersStateKey.cb_toggleActive]: async () => {
       return false
+    },
+    [MyOrdersStateKey.showEditSuccess]: async () => {
+      await MyOrdersMessage(msg, user).showEditSuccess()
+      return true
     }
   }
 
   return resp[currentState.currentStateKey as MyOrdersStateKey]()
+}
+
+async function getMarketRate(
+  _cryptocurrency: CryptoCurrency,
+  _fiatCurrency: FiatCurrency
+): Promise<number> {
+  return 400000
 }

@@ -8,8 +8,10 @@ import {
 import * as _ from 'lodash'
 import { CryptoCurrency } from 'constants/currencies'
 import { PaymentMethods } from 'constants/paymentMethods'
-import { OrderStatus } from 'models'
+import { OrderStatus, RateTypes } from 'models'
 import { MyOrdersMessage } from './messages'
+import logger from 'modules/Logger'
+import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 
 export const MyOrdersParser: Parser<ExchangeState> = async (
   msg,
@@ -28,9 +30,6 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       return state
     },
     [MyOrdersStateKey.cb_deleteOrder]: async () => {
-      return null
-    },
-    [MyOrdersStateKey.cb_editAmount]: async () => {
       return null
     },
     [MyOrdersStateKey.cb_editOrder]: async () => {
@@ -61,9 +60,84 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
     [MyOrdersStateKey.cb_editPaymentMethod]: async () => {
       return null
     },
-    [MyOrdersStateKey.cb_editRate]: async () => {
-      return null
+
+    [MyOrdersStateKey.cb_editAmount]: async () => {
+      return state
     },
+    [MyOrdersStateKey.editAmount_show]: async () => {
+      let min, max
+
+      if (!msg.text) {
+        return null
+      }
+
+      if (msg.text.includes('-')) {
+        const [a, b] = msg.text.split('-')
+        min = parseFloat(a.replace(/[^\d\.]/g, '')) || 0
+        max = parseFloat(b.replace(/[^\d\.]/g, '')) || 0
+      } else {
+        min = 0
+        max = parseFloat(msg.text.replace(/[^\d\.]/g, '')) || 0
+      }
+      if (max <= 0) {
+        return state
+      }
+
+      await saveEditedAmount(min, max)
+
+      return {
+        ...state,
+        [MyOrdersStateKey.editAmount_show]: {
+          data: {
+            maxAmount: max,
+            minAmount: min
+          }
+        }
+      }
+    },
+
+    [MyOrdersStateKey.cb_editRate]: async () => {
+      return state
+    },
+    [MyOrdersStateKey.editRate_show]: async () => {
+      if (!msg.text) {
+        return null
+      }
+
+      const parsed = parseCurrencyAmount(msg.text, user.currencyCode)
+      if (msg.text.includes('%')) {
+        const valueType = RateTypes.MARGIN
+        const value = parseFloat(msg.text.replace(/[^\d\.]/g, ''))
+        await saveEditedRate(valueType, value)
+
+        return {
+          ...state,
+          [MyOrdersStateKey.editRate_show]: {
+            data: {
+              value,
+              valueType
+            }
+          }
+        }
+      } else if (parsed && parsed.amount > 0) {
+        const valueType = RateTypes.FIXED
+        const value = parsed.amount
+        await saveEditedRate(valueType, value)
+
+        return {
+          ...state,
+          [MyOrdersStateKey.editRate_show]: {
+            data: {
+              valueType,
+              value
+            }
+          }
+        }
+      }
+
+      return state
+    },
+
     [MyOrdersStateKey.cb_editTerms]: async () => {
       return null
     },
@@ -71,6 +145,9 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       return null
     },
     [MyOrdersStateKey.cb_toggleActive]: async () => {
+      return null
+    },
+    [MyOrdersStateKey.showEditSuccess]: async () => {
       return null
     }
   }
@@ -100,22 +177,88 @@ function nextMyOrdersState(
       return MyOrdersStateKey.cb_editOrder
     case MyOrdersStateKey.myOrders_show:
       return null
+
+    case MyOrdersStateKey.cb_editRate:
+      return MyOrdersStateKey.editRate_show
+    case MyOrdersStateKey.editRate_show: {
+      const data = _.get(state[MyOrdersStateKey.editRate_show], 'data', null)
+      if (data === null) {
+        return MyOrdersStateKey.editRate_show
+      }
+
+      return MyOrdersStateKey.showEditSuccess
+    }
+
+    case MyOrdersStateKey.cb_editAmount:
+      return MyOrdersStateKey.editAmount_show
+    case MyOrdersStateKey.editAmount_show: {
+      const data = _.get(state[MyOrdersStateKey.editAmount_show], 'data', null)
+      if (data === null) {
+        return MyOrdersStateKey.editAmount_show
+      }
+
+      return MyOrdersStateKey.showEditSuccess
+    }
+
     default:
       return null
   }
 }
 
+const MOCK_ORDER = {
+  cryptoCurrencyCode: CryptoCurrency.BTC,
+  rate: 382000,
+  amount: {
+    min: 0.1,
+    max: 0.5
+  },
+  paymentMethod: PaymentMethods.BANK_TRANSFER_INR,
+  status: OrderStatus.ACTIVE,
+  terms: null
+}
+
 async function getOrderInfo(orderId: number) {
   return {
-    orderId,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    rate: 382000,
-    amount: {
-      min: 0.1,
-      max: 0.5
-    },
-    paymentMethod: PaymentMethods.BANK_TRANSFER_INR,
-    status: OrderStatus.ACTIVE,
-    terms: null
+    ...MOCK_ORDER,
+    orderId
   }
 }
+
+async function saveEditedRate(valueType: RateTypes, value: number) {
+  logger.error('TODO: implement saveEditedrate')
+  return {
+    ...MOCK_ORDER,
+    rate: {
+      value,
+      valueType
+    }
+  }
+}
+
+async function saveEditedAmount(min: number, max: number) {
+  logger.error('TODO: implement saveEditedAmount')
+  return {
+    ...MOCK_ORDER,
+    amount: {
+      min,
+      max
+    }
+  }
+}
+
+// async function saveEditedTerms(terms: string) {
+//   logger.error('TODO: implement saveEditedTerms')
+//   return {
+//     ...MOCK_ORDER,
+//     terms
+//   }
+//   return true
+// }
+
+// async function saveActive(active: boolean) {
+//   logger.error('TODO: implement saveActive')
+//   return {
+//     ...MOCK_ORDER,
+//     active
+//   }
+// }

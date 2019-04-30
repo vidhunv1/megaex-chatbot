@@ -49,6 +49,12 @@ export const ExchangeChat: ChatHandler = {
             BuyStateKey.cb_buy,
             SellStateKey.cb_sell,
             MyOrdersStateKey.cb_myOrders,
+            MyOrdersStateKey.cb_editRate,
+            MyOrdersStateKey.cb_editAmount,
+            MyOrdersStateKey.cb_editTerms,
+            MyOrdersStateKey.cb_editPaymentMethod,
+            MyOrdersStateKey.cb_toggleActive,
+            MyOrdersStateKey.cb_deleteOrder,
             CreateOrderStateKey.cb_showCreateOrder,
             CreateOrderStateKey.cb_createNewOrder
           ].includes(callbackName)

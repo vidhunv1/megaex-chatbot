@@ -25,6 +25,11 @@ export enum OrderStatus {
   INSUFFICIENT_FUNDS = 'INSUFFICIENT_FUNDS'
 }
 
+export enum RateTypes {
+  MARGIN = 'MARGIN',
+  FIXED = 'FIXED'
+}
+
 export const isOrderActive = (orderStatus: OrderStatus) =>
   orderStatus === OrderStatus.ACTIVE
 

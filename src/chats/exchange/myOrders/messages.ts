@@ -8,6 +8,7 @@ import { dataFormatter } from 'utils/dataFormatter'
 import { linkCreator } from 'utils/linkCreator'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { MyOrdersStateKey, MyOrdersState } from './types'
+import { keyboardMainMenu } from 'chats/common'
 
 export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
   async showMyOrdersMessage() {
@@ -16,6 +17,63 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
       user.t(`${Namespace.Exchange}:my-orders.show-orders`),
       {
         parse_mode: 'Markdown'
+      }
+    )
+  },
+
+  async showEditRate(cryptoCurrencyCode: CryptoCurrency, marketRate: number) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:my-orders.order-edit-rate`, {
+        cryptoCurrencyCode,
+        marketRate
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: [
+            [
+              {
+                text: user.t('actions.cancel-keyboard-button')
+              }
+            ]
+          ]
+        }
+      }
+    )
+
+    return true
+  },
+
+  async showEditAmount(marketRate: number) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:create-order.input-amount-limits`, {
+        marketRate,
+        fiatCurrencyCode: user.currencyCode
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: [
+            [
+              {
+                text: user.t('actions.cancel-keyboard-button')
+              }
+            ]
+          ]
+        }
+      }
+    )
+  },
+
+  async showEditSuccess() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:my-orders.order-edit-success`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
       }
     )
   },

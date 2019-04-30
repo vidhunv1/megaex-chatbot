@@ -1,4 +1,4 @@
-import { OrderType } from 'models'
+import { OrderType, RateTypes } from 'models'
 import { PaymentMethods } from 'constants/paymentMethods'
 
 export enum CreateOrderStateKey {
@@ -60,7 +60,7 @@ export interface CreateOrderState {
 
   [CreateOrderStateKey.inputRate]?: {
     data: {
-      valueType: 'fixed' | 'margin'
+      valueType: RateTypes
       value: number
     } | null
   }

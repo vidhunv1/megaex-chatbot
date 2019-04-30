@@ -6,7 +6,7 @@ import {
   updateNextExchangeState
 } from '../ExchangeState'
 import * as _ from 'lodash'
-import { OrderType } from 'models'
+import { OrderType, RateTypes } from 'models'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { PaymentMethods } from 'constants/paymentMethods'
 import logger from 'modules/Logger'
@@ -57,7 +57,7 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
           [CreateOrderStateKey.inputRate]: {
             orderType,
             data: {
-              valueType: 'margin',
+              valueType: RateTypes.MARGIN,
               value: parseFloat(msg.text.replace(/[^\d\.]/g, ''))
             }
           }
@@ -68,7 +68,7 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
           [CreateOrderStateKey.inputRate]: {
             orderType,
             data: {
-              valueType: 'fixed',
+              valueType: RateTypes.FIXED,
               value: parsed.amount
             }
           }
@@ -257,7 +257,7 @@ async function createOrder(
   orderType: OrderType,
   minAmount: number,
   maxAmount: number,
-  rateType: 'fixed' | 'margin',
+  rateType: RateTypes,
   rateValue: number,
   paymentMethod: PaymentMethods
 ): Promise<number | null> {
