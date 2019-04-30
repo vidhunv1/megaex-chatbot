@@ -1,4 +1,5 @@
 import { RateTypes } from 'models'
+import { PaymentMethods } from 'constants/paymentMethods'
 
 export enum MyOrdersStateKey {
   cb_myOrders = 'cb_myOrders',
@@ -13,7 +14,12 @@ export enum MyOrdersStateKey {
   editAmount_show = 'editAmount_show',
 
   cb_editTerms = 'cb_editTerms',
+  editTerms_show = 'editTerms_show',
+
   cb_editPaymentMethod = 'cb_editPaymentMethod',
+  editPaymentMethod_show = 'editPaymentMethod_show',
+  cb_editPaymentMethodSelected = 'cb_editPaymentMethodSelected',
+
   cb_toggleActive = 'cb_toggleActive',
   cb_deleteOrder = 'cb_deleteOrder',
   cb_showOrder_back = 'cb_showOrder_back',
@@ -55,9 +61,20 @@ export interface MyOrdersState {
   [MyOrdersStateKey.cb_editTerms]?: {
     orderId: number
   }
+  [MyOrdersStateKey.editTerms_show]?: {
+    data: {
+      terms: string
+    } | null
+  }
+
   [MyOrdersStateKey.cb_editPaymentMethod]?: {
     orderId: number
   }
+  [MyOrdersStateKey.editPaymentMethod_show]?: {}
+  [MyOrdersStateKey.cb_editPaymentMethodSelected]?: {
+    pm: PaymentMethods
+  }
+
   [MyOrdersStateKey.cb_toggleActive]?: {
     orderId: number
   }

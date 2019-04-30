@@ -57,8 +57,25 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       )
       return state
     },
+
     [MyOrdersStateKey.cb_editPaymentMethod]: async () => {
+      return state
+    },
+    [MyOrdersStateKey.editPaymentMethod_show]: async () => {
       return null
+    },
+    [MyOrdersStateKey.cb_editPaymentMethodSelected]: async () => {
+      const selectedPaymentMethod = _.get(
+        state[MyOrdersStateKey.cb_editPaymentMethodSelected],
+        'pm',
+        null
+      )
+      if (selectedPaymentMethod === null) {
+        return null
+      }
+
+      await savePaymentMethod(selectedPaymentMethod)
+      return state
     },
 
     [MyOrdersStateKey.cb_editAmount]: async () => {
@@ -139,8 +156,26 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
     },
 
     [MyOrdersStateKey.cb_editTerms]: async () => {
-      return null
+      return state
     },
+    [MyOrdersStateKey.editTerms_show]: async () => {
+      if (!msg.text) {
+        return null
+      }
+
+      const TERMS_CHARACTER_LIMIT = 300
+      const terms = msg.text.substring(0, TERMS_CHARACTER_LIMIT)
+      await saveEditedTerms(terms)
+      return {
+        ...state,
+        [MyOrdersStateKey.editTerms_show]: {
+          data: {
+            terms
+          }
+        }
+      }
+    },
+
     [MyOrdersStateKey.cb_showOrder_back]: async () => {
       return null
     },
@@ -185,7 +220,6 @@ function nextMyOrdersState(
       if (data === null) {
         return MyOrdersStateKey.editRate_show
       }
-
       return MyOrdersStateKey.showEditSuccess
     }
 
@@ -196,7 +230,30 @@ function nextMyOrdersState(
       if (data === null) {
         return MyOrdersStateKey.editAmount_show
       }
+      return MyOrdersStateKey.showEditSuccess
+    }
 
+    case MyOrdersStateKey.cb_editTerms:
+      return MyOrdersStateKey.editTerms_show
+    case MyOrdersStateKey.editTerms_show: {
+      const data = _.get(state[MyOrdersStateKey.editTerms_show], 'data', null)
+      if (data === null) {
+        return MyOrdersStateKey.editTerms_show
+      }
+      return MyOrdersStateKey.showEditSuccess
+    }
+
+    case MyOrdersStateKey.cb_editPaymentMethod:
+      return MyOrdersStateKey.editPaymentMethod_show
+    case MyOrdersStateKey.cb_editPaymentMethodSelected: {
+      const seleceted = _.get(
+        state[MyOrdersStateKey.cb_editPaymentMethodSelected],
+        'pm',
+        null
+      )
+      if (seleceted === null) {
+        return null
+      }
       return MyOrdersStateKey.showEditSuccess
     }
 
@@ -246,14 +303,21 @@ async function saveEditedAmount(min: number, max: number) {
   }
 }
 
-// async function saveEditedTerms(terms: string) {
-//   logger.error('TODO: implement saveEditedTerms')
-//   return {
-//     ...MOCK_ORDER,
-//     terms
-//   }
-//   return true
-// }
+async function saveEditedTerms(terms: string) {
+  logger.error('TODO: implement saveEditedTerms')
+  return {
+    ...MOCK_ORDER,
+    terms
+  }
+}
+
+async function savePaymentMethod(paymentMethod: PaymentMethods) {
+  logger.error('TODO: implement savePaymentMethod')
+  return {
+    ...MOCK_ORDER,
+    paymentMethod
+  }
+}
 
 // async function saveActive(active: boolean) {
 //   logger.error('TODO: implement saveActive')

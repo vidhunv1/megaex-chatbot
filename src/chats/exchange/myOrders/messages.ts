@@ -67,6 +67,25 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
+  async showEditTerms() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:my-orders.order-edit-terms`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: [
+            [
+              {
+                text: user.t('actions.cancel-keyboard-button')
+              }
+            ]
+          ]
+        }
+      }
+    )
+  },
+
   async showEditSuccess() {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
@@ -218,5 +237,32 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     } else {
       await telegramHook.getWebhook.sendMessage(msg.chat.id, message, options)
     }
+  },
+
+  async showEditPaymentMethod(paymentMethods: PaymentMethods[]) {
+    const inline: TelegramBot.InlineKeyboardButton[][] = paymentMethods.map(
+      (pm) => [
+        {
+          text: user.t(`payment-methods.names.${pm}`),
+          callback_data: stringifyCallbackQuery<
+            MyOrdersStateKey.cb_editPaymentMethodSelected,
+            MyOrdersState[MyOrdersStateKey.cb_editPaymentMethodSelected]
+          >(MyOrdersStateKey.cb_editPaymentMethodSelected, {
+            pm
+          })
+        }
+      ]
+    )
+
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: inline
+        }
+      }
+    )
   }
 })

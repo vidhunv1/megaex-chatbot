@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { MyOrdersMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import { PaymentMethods } from 'constants/paymentMethods'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 export const MyOrdersResponder: Responder<ExchangeState> = (
@@ -28,7 +29,17 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     [MyOrdersStateKey.cb_editOrder]: async () => {
       return true
     },
+
     [MyOrdersStateKey.cb_editPaymentMethod]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.editPaymentMethod_show]: async () => {
+      await MyOrdersMessage(msg, user).showEditPaymentMethod(Object.keys(
+        PaymentMethods
+      ) as PaymentMethods[])
+      return true
+    },
+    [MyOrdersStateKey.cb_editPaymentMethodSelected]: async () => {
       return false
     },
 
@@ -62,6 +73,11 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     [MyOrdersStateKey.cb_editTerms]: async () => {
       return false
     },
+    [MyOrdersStateKey.editTerms_show]: async () => {
+      await MyOrdersMessage(msg, user).showEditTerms()
+      return true
+    },
+
     [MyOrdersStateKey.cb_showOrder_back]: async () => {
       return false
     },

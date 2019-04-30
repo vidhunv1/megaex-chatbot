@@ -43,14 +43,16 @@ Terms: _{{ terms }}_
     'delete-order-cbbutton': '🗑️ Delete!',
     'edit-order': '✏️  Edit order',
     'go-back': '⬅️  Back',
-    'order-edit-success': '✅ Your order was edited.',
+    'order-edit-success': '✅ Your order was updated.',
 
     'order-edit-rate': `*Rate {{ cryptoCurrencyCode }}*
 
 Set the rate for {{ cryptoCurrencyCode }} for this order. Write your margin in percentage(%) or set up a fixed price.
 
-Example: *2%* or *{{ marketRate }}*
-`
+Example: *2%* or *{{ marketRate }}*`,
+    'order-edit-terms': `📝 *Terms*
+
+Write your terms for the trade. This will be shown on your order.`
   },
 
   'create-order': {
