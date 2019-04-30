@@ -1,6 +1,6 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, OrderStatus } from 'models'
+import { User } from 'models'
 import { Namespace } from 'modules/i18n'
 import { PaymentMethods } from 'constants/paymentMethods'
 import { CryptoCurrency } from 'constants/currencies'
@@ -15,6 +15,16 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Exchange}:my-orders.show-orders`),
+      {
+        parse_mode: 'Markdown'
+      }
+    )
+  },
+
+  async showDeleteSuccess() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:my-orders.order-delete-success`),
       {
         parse_mode: 'Markdown'
       }
@@ -106,11 +116,12 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
       max: number
     },
     paymentMethod: PaymentMethods,
-    status: OrderStatus,
+    isEnabled: boolean,
     terms: string | null,
     showEditOptions: boolean,
     msgEdit: boolean = false
   ) {
+    console.log('showBuyOrder ' + isEnabled)
     let inline: TelegramBot.InlineKeyboardButton[][]
 
     if (!showEditOptions) {
@@ -176,13 +187,14 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
         [
           {
             text:
-              (status === OrderStatus.OFF ? '' : '☑️ ') +
+              (isEnabled === false ? '' : '☑️ ') +
               user.t(`${Namespace.Exchange}:my-orders.toggle-active-cbbutton`),
             callback_data: stringifyCallbackQuery<
               MyOrdersStateKey.cb_toggleActive,
               MyOrdersState[MyOrdersStateKey.cb_toggleActive]
             >(MyOrdersStateKey.cb_toggleActive, {
-              orderId: orderId
+              orderId: orderId,
+              isEnabled
             })
           },
           {
@@ -213,7 +225,11 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
         paymentMethod: user.t(`payment-methods.names.${paymentMethod}`),
         minAmount: amount.min,
         maxAmount: amount.max,
-        status: user.t(`order.status-name.${status}`),
+        status: user.t(
+          `${Namespace.Exchange}:my-orders.${
+            isEnabled === true ? 'order-enabled' : 'order-disabled'
+          }`
+        ),
         orderLink: linkCreator.getOrderLink(orderId),
         terms:
           terms != null && terms != ''

@@ -17,9 +17,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      status: {
+      isEnabled: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.BOOLEAN
       },
       price: {
         allowNull: true,

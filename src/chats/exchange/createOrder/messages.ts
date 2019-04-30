@@ -1,6 +1,6 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, OrderType, OrderStatus } from 'models'
+import { User, OrderType } from 'models'
 import { Namespace } from 'modules/i18n'
 import { stringifyCallbackQuery } from 'chats/utils'
 import {
@@ -170,7 +170,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       max: number
     },
     paymentMethod: PaymentMethods,
-    status: OrderStatus,
+    isEnabled: boolean,
     terms: string | null
   ) {
     await telegramHook.getWebhook.sendMessage(
@@ -187,7 +187,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       rate,
       amount,
       paymentMethod,
-      status,
+      isEnabled,
       terms,
       false,
       false

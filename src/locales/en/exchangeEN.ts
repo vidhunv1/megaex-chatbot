@@ -20,6 +20,9 @@ export const exchangeEN = {
   },
 
   'my-orders': {
+    'order-enabled': 'Active',
+    'order-disabled': `Inactive
+_(Click on Active button to enable this order.)_`,
     'show-orders': 'TODO: Show my orders',
 
     'terms-not-added': 'None (Click on edit to add terms)',
@@ -52,7 +55,8 @@ Set the rate for {{ cryptoCurrencyCode }} for this order. Write your margin in p
 Example: *2%* or *{{ marketRate }}*`,
     'order-edit-terms': `📝 *Terms*
 
-Write your terms for the trade. This will be shown on your order.`
+Write your terms for the trade. This will be shown on your order.`,
+    'order-delete-success': 'Order deleted'
   },
 
   'create-order': {

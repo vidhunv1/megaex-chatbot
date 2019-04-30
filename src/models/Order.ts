@@ -8,8 +8,7 @@ import {
   PrimaryKey,
   AllowNull,
   AutoIncrement,
-  Default,
-  Sequelize
+  Default
 } from 'sequelize-typescript'
 import { User, Transaction, Wallet } from '.'
 import logger from '../modules/Logger'
@@ -19,19 +18,10 @@ export enum OrderType {
   SELL = 'SELL'
 }
 
-export enum OrderStatus {
-  ACTIVE = 'ACTIVE',
-  OFF = 'OFF',
-  INSUFFICIENT_FUNDS = 'INSUFFICIENT_FUNDS'
-}
-
 export enum RateTypes {
   MARGIN = 'MARGIN',
   FIXED = 'FIXED'
 }
-
-export const isOrderActive = (orderStatus: OrderStatus) =>
-  orderStatus === OrderStatus.ACTIVE
 
 @Table({ timestamps: true, tableName: 'Orders' })
 export class Order extends Model<Order> {
@@ -71,8 +61,8 @@ export class Order extends Model<Order> {
   type!: OrderType
 
   @AllowNull(false)
-  @Column(DataType.STRING)
-  status!: OrderStatus
+  @Column(DataType.BOOLEAN)
+  isEnabled!: boolean
 
   @AllowNull(false)
   @Column(DataType.STRING)
@@ -136,7 +126,7 @@ export class Order extends Model<Order> {
           minAmount,
           maxAmount,
           userId,
-          status: OrderStatus.ACTIVE,
+          isEnabled: true,
           type: OrderType.SELL,
           currencyCode
         },
@@ -158,7 +148,7 @@ export class Order extends Model<Order> {
         userId,
         minAmount,
         maxAmount,
-        status: OrderStatus.ACTIVE,
+        isEnabled: true,
         type: OrderType.BUY,
         currencyCode,
         price
@@ -170,13 +160,6 @@ export class Order extends Model<Order> {
 
   async updateAccountVerifiedFilter(shouldSet: boolean) {
     await this.update({ accountVerifiedFilter: shouldSet })
-  }
-
-  async getActiveOrders(userId: number) {
-    const activeOrders = await Order.findAll({
-      where: { userId: userId, status: { [Sequelize.Op.ne]: 'completed' } }
-    })
-    console.log('Active orders: ' + JSON.stringify(activeOrders))
   }
 }
 

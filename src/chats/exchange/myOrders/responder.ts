@@ -23,6 +23,10 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     [MyOrdersStateKey.cb_deleteOrder]: async () => {
       return false
     },
+    [MyOrdersStateKey.showDeleteSuccess]: async () => {
+      await MyOrdersMessage(msg, user).showDeleteSuccess()
+      return true
+    },
     [MyOrdersStateKey.cb_editAmount]: async () => {
       return false
     },

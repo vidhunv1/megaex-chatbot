@@ -1,3 +1,4 @@
+import telegramHook from 'modules/TelegramHook'
 import { MyOrdersStateKey } from './types'
 import { Parser } from 'chats/types'
 import {
@@ -8,7 +9,7 @@ import {
 import * as _ from 'lodash'
 import { CryptoCurrency } from 'constants/currencies'
 import { PaymentMethods } from 'constants/paymentMethods'
-import { OrderStatus, RateTypes } from 'models'
+import { RateTypes } from 'models'
 import { MyOrdersMessage } from './messages'
 import logger from 'modules/Logger'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
@@ -29,9 +30,29 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
     [MyOrdersStateKey.myOrders_show]: async () => {
       return state
     },
+
     [MyOrdersStateKey.cb_deleteOrder]: async () => {
+      const orderId = _.get(
+        state[MyOrdersStateKey.cb_deleteOrder],
+        'orderId',
+        null
+      )
+      if (orderId === null) {
+        return null
+      }
+
+      await deleteOrder(orderId)
+
+      await telegramHook.getWebhook.editMessageText('- -', {
+        message_id: msg.message_id,
+        chat_id: msg.chat.id
+      })
+      return state
+    },
+    [MyOrdersStateKey.showDeleteSuccess]: async () => {
       return null
     },
+
     [MyOrdersStateKey.cb_editOrder]: async () => {
       const orderId = _.get(
         state[MyOrdersStateKey.cb_editOrder],
@@ -50,7 +71,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         orderInfo.rate,
         orderInfo.amount,
         orderInfo.paymentMethod,
-        orderInfo.status,
+        orderInfo.isEnabled,
         orderInfo.terms,
         true,
         true
@@ -180,7 +201,30 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       return null
     },
     [MyOrdersStateKey.cb_toggleActive]: async () => {
-      return null
+      const isEnabled = _.get(
+        state[MyOrdersStateKey.cb_toggleActive],
+        'isEnabled',
+        null
+      )
+      if (isEnabled === null) {
+        return null
+      }
+
+      const orderInfo = await saveActive(JSON.parse(isEnabled + ''))
+
+      await MyOrdersMessage(msg, user).showBuyOrder(
+        orderInfo.orderId,
+        orderInfo.cryptoCurrencyCode,
+        orderInfo.rate,
+        orderInfo.amount,
+        orderInfo.paymentMethod,
+        orderInfo.isEnabled,
+        orderInfo.terms,
+        true,
+        true
+      )
+
+      return state
     },
     [MyOrdersStateKey.showEditSuccess]: async () => {
       return null
@@ -257,12 +301,18 @@ function nextMyOrdersState(
       return MyOrdersStateKey.showEditSuccess
     }
 
+    case MyOrdersStateKey.cb_toggleActive:
+      return MyOrdersStateKey.showEditSuccess
+
+    case MyOrdersStateKey.cb_deleteOrder:
+      return MyOrdersStateKey.showDeleteSuccess
     default:
       return null
   }
 }
 
 const MOCK_ORDER = {
+  orderId: 213213,
   cryptoCurrencyCode: CryptoCurrency.BTC,
   rate: 382000,
   amount: {
@@ -270,7 +320,7 @@ const MOCK_ORDER = {
     max: 0.5
   },
   paymentMethod: PaymentMethods.BANK_TRANSFER_INR,
-  status: OrderStatus.ACTIVE,
+  isEnabled: true,
   terms: null
 }
 
@@ -319,10 +369,15 @@ async function savePaymentMethod(paymentMethod: PaymentMethods) {
   }
 }
 
-// async function saveActive(active: boolean) {
-//   logger.error('TODO: implement saveActive')
-//   return {
-//     ...MOCK_ORDER,
-//     active
-//   }
-// }
+async function saveActive(isEnabled: boolean) {
+  logger.error('TODO: implement saveActive ' + isEnabled)
+  return {
+    ...MOCK_ORDER,
+    isEnabled: !isEnabled
+  }
+}
+
+async function deleteOrder(orderId: number): Promise<boolean> {
+  logger.error('TODO: implement delete order ' + orderId)
+  return true
+}

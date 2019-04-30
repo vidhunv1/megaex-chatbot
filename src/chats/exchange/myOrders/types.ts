@@ -21,10 +21,13 @@ export enum MyOrdersStateKey {
   cb_editPaymentMethodSelected = 'cb_editPaymentMethodSelected',
 
   cb_toggleActive = 'cb_toggleActive',
-  cb_deleteOrder = 'cb_deleteOrder',
+
   cb_showOrder_back = 'cb_showOrder_back',
 
-  showEditSuccess = 'showEditSuccess'
+  showEditSuccess = 'showEditSuccess',
+
+  cb_deleteOrder = 'cb_deleteOrder',
+  showDeleteSuccess = 'showDeleteSuccess'
 }
 
 export interface MyOrdersState {
@@ -77,10 +80,9 @@ export interface MyOrdersState {
 
   [MyOrdersStateKey.cb_toggleActive]?: {
     orderId: number
+    isEnabled: boolean
   }
-  [MyOrdersStateKey.cb_toggleActive]?: {
-    orderId: number
-  }
+
   [MyOrdersStateKey.cb_deleteOrder]?: {
     orderId: number
   }

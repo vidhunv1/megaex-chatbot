@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { CreateOrderMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { OrderType, OrderStatus } from 'models'
+import { OrderType } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethods } from 'constants/paymentMethods'
 
@@ -107,7 +107,7 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
         orderInfo.rate,
         orderInfo.amount,
         orderInfo.paymentMethod,
-        orderInfo.status,
+        orderInfo.isEnabled,
         orderInfo.terms
       )
       return true
@@ -138,7 +138,7 @@ async function getOrderInfo(orderId: number) {
       max: 0.5
     },
     paymentMethod: PaymentMethods.BANK_TRANSFER_INR,
-    status: OrderStatus.ACTIVE,
+    isEnabled: true,
     terms: null
   }
 }
