@@ -20,6 +20,10 @@ export enum MyOrdersStateKey {
   editPaymentMethod_show = 'editPaymentMethod_show',
   cb_editPaymentMethodSelected = 'cb_editPaymentMethodSelected',
 
+  cb_editPaymentDetails = 'cb_editPaymentDetails',
+  editPaymentDetails_show = 'editPaymentDetails_show',
+  editPaymentDetails_input = 'editPaymentDetails_input',
+
   cb_toggleActive = 'cb_toggleActive',
 
   cb_showOrder_back = 'cb_showOrder_back',
@@ -87,4 +91,8 @@ export interface MyOrdersState {
     orderId: number
   }
   [MyOrdersStateKey.cb_showOrder_back]?: {}
+
+  [MyOrdersStateKey.cb_editPaymentDetails]?: {
+    paymentMethod: PaymentMethods
+  }
 }

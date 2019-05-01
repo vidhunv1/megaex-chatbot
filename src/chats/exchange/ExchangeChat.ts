@@ -55,6 +55,7 @@ export const ExchangeChat: ChatHandler = {
             MyOrdersStateKey.cb_editPaymentMethod,
             MyOrdersStateKey.cb_toggleActive,
             MyOrdersStateKey.cb_deleteOrder,
+            MyOrdersStateKey.cb_editOrder,
             CreateOrderStateKey.cb_showCreateOrder,
             CreateOrderStateKey.cb_createNewOrder
           ].includes(callbackName)

@@ -9,7 +9,7 @@ import {
 import * as _ from 'lodash'
 import { CryptoCurrency } from 'constants/currencies'
 import { PaymentMethods } from 'constants/paymentMethods'
-import { RateTypes } from 'models'
+import { RateTypes, OrderType } from 'models'
 import { MyOrdersMessage } from './messages'
 import logger from 'modules/Logger'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
@@ -65,18 +65,45 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
 
       const orderInfo = await getOrderInfo(orderId)
 
-      await MyOrdersMessage(msg, user).showBuyOrder(
-        orderInfo.orderId,
-        orderInfo.cryptoCurrencyCode,
-        orderInfo.rate,
-        orderInfo.amount,
-        orderInfo.paymentMethod,
-        orderInfo.isEnabled,
-        orderInfo.terms,
-        true,
-        true
-      )
+      if (orderInfo.orderType === OrderType.SELL) {
+        await MyOrdersMessage(msg, user).showSellOrder(
+          orderInfo.orderId,
+          orderInfo.cryptoCurrencyCode,
+          orderInfo.rate,
+          orderInfo.amount,
+          await getAvailableBalance(orderInfo.cryptoCurrencyCode),
+          orderInfo.paymentMethod,
+          [],
+          orderInfo.isEnabled,
+          orderInfo.terms,
+          true,
+          true
+        )
+      } else {
+        await MyOrdersMessage(msg, user).showBuyOrder(
+          orderInfo.orderId,
+          orderInfo.cryptoCurrencyCode,
+          orderInfo.rate,
+          orderInfo.amount,
+          orderInfo.paymentMethod,
+          orderInfo.isEnabled,
+          orderInfo.terms,
+          true,
+          true
+        )
+      }
+
       return state
+    },
+
+    [MyOrdersStateKey.cb_editPaymentDetails]: async () => {
+      return null
+    },
+    [MyOrdersStateKey.editPaymentDetails_show]: async () => {
+      return null
+    },
+    [MyOrdersStateKey.editPaymentDetails_input]: async () => {
+      return null
     },
 
     [MyOrdersStateKey.cb_editPaymentMethod]: async () => {
@@ -206,23 +233,44 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         'isEnabled',
         null
       )
-      if (isEnabled === null) {
+      const orderId = _.get(
+        state[MyOrdersStateKey.cb_toggleActive],
+        'orderId',
+        null
+      )
+      if (isEnabled === null || orderId === null) {
         return null
       }
 
       const orderInfo = await saveActive(JSON.parse(isEnabled + ''))
 
-      await MyOrdersMessage(msg, user).showBuyOrder(
-        orderInfo.orderId,
-        orderInfo.cryptoCurrencyCode,
-        orderInfo.rate,
-        orderInfo.amount,
-        orderInfo.paymentMethod,
-        orderInfo.isEnabled,
-        orderInfo.terms,
-        true,
-        true
-      )
+      if (orderInfo.orderType === OrderType.SELL) {
+        await MyOrdersMessage(msg, user).showSellOrder(
+          orderInfo.orderId,
+          orderInfo.cryptoCurrencyCode,
+          orderInfo.rate,
+          orderInfo.amount,
+          await getAvailableBalance(orderInfo.cryptoCurrencyCode),
+          orderInfo.paymentMethod,
+          [],
+          orderInfo.isEnabled,
+          orderInfo.terms,
+          true,
+          true
+        )
+      } else {
+        await MyOrdersMessage(msg, user).showBuyOrder(
+          orderInfo.orderId,
+          orderInfo.cryptoCurrencyCode,
+          orderInfo.rate,
+          orderInfo.amount,
+          orderInfo.paymentMethod,
+          orderInfo.isEnabled,
+          orderInfo.terms,
+          true,
+          true
+        )
+      }
 
       return state
     },
@@ -313,15 +361,22 @@ function nextMyOrdersState(
 
 const MOCK_ORDER = {
   orderId: 213213,
+  orderType: OrderType.SELL,
   cryptoCurrencyCode: CryptoCurrency.BTC,
   rate: 382000,
   amount: {
     min: 0.1,
     max: 0.5
   },
-  paymentMethod: PaymentMethods.BANK_TRANSFER_INR,
+  paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
   isEnabled: true,
   terms: null
+}
+
+async function getAvailableBalance(
+  _currencyCode: CryptoCurrency
+): Promise<number> {
+  return 0
 }
 
 async function getOrderInfo(orderId: number) {

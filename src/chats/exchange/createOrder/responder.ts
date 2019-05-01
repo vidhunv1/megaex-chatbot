@@ -85,9 +85,25 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       return false
     },
     [CreateOrderStateKey.selectPaymentMethod]: async () => {
-      await CreateOrderMessage(msg, user).selectPaymentMethod(Object.keys(
-        PaymentMethods
-      ) as PaymentMethods[])
+      const orderType = _.get(
+        state[CreateOrderStateKey.cb_createNewOrder],
+        'orderType',
+        null
+      )
+      if (orderType === null) {
+        return false
+      }
+
+      if (orderType === OrderType.BUY) {
+        await CreateOrderMessage(msg, user).selectBuyPaymentMethod(Object.keys(
+          PaymentMethods
+        ) as PaymentMethods[])
+      } else {
+        await CreateOrderMessage(msg, user).selectSellPaymentMethod(
+          Object.keys(PaymentMethods) as PaymentMethods[],
+          await getAddedPaymentMethods()
+        )
+      }
       return true
     },
     [CreateOrderStateKey.createdOrder]: async () => {
@@ -101,15 +117,30 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       }
 
       const orderInfo = await getOrderInfo(orderData.createdOrderId)
-      await CreateOrderMessage(msg, user).buyOrderCreated(
-        orderInfo.orderId,
-        orderInfo.cryptoCurrencyCode,
-        orderInfo.rate,
-        orderInfo.amount,
-        orderInfo.paymentMethod,
-        orderInfo.isEnabled,
-        orderInfo.terms
-      )
+
+      if (orderData.orderType === OrderType.BUY) {
+        await CreateOrderMessage(msg, user).buyOrderCreated(
+          orderInfo.orderId,
+          orderInfo.cryptoCurrencyCode,
+          orderInfo.rate,
+          orderInfo.amount,
+          orderInfo.paymentMethod,
+          orderInfo.isEnabled,
+          orderInfo.terms
+        )
+      } else {
+        await CreateOrderMessage(msg, user).sellOrderCreated(
+          orderInfo.orderId,
+          orderInfo.cryptoCurrencyCode,
+          orderInfo.rate,
+          orderInfo.amount,
+          await getAvailableBalance(orderInfo.cryptoCurrencyCode),
+          orderInfo.paymentMethod,
+          orderInfo.paymentMethodFields,
+          orderInfo.isEnabled,
+          orderInfo.terms
+        )
+      }
       return true
     }
   }
@@ -137,8 +168,36 @@ async function getOrderInfo(orderId: number) {
       min: 0.1,
       max: 0.5
     },
-    paymentMethod: PaymentMethods.BANK_TRANSFER_INR,
+    paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+    paymentMethodFields: [],
     isEnabled: true,
     terms: null
   }
+}
+
+interface PaymentMethodDetails {
+  paymentMethod: PaymentMethods
+  fields: string[]
+  id: number
+}
+
+async function getAddedPaymentMethods(): Promise<PaymentMethodDetails[]> {
+  return [
+    {
+      paymentMethod: PaymentMethods.PAYTM,
+      fields: ['91 9113869518'],
+      id: 1
+    },
+    {
+      paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+      fields: ['Axis bank', '1982731289371', 'AX001211'],
+      id: 2
+    }
+  ]
+}
+
+async function getAvailableBalance(
+  _currencyCode: CryptoCurrency
+): Promise<number> {
+  return 0.1
 }

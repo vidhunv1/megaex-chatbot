@@ -117,20 +117,36 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
       }
 
       let orderId: number | null = null
-      orderId = await createOrder(
-        orderType,
-        min,
-        max,
-        rateInput.valueType,
-        rateInput.value,
-        paymentMethod
-      )
+      if (orderType === OrderType.BUY) {
+        orderId = await createBuyOrder(
+          min,
+          max,
+          rateInput.valueType,
+          rateInput.value,
+          paymentMethod
+        )
+      } else {
+        const pmid = _.get(
+          state[CreateOrderStateKey.cb_selectPaymentMethod],
+          'pmId',
+          null
+        )
+        orderId = await createSellOrder(
+          min,
+          max,
+          rateInput.valueType,
+          rateInput.value,
+          paymentMethod,
+          pmid != null ? JSON.parse(pmid + '') : null
+        )
+      }
 
       if (orderId != null) {
         return {
           ...state,
           [CreateOrderStateKey.inputAmountLimit]: {
             data: {
+              orderType,
               minAmount: min,
               maxAmount: max,
               createdOrderId: orderId
@@ -253,8 +269,7 @@ function nextCreateOrderState(
   }
 }
 
-async function createOrder(
-  orderType: OrderType,
+async function createBuyOrder(
   minAmount: number,
   maxAmount: number,
   rateType: RateTypes,
@@ -262,7 +277,21 @@ async function createOrder(
   paymentMethod: PaymentMethods
 ): Promise<number | null> {
   logger.error(
-    `TODO: create order ${orderType}, ${minAmount}-${maxAmount} ${rateType} ${rateValue} via ${paymentMethod}`
+    `TODO: create BUY order ${minAmount}-${maxAmount} ${rateType} ${rateValue} via ${paymentMethod}`
+  )
+  return 12234
+}
+
+async function createSellOrder(
+  minAmount: number,
+  maxAmount: number,
+  rateType: RateTypes,
+  rateValue: number,
+  paymentMethod: PaymentMethods,
+  addedPaymentMethodId: number | null
+): Promise<number | null> {
+  logger.error(
+    `TODO: create BUY order ${minAmount}-${maxAmount} ${rateType} ${rateValue} via ${paymentMethod} addedPM: ${addedPaymentMethodId}`
   )
   return 12234
 }

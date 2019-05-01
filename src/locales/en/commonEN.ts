@@ -53,7 +53,13 @@ Here you can find best deals to exchange bitcoins with your local currency here
       [PaymentMethods.PAYTM]: 'PayTM',
       [PaymentMethods.UPI]: 'UPI',
       [PaymentMethods.CASH]: 'Direct cash',
-      [PaymentMethods.BANK_TRANSFER_INR]: 'Bank transfer'
+      [PaymentMethods.BANK_TRANSFER_IMPS_INR]: 'IMPS bank transfer'
+    },
+    'short-names': {
+      [PaymentMethods.PAYTM]: 'PayTM',
+      [PaymentMethods.UPI]: 'UPI',
+      [PaymentMethods.CASH]: 'Direct cash',
+      [PaymentMethods.BANK_TRANSFER_IMPS_INR]: 'IMPS'
     },
     fields: {
       [PaymentMethods.PAYTM]: {
@@ -65,7 +71,7 @@ Here you can find best deals to exchange bitcoins with your local currency here
       [PaymentMethods.CASH]: {
         field1: 'location'
       },
-      [PaymentMethods.BANK_TRANSFER_INR]: {
+      [PaymentMethods.BANK_TRANSFER_IMPS_INR]: {
         field1: 'Bank name',
         field2: 'Account Number',
         field3: 'IFSC Code'

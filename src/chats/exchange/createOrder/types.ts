@@ -53,6 +53,7 @@ export interface CreateOrderState {
     data: {
       minAmount: number
       maxAmount: number
+      orderType: OrderType
       createdOrderId: number
     } | null
     error: CreateOrderError.ERROR_CREATE_BUY_ORDER | null
@@ -73,5 +74,6 @@ export interface CreateOrderState {
 
   [CreateOrderStateKey.cb_selectPaymentMethod]?: {
     pm: PaymentMethods
+    pmId?: number
   }
 }

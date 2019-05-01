@@ -47,6 +47,16 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
       return false
     },
 
+    [MyOrdersStateKey.cb_editPaymentDetails]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.editPaymentDetails_show]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.editPaymentDetails_input]: async () => {
+      return false
+    },
+
     [MyOrdersStateKey.cb_editRate]: async () => {
       return false
     },

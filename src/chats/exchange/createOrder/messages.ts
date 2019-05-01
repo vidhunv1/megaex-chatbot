@@ -10,7 +10,10 @@ import {
 } from './types'
 import { CryptoCurrency } from 'constants/currencies'
 import { ExchangeSource } from 'constants/exchangeSource'
-import { PaymentMethods } from 'constants/paymentMethods'
+import {
+  PaymentMethods,
+  PaymentMethodPrimaryFieldIndex
+} from 'constants/paymentMethods'
 import { MyOrdersMessage } from '../myOrders'
 
 export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
@@ -194,6 +197,43 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
+  async sellOrderCreated(
+    orderId: number,
+    cryptoCurrencyCode: CryptoCurrency,
+    rate: number,
+    amount: {
+      min: number
+      max: number
+    },
+    availableBalance: number,
+    paymentMethod: PaymentMethods,
+    paymentMethodFields: string[],
+    isEnabled: boolean,
+    terms: string | null
+  ) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:create-order.sell-order-created`),
+      {
+        parse_mode: 'Markdown'
+      }
+    )
+
+    await MyOrdersMessage(msg, user).showSellOrder(
+      orderId,
+      cryptoCurrencyCode,
+      rate,
+      amount,
+      availableBalance,
+      paymentMethod,
+      paymentMethodFields,
+      isEnabled,
+      terms,
+      false,
+      false
+    )
+  },
+
   async showCreateOrderError(errorType: CreateOrderError): Promise<boolean> {
     switch (errorType) {
       case CreateOrderError.ERROR_CREATE_BUY_ORDER:
@@ -217,7 +257,56 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     }
   },
 
-  async selectPaymentMethod(pmList: PaymentMethods[]) {
+  async selectSellPaymentMethod(
+    pmList: PaymentMethods[],
+    addedPM: {
+      paymentMethod: PaymentMethods
+      fields: string[]
+      id: number
+    }[]
+  ) {
+    const inline1: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
+      {
+        text: user.t(`payment-methods.names.${pm}`),
+        callback_data: stringifyCallbackQuery<
+          CreateOrderStateKey.cb_selectPaymentMethod,
+          CreateOrderState[CreateOrderStateKey.cb_selectPaymentMethod]
+        >(CreateOrderStateKey.cb_selectPaymentMethod, {
+          pm
+        })
+      }
+    ])
+
+    const inline2: TelegramBot.InlineKeyboardButton[][] = addedPM.map((pm) => [
+      {
+        text: `${user.t(
+          `payment-methods.short-names.${pm.paymentMethod}`
+        )}-${pm.fields[
+          PaymentMethodPrimaryFieldIndex[pm.paymentMethod]
+        ].substring(0, 4)}***`,
+        callback_data: stringifyCallbackQuery<
+          CreateOrderStateKey.cb_selectPaymentMethod,
+          CreateOrderState[CreateOrderStateKey.cb_selectPaymentMethod]
+        >(CreateOrderStateKey.cb_selectPaymentMethod, {
+          pm: pm.paymentMethod,
+          pmId: pm.id
+        })
+      }
+    ])
+
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [...inline2, ...inline1]
+        }
+      }
+    )
+  },
+
+  async selectBuyPaymentMethod(pmList: PaymentMethods[]) {
     const inline: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
       {
         text: user.t(`payment-methods.names.${pm}`),

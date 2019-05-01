@@ -319,7 +319,7 @@ const getAddedPaymentMethods = (id?: number): PaymentMethodFields[] => {
   const pms = [
     {
       id: 1,
-      paymentMethod: PaymentMethods.BANK_TRANSFER_INR,
+      paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
       fields: ['Axis Bank', '10291029120912', 'IOBA000124']
     },
     {

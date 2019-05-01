@@ -25,7 +25,7 @@ export const exchangeEN = {
 _(Click on Active button to enable this order.)_`,
     'show-orders': 'TODO: Show my orders',
 
-    'terms-not-added': 'None (Click on edit to add terms)',
+    'terms-not-added': 'None',
     'my-buy-order-info': `*📗 My Buy Order* - /o{{orderId}}
 
 *Rate {{ cryptoCurrencyCode }}*: {{ rate }}
@@ -37,17 +37,27 @@ Terms: _{{ terms }}_
 *Order share link*: {{ orderLink }}
 (_Anyone who clicks on this link can directly open a deal with you._)
 `,
-    'my-sell-order-info': '',
+    'my-sell-order-info': `*📕 My Sell Order* - /o{{orderId}}
+
+*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
+*Payment details*: {{ paymentDetails }}
+*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
+*Status*: {{ status }}
+Terms: _{{ terms }}_
+
+*Order share link*: {{ orderLink }}
+(_Anyone who clicks on this link can directly open a deal with you._)
+`,
     'edit-amount-cbbutton': '⚖️ Amount',
     'edit-rate-cbbutton': '💸 Rate BTC',
     'edit-terms-cbbutton': '📝 Terms',
-    'edit-payment-method-cbbutton': '💳 Payment details',
+    'edit-payment-method-cbbutton': '💳 Payment method',
     'toggle-active-cbbutton': 'Active',
     'delete-order-cbbutton': '🗑️ Delete!',
     'edit-order': '✏️  Edit order',
     'go-back': '⬅️  Back',
     'order-edit-success': '✅ Your order was updated.',
-
+    'edit-payment-details': '📃 Update payment info',
     'order-edit-rate': `*Rate {{ cryptoCurrencyCode }}*
 
 Set the rate for {{ cryptoCurrencyCode }} for this order. Write your margin in percentage(%) or set up a fixed price.
@@ -88,6 +98,7 @@ Enter the amount in *{{ fiatCurrencyCode }}* for this order.
 Example: *{{ marketRate }}* or *100-1000* (min-max limit)
 `,
     'buy-order-created': '✅ *Buy order created*',
+    'sell-order-created': '✅ *Sell order created*',
     'create-error': '❌ Could not create this order. Please try again later.',
     'select-payment-method': `💳 *Payment Method*
 
