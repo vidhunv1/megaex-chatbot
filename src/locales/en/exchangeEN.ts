@@ -21,6 +21,7 @@ export const exchangeEN = {
 
   'my-orders': {
     'order-enabled': 'Active',
+    'input-payment-details-field': `Write your *{{ fieldName }}* for *{{ paymentMethod}}*`,
     'order-disabled': `Inactive
 _(Click on Active button to enable this order.)_`,
     'show-orders': 'TODO: Show my orders',

@@ -4,13 +4,16 @@ import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { MyOrdersMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { PaymentMethods } from 'constants/paymentMethods'
+import {
+  PaymentMethods,
+  PaymentMethodsFieldsLocale
+} from 'constants/paymentMethods'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 export const MyOrdersResponder: Responder<ExchangeState> = (
   msg,
   user,
-  currentState
+  state
 ) => {
   const resp: Record<MyOrdersStateKey, () => Promise<boolean>> = {
     [MyOrdersStateKey.cb_myOrders]: async () => {
@@ -51,10 +54,26 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
       return false
     },
     [MyOrdersStateKey.editPaymentDetails_show]: async () => {
-      return false
-    },
-    [MyOrdersStateKey.editPaymentDetails_input]: async () => {
-      return false
+      const details = _.get(
+        state[MyOrdersStateKey.editPaymentDetails_show],
+        'data',
+        null
+      )
+      if (details === null) {
+        return false
+      }
+
+      if (
+        details.fields.length <=
+        PaymentMethodsFieldsLocale[details.paymentMethod].length
+      ) {
+        await MyOrdersMessage(msg, user).inputPaymentDetails(
+          details.paymentMethod,
+          details.fields.length + 1
+        )
+      }
+
+      return true
     },
 
     [MyOrdersStateKey.cb_editRate]: async () => {
@@ -104,7 +123,7 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     }
   }
 
-  return resp[currentState.currentStateKey as MyOrdersStateKey]()
+  return resp[state.currentStateKey as MyOrdersStateKey]()
 }
 
 async function getMarketRate(

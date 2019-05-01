@@ -35,6 +35,24 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
+  async inputPaymentDetails(
+    paymentMethod: PaymentMethods,
+    nextInputFieldIndex: number
+  ) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:my-orders.input-payment-details-field`, {
+        paymentMethod: user.t(`payment-methods.names.${paymentMethod}`),
+        fieldName: user.t(
+          `payment-methods.fields.${paymentMethod}.field${nextInputFieldIndex}`
+        )
+      }),
+      {
+        parse_mode: 'Markdown'
+      }
+    )
+  },
+
   async showEditRate(cryptoCurrencyCode: CryptoCurrency, marketRate: number) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
@@ -299,7 +317,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
             MyOrdersStateKey.cb_editPaymentDetails,
             MyOrdersState[MyOrdersStateKey.cb_editPaymentDetails]
           >(MyOrdersStateKey.cb_editPaymentDetails, {
-            paymentMethod
+            pm: paymentMethod
           })
         })
       }
@@ -328,7 +346,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
               MyOrdersStateKey.cb_editPaymentDetails,
               MyOrdersState[MyOrdersStateKey.cb_editPaymentDetails]
             >(MyOrdersStateKey.cb_editPaymentDetails, {
-              paymentMethod
+              pm: paymentMethod
             })
           }
         ],

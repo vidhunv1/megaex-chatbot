@@ -8,7 +8,10 @@ import {
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { CryptoCurrency } from 'constants/currencies'
-import { PaymentMethods } from 'constants/paymentMethods'
+import {
+  PaymentMethods,
+  PaymentMethodsFieldsLocale
+} from 'constants/paymentMethods'
 import { RateTypes, OrderType } from 'models'
 import { MyOrdersMessage } from './messages'
 import logger from 'modules/Logger'
@@ -97,13 +100,54 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
     },
 
     [MyOrdersStateKey.cb_editPaymentDetails]: async () => {
-      return null
+      const paymentMethod = _.get(
+        state[MyOrdersStateKey.cb_editPaymentDetails],
+        'pm',
+        null
+      )
+      if (paymentMethod === null) {
+        return null
+      }
+
+      return {
+        ...state,
+        [MyOrdersStateKey.editPaymentDetails_show]: {
+          data: {
+            paymentMethod,
+            fields: []
+          }
+        }
+      }
     },
     [MyOrdersStateKey.editPaymentDetails_show]: async () => {
-      return null
-    },
-    [MyOrdersStateKey.editPaymentDetails_input]: async () => {
-      return null
+      const pmDetailsData = _.get(
+        state[MyOrdersStateKey.editPaymentDetails_show],
+        'data',
+        null
+      )
+      if (pmDetailsData === null || !msg.text) {
+        return null
+      }
+
+      const fields = pmDetailsData.fields
+      fields.push(msg.text)
+
+      if (
+        pmDetailsData.fields.length ===
+        PaymentMethodsFieldsLocale[pmDetailsData.paymentMethod].length
+      ) {
+        await savePaymentDetails(pmDetailsData.paymentMethod, fields)
+      }
+
+      return {
+        ...state,
+        [MyOrdersStateKey.editPaymentDetails_show]: {
+          data: {
+            ...pmDetailsData,
+            fields
+          }
+        }
+      }
     },
 
     [MyOrdersStateKey.cb_editPaymentMethod]: async () => {
@@ -354,6 +398,28 @@ function nextMyOrdersState(
 
     case MyOrdersStateKey.cb_deleteOrder:
       return MyOrdersStateKey.showDeleteSuccess
+
+    case MyOrdersStateKey.cb_editPaymentDetails:
+      return MyOrdersStateKey.editPaymentDetails_show
+    case MyOrdersStateKey.editPaymentDetails_show: {
+      const pmDetailsData = _.get(
+        state[MyOrdersStateKey.editPaymentDetails_show],
+        'data',
+        null
+      )
+      if (pmDetailsData === null) {
+        return null
+      }
+
+      if (
+        pmDetailsData.fields.length ===
+        PaymentMethodsFieldsLocale[pmDetailsData.paymentMethod].length
+      ) {
+        return MyOrdersStateKey.showEditSuccess
+      }
+
+      return MyOrdersStateKey.editPaymentDetails_show
+    }
     default:
       return null
   }
@@ -435,4 +501,17 @@ async function saveActive(isEnabled: boolean) {
 async function deleteOrder(orderId: number): Promise<boolean> {
   logger.error('TODO: implement delete order ' + orderId)
   return true
+}
+
+async function savePaymentDetails(
+  paymentMethod: PaymentMethods,
+  fields: string[]
+): Promise<number> {
+  logger.error(
+    'TODO: implement savePaymentDetails ' +
+      paymentMethod +
+      ', ' +
+      fields.join(', ')
+  )
+  return 1
 }
