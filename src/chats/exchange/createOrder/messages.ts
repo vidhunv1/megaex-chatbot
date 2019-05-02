@@ -193,6 +193,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       isEnabled,
       terms,
       false,
+      false,
       false
     )
   },
@@ -229,6 +230,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       paymentMethodFields,
       isEnabled,
       terms,
+      false,
       false,
       false
     )

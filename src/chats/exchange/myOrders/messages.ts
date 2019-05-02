@@ -210,7 +210,8 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     isEnabled: boolean,
     terms: string | null,
     showEditOptions: boolean,
-    msgEdit: boolean = false
+    msgEdit: boolean,
+    showBackButton: boolean
   ) {
     let inline: TelegramBot.InlineKeyboardButton[][]
 
@@ -301,6 +302,21 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
         ]
       ]
     }
+
+    if (showBackButton) {
+      inline.push([
+        {
+          text: user.t(`${Namespace.Exchange}:my-orders.go-back-cbbutton`),
+          callback_data: stringifyCallbackQuery<
+            MyOrdersStateKey.cb_showOrder_back,
+            MyOrdersState[MyOrdersStateKey.cb_showOrder_back]
+          >(MyOrdersStateKey.cb_showOrder_back, {
+            orderId: orderId
+          })
+        }
+      ])
+    }
+
     const formattedRate = dataFormatter.formatFiatCurrency(
       rate,
       user.currencyCode
@@ -359,7 +375,8 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     isEnabled: boolean,
     terms: string | null,
     showEditOptions: boolean,
-    msgEdit: boolean = false
+    msgEdit: boolean,
+    showBackButton: boolean
   ) {
     let inline: TelegramBot.InlineKeyboardButton[][]
 
@@ -493,6 +510,21 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
         ]
       ]
     }
+
+    if (showBackButton) {
+      inline.push([
+        {
+          text: user.t(`${Namespace.Exchange}:my-orders.go-back-cbbutton`),
+          callback_data: stringifyCallbackQuery<
+            MyOrdersStateKey.cb_showOrder_back,
+            MyOrdersState[MyOrdersStateKey.cb_showOrder_back]
+          >(MyOrdersStateKey.cb_showOrder_back, {
+            orderId: orderId
+          })
+        }
+      ])
+    }
+
     const formattedRate = dataFormatter.formatFiatCurrency(
       rate,
       user.currencyCode

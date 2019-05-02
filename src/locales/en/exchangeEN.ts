@@ -68,7 +68,7 @@ Terms: _{{ terms }}_
     'toggle-active-cbbutton': 'Active',
     'delete-order-cbbutton': '🗑️ Delete!',
     'edit-order': '✏️  Edit order',
-    'go-back': '⬅️  Back',
+    'go-back-cbbutton': '⬅️  Back',
     'order-edit-success': '✅ Your order was updated.',
     'edit-payment-details': '📃 Update payment info',
     'order-edit-rate': `*Rate {{ cryptoCurrencyCode }}*

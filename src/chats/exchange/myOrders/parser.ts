@@ -86,7 +86,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.isEnabled,
           orderInfo.terms,
           true,
-          true
+          true,
+          false
         )
       } else {
         await MyOrdersMessage(msg, user).showMyBuyOrder(
@@ -98,7 +99,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.isEnabled,
           orderInfo.terms,
           true,
-          true
+          true,
+          false
         )
       }
 
@@ -275,7 +277,11 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
     },
 
     [MyOrdersStateKey.cb_showOrder_back]: async () => {
-      return null
+      await telegramHook.getWebhook.deleteMessage(
+        msg.chat.id,
+        msg.message_id + ''
+      )
+      return state
     },
     [MyOrdersStateKey.cb_toggleActive]: async () => {
       const isEnabled = _.get(
@@ -306,7 +312,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.isEnabled,
           orderInfo.terms,
           true,
-          true
+          true,
+          false
         )
       } else {
         await MyOrdersMessage(msg, user).showMyBuyOrder(
@@ -318,7 +325,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.isEnabled,
           orderInfo.terms,
           true,
-          true
+          true,
+          false
         )
       }
 
@@ -431,6 +439,8 @@ function nextMyOrdersState(
 
       return MyOrdersStateKey.editPaymentDetails_show
     }
+    case MyOrdersStateKey.cb_showOrder_back:
+      return MyOrdersStateKey.cb_showOrder_back
     default:
       return null
   }

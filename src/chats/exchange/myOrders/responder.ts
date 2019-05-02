@@ -116,7 +116,7 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     },
 
     [MyOrdersStateKey.cb_showOrder_back]: async () => {
-      return false
+      return true
     },
     [MyOrdersStateKey.cb_toggleActive]: async () => {
       return false
@@ -150,7 +150,8 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
             order.isEnabled,
             order.terms,
             false,
-            false
+            false,
+            true
           )
         } else {
           await MyOrdersMessage(msg, user).showMySellOrder(
@@ -164,7 +165,8 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
             order.isEnabled,
             order.terms,
             false,
-            false
+            false,
+            true
           )
         }
       } else {
