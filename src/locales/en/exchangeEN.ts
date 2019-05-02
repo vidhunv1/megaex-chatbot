@@ -20,7 +20,15 @@ export const exchangeEN = {
   },
 
   'my-orders': {
+    'my-sell-order-cbbutton': 'My Sell on {{ paymentMethod }}',
+    'my-buy-order-cbbutton': 'My Buy on {{ paymentMethod }}',
+    'buy-deal-cbbutton': '🛎 Buy Deal @ {{ fiatRate }}',
+    'sell-deal-cbbutton': '🛎 Sell Deal @ {{ fiatRate }}',
     'deposit-cryptocurrency': '📩 Deposit {{ cryptoCurrencyCode }}',
+    'show-active-orders': `*Active Orders*
+
+Your ongoing deals and orders created by you are listed.
+`,
     'order-enabled': 'Active',
     'input-payment-details-field': `Write your *{{ fieldName }}* for *{{ paymentMethod}}*`,
     'order-disabled': `Inactive

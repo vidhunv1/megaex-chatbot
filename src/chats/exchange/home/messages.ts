@@ -10,7 +10,7 @@ import { MyOrdersStateKey, MyOrdersState } from '../myOrders'
 import { CreateOrderStateKey, CreateOrderState } from '../createOrder'
 
 export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
-  async showExchangeHome() {
+  async showExchangeHome(activeOrdersCount: number) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Exchange}:home.exchange`, {
@@ -24,14 +24,12 @@ export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
             [
               {
                 text: user.t(`${Namespace.Exchange}:home.my-orders-cbbutton`, {
-                  orderCount: 0
+                  orderCount: activeOrdersCount
                 }),
                 callback_data: stringifyCallbackQuery<
-                  MyOrdersStateKey.cb_myOrders,
-                  MyOrdersState[MyOrdersStateKey.cb_myOrders]
-                >(MyOrdersStateKey.cb_myOrders, {
-                  data: null
-                })
+                  MyOrdersStateKey.cb_showActiveOrders,
+                  MyOrdersState[MyOrdersStateKey.cb_showActiveOrders]
+                >(MyOrdersStateKey.cb_showActiveOrders, {})
               },
               {
                 text: user.t(

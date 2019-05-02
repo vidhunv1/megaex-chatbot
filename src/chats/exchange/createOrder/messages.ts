@@ -184,7 +184,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     )
 
-    await MyOrdersMessage(msg, user).showBuyOrder(
+    await MyOrdersMessage(msg, user).showMyBuyOrder(
       orderId,
       cryptoCurrencyCode,
       rate,
@@ -219,7 +219,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     )
 
-    await MyOrdersMessage(msg, user).showSellOrder(
+    await MyOrdersMessage(msg, user).showMySellOrder(
       orderId,
       cryptoCurrencyCode,
       rate,

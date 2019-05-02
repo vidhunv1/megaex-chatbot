@@ -1,26 +1,95 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User } from 'models'
+import { User, OrderType } from 'models'
 import { Namespace } from 'modules/i18n'
 import {
   PaymentMethods,
   PaymentMethodsFieldsLocale
 } from 'constants/paymentMethods'
-import { CryptoCurrency } from 'constants/currencies'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { dataFormatter } from 'utils/dataFormatter'
 import { linkCreator } from 'utils/linkCreator'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { MyOrdersStateKey, MyOrdersState } from './types'
 import { keyboardMainMenu } from 'chats/common'
 import { DepositStateKey, DepositState } from 'chats/wallet/deposit'
+import * as _ from 'lodash'
 
 export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
-  async showMyOrdersMessage() {
+  async showActiveOrders(
+    activeOrders: {
+      createdBy: number
+      orderType: OrderType
+      paymentMethod: PaymentMethods
+      rate: number
+      fiatCurrencyCode: FiatCurrency
+      orderId: number
+    }[]
+  ) {
+    activeOrders = _.sortBy(activeOrders, (a) => a.createdBy === user.id)
+    const inline: TelegramBot.InlineKeyboardButton[][] = activeOrders.map(
+      (order) => {
+        const formattedFiatRate = dataFormatter.formatFiatCurrency(
+          order.rate,
+          order.fiatCurrencyCode
+        )
+        let text
+        if (order.createdBy === user.id) {
+          if (order.orderType === OrderType.BUY) {
+            text = user.t(
+              `${Namespace.Exchange}:my-orders.my-buy-order-cbbutton`,
+              {
+                paymentMethod: user.t(
+                  `payment-methods.short-names.${order.paymentMethod}`
+                )
+              }
+            )
+          } else {
+            text = user.t(
+              `${Namespace.Exchange}:my-orders.my-sell-order-cbbutton`,
+              {
+                paymentMethod: user.t(
+                  `payment-methods.short-names.${order.paymentMethod}`
+                )
+              }
+            )
+          }
+        } else {
+          if (order.orderType === OrderType.BUY) {
+            text = user.t(`${Namespace.Exchange}:my-orders.buy-deal-cbbutton`, {
+              fiatRate: formattedFiatRate
+            })
+          } else {
+            text = user.t(
+              `${Namespace.Exchange}:my-orders.sell-deal-cbbutton`,
+              {
+                fiatRate: formattedFiatRate
+              }
+            )
+          }
+        }
+
+        return [
+          {
+            text,
+            callback_data: stringifyCallbackQuery<
+              MyOrdersStateKey.cb_showOrderById,
+              MyOrdersState[MyOrdersStateKey.cb_showOrderById]
+            >(MyOrdersStateKey.cb_showOrderById, {
+              orderId: order.orderId
+            })
+          }
+        ]
+      }
+    )
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
-      user.t(`${Namespace.Exchange}:my-orders.show-orders`),
+      user.t(`${Namespace.Exchange}:my-orders.show-active-orders`),
       {
-        parse_mode: 'Markdown'
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: inline
+        }
       }
     )
   },
@@ -129,7 +198,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
-  async showBuyOrder(
+  async showMyBuyOrder(
     orderId: number,
     cryptoCurrencyCode: CryptoCurrency,
     rate: number,
@@ -276,7 +345,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     }
   },
 
-  async showSellOrder(
+  async showMySellOrder(
     orderId: number,
     cryptoCurrencyCode: CryptoCurrency,
     rate: number,

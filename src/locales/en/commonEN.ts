@@ -1,5 +1,6 @@
 import { PaymentMethods } from 'constants/paymentMethods'
 import { ExchangeSource } from 'constants/exchangeSource'
+import { OrderType } from 'models'
 
 export const commonEN = {
   'exchange-source': {
@@ -40,6 +41,12 @@ Here you can find best deals to exchange bitcoins with your local currency here
     name: 'BTC Deals',
     support: {
       name: 'BTC Deals support'
+    }
+  },
+  order: {
+    'type-names': {
+      [OrderType.BUY]: 'Buy',
+      [OrderType.SELL]: 'Sell'
     }
   },
   'main-menu': {

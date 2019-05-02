@@ -27,11 +27,17 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
     MyOrdersStateKey,
     () => Promise<ExchangeState | null>
   > = {
-    [MyOrdersStateKey.cb_myOrders]: async () => {
+    [MyOrdersStateKey.cb_showActiveOrders]: async () => {
       return state
     },
-    [MyOrdersStateKey.myOrders_show]: async () => {
+    [MyOrdersStateKey.showActiveOrders]: async () => {
+      return null
+    },
+    [MyOrdersStateKey.cb_showOrderById]: async () => {
       return state
+    },
+    [MyOrdersStateKey.showOrderById]: async () => {
+      return null
     },
 
     [MyOrdersStateKey.cb_deleteOrder]: async () => {
@@ -69,7 +75,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       const orderInfo = await getOrderInfo(orderId)
 
       if (orderInfo.orderType === OrderType.SELL) {
-        await MyOrdersMessage(msg, user).showSellOrder(
+        await MyOrdersMessage(msg, user).showMySellOrder(
           orderInfo.orderId,
           orderInfo.cryptoCurrencyCode,
           orderInfo.rate,
@@ -83,7 +89,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           true
         )
       } else {
-        await MyOrdersMessage(msg, user).showBuyOrder(
+        await MyOrdersMessage(msg, user).showMyBuyOrder(
           orderInfo.orderId,
           orderInfo.cryptoCurrencyCode,
           orderInfo.rate,
@@ -289,7 +295,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       const orderInfo = await saveActive(JSON.parse(isEnabled + ''))
 
       if (orderInfo.orderType === OrderType.SELL) {
-        await MyOrdersMessage(msg, user).showSellOrder(
+        await MyOrdersMessage(msg, user).showMySellOrder(
           orderInfo.orderId,
           orderInfo.cryptoCurrencyCode,
           orderInfo.rate,
@@ -303,7 +309,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           true
         )
       } else {
-        await MyOrdersMessage(msg, user).showBuyOrder(
+        await MyOrdersMessage(msg, user).showMyBuyOrder(
           orderInfo.orderId,
           orderInfo.cryptoCurrencyCode,
           orderInfo.rate,
@@ -342,12 +348,17 @@ function nextMyOrdersState(
   }
 
   switch (state.currentStateKey) {
-    case MyOrdersStateKey.cb_myOrders:
-      return MyOrdersStateKey.myOrders_show
+    case MyOrdersStateKey.cb_showActiveOrders:
+      return MyOrdersStateKey.showActiveOrders
+    case MyOrdersStateKey.showActiveOrders:
+      return null
+    case MyOrdersStateKey.cb_showOrderById:
+      return MyOrdersStateKey.showOrderById
+    case MyOrdersStateKey.showOrderById:
+      return null
+
     case MyOrdersStateKey.cb_editOrder:
       return MyOrdersStateKey.cb_editOrder
-    case MyOrdersStateKey.myOrders_show:
-      return null
 
     case MyOrdersStateKey.cb_editRate:
       return MyOrdersStateKey.editRate_show

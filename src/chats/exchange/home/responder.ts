@@ -15,10 +15,16 @@ export const ExchangeHomeResponder: Responder<ExchangeState> = (
     },
 
     [ExchangeHomeStateKey.exchange]: async () => {
-      await ExchangeHomeMessage(msg, user).showExchangeHome()
+      await ExchangeHomeMessage(msg, user).showExchangeHome(
+        await getActiveOrdersCount(user.accountId)
+      )
       return true
     }
   }
 
   return resp[currentState.currentStateKey as ExchangeHomeStateKey]()
+}
+
+async function getActiveOrdersCount(_accountId: string) {
+  return 3
 }

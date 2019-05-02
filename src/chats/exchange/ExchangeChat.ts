@@ -48,7 +48,7 @@ export const ExchangeChat: ChatHandler = {
           [
             BuyStateKey.cb_buy,
             SellStateKey.cb_sell,
-            MyOrdersStateKey.cb_myOrders,
+            MyOrdersStateKey.cb_showActiveOrders,
             MyOrdersStateKey.cb_editRate,
             MyOrdersStateKey.cb_editAmount,
             MyOrdersStateKey.cb_editTerms,
