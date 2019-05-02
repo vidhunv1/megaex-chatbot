@@ -299,7 +299,10 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
 
       if (amount.max > availableBalance) {
         focusInlineButtons.push({
-          text: user.t(`${Namespace.Wallet}:home.my-address`),
+          text: user.t(
+            `${Namespace.Exchange}:my-orders.deposit-cryptocurrency`,
+            { cryptoCurrencyCode: cryptoCurrencyCode }
+          ),
           callback_data: stringifyCallbackQuery<
             DepositStateKey.cb_depositCoin,
             DepositState[DepositStateKey.cb_depositCoin]
@@ -425,14 +428,14 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
       rate,
       user.currencyCode
     )
-    let paymentDetails = user.t(`payment-methods.names.${paymentMethod}`)
 
+    let paymentInfo = ''
     pmFields.forEach((field, index) => {
-      paymentDetails =
-        paymentDetails +
-        `\n${user.t(
+      paymentInfo =
+        paymentInfo +
+        `\n  ${user.t(
           `payment-methods.fields.${paymentMethod}.field${index + 1}`
-        )}: ${field}`
+        )} - ${field}`
     })
 
     const message = user.t(
@@ -441,7 +444,8 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
         orderId: orderId,
         cryptoCurrencyCode,
         rate: formattedRate,
-        paymentDetails,
+        paymentMethod: user.t(`payment-methods.names.${paymentMethod}`),
+        paymentInfo,
         minAmount: amount.min,
         maxAmount: amount.max,
         status: user.t(

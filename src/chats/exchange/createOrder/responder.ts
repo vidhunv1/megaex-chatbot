@@ -169,7 +169,7 @@ async function getOrderInfo(orderId: number) {
       max: 0.5
     },
     paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
-    paymentMethodFields: [],
+    paymentMethodFields: ['Axis', '21321313', 'AX098098'],
     isEnabled: true,
     terms: null
   }

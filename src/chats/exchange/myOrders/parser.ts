@@ -76,7 +76,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.amount,
           await getAvailableBalance(orderInfo.cryptoCurrencyCode),
           orderInfo.paymentMethod,
-          [],
+          orderInfo.paymentMethodFields,
           orderInfo.isEnabled,
           orderInfo.terms,
           true,
@@ -296,7 +296,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.amount,
           await getAvailableBalance(orderInfo.cryptoCurrencyCode),
           orderInfo.paymentMethod,
-          [],
+          orderInfo.paymentMethodFields,
           orderInfo.isEnabled,
           orderInfo.terms,
           true,
@@ -435,6 +435,7 @@ const MOCK_ORDER = {
     max: 0.5
   },
   paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+  paymentMethodFields: ['Axis', '21321313', 'AX098098'],
   isEnabled: true,
   terms: null
 }

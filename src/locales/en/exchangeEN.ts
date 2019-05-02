@@ -20,6 +20,7 @@ export const exchangeEN = {
   },
 
   'my-orders': {
+    'deposit-cryptocurrency': '📩 Deposit {{ cryptoCurrencyCode }}',
     'order-enabled': 'Active',
     'input-payment-details-field': `Write your *{{ fieldName }}* for *{{ paymentMethod}}*`,
     'order-disabled': `Inactive
@@ -29,10 +30,11 @@ _(Click on Active button to enable this order.)_`,
     'terms-not-added': 'None',
     'my-buy-order-info': `*📗 My Buy Order* - /o{{orderId}}
 
-*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Payment method*: {{ paymentMethod }}
-*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
 *Status*: {{ status }}
+*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
+*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
+*Payment method*: {{ paymentMethod }}
+
 Terms: _{{ terms }}_
 
 *Order share link*: {{ orderLink }}
@@ -40,10 +42,12 @@ Terms: _{{ terms }}_
 `,
     'my-sell-order-info': `*📕 My Sell Order* - /o{{orderId}}
 
-*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Payment details*: {{ paymentDetails }}
-*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
 *Status*: {{ status }}
+*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
+*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
+*Payment method*: {{ paymentMethod }}
+*Payment Info*: {{ paymentInfo }}
+
 Terms: _{{ terms }}_
 
 *Order share link*: {{ orderLink }}
