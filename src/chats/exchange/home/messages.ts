@@ -1,13 +1,12 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User } from 'models'
+import { User, OrderType } from 'models'
 import { Namespace } from 'modules/i18n'
 import { CONFIG } from '../../../config'
 import { stringifyCallbackQuery } from 'chats/utils'
-import { BuyStateKey, BuyState } from '../buy'
-import { SellStateKey, SellState } from '../sell'
 import { MyOrdersStateKey, MyOrdersState } from '../myOrders'
 import { CreateOrderStateKey, CreateOrderState } from '../createOrder'
+import { DealsStateKey, DealsState } from '../deals'
 
 export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
   async showExchangeHome(activeOrdersCount: number) {
@@ -47,10 +46,10 @@ export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
               {
                 text: user.t(`${Namespace.Exchange}:home.buy-cbbutton`),
                 callback_data: stringifyCallbackQuery<
-                  BuyStateKey.cb_buy,
-                  BuyState[BuyStateKey.cb_buy]
-                >(BuyStateKey.cb_buy, {
-                  data: null
+                  DealsStateKey.cb_deals,
+                  DealsState[DealsStateKey.cb_deals]
+                >(DealsStateKey.cb_deals, {
+                  orderType: OrderType.BUY
                 })
               }
             ],
@@ -58,10 +57,10 @@ export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
               {
                 text: user.t(`${Namespace.Exchange}:home.sell-cbbutton`),
                 callback_data: stringifyCallbackQuery<
-                  SellStateKey.cb_sell,
-                  SellState[SellStateKey.cb_sell]
-                >(SellStateKey.cb_sell, {
-                  data: null
+                  DealsStateKey.cb_deals,
+                  DealsState[DealsStateKey.cb_deals]
+                >(DealsStateKey.cb_deals, {
+                  orderType: OrderType.SELL
                 })
               }
             ]

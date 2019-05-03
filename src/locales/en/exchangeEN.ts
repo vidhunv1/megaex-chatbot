@@ -11,16 +11,43 @@ export const exchangeEN = {
     'sell-cbbutton': '📈 Quick Sell'
   },
 
-  buy: {
-    'show-orders': 'TODO: Show buy orders'
-  },
+  deals: {
+    'next-cbbutton': 'next »',
+    'prev-cbbutton': '« prev',
+    'show-buy-deals': `📉 *Quick Buy* ({{ currentPage}}/{{ totalPages }})
 
-  sell: {
-    'show-orders': 'TODO: Show sell orders'
+Please select the order you want to buy from. 
+
+*Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
+`,
+    'show-sell-deals': `📈 *Quick Sell* ({{ currentPage}}/{{ totalPages }})
+
+Please select the order you want to sell from. 
+
+*Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
+`,
+    'show-buy-deal': `*Buy {{ cryptoCurrencyCode }}*
+    
+_This deal is by *{{ realName }}*._
+
+*Buyer Account ID*: /u{{ accountId }}
+*Last seen*: {{ lastSeenValue }} {{ lastSeenValue }} ago
+*⭐️ Rating*: {{ rating }}/5 ({{ tradeCount }})+
+
+*TERMS*: _{{ terms }}_
+
+*Payment Method*: {{ paymentMethodName }}
+*Price*: {{ rate }} / {{ cryptoCurrencyCode }}
+*Min. Buy Limit*: {{ minFiatTradeValue }}
+*Max. Buy Limit*: {{ maxFiatTradeValue }}`,
+    'open-buy-deal-cbbutton': '🛎 Buy {{ cryptoCurrencyCode }} here',
+    'open-sell-deal-cbbutton': '🛎 Sell {{ cryptoCurrencyCode }} here',
+    'back-cbbutton': '⬅️  Back',
+    'user-reviews': '🗣 reviews({{ reviewCount }})'
   },
 
   'my-orders': {
-    'my-sell-order-cbbutton': 'My Sell on {{ paymentMethod }}',
+    'my-sell-order-cbbutton': 'My Sell order on {{ paymentMethod }}',
     'my-buy-order-cbbutton': 'My Buy on {{ paymentMethod }}',
     'buy-deal-cbbutton': '🛎 Buy Deal @ {{ fiatRate }}',
     'sell-deal-cbbutton': '🛎 Sell Deal @ {{ fiatRate }}',

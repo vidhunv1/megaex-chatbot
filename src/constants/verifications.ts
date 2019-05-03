@@ -1,0 +1,5 @@
+export enum VerificationTypes {
+  IDENTITY_CARD = 'IDENTITY_CARD',
+  DRIVERS_LICENSE = 'DRIVERS_LICENSE',
+  PASSPORT = 'PASSPORT'
+}

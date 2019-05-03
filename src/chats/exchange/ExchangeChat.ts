@@ -13,14 +13,13 @@ import {
   ExchangeHomeResponder,
   ExchangeParser
 } from './home'
-import { BuyStateKey, BuyParser, BuyResponder } from './buy'
-import { SellStateKey, SellParser, SellResponder } from './sell'
 import { MyOrdersStateKey, MyOrdersParser, MyOrdersResponder } from './myOrders'
 import {
   CreateOrderStateKey,
   CreateOrderParser,
   CreateOrderResponder
 } from './createOrder'
+import { DealsStateKey, DealsParser, DealsResponder } from './deals'
 
 export const ExchangeChat: ChatHandler = {
   async handleCommand(
@@ -46,8 +45,7 @@ export const ExchangeChat: ChatHandler = {
       if (_.get(state, 'key', null) != EXCHANGE_STATE_LABEL) {
         if (
           [
-            BuyStateKey.cb_buy,
-            SellStateKey.cb_sell,
+            DealsStateKey.cb_deals,
             MyOrdersStateKey.cb_showActiveOrders,
             MyOrdersStateKey.cb_editRate,
             MyOrdersStateKey.cb_editAmount,
@@ -102,8 +100,7 @@ export const ExchangeChat: ChatHandler = {
 }
 
 const exchangeHomeStateKeys = Object.keys(ExchangeHomeStateKey)
-const buyStateKeys = Object.keys(BuyStateKey)
-const sellStateKeys = Object.keys(SellStateKey)
+const dealsStateKeys = Object.keys(DealsStateKey)
 const myOrdersKeys = Object.keys(MyOrdersStateKey)
 const createOrderKeys = Object.keys(CreateOrderStateKey)
 
@@ -118,10 +115,8 @@ async function processMessage(
   // Input parse
   if (exchangeHomeStateKeys.includes(state.currentStateKey))
     nextState = await ExchangeParser(msg, user, tUser, state)
-  if (buyStateKeys.includes(state.currentStateKey))
-    nextState = await BuyParser(msg, user, tUser, state)
-  if (sellStateKeys.includes(state.currentStateKey))
-    nextState = await SellParser(msg, user, tUser, state)
+  if (dealsStateKeys.includes(state.currentStateKey))
+    nextState = await DealsParser(msg, user, tUser, state)
   if (myOrdersKeys.includes(state.currentStateKey))
     nextState = await MyOrdersParser(msg, user, tUser, state)
   if (createOrderKeys.includes(state.currentStateKey))
@@ -135,11 +130,8 @@ async function processMessage(
   if (exchangeHomeStateKeys.includes(nextState.currentStateKey)) {
     return await ExchangeHomeResponder(msg, user, nextState)
   }
-  if (buyStateKeys.includes(nextState.currentStateKey)) {
-    return await BuyResponder(msg, user, nextState)
-  }
-  if (sellStateKeys.includes(nextState.currentStateKey)) {
-    return await SellResponder(msg, user, nextState)
+  if (dealsStateKeys.includes(nextState.currentStateKey)) {
+    return await DealsResponder(msg, user, nextState)
   }
   if (myOrdersKeys.includes(nextState.currentStateKey)) {
     return await MyOrdersResponder(msg, user, nextState)
