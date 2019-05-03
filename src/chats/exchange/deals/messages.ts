@@ -48,18 +48,22 @@ export const Deals = (msg: TelegramBot.Message, user: User) => ({
     )
 
     let nextPageCursor = currentCursor
+    let nextPageText = user.t(`${Namespace.Exchange}:deals.next-cbbutton`)
+    let prevPageText = user.t(`${Namespace.Exchange}:deals.prev-cbbutton`)
     let prevPageCursor = currentCursor
     if (currentCursor - DealsConfig.LIST_LIMIT >= 0) {
       prevPageCursor = currentCursor - DealsConfig.LIST_LIMIT
+      prevPageText = '« ' + prevPageText
     }
 
     if (currentCursor + DealsConfig.LIST_LIMIT < totalOrders) {
       nextPageCursor = currentCursor + DealsConfig.LIST_LIMIT
+      nextPageText = nextPageText + ' »'
     }
 
     inline.push([
       {
-        text: user.t(`${Namespace.Exchange}:deals.prev-cbbutton`),
+        text: prevPageText,
         callback_data: stringifyCallbackQuery<
           DealsStateKey.cb_prevDeals,
           DealsState[DealsStateKey.cb_prevDeals]
@@ -68,7 +72,7 @@ export const Deals = (msg: TelegramBot.Message, user: User) => ({
         })
       },
       {
-        text: user.t(`${Namespace.Exchange}:deals.next-cbbutton`),
+        text: nextPageText,
         callback_data: stringifyCallbackQuery<
           DealsStateKey.cb_nextDeals,
           DealsState[DealsStateKey.cb_nextDeals]
@@ -82,26 +86,30 @@ export const Deals = (msg: TelegramBot.Message, user: User) => ({
     if (orderType === OrderType.BUY) {
       text = user.t(`${Namespace.Exchange}:deals.show-buy-deals`, {
         cryptoCurrencyCode,
-        currentPage: Math.floor((currentCursor + 1) / DealsConfig.LIST_LIMIT),
-        totalPages: Math.floor(totalOrders / DealsConfig.LIST_LIMIT)
+        currentPage: Math.ceil((currentCursor + 1) / DealsConfig.LIST_LIMIT),
+        totalPages: Math.ceil(totalOrders / DealsConfig.LIST_LIMIT)
       })
     } else {
       text = user.t(`${Namespace.Exchange}:deals.show-sell-deals`, {
         cryptoCurrencyCode,
-        currentPage: Math.floor((currentCursor + 1) / DealsConfig.LIST_LIMIT),
-        totalPages: Math.floor(totalOrders / DealsConfig.LIST_LIMIT)
+        currentPage: Math.ceil((currentCursor + 1) / DealsConfig.LIST_LIMIT),
+        totalPages: Math.ceil(totalOrders / DealsConfig.LIST_LIMIT)
       })
     }
 
     if (shouldEdit) {
-      await telegramHook.getWebhook.editMessageText(text, {
-        message_id: msg.message_id,
-        chat_id: msg.chat.id,
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: inline
-        }
-      })
+      try {
+        await telegramHook.getWebhook.editMessageText(text, {
+          message_id: msg.message_id,
+          chat_id: msg.chat.id,
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: inline
+          }
+        })
+      } catch (e) {
+        // todo: to Ignore the editing unchanged message error ///
+      }
     } else {
       await telegramHook.getWebhook.sendMessage(msg.chat.id, text, {
         parse_mode: 'Markdown',

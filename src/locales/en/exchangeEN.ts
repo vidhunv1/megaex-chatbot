@@ -12,8 +12,8 @@ export const exchangeEN = {
   },
 
   deals: {
-    'next-cbbutton': 'next »',
-    'prev-cbbutton': '« prev',
+    'next-cbbutton': 'next',
+    'prev-cbbutton': 'prev',
     'show-buy-deals': `📉 *Quick Buy* ({{ currentPage}}/{{ totalPages }})
 
 Please select the order you want to buy from. 
