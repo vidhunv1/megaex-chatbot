@@ -26,24 +26,37 @@ Please select the order you want to sell from.
 
 *Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
 `,
-    'show-buy-deal': `*Buy {{ cryptoCurrencyCode }}*
+    'show-buy-deal': `📈 *Buy {{ cryptoCurrencyCode }}*
     
-_This deal is by *{{ realName }}*._
+_This deal is by_ *{{ realName }}*.
 
-*Buyer Account ID*: /u{{ accountId }}
-*Last seen*: {{ lastSeenValue }} {{ lastSeenValue }} ago
-*⭐️ Rating*: {{ rating }}/5 ({{ tradeCount }})+
-
-*TERMS*: _{{ terms }}_
+Account ID: /u{{ accountId }}
+Last seen: {{ lastSeenValue }}
+Rating:  {{ rating }} ⭐️
 
 *Payment Method*: {{ paymentMethodName }}
+*Terms*: _{{ terms }}_
+
 *Price*: {{ rate }} / {{ cryptoCurrencyCode }}
-*Min. Buy Limit*: {{ minFiatTradeValue }}
-*Max. Buy Limit*: {{ maxFiatTradeValue }}`,
-    'open-buy-deal-cbbutton': '🛎 Buy {{ cryptoCurrencyCode }} here',
-    'open-sell-deal-cbbutton': '🛎 Sell {{ cryptoCurrencyCode }} here',
+*Buy Amount*: {{ formattedAmount }}`,
+    'show-sell-deal': `📈 *Sell {{ cryptoCurrencyCode }}*
+    
+_This deal is by_ *{{ realName }}*.
+
+Account ID: /u{{ accountId }}
+Last seen: {{ lastSeenValue }}
+Rating:  {{ rating }} ⭐️
+
+*Payment Method*: {{ paymentMethodName }}
+*Terms*: _{{ terms }}_
+
+*Price*: {{ rate }} / {{ cryptoCurrencyCode }}
+*Sell Amount*: {{ formattedAmount }}`,
+
+    'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',
+    'open-sell-deal-cbbutton': '🛎  Sell {{ cryptoCurrencyCode }} here',
     'back-cbbutton': '⬅️  Back',
-    'user-reviews': '🗣 reviews({{ reviewCount }})'
+    'user-reviews': '🗣 reviews ({{ reviewCount }})'
   },
 
   'my-orders': {

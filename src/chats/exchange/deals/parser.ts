@@ -29,7 +29,7 @@ export const DealsParser: Parser<ExchangeState> = async (
       return null
     },
     [DealsStateKey.cb_showDealById]: async () => {
-      return null
+      return state
     },
     [DealsStateKey.showDealById]: async () => {
       return null
@@ -67,6 +67,10 @@ export const DealsParser: Parser<ExchangeState> = async (
           }
         }
       }
+    },
+
+    [DealsStateKey.cb_openDeal]: async () => {
+      return null
     }
   }
 
@@ -95,6 +99,8 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
       return DealsStateKey.deals_show
     case DealsStateKey.cb_prevDeals:
       return DealsStateKey.deals_show
+    case DealsStateKey.cb_showDealById:
+      return DealsStateKey.showDealById
     default:
       return null
   }

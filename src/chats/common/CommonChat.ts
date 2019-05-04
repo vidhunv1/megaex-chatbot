@@ -7,6 +7,8 @@ import { CacheHelper } from 'lib/CacheHelper'
 import { CryptoCurrency } from 'constants/currencies'
 import { centerJustify } from './utils'
 import { dataFormatter } from 'utils/dataFormatter'
+import { parseCallbackQuery } from 'chats/utils'
+import { CommonStateKey } from './types'
 
 const getTransactions = () => {
   enum TxType {
@@ -104,11 +106,23 @@ export const CommonChat: ChatHandler = {
   },
 
   async handleCallback(
-    _msg: TelegramBot.Message,
+    msg: TelegramBot.Message,
     _user: User,
     _tUser: TelegramAccount,
-    _callback: TelegramBot.CallbackQuery
+    callback: TelegramBot.CallbackQuery
   ) {
+    if (callback.data && msg) {
+      const { type } = parseCallbackQuery(callback.data)
+
+      const callbackName = type as any
+      if (callbackName === CommonStateKey.cb_deleteThisMessage) {
+        await telegramHook.getWebhook.deleteMessage(
+          msg.chat.id,
+          msg.message_id + ''
+        )
+        return true
+      }
+    }
     return false
   },
 

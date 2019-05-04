@@ -6,7 +6,9 @@ export enum DealsStateKey {
   cb_showDealById = 'cb_showDealById',
   showDealById = 'showDealById',
   cb_nextDeals = 'cb_nextDeals',
-  cb_prevDeals = 'cb_prevDeals'
+  cb_prevDeals = 'cb_prevDeals',
+
+  cb_openDeal = 'cb_openDeal'
 }
 
 export interface DealsState {
@@ -30,5 +32,9 @@ export interface DealsState {
   }
   [DealsStateKey.cb_prevDeals]?: {
     cursor: number
+  }
+
+  [DealsStateKey.cb_openDeal]?: {
+    orderId: number
   }
 }
