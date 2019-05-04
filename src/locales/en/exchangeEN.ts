@@ -18,7 +18,7 @@ export const exchangeEN = {
 
 Please select the order you want to buy from. 
 
-*Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
+*Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Seller Rating* are shown.
 `,
     'show-sell-deals': `📈 *Quick Sell* ({{ currentPage}}/{{ totalPages }})
 
