@@ -15,7 +15,9 @@ export const walletEN = {
     `,
     'send-cryptocurrency-cbbutton': '⚡️  Send {{ cryptoCurrencyName }}',
     'my-address': '📩  Deposit',
-    withdraw: '📤  Withdraw'
+    withdraw: '📤  Withdraw',
+    'transaction-credit': 'credit',
+    'transaction-debit': 'debit'
   },
 
   /* Deposit */

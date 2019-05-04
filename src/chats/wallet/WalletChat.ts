@@ -1,21 +1,34 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, TelegramAccount } from 'models'
-import { ChatHandler, BotCommand } from 'chats/types'
+import { ChatHandler, BotCommand, TxType } from 'chats/types'
 import { WALLET_STATE_LABEL, WalletState, initialState } from './WalletState'
 import { parseCallbackQuery } from 'chats/utils'
 import * as _ from 'lodash'
 import { DepositStateKey, DepositParser, DepositResponder } from './deposit'
 import { WithdrawStateKey, WithdrawParser, WithdrawResponder } from './withdraw'
-import { WalletHomeParser, WalletHomeStateKey, WalletResponder } from './home'
+import {
+  WalletHomeParser,
+  WalletHomeStateKey,
+  WalletResponder,
+  WalletHomeMessage
+} from './home'
 import { SendCoinParser, SendCoinStateKey, SendCoinResponder } from './sendCoin'
-
+import { CryptoCurrency } from 'constants/currencies'
 export const WalletChat: ChatHandler = {
   async handleCommand(
-    _msg: TelegramBot.Message,
-    _command: BotCommand,
-    _user: User,
+    msg: TelegramBot.Message,
+    command: BotCommand,
+    user: User,
     _tUser: TelegramAccount
   ) {
+    switch (command) {
+      case BotCommand.TRANSACTIONS: {
+        await WalletHomeMessage(msg, user).listTransactions(
+          await getTransactions()
+        )
+        return true
+      }
+    }
     return false
   },
 
@@ -120,4 +133,39 @@ async function processMessage(
   }
 
   return false
+}
+
+const getTransactions = async () => {
+  return [
+    {
+      date: Date.now(),
+      currencyCode: CryptoCurrency.BTC,
+      txType: TxType.DEPOSIT,
+      amount: 0.0001
+    },
+    {
+      date: Date.now(),
+      currencyCode: CryptoCurrency.BTC,
+      txType: TxType.INTERNAL_SEND,
+      amount: 0.0002
+    },
+    {
+      date: Date.now(),
+      currencyCode: CryptoCurrency.BTC,
+      txType: TxType.INTERNAL_SEND,
+      amount: 0.0001
+    },
+    {
+      date: Date.now(),
+      currencyCode: CryptoCurrency.BTC,
+      txType: TxType.INTERNAL_RECEIVE,
+      amount: 0.0001
+    },
+    {
+      date: Date.now(),
+      currencyCode: CryptoCurrency.BTC,
+      txType: TxType.WITHDRAWAL,
+      amount: 0.0001
+    }
+  ]
 }

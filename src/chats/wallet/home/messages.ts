@@ -8,6 +8,8 @@ import { stringifyCallbackQuery } from 'chats/utils'
 import { SendCoinStateKey, SendCoinState } from '../sendCoin'
 import { DepositStateKey, DepositState } from '../deposit'
 import { WithdrawStateKey, WithdrawState } from '../withdraw'
+import { centerJustify, keyboardMainMenu } from 'chats/common'
+import { TxType } from 'chats/types'
 
 export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
   showWalletHome: async (
@@ -94,6 +96,43 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
             ]
           ]
         }
+      }
+    )
+  },
+
+  async listTransactions(
+    transactions: {
+      date: number
+      currencyCode: CryptoCurrency
+      txType: TxType
+      amount: number
+    }[]
+  ) {
+    const transactionString = transactions.reduce((acc, current) => {
+      const txTypeString =
+        current.txType === TxType.DEPOSIT ||
+        current.txType === TxType.INTERNAL_SEND
+          ? user.t(`${Namespace.Wallet}:home.transaction-debit`)
+          : user.t(`${Namespace.Wallet}:home.transaction-credit`)
+
+      return (
+        acc +
+        '\n' +
+        user.t('transaction-row', {
+          cryptoCurrency: centerJustify(current.currencyCode, 10),
+          amount: centerJustify(current.amount, 10),
+          transactionType: centerJustify(txTypeString, 10)
+        })
+      )
+    }, '')
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t('show-transactions-title', {
+        transactionsData: transactionString
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
       }
     )
   }

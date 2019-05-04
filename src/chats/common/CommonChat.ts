@@ -4,57 +4,8 @@ import { ChatHandler, BotCommand } from 'chats/types'
 import telegramHook from 'modules/TelegramHook'
 import { keyboardMainMenu } from './utils'
 import { CacheHelper } from 'lib/CacheHelper'
-import { CryptoCurrency } from 'constants/currencies'
-import { centerJustify } from './utils'
-import { dataFormatter } from 'utils/dataFormatter'
 import { parseCallbackQuery } from 'chats/utils'
 import { CommonStateKey } from './types'
-
-const getTransactions = () => {
-  enum TxType {
-    WITHDRAWAL = 'WITHDRAWAL',
-    DEPOSIT = 'DEPOSIT',
-    INTERNAL_SEND = 'INTERNAL_SEND',
-    INTERNAL_RECEIVE = 'INTERNAL_RECEIVE'
-  }
-
-  const getTypeString = (type: TxType) =>
-    type === TxType.DEPOSIT || type === TxType.INTERNAL_SEND
-      ? 'debit'
-      : 'credit'
-  return [
-    {
-      date: Date.now(),
-      currencyCode: CryptoCurrency.BTC,
-      txType: getTypeString(TxType.DEPOSIT),
-      amount: dataFormatter.formatCryptoCurrency(0.0001)
-    },
-    {
-      date: Date.now(),
-      currencyCode: CryptoCurrency.BTC,
-      txType: getTypeString(TxType.INTERNAL_SEND),
-      amount: dataFormatter.formatCryptoCurrency(0.0002)
-    },
-    {
-      date: Date.now(),
-      currencyCode: CryptoCurrency.BTC,
-      txType: getTypeString(TxType.INTERNAL_SEND),
-      amount: dataFormatter.formatCryptoCurrency(0.0001)
-    },
-    {
-      date: Date.now(),
-      currencyCode: CryptoCurrency.BTC,
-      txType: getTypeString(TxType.INTERNAL_RECEIVE),
-      amount: dataFormatter.formatCryptoCurrency(0.0001)
-    },
-    {
-      date: Date.now(),
-      currencyCode: CryptoCurrency.BTC,
-      txType: getTypeString(TxType.WITHDRAWAL),
-      amount: dataFormatter.formatCryptoCurrency(0.0001)
-    }
-  ]
-}
 
 export const CommonChat: ChatHandler = {
   async handleCommand(
@@ -74,31 +25,6 @@ export const CommonChat: ChatHandler = {
           }
         )
         await CacheHelper.clearState(tUser.id)
-        return true
-      }
-
-      case BotCommand.TRANSACTIONS: {
-        const transactionString = getTransactions().reduce(
-          (acc, current) =>
-            acc +
-            '\n' +
-            user.t('transaction-row', {
-              cryptoCurrency: centerJustify(current.currencyCode, 10),
-              amount: centerJustify(current.amount, 10),
-              transactionType: centerJustify(current.txType, 10)
-            }),
-          ''
-        )
-        await telegramHook.getWebhook.sendMessage(
-          msg.chat.id,
-          user.t('show-transactions-title', {
-            transactionsData: transactionString
-          }),
-          {
-            parse_mode: 'Markdown',
-            reply_markup: keyboardMainMenu(user)
-          }
-        )
         return true
       }
     }
