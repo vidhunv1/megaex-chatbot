@@ -32,7 +32,8 @@ export enum BotCommand {
 
   // App commands
   USER = '/u',
-  TRANSACTIONS = '/transactions'
+  TRANSACTIONS = '/transactions',
+  ORDER = '/o'
 }
 
 export enum DeepLink {

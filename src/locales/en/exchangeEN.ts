@@ -1,3 +1,5 @@
+import { DealsError } from 'chats/exchange/deals'
+
 export const exchangeEN = {
   home: {
     exchange: `💵  *Exchange BTC-{{ fiatCurrency }}*
@@ -12,6 +14,9 @@ export const exchangeEN = {
   },
 
   deals: {
+    errors: {
+      [DealsError.ORDER_NOT_FOUND]: 'Order not found.'
+    },
     'next-cbbutton': 'next',
     'prev-cbbutton': 'prev',
     'show-buy-deals': `📉 *Quick Buy* ({{ currentPage}}/{{ totalPages }})
@@ -26,7 +31,7 @@ Please select the order you want to sell from.
 
 *Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
 `,
-    'show-buy-deal': `📈 *Buy {{ cryptoCurrencyCode }}*
+    'show-buy-deal': `📈 *Buy {{ cryptoCurrencyCode }}* (/o{{ orderId }})
     
 _This deal is by_ *{{ realName }}*.
 
@@ -39,7 +44,7 @@ Rating:  {{ rating }} ⭐️
 
 *Price*: {{ rate }} / {{ cryptoCurrencyCode }}
 *Buy Amount*: {{ formattedAmount }}`,
-    'show-sell-deal': `📈 *Sell {{ cryptoCurrencyCode }}*
+    'show-sell-deal': `📈 *Sell {{ cryptoCurrencyCode }}* (/o{{ orderId }})
     
 _This deal is by_ *{{ realName }}*.
 

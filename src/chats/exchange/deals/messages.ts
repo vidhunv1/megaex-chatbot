@@ -5,7 +5,7 @@ import { Namespace } from 'modules/i18n'
 import { PaymentMethods } from 'constants/paymentMethods'
 import * as _ from 'lodash'
 import { stringifyCallbackQuery } from 'chats/utils'
-import { DealsStateKey, DealsState } from './types'
+import { DealsStateKey, DealsState, DealsError } from './types'
 import { dataFormatter } from 'utils/dataFormatter'
 import { FiatCurrency, CryptoCurrency } from 'constants/currencies'
 import { DealsConfig } from './config'
@@ -14,6 +14,12 @@ import { LanguageISO } from 'constants/languages'
 import { CommonStateKey, CommonState } from 'chats/common/types'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
+  async showError(dealsError: DealsError) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.errors.${dealsError}`)
+    )
+  },
   async showDeal(
     orderType: OrderType,
     orderId: number,
@@ -51,6 +57,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       )
 
       showDealText = user.t(`${Namespace.Exchange}:deals.show-buy-deal`, {
+        orderId,
         cryptoCurrencyCode,
         realName,
         accountId,
@@ -71,6 +78,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       )
 
       showDealText = user.t(`${Namespace.Exchange}:deals.show-sell-deal`, {
+        orderId,
         cryptoCurrencyCode,
         realName,
         accountId,

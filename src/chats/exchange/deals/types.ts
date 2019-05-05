@@ -11,6 +11,10 @@ export enum DealsStateKey {
   cb_openDeal = 'cb_openDeal'
 }
 
+export enum DealsError {
+  ORDER_NOT_FOUND = 'ORDER_NOT_FOUND'
+}
+
 export interface DealsState {
   [DealsStateKey.cb_deals]?: {
     orderType: OrderType

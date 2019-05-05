@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount } from 'models'
+import { User, TelegramAccount, OrderType } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
 import {
   EXCHANGE_STATE_LABEL,
@@ -19,15 +19,54 @@ import {
   CreateOrderParser,
   CreateOrderResponder
 } from './createOrder'
-import { DealsStateKey, DealsParser, DealsResponder } from './deals'
+import {
+  DealsStateKey,
+  DealsParser,
+  DealsResponder,
+  DealsMessage,
+  DealsError
+} from './deals'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import { PaymentMethods } from 'constants/paymentMethods'
 
 export const ExchangeChat: ChatHandler = {
   async handleCommand(
-    _msg: TelegramBot.Message,
-    _command: BotCommand,
-    _user: User,
+    msg: TelegramBot.Message,
+    command: BotCommand,
+    user: User,
     _tUser: TelegramAccount
   ) {
+    if (command === BotCommand.ORDER && msg.text) {
+      try {
+        const orderId = parseInt(msg.text.replace(BotCommand.ORDER, ''))
+        const { order, dealer } = await getOrder(orderId)
+        if (!order || !dealer) {
+          await DealsMessage(msg, user).showError(DealsError.ORDER_NOT_FOUND)
+          return true
+        }
+
+        await DealsMessage(msg, user).showDeal(
+          order.orderType,
+          order.orderId,
+          order.cryptoCurrencyCode,
+          dealer.realName,
+          dealer.accountId,
+          dealer.lastSeen,
+          dealer.rating,
+          dealer.tradeCount,
+          order.terms,
+          order.paymentMethod,
+          order.rate,
+          order.amount,
+          order.fiatCurrencyCode,
+          dealer.reviewCount
+        )
+      } catch (e) {
+        await DealsMessage(msg, user).showError(DealsError.ORDER_NOT_FOUND)
+      }
+
+      return true
+    }
     return false
   },
 
@@ -141,4 +180,39 @@ async function processMessage(
   }
 
   return false
+}
+
+async function getOrder(orderId: number) {
+  if (orderId == 1) {
+    return {
+      order: {
+        orderId: orderId,
+        orderType: OrderType.SELL,
+        cryptoCurrencyCode: CryptoCurrency.BTC,
+        fiatCurrencyCode: FiatCurrency.INR,
+        rate: 310002,
+        rating: 4.9,
+        amount: {
+          min: 0.1,
+          max: 0.5
+        },
+        paymentMethod: PaymentMethods.CASH,
+        isEnabled: true,
+        terms: 'Please transfer fast..'
+      },
+      dealer: {
+        realName: 'Satoshi',
+        accountId: 'uxawsats',
+        rating: 4.7,
+        lastSeen: new Date(),
+        tradeCount: 5,
+        reviewCount: 30
+      }
+    }
+  } else {
+    return {
+      order: null,
+      dealer: null
+    }
+  }
 }
