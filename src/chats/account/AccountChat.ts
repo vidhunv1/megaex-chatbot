@@ -14,16 +14,42 @@ import {
 import {
   AccountHomeStateKey,
   AccountHomeParser,
-  AccountHomeResponder
+  AccountHomeResponder,
+  AccountHomeMessage,
+  AccountHomeError
 } from './home'
+import { CryptoCurrency } from 'constants/currencies'
 
 export const AccountChat: ChatHandler = {
   async handleCommand(
-    _msg: TelegramBot.Message,
-    _command: BotCommand,
-    _user: User,
+    msg: TelegramBot.Message,
+    command: BotCommand,
+    user: User,
     _tUser: TelegramAccount
   ) {
+    if (command === BotCommand.USER && msg.text) {
+      const accountId = msg.text.replace(BotCommand.USER, '')
+      const accountInfo = await getAccount(accountId)
+      if (accountInfo != null) {
+        await AccountHomeMessage(msg, user).showDealerAccount(
+          accountInfo.accountId,
+          accountInfo.telegramUsername,
+          accountInfo.dealCount,
+          accountInfo.tradeVolume,
+          accountInfo.cryptoCurrencyCode,
+          accountInfo.tradeSpeed,
+          accountInfo.rating,
+          accountInfo.reviewCount
+          // accountInfo.isUserBlocked
+        )
+      } else {
+        await AccountHomeMessage(msg, user).showError(
+          AccountHomeError.ACCOUNT_NOT_FOUND
+        )
+      }
+      return true
+    }
+
     return false
   },
 
@@ -133,4 +159,30 @@ async function processMessage(
   }
 
   return false
+}
+
+async function getAccount(
+  accountId: string
+): Promise<{
+  accountId: string
+  telegramUsername: string
+  dealCount: number
+  tradeVolume: number
+  cryptoCurrencyCode: CryptoCurrency
+  tradeSpeed: number
+  reviewCount: number
+  // isUserBlocked: boolean,
+  rating: number
+} | null> {
+  return {
+    accountId,
+    telegramUsername: 'satoshi',
+    dealCount: 4,
+    tradeVolume: 100,
+    cryptoCurrencyCode: CryptoCurrency.BTC,
+    tradeSpeed: 100,
+    reviewCount: 30,
+    // isUserBlocked: false,
+    rating: 4.5
+  }
 }

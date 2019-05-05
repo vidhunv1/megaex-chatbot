@@ -9,19 +9,88 @@ import { SettingsStateKey, SettingsState } from '../settings'
 import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
 import { CryptoCurrency } from 'constants/currencies'
 import { PaymentMethods } from 'constants/paymentMethods'
+import { AccountHomeError } from './types'
+import { CommonStateKey, CommonState } from 'chats/common/types'
 
 export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
+  async showError(accountError: AccountHomeError) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Account}:home.errors.${accountError}`),
+      {
+        parse_mode: 'Markdown'
+      }
+    )
+  },
+  async showDealerAccount(
+    accountID: string,
+    telegramUsername: string,
+    dealCount: number,
+    tradeVolume: number,
+    cryptoCurrencyCode: CryptoCurrency,
+    tradeSpeedSec: number,
+    rating: number,
+    reviewCount: number
+    // isUserBlocked: boolean
+  ) {
+    // TODO: Add block and sendMessage
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Account}:home.dealer-account`, {
+        accountId: accountID,
+        telegramUsername: telegramUsername,
+        dealCount: dealCount,
+        tradeVolume: tradeVolume,
+        cryptoCurrencyCode: cryptoCurrencyCode,
+        tradeSpeed: tradeSpeedSec,
+        rating: rating
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: user.t(
+                  `${Namespace.Account}:home.user-reviews-cbbutton`,
+                  {
+                    reviewCount: reviewCount
+                  }
+                ),
+                callback_data: stringifyCallbackQuery<
+                  CommonStateKey.cb_deleteThisMessage,
+                  CommonState[CommonStateKey.cb_deleteThisMessage]
+                >(CommonStateKey.cb_deleteThisMessage, {})
+              }
+            ]
+            // [
+            //   {
+            //     text: isUserBlocked ? user.t(`${Namespace.Account}:home.unblock-dealer-cbbutton`) : user.t(`${Namespace.Account}:home.block-dealer-cbbutton`),
+            //     callback_data: stringifyCallbackQuery<
+            //       CommonStateKey.cb_deleteThisMessage,
+            //       CommonState[CommonStateKey.cb_deleteThisMessage]
+            //     >(CommonStateKey.cb_deleteThisMessage, {})
+            //   },
+            //   {
+            //     text: user.t(`${Namespace.Account}:home.send-message-dealer-cbbutton`),
+            //     callback_data: stringifyCallbackQuery<
+            //       CommonStateKey.cb_deleteThisMessage,
+            //       CommonState[CommonStateKey.cb_deleteThisMessage]
+            //     >(CommonStateKey.cb_deleteThisMessage, {})
+            //   },
+            // ]
+          ]
+        }
+      }
+    )
+  },
   async showAccount(
     accountId: string,
     totalDeals: number,
     tradeVolume: number,
     cryptoCode: CryptoCurrency,
     avgSpeedSec: number,
-    rating: {
-      percentage: number
-      upvotes: number
-      downvotes: number
-    },
+    rating: number,
     referralCount: number,
     earnings: number,
     addedPaymentMethods: PaymentMethods[]
@@ -80,9 +149,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
         tradeVolume: tradeVolume,
         cryptoCurrencyCode: cryptoCode,
         tradeSpeed: parseInt(avgSpeedSec / 60 + ''),
-        ratingPercentage: rating.percentage,
-        upvotes: rating.upvotes,
-        downvotes: rating.downvotes,
+        rating: rating,
         referralCount: referralCount,
         earnings: earnings,
         paymentMethods: stringifyPaymentMethods(addedPaymentMethods, user)

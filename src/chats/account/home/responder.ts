@@ -37,11 +37,7 @@ export const AccountHomeResponder: Responder<AccountState> = (
         totalVolume,
         CryptoCurrency.BTC,
         avgSpeedSec,
-        {
-          percentage: rating.totalPercentage,
-          upvotes: rating.upVotes,
-          downvotes: rating.downVotes
-        },
+        rating,
         referralCount,
         totalEarnings,
         addedPaymentMethods

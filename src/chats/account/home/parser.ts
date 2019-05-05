@@ -95,11 +95,7 @@ const getEarnings = () => {
 }
 
 const getRating = () => {
-  return {
-    totalPercentage: 98,
-    upVotes: 100,
-    downVotes: 3
-  }
+  return 4.7
 }
 
 const getAddedPaymentMethods = (id?: number): PaymentMethodFields[] => {

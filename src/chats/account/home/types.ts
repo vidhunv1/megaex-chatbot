@@ -12,14 +12,14 @@ export interface AccountHomeState {
       totalDeals: number
       totalVolume: number
       avgSpeedSec: number
-      rating: {
-        totalPercentage: number
-        upVotes: number
-        downVotes: number
-      }
+      rating: number
       referralCount: number
       totalEarnings: number
       addedPaymentMethods: PaymentMethods[]
     } | null
   }
+}
+
+export enum AccountHomeError {
+  ACCOUNT_NOT_FOUND = 'ACCOUNT_NOT_FOUND'
 }

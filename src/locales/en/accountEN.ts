@@ -1,19 +1,36 @@
+import { AccountHomeError } from 'chats/account/home'
+
 export const accountEN = {
   home: {
+    errors: {
+      [AccountHomeError.ACCOUNT_NOT_FOUND]: 'Could not find this account.'
+    },
     account: `👤  *My Account*
     
-    Account ID: /u{{ accountID }}
+Account ID: /u{{ accountID }}
     
-    💵  *Total Deals:* {{ dealCount }}
-    💎  *Volume:*        {{ tradeVolume }} {{ cryptoCurrencyCode }}
-    🕒  *Avg speed:*   {{ tradeSpeed }}
-    ⭐  *Rating:*           {{ ratingPercentage }}% 👍({{ upvotes }}) 👎({{ downvotes }})
+💵  *Total Deals:* {{ dealCount }}
+💎  *Volume:*        {{ tradeVolume }} {{ cryptoCurrencyCode }}
+🕒  *Avg speed:*   {{ tradeSpeed }}
+⭐  *Rating:*           {{ rating }}
     
-    🤝 Invited:           {{ referralCount }} users
-    💰 Earnings:        {{ earnings }} {{ cryptoCurrencyCode }}
+🤝 Invited:           {{ referralCount }} users
+💰 Earnings:        {{ earnings }} {{ cryptoCurrencyCode }}
     
-    💳  *Payment Methods:* {{ paymentMethods }}
-    `,
+💳  *Payment Methods:* {{ paymentMethods }}`,
+
+    'dealer-account': `*Account* (/u{{ accountId }})
+
+Telegram: @{{ telegramUsername }}
+
+💵  *Total Deals:* {{ dealCount }}
+💎  *Volume:*       {{ tradeVolume }} {{ cryptoCurrencyCode }}
+🕒  *Avg speed:*  {{ tradeSpeed }}
+⭐  *Rating:*         {{ rating }}`,
+    'send-message-dealer-cbbutton': '📝 Write message',
+    'user-reviews-cbbutton': '🗣 Reviews ({{ reviewCount }})',
+    'block-dealer-cbbutton': '⛔️  Block user',
+    'unblock-dealer-cbbutton': 'Unblock user',
     'verify-account-cbbutton': '✅  Verify identity',
     'manage-payment-methods-cbbutton': '💳  Payment Methods',
     'referral-link-cbbutton': '🤝  Referral',
@@ -63,13 +80,12 @@ Your payment method was updated.
   referral: {
     'show-info': `🤝 *Referral*
 
-    * Invited*: {{ referralCount }} users
-    * Referral fees*: {{ referralFeesPercentage }}% 
-    _(from the fees we take from your referral)_
+* Invited*: {{ referralCount }} users
+* Referral fees*: {{ referralFeesPercentage }}% 
+_(from the fees we take from your referral)_
     
-    💰Invite your friends using your referral link to earn bitcoins from their transactions.
-    Payouts are processed *every day*, credited directly to your wallet.
-    `
+💰Invite your friends using your referral link to earn bitcoins from their transactions.
+Payouts are processed *every day*, credited directly to your wallet.`
   },
 
   settings: {
