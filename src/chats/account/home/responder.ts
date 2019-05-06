@@ -64,18 +64,23 @@ export const AccountHomeResponder: Responder<AccountState> = (
       if (accountId && stateData) {
         const userReviews = await getUserReviews(accountId)
         const cursor = parseInt(stateData.cursor + '')
-        const review = userReviews[stateData.cursor]
-        await AccountHomeMessage(msg, user).showReview(
-          cursor,
-          userReviews.length,
-          accountId,
-          review.reviewerName,
-          review.review,
-          review.isUpvote,
-          review.dealVolume,
-          review.cryptoCurrencyCode,
-          stateData.shouldEdit
-        )
+
+        if (userReviews.length > 0) {
+          const review = userReviews[stateData.cursor]
+          await AccountHomeMessage(msg, user).showReview(
+            cursor,
+            userReviews.length,
+            accountId,
+            review.reviewerName,
+            review.review,
+            review.isUpvote,
+            review.dealVolume,
+            review.cryptoCurrencyCode,
+            stateData.shouldEdit
+          )
+        } else {
+          await AccountHomeMessage(msg, user).noReviewsAvailable()
+        }
       }
       return true
     },

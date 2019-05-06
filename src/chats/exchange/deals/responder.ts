@@ -199,7 +199,7 @@ async function getOrder(orderId: number) {
       rating: 4.7,
       lastSeen: new Date(),
       tradeCount: 5,
-      reviewCount: 30
+      reviewCount: 3
     }
   }
 }

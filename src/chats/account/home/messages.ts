@@ -17,6 +17,15 @@ import {
 import { CommonStateKey, CommonState } from 'chats/common/types'
 
 export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
+  async noReviewsAvailable() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Account}:home.no-reviews-available`),
+      {
+        parse_mode: 'Markdown'
+      }
+    )
+  },
   async showReview(
     currentCursor: number,
     totalReviews: number,

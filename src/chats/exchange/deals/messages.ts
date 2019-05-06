@@ -95,22 +95,6 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
 
     const inline: TelegramBot.InlineKeyboardButton[][] = []
 
-    if (reviewCount > 0) {
-      inline.push([
-        {
-          text: user.t(`${Namespace.Exchange}:deals.user-reviews`, {
-            reviewCount
-          }),
-          callback_data: stringifyCallbackQuery<
-            AccountHomeStateKey.cb_showReviews,
-            AccountHomeState[AccountHomeStateKey.cb_showReviews]
-          >(AccountHomeStateKey.cb_showReviews, {
-            accountId: accountId
-          })
-        }
-      ])
-    }
-
     inline.push([
       {
         text: user.t(`${Namespace.Exchange}:deals.back-cbbutton`),
@@ -118,7 +102,24 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
           CommonStateKey.cb_deleteThisMessage,
           CommonState[CommonStateKey.cb_deleteThisMessage]
         >(CommonStateKey.cb_deleteThisMessage, {})
-      },
+      }
+    ])
+
+    if (reviewCount > 0) {
+      inline[inline.length - 1].push({
+        text: user.t(`${Namespace.Exchange}:deals.user-reviews`, {
+          reviewCount
+        }),
+        callback_data: stringifyCallbackQuery<
+          AccountHomeStateKey.cb_showReviews,
+          AccountHomeState[AccountHomeStateKey.cb_showReviews]
+        >(AccountHomeStateKey.cb_showReviews, {
+          accountId: accountId
+        })
+      })
+    }
+
+    inline.push([
       {
         text: openDealText,
         callback_data: stringifyCallbackQuery<

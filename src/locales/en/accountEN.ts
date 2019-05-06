@@ -4,7 +4,8 @@ export const accountEN = {
   home: {
     'back-cbbutton': '⬅️ back',
     'more-cbbutton': 'more »',
-    'user-review': `🗣 *Review* for /u{{ opAccountId }} ({{ currentPage }}/{{ totalPages }})
+    'no-reviews-available': 'No reviews yet',
+    'user-review': `({{ currentPage }}/{{ totalPages }}) Review for /u{{ opAccountId }}
 
 {{ rating }}
 
@@ -34,6 +35,7 @@ Telegram: @{{ telegramUsername }}
 💎  *Volume:*       {{ tradeVolume }} {{ cryptoCurrencyCode }}
 🕒  *Avg speed:*  {{ tradeSpeed }}
 ⭐  *Rating:*         {{ rating }}`,
+
     'send-message-dealer-cbbutton': '📝 Write message',
     'user-reviews-cbbutton': '🗣 Reviews ({{ reviewCount }})',
     'block-dealer-cbbutton': '⛔️  Block user',
