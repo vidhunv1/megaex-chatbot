@@ -27,8 +27,10 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         return false
       }
 
+      const orderTypeForUser =
+        orderType === OrderType.BUY ? OrderType.SELL : OrderType.BUY
       const { orderList, totalOrders } = await getOrdersList(
-        orderType,
+        orderTypeForUser,
         user.currencyCode,
         cursor,
         DealsConfig.LIST_LIMIT
@@ -78,6 +80,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
           order.paymentMethod,
           order.rate,
           order.amount,
+          order.availableBalance,
           order.fiatCurrencyCode,
           dealer.reviewCount
         )
@@ -86,6 +89,9 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       return true
     },
     [DealsStateKey.cb_openDeal]: async () => {
+      return false
+    },
+    [DealsStateKey.cb_requestDealDeposit]: async () => {
       return false
     }
   }
@@ -105,6 +111,7 @@ const orders = [
       min: 0.3,
       max: 0.5
     },
+    availableBalance: 0,
     paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
     isEnabled: true,
     terms: 'Please transfer fast..'
@@ -116,6 +123,7 @@ const orders = [
     fiatCurrencyCode: FiatCurrency.INR,
     rate: 310004,
     rating: 4.6,
+    availableBalance: 0.2,
     amount: {
       min: 0.1,
       max: 0.5
@@ -131,6 +139,7 @@ const orders = [
     fiatCurrencyCode: FiatCurrency.INR,
     rate: 310003,
     rating: 4.7,
+    availableBalance: 0.5,
     amount: {
       min: 0.1,
       max: 0.5
@@ -146,6 +155,7 @@ const orders = [
     fiatCurrencyCode: FiatCurrency.INR,
     rate: 310002,
     rating: 4.9,
+    availableBalance: 0.5,
     amount: {
       min: 0.1,
       max: 0.5
@@ -165,6 +175,7 @@ a.forEach((id) =>
     fiatCurrencyCode: FiatCurrency.INR,
     rate: 310000 + id,
     rating: 4.6,
+    availableBalance: 0.5,
     amount: {
       min: 0.1,
       max: 0.5
@@ -181,13 +192,25 @@ async function getOrdersList(
   cursor: number,
   limit: number
 ) {
-  let orderList = _.filter(orders, (o) => o.orderType === orderType)
-  const totalOrders = orderList.length
+  // Show all orders with available balance first, rest are shown at last
+  let orderList = _.filter(
+    orders,
+    (o) => o.orderType === orderType && o.availableBalance >= o.amount.min
+  )
   orderList = _.orderBy(orderList, (o) => o.rate, [
-    orderType === OrderType.BUY ? 'asc' : 'desc'
-  ]).slice(cursor, cursor + limit)
+    orderType === OrderType.BUY ? 'desc' : 'asc'
+  ])
+  // Move all orders without available balance to end
+  orderList.push(
+    ..._.filter(
+      orders,
+      (o) => o.availableBalance < o.amount.min && o.orderType === orderType
+    )
+  )
 
-  return { orderList, totalOrders }
+  const totalOrders = orderList.length
+
+  return { orderList: orderList.slice(cursor, cursor + limit), totalOrders }
 }
 
 async function getOrder(orderId: number) {

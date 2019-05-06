@@ -21,123 +21,6 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       user.t(`${Namespace.Exchange}:deals.errors.${dealsError}`)
     )
   },
-  async showDeal(
-    orderType: OrderType,
-    orderId: number,
-    cryptoCurrencyCode: CryptoCurrency,
-    realName: string,
-    accountId: string,
-    lastSeen: Date,
-    rating: number,
-    tradeCount: number,
-    terms: string,
-    paymentMethod: PaymentMethods,
-    rate: number,
-    amount: { min: number; max: number },
-    fiatCurrencyCode: FiatCurrency,
-    reviewCount: number
-  ) {
-    const lastSeenValue = moment(lastSeen)
-      .locale(LanguageISO[user.locale])
-      .fromNow()
-    const formattedRate = dataFormatter.formatFiatCurrency(
-      rate,
-      fiatCurrencyCode
-    )
-    const formattedAmount = `${
-      amount.min
-    } - ${dataFormatter.formatCryptoCurrency(amount.max, cryptoCurrencyCode)}`
-
-    let openDealText, showDealText
-    if (orderType === OrderType.BUY) {
-      openDealText = user.t(
-        `${Namespace.Exchange}:deals.open-buy-deal-cbbutton`,
-        {
-          cryptoCurrencyCode
-        }
-      )
-
-      showDealText = user.t(`${Namespace.Exchange}:deals.show-buy-deal`, {
-        orderId,
-        cryptoCurrencyCode,
-        realName,
-        accountId,
-        lastSeenValue,
-        rating: rating.toFixed(1),
-        tradeCount,
-        terms,
-        paymentMethodName: user.t(`payment-methods.names.${paymentMethod}`),
-        rate: formattedRate,
-        formattedAmount
-      })
-    } else {
-      openDealText = user.t(
-        `${Namespace.Exchange}:deals.open-sell-deal-cbbutton`,
-        {
-          cryptoCurrencyCode
-        }
-      )
-
-      showDealText = user.t(`${Namespace.Exchange}:deals.show-sell-deal`, {
-        orderId,
-        cryptoCurrencyCode,
-        realName,
-        accountId,
-        lastSeenValue,
-        rating: rating.toFixed(1),
-        tradeCount,
-        terms,
-        paymentMethodName: user.t(`payment-methods.names.${paymentMethod}`),
-        rate: formattedRate,
-        formattedAmount
-      })
-    }
-
-    const inline: TelegramBot.InlineKeyboardButton[][] = []
-
-    inline.push([
-      {
-        text: user.t(`${Namespace.Exchange}:deals.back-cbbutton`),
-        callback_data: stringifyCallbackQuery<
-          CommonStateKey.cb_deleteThisMessage,
-          CommonState[CommonStateKey.cb_deleteThisMessage]
-        >(CommonStateKey.cb_deleteThisMessage, {})
-      }
-    ])
-
-    if (reviewCount > 0) {
-      inline[inline.length - 1].push({
-        text: user.t(`${Namespace.Exchange}:deals.user-reviews`, {
-          reviewCount
-        }),
-        callback_data: stringifyCallbackQuery<
-          AccountHomeStateKey.cb_showReviews,
-          AccountHomeState[AccountHomeStateKey.cb_showReviews]
-        >(AccountHomeStateKey.cb_showReviews, {
-          accountId: accountId
-        })
-      })
-    }
-
-    inline.push([
-      {
-        text: openDealText,
-        callback_data: stringifyCallbackQuery<
-          DealsStateKey.cb_openDeal,
-          DealsState[DealsStateKey.cb_openDeal]
-        >(DealsStateKey.cb_openDeal, {
-          orderId
-        })
-      }
-    ])
-
-    await telegramHook.getWebhook.sendMessage(msg.chat.id, showDealText, {
-      parse_mode: 'Markdown',
-      reply_markup: {
-        inline_keyboard: inline
-      }
-    })
-  },
 
   async showDealsMessage(
     cryptoCurrencyCode: CryptoCurrency,
@@ -248,5 +131,157 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         }
       })
     }
+  },
+
+  async showDeal(
+    orderType: OrderType,
+    orderId: number,
+    cryptoCurrencyCode: CryptoCurrency,
+    realName: string,
+    accountId: string,
+    lastSeen: Date,
+    rating: number,
+    tradeCount: number,
+    terms: string,
+    paymentMethod: PaymentMethods,
+    rate: number,
+    amount: { min: number; max: number },
+    availableBalance: number,
+    fiatCurrencyCode: FiatCurrency,
+    reviewCount: number
+  ) {
+    // If orderType = Buy, then it is Sell when shown to the user
+    const lastSeenValue = moment(lastSeen)
+      .locale(LanguageISO[user.locale])
+      .fromNow()
+    const formattedRate = dataFormatter.formatFiatCurrency(
+      rate,
+      fiatCurrencyCode
+    )
+
+    let openDealInline: TelegramBot.InlineKeyboardButton, showDealText
+    if (orderType === OrderType.BUY) {
+      const formattedAmount = `${amount.min} - ${
+        amount.max
+      } ${cryptoCurrencyCode}`
+
+      openDealInline = {
+        text: user.t(`${Namespace.Exchange}:deals.open-sell-deal-cbbutton`, {
+          cryptoCurrencyCode
+        }),
+        callback_data: stringifyCallbackQuery<
+          DealsStateKey.cb_openDeal,
+          DealsState[DealsStateKey.cb_openDeal]
+        >(DealsStateKey.cb_openDeal, {
+          orderId
+        })
+      }
+
+      showDealText = user.t(`${Namespace.Exchange}:deals.show-sell-deal`, {
+        orderId,
+        cryptoCurrencyCode,
+        realName,
+        accountId,
+        lastSeenValue,
+        rating: rating.toFixed(1),
+        tradeCount,
+        terms,
+        paymentMethodName: user.t(`payment-methods.names.${paymentMethod}`),
+        rate: formattedRate,
+        formattedAmount
+      })
+    } else {
+      const actualMaxAmount =
+        availableBalance >= amount.min && availableBalance < amount.max
+          ? availableBalance
+          : amount.max
+
+      const formattedAmount = `${
+        amount.min
+      } - ${actualMaxAmount} ${cryptoCurrencyCode}`
+
+      showDealText = user.t(`${Namespace.Exchange}:deals.show-buy-deal`, {
+        orderId,
+        cryptoCurrencyCode,
+        realName,
+        accountId,
+        lastSeenValue,
+        rating: rating.toFixed(1),
+        tradeCount,
+        terms,
+        paymentMethodName: user.t(`payment-methods.names.${paymentMethod}`),
+        rate: formattedRate,
+        formattedAmount
+      })
+
+      if (availableBalance < amount.min) {
+        showDealText =
+          showDealText +
+          '\n\n' +
+          user.t(`${Namespace.Exchange}:deals.show-sell-insufficient-funds`)
+
+        openDealInline = {
+          text: user.t(
+            `${Namespace.Exchange}:deals.request-buy-deal-deposit-cbbutton`,
+            {
+              cryptoCurrencyCode
+            }
+          ),
+          callback_data: stringifyCallbackQuery<
+            DealsStateKey.cb_requestDealDeposit,
+            DealsState[DealsStateKey.cb_requestDealDeposit]
+          >(DealsStateKey.cb_requestDealDeposit, {
+            orderId
+          })
+        }
+      } else {
+        openDealInline = {
+          text: user.t(`${Namespace.Exchange}:deals.open-buy-deal-cbbutton`, {
+            cryptoCurrencyCode
+          }),
+          callback_data: stringifyCallbackQuery<
+            DealsStateKey.cb_openDeal,
+            DealsState[DealsStateKey.cb_openDeal]
+          >(DealsStateKey.cb_openDeal, {
+            orderId
+          })
+        }
+      }
+    }
+
+    const inline: TelegramBot.InlineKeyboardButton[][] = []
+
+    inline.push([
+      {
+        text: user.t(`${Namespace.Exchange}:deals.back-cbbutton`),
+        callback_data: stringifyCallbackQuery<
+          CommonStateKey.cb_deleteThisMessage,
+          CommonState[CommonStateKey.cb_deleteThisMessage]
+        >(CommonStateKey.cb_deleteThisMessage, {})
+      }
+    ])
+
+    if (reviewCount > 0) {
+      inline[inline.length - 1].push({
+        text: user.t(`${Namespace.Exchange}:deals.user-reviews`, {
+          reviewCount
+        }),
+        callback_data: stringifyCallbackQuery<
+          AccountHomeStateKey.cb_showReviews,
+          AccountHomeState[AccountHomeStateKey.cb_showReviews]
+        >(AccountHomeStateKey.cb_showReviews, {
+          accountId: accountId
+        })
+      })
+    }
+
+    inline.push([openDealInline])
+
+    await telegramHook.getWebhook.sendMessage(msg.chat.id, showDealText, {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: inline
+      }
+    })
   }
 })

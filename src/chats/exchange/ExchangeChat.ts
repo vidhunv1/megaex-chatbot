@@ -58,6 +58,7 @@ export const ExchangeChat: ChatHandler = {
           order.paymentMethod,
           order.rate,
           order.amount,
+          order.availableBalance,
           order.fiatCurrencyCode,
           dealer.reviewCount
         )
@@ -199,6 +200,7 @@ async function getOrder(orderId: number) {
           min: 0.1,
           max: 0.5
         },
+        availableBalance: 0.2,
         paymentMethod: PaymentMethods.CASH,
         isEnabled: true,
         terms: 'Please transfer fast..'

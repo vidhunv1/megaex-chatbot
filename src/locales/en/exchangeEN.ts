@@ -31,7 +31,7 @@ Please select the order you want to sell from.
 
 *Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
 `,
-    'show-buy-deal': `📈 *Buy {{ cryptoCurrencyCode }}* (/o{{ orderId }})
+    'show-buy-deal': `📉 *Buy {{ cryptoCurrencyCode }}* (/o{{ orderId }})
     
 _This deal is by_ *{{ realName }}*.
 
@@ -57,6 +57,9 @@ Rating:  {{ rating }} ⭐️
 
 *Price*: {{ rate }} / {{ cryptoCurrencyCode }}
 *Sell Amount*: {{ formattedAmount }}`,
+
+    'show-sell-insufficient-funds': `❗️ There is not enough balance on sellers account to start this deal. You may request the seller to deposit the funds after which the deal can begin.`,
+    'request-buy-deal-deposit-cbbutton': '📲 Contact seller',
 
     'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',
     'open-sell-deal-cbbutton': '🛎  Sell {{ cryptoCurrencyCode }} here',

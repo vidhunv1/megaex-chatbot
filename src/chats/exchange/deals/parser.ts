@@ -71,6 +71,10 @@ export const DealsParser: Parser<ExchangeState> = async (
 
     [DealsStateKey.cb_openDeal]: async () => {
       return null
+    },
+
+    [DealsStateKey.cb_requestDealDeposit]: async () => {
+      return null
     }
   }
 

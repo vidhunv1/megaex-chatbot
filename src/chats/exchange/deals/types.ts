@@ -8,7 +8,8 @@ export enum DealsStateKey {
   cb_nextDeals = 'cb_nextDeals',
   cb_prevDeals = 'cb_prevDeals',
 
-  cb_openDeal = 'cb_openDeal'
+  cb_openDeal = 'cb_openDeal',
+  cb_requestDealDeposit = 'cb_requestDealDeposit'
 }
 
 export enum DealsError {
@@ -39,6 +40,9 @@ export interface DealsState {
   }
 
   [DealsStateKey.cb_openDeal]?: {
+    orderId: number
+  }
+  [DealsStateKey.cb_requestDealDeposit]?: {
     orderId: number
   }
 }
