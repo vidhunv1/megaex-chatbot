@@ -13,7 +13,7 @@ export const AccountHomeParser: Parser<AccountState> = async (
   _msg,
   _user,
   tUser,
-  currentState
+  state
 ) => {
   const parser: Record<
     AccountHomeStateKey,
@@ -25,7 +25,7 @@ export const AccountHomeParser: Parser<AccountState> = async (
 
     [AccountHomeStateKey.start]: async () => {
       return {
-        ...currentState,
+        ...state,
         [AccountHomeStateKey.start]: {
           data: {
             accountId: getAccountId(),
@@ -41,11 +41,44 @@ export const AccountHomeParser: Parser<AccountState> = async (
           }
         }
       }
+    },
+
+    [AccountHomeStateKey.cb_showReviews]: async () => {
+      return {
+        ...state,
+        [AccountHomeStateKey.showReviews]: {
+          data: {
+            shouldEdit: false,
+            cursor: 0
+          }
+        }
+      }
+    },
+
+    [AccountHomeStateKey.showReviews]: async () => {
+      return null
+    },
+
+    [AccountHomeStateKey.cb_reviewShowMore]: async () => {
+      const cursor = _.get(
+        state[AccountHomeStateKey.cb_reviewShowMore],
+        'cursor',
+        0
+      )
+      return {
+        ...state,
+        [AccountHomeStateKey.showReviews]: {
+          data: {
+            shouldEdit: true,
+            cursor
+          }
+        }
+      }
     }
   }
 
   const updatedState = await parser[
-    currentState.currentStateKey as AccountHomeStateKey
+    state.currentStateKey as AccountHomeStateKey
   ]()
   const nextStateKey = nextAccountHomeState(updatedState)
   const nextState = updateNextAccountState(updatedState, nextStateKey, tUser.id)
@@ -65,6 +98,10 @@ export function nextAccountHomeState(
       return AccountHomeStateKey.account
     case AccountHomeStateKey.account:
       return null
+    case AccountHomeStateKey.cb_showReviews:
+      return AccountHomeStateKey.showReviews
+    case AccountHomeStateKey.cb_reviewShowMore:
+      return AccountHomeStateKey.showReviews
     default:
       return null
   }

@@ -2,6 +2,13 @@ import { AccountHomeError } from 'chats/account/home'
 
 export const accountEN = {
   home: {
+    'back-cbbutton': '⬅️ back',
+    'more-cbbutton': 'more »',
+    'user-review': `🗣 *Review* for /u{{ opAccountId }} ({{ currentPage }}/{{ totalPages }})
+
+{{ rating }}
+
+*{{ reviewerName }}* had completed a deal for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`,
     errors: {
       [AccountHomeError.ACCOUNT_NOT_FOUND]: 'Could not find this account.'
     },

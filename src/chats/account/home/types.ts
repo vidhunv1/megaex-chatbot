@@ -2,7 +2,11 @@ import { PaymentMethods } from 'constants/paymentMethods'
 
 export enum AccountHomeStateKey {
   start = 'start',
-  account = 'account'
+  account = 'account',
+
+  cb_showReviews = 'cb_showReviews',
+  showReviews = 'showReviews',
+  cb_reviewShowMore = 'cb_reviewShowMore'
 }
 
 export interface AccountHomeState {
@@ -17,6 +21,21 @@ export interface AccountHomeState {
       totalEarnings: number
       addedPaymentMethods: PaymentMethods[]
     } | null
+  }
+
+  [AccountHomeStateKey.cb_showReviews]?: {
+    accountId: string
+  }
+
+  [AccountHomeStateKey.showReviews]?: {
+    data: {
+      shouldEdit: boolean
+      cursor: number
+    }
+  }
+
+  [AccountHomeStateKey.cb_reviewShowMore]?: {
+    cursor: number
   }
 }
 

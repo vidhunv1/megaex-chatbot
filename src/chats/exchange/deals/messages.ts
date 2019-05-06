@@ -12,6 +12,7 @@ import { DealsConfig } from './config'
 import * as moment from 'moment'
 import { LanguageISO } from 'constants/languages'
 import { CommonStateKey, CommonState } from 'chats/common/types'
+import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
   async showError(dealsError: DealsError) {
@@ -101,9 +102,11 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
             reviewCount
           }),
           callback_data: stringifyCallbackQuery<
-            CommonStateKey.cb_deleteThisMessage,
-            CommonState[CommonStateKey.cb_deleteThisMessage]
-          >(CommonStateKey.cb_deleteThisMessage, {})
+            AccountHomeStateKey.cb_showReviews,
+            AccountHomeState[AccountHomeStateKey.cb_showReviews]
+          >(AccountHomeStateKey.cb_showReviews, {
+            accountId: accountId
+          })
         }
       ])
     }

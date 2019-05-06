@@ -85,6 +85,9 @@ export const ExchangeChat: ChatHandler = {
         if (
           [
             DealsStateKey.cb_deals,
+            DealsStateKey.cb_nextDeals,
+            DealsStateKey.cb_prevDeals,
+            DealsStateKey.cb_showDealById,
             MyOrdersStateKey.cb_showActiveOrders,
             MyOrdersStateKey.cb_editRate,
             MyOrdersStateKey.cb_editAmount,

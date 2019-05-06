@@ -9,10 +9,76 @@ import { SettingsStateKey, SettingsState } from '../settings'
 import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
 import { CryptoCurrency } from 'constants/currencies'
 import { PaymentMethods } from 'constants/paymentMethods'
-import { AccountHomeError } from './types'
+import {
+  AccountHomeError,
+  AccountHomeStateKey,
+  AccountHomeState
+} from './types'
 import { CommonStateKey, CommonState } from 'chats/common/types'
 
 export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
+  async showReview(
+    currentCursor: number,
+    totalReviews: number,
+    opAccountId: string,
+    reviewerName: string,
+    review: string,
+    isUpvote: boolean,
+    dealVolume: number,
+    cryptoCurrencyCode: CryptoCurrency,
+    shouldEdit: boolean
+  ) {
+    const message = user.t(`${Namespace.Account}:home.user-review`, {
+      currentPage: currentCursor + 1,
+      totalPages: totalReviews,
+      opAccountId: opAccountId,
+      reviewerName: reviewerName,
+      tradeVolume: dealVolume,
+      cryptoCurrencyCode: cryptoCurrencyCode,
+      rating: (isUpvote ? '(👍)' : '(👎)') + (review && `  _"${review}"_`)
+    })
+
+    const hasMoreReviews: boolean = currentCursor + 1 < totalReviews
+
+    const inline: TelegramBot.InlineKeyboardButton[][] = [
+      [
+        {
+          text: user.t(`${Namespace.Account}:home.back-cbbutton`),
+          callback_data: stringifyCallbackQuery<
+            CommonStateKey.cb_deleteThisMessage,
+            CommonState[CommonStateKey.cb_deleteThisMessage]
+          >(CommonStateKey.cb_deleteThisMessage, {})
+        },
+        {
+          text: user.t(`${Namespace.Account}:home.more-cbbutton`),
+          callback_data: stringifyCallbackQuery<
+            AccountHomeStateKey.cb_reviewShowMore,
+            AccountHomeState[AccountHomeStateKey.cb_reviewShowMore]
+          >(AccountHomeStateKey.cb_reviewShowMore, {
+            cursor: hasMoreReviews ? currentCursor + 1 : 0
+          })
+        }
+      ]
+    ]
+
+    if (shouldEdit) {
+      await telegramHook.getWebhook.editMessageText(message, {
+        chat_id: msg.chat.id,
+        message_id: msg.message_id,
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: inline
+        }
+      })
+    } else {
+      await telegramHook.getWebhook.sendMessage(msg.chat.id, message, {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: inline
+        }
+      })
+    }
+  },
   async showError(accountError: AccountHomeError) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
@@ -58,9 +124,11 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   }
                 ),
                 callback_data: stringifyCallbackQuery<
-                  CommonStateKey.cb_deleteThisMessage,
-                  CommonState[CommonStateKey.cb_deleteThisMessage]
-                >(CommonStateKey.cb_deleteThisMessage, {})
+                  AccountHomeStateKey.cb_showReviews,
+                  AccountHomeState[AccountHomeStateKey.cb_showReviews]
+                >(AccountHomeStateKey.cb_showReviews, {
+                  accountId: accountID
+                })
               }
             ]
             // [

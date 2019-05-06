@@ -76,10 +76,15 @@ export const AccountChat: ChatHandler = {
             SettingsStateKey.cb_settingsLanguage,
             SettingsStateKey.cb_settingsCurrency,
             SettingsStateKey.cb_settingsRate,
-            SettingsStateKey.cb_settingsUsername
+            SettingsStateKey.cb_settingsUsername,
+            AccountHomeStateKey.cb_showReviews,
+            AccountHomeStateKey.cb_reviewShowMore
           ].includes(callbackName)
         ) {
-          state = _.clone(initialState)
+          state = {
+            ..._.clone(initialState),
+            ...state
+          }
         } else {
           return false
         }
