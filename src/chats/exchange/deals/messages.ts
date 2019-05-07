@@ -187,6 +187,10 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       paymentMethod: PaymentMethods
       fiatCurrencyCode: FiatCurrency
       rating: number
+      availableBalance: number
+      amount: {
+        min: number
+      }
     }[],
     totalOrders: number,
     currentCursor: number,
@@ -198,11 +202,17 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
           order.rate,
           order.fiatCurrencyCode
         )
+
+        let text = `${formattedFiatRateRate} - ${user.t(
+          `payment-methods.short-names.${order.paymentMethod}`
+        )} | ${order.rating.toFixed(1)} ⭐️`
+
+        if (order.availableBalance < order.amount.min) {
+          text = '❕' + text
+        }
         return [
           {
-            text: `${formattedFiatRateRate} - ${user.t(
-              `payment-methods.short-names.${order.paymentMethod}`
-            )} | ${order.rating.toFixed(1)} ⭐️`,
+            text,
             callback_data: stringifyCallbackQuery<
               DealsStateKey.cb_showDealById,
               DealsState[DealsStateKey.cb_showDealById]
