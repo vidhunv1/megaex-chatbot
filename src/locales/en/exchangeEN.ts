@@ -64,13 +64,55 @@ Rating:  {{ rating }} ⭐️
     'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',
     'open-sell-deal-cbbutton': '🛎  Sell {{ cryptoCurrencyCode }} here',
     'back-cbbutton': '⬅️  Back',
-    'user-reviews': '🗣 reviews ({{ reviewCount }})'
+    'user-reviews': '🗣 reviews ({{ reviewCount }})',
+    'input-buy-amount': `💵 *Input buy amount*
+
+Input the amount between *{{ minFiatValue }}* and *{{ maxFiatValue }}* or from *{{ minCryptoValue }}* to *{{ maxCryptoValue }}* to buy. 
+
+If you want to specify {{ cryptoCurrencyCode }} value, then add the ticker(*{{ cryptoCurrencyCode }}*) (Example: 0.1 {{ cryptoCurrencyCode }})`,
+    'input-sell-amount': `💵 *Input sell amount*
+
+Input the amount between *{{ minFiatValue }}* and *{{ maxFiatValue }}* or from *{{ minCryptoValue }}* to *{{ maxCryptoValue }}* to sell. 
+
+If you want to specify {{ cryptoCurrencyCode }} value, then add the ticker(*{{ cryptoCurrencyCode }}*) (Example: 0.1 {{ cryptoCurrencyCode }})`,
+    'confirm-input-buy-amount': `*Confirm*
+    
+Are you sure you want to buy *{{ cryptoValue }}* for *{{ fiatValue }}* at rate *{{ rate }}*?
+
+❕By continuing you agree to the deal terms.`,
+
+    'confirm-input-sell-amount': `*Confirm*
+    
+Are you sure you want to sell *{{ cryptoValue }}* for *{{ fiatValue }}* at rate *{{ rate }}*?
+
+❕By continuing you agree to the deal terms.`,
+    'confirm-input-amount-yes-cbbutton': 'Yes',
+    'confirm-input-amount-no-cbbutton': 'No',
+    'show-open-deal-request': `📲 *Request sent*
+
+Your request has been sent, this deal will only start after the seller has deposited the required funds.
+
+⚠️ Never make any payment before the deposit has been confirmed here. Do not make any deals outside this bot, you risk losing your money.
+
+*Seller's telegram*: @{{ telegramUsername}}`,
+    'show-open-deal-cancel': 'Deal canceled.',
+    'trade-opened-message': 'trade opened!',
+    'show-opened-trade': `*Trade* /t{{ tradeId }}
+
+Waiting for /u{{ traderAccountId }}. If user doesn't appear within {{ timeoutMinutes }} minutes, the deal will automatically cancel.
+
+⚠️ For your security do not make any trades outside this bot.
+
+You can cancel the deal any time. Keep in mind that the money you have sent will not return if you cancel the transaction.
+
+*Auto cancel in {{ timeoutMinutes }} minutes*`,
+    'cancel-trade-cbbutton': '🚫 Cancel trade'
   },
 
   'my-orders': {
     'my-sell-order-cbbutton': 'My Sell order on {{ paymentMethod }}',
     'my-buy-order-cbbutton': 'My Buy on {{ paymentMethod }}',
-    'buy-deal-cbbutton': '🛎 Buy Deal @ {{ fiatRate }}',
+    'buy-deal-cbbutton': '🛎 Buy trade @ {{ fiatRate }}',
     'sell-deal-cbbutton': '🛎 Sell Deal @ {{ fiatRate }}',
     'deposit-cryptocurrency': '📩 Deposit {{ cryptoCurrencyCode }}',
     'show-active-orders': `*Active Orders*

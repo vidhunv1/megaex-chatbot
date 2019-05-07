@@ -1,7 +1,7 @@
 import { DealsStateKey } from './types'
 import { Responder } from 'chats/types'
 import * as _ from 'lodash'
-import { ExchangeState } from '../ExchangeState'
+import { ExchangeState, TradeStatus } from '../ExchangeState'
 import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { PaymentMethods } from 'constants/paymentMethods'
@@ -93,6 +93,103 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     },
     [DealsStateKey.cb_requestDealDeposit]: async () => {
       return false
+    },
+    [DealsStateKey.requestDealDeposit_show]: async () => {
+      const orderId = _.get(
+        state[DealsStateKey.cb_requestDealDeposit],
+        'orderId',
+        null
+      )
+      if (orderId == null) {
+        return false
+      }
+
+      const order = await getOrder(orderId)
+      if (order.dealer) {
+        await DealsMessage(msg, user).showOpenDealRequest(
+          order.dealer.telegramUsername
+        )
+        return true
+      }
+      return false
+    },
+
+    [DealsStateKey.inputDealAmount]: async () => {
+      const orderId = _.get(
+        state[DealsStateKey.inputDealAmount],
+        'orderId',
+        null
+      )
+      if (orderId == null) {
+        return false
+      }
+      const order = (await getOrder(orderId)).order
+      if (order == null) {
+        return false
+      }
+
+      await DealsMessage(msg, user).inputDealAmount(
+        order.orderType,
+        order.fiatCurrencyCode,
+        order.rate,
+        order.cryptoCurrencyCode,
+        order.amount.min,
+        order.amount.max
+      )
+      return true
+    },
+    [DealsStateKey.confirmInputDealAmount]: async () => {
+      const orderId = _.get(
+        state[DealsStateKey.inputDealAmount],
+        'orderId',
+        null
+      )
+      const inputData = _.get(
+        state[DealsStateKey.inputDealAmount],
+        'data',
+        null
+      )
+      if (orderId == null || inputData == null) {
+        return false
+      }
+      const order = (await getOrder(orderId)).order
+      if (order == null) {
+        return false
+      }
+
+      await DealsMessage(msg, user).confirmInputDealAmount(
+        order.orderType,
+        order.cryptoCurrencyCode,
+        order.fiatCurrencyCode,
+        inputData.fiatValue,
+        order.rate
+      )
+      return true
+    },
+    [DealsStateKey.cb_confirmInputDealAmount]: async () => {
+      return false
+    },
+    [DealsStateKey.showDealInitOpened]: async () => {
+      const stateData = _.get(
+        state[DealsStateKey.showDealInitOpened],
+        'data',
+        null
+      )
+      if (stateData == null) {
+        return false
+      }
+
+      const trade = await getTrade(stateData.tradeId)
+      await DealsMessage(msg, user).showOpenedTrade(
+        trade.trade.tradeId,
+        trade.dealer.accountId
+      )
+
+      return true
+    },
+    [DealsStateKey.showDealInitCancel]: async () => {
+      await DealsMessage(msg, user).showDealInitCancel()
+      return true
     }
   }
 
@@ -219,10 +316,23 @@ async function getOrder(orderId: number) {
     dealer: {
       realName: 'Satoshi',
       accountId: 'uxawsats',
+      telegramUsername: 'satoshi',
       rating: 4.7,
       lastSeen: new Date(),
       tradeCount: 5,
       reviewCount: 3
+    }
+  }
+}
+
+async function getTrade(tradeId: number) {
+  return {
+    trade: {
+      tradeId: tradeId,
+      status: TradeStatus.INITIATED
+    },
+    dealer: {
+      accountId: 'uxawsats'
     }
   }
 }

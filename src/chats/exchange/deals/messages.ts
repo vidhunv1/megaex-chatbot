@@ -13,8 +13,164 @@ import * as moment from 'moment'
 import { LanguageISO } from 'constants/languages'
 import { CommonStateKey, CommonState } from 'chats/common/types'
 import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
+import { keyboardMainMenu } from 'chats/common'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
+  async showOpenDealRequest(sellerTelegramUsername: string) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.show-open-deal-request`, {
+        telegramUsername: sellerTelegramUsername
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
+      }
+    )
+  },
+
+  async showDealInitCancel() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.show-open-deal-cancel`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
+      }
+    )
+  },
+
+  async confirmInputDealAmount(
+    orderType: OrderType,
+    cryptoCurrencyCode: CryptoCurrency,
+    fiatCurrencyCode: FiatCurrency,
+    fiatValue: number,
+    rate: number
+  ) {
+    const formattedCryptoValue = dataFormatter.formatCryptoCurrency(
+      fiatValue / rate,
+      cryptoCurrencyCode
+    )
+    const formattedFiatValue = dataFormatter.formatFiatCurrency(
+      fiatValue,
+      fiatCurrencyCode
+    )
+    const formattedRate = dataFormatter.formatFiatCurrency(
+      rate,
+      fiatCurrencyCode
+    )
+    let message
+    if (orderType === OrderType.BUY) {
+      message = user.t(
+        `${Namespace.Exchange}:deals.confirm-input-sell-amount`,
+        {
+          cryptoValue: formattedCryptoValue,
+          fiatValue: formattedFiatValue,
+          rate: formattedRate
+        }
+      )
+    } else {
+      message = user.t(`${Namespace.Exchange}:deals.confirm-input-buy-amount`, {
+        cryptoValue: formattedCryptoValue,
+        fiatValue: formattedFiatValue,
+        rate: formattedRate
+      })
+    }
+
+    await telegramHook.getWebhook.sendMessage(msg.chat.id, message, {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: user.t(
+                `${Namespace.Exchange}:deals.confirm-input-amount-yes-cbbutton`
+              ),
+              callback_data: stringifyCallbackQuery<
+                DealsStateKey.cb_confirmInputDealAmount,
+                DealsState[DealsStateKey.cb_confirmInputDealAmount]
+              >(DealsStateKey.cb_confirmInputDealAmount, {
+                isConfirmed: true,
+                data: null
+              })
+            },
+            {
+              text: user.t(
+                `${Namespace.Exchange}:deals.confirm-input-amount-no-cbbutton`
+              ),
+              callback_data: stringifyCallbackQuery<
+                DealsStateKey.cb_confirmInputDealAmount,
+                DealsState[DealsStateKey.cb_confirmInputDealAmount]
+              >(DealsStateKey.cb_confirmInputDealAmount, {
+                isConfirmed: false,
+                data: null
+              })
+            }
+          ]
+        ]
+      }
+    })
+  },
+
+  async inputDealAmount(
+    orderType: OrderType,
+    fiatCurrencyCode: FiatCurrency,
+    rate: number,
+    cryptoCurrencyCode: CryptoCurrency,
+    minCrypto: number,
+    maxCrypto: number
+  ) {
+    const minFiatValue = dataFormatter.formatFiatCurrency(
+      minCrypto * rate,
+      fiatCurrencyCode
+    )
+    const maxFiatValue = dataFormatter.formatFiatCurrency(
+      maxCrypto * rate,
+      fiatCurrencyCode
+    )
+    const minCryptoValue = dataFormatter.formatCryptoCurrency(
+      minCrypto,
+      cryptoCurrencyCode
+    )
+    const maxCryptoValue = dataFormatter.formatCryptoCurrency(
+      maxCrypto,
+      cryptoCurrencyCode
+    )
+
+    let message
+    if (orderType === OrderType.BUY) {
+      message = user.t(`${Namespace.Exchange}:deals.input-sell-amount`, {
+        minFiatValue: minFiatValue,
+        maxFiatValue: maxFiatValue,
+        minCryptoValue: minCryptoValue,
+        maxCryptoValue: maxCryptoValue,
+        cryptoCurrencyCode: cryptoCurrencyCode
+      })
+    } else {
+      message = user.t(`${Namespace.Exchange}:deals.input-buy-amount`, {
+        minFiatValue: minFiatValue,
+        maxFiatValue: maxFiatValue,
+        minCryptoValue: minCryptoValue,
+        maxCryptoValue: maxCryptoValue,
+        cryptoCurrencyCode: cryptoCurrencyCode
+      })
+    }
+    await telegramHook.getWebhook.sendMessage(msg.chat.id, message, {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        one_time_keyboard: true,
+        resize_keyboard: true,
+        keyboard: [
+          [
+            {
+              text: user.t('actions.cancel-keyboard-button')
+            }
+          ]
+        ]
+      }
+    })
+  },
+
   async showError(dealsError: DealsError) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
@@ -283,5 +439,44 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         inline_keyboard: inline
       }
     })
+  },
+
+  async showOpenedTrade(tradeId: number, traderAccountId: string) {
+    const timeoutMinutes = DealsConfig.INITATED_TRADE_TIMEOUT / 60
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade-opened-message`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
+      }
+    )
+
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.show-opened-trade`, {
+        tradeId,
+        traderAccountId,
+        timeoutMinutes
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: user.t(
+                  `${Namespace.Exchange}:deals.cancel-trade-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  CommonStateKey.cb_deleteThisMessage,
+                  CommonState[CommonStateKey.cb_deleteThisMessage]
+                >(CommonStateKey.cb_deleteThisMessage, {})
+              }
+            ]
+          ]
+        }
+      }
+    )
   }
 })

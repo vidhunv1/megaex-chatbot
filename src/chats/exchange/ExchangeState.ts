@@ -40,3 +40,11 @@ export async function updateNextExchangeState(
     STATE_EXPIRY
   )
 }
+
+export enum TradeStatus {
+  INITIATED = 'INITIATED',
+  MATCHED = 'MATCHED',
+  PAYMENT_SENT_CONFIRMED = 'PAYMENT_SENT_CONFIRMED',
+  PAYMENT_RECEIVE_CONFIRMED = 'PAYMENT_RECEIVE_CONFIRMED',
+  CANCELED = 'CANCELED'
+}
