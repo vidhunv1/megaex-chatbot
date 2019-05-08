@@ -1,3 +1,5 @@
+import { BotCommand } from 'chats/types'
+
 export const signupEN = {
   'choose-language': `Hello, *{{ name }}*!
 
@@ -14,7 +16,7 @@ By continuing you agree to our [terms & conditions](https://google.com) and [pri
 
   'account-ready': `*Account Created*
 
-Account ID: /u{{ accountID }}
+Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 Bitcoin address: *{{ bitcoinAddress }}*
 
 _Security Tip_
@@ -23,13 +25,13 @@ _Security Tip_
 
   'account-ready-generating-address': `*Account Created*
 
-Account ID: /u{{ accountID }}
+Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 
 _Security Tip_
 🔒 _Enable Telegram password_ security settings -> 2 step verification -> Password
 🔒 _Always terminate all inactive sessions from_ security settings -> Active sessions`,
   'account-ready-continue-button': '🚀 Start trading',
-  'home-screen': `[Join our group](https://t.me/megadealsenglish)      /settings
+  'home-screen': `[Join our group](https://t.me/megadealsenglish)
 
 _Earn bitcoins using our referral program. Get your referral link inside_ *Account* _below_
 

@@ -17,8 +17,8 @@ export const getBotCommand = (msg: TelegramBot.Message): BotCommand | null => {
       return BotCommand.SETTINGS
     } else if (message.startsWith(BotCommand.HELP)) {
       return BotCommand.HELP
-    } else if (message.startsWith(BotCommand.USER)) {
-      return BotCommand.USER
+    } else if (message.startsWith(BotCommand.ACCOUNT)) {
+      return BotCommand.ACCOUNT
     } else if (message.startsWith(BotCommand.TRANSACTIONS)) {
       return BotCommand.TRANSACTIONS
     } else if (message.startsWith(BotCommand.ORDER)) {

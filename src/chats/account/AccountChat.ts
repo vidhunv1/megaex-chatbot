@@ -27,8 +27,8 @@ export const AccountChat: ChatHandler = {
     user: User,
     _tUser: TelegramAccount
   ) {
-    if (command === BotCommand.USER && msg.text) {
-      const accountId = msg.text.replace(BotCommand.USER, '')
+    if (command === BotCommand.ACCOUNT && msg.text) {
+      const accountId = msg.text.replace(BotCommand.ACCOUNT, '')
       const accountInfo = await getAccount(accountId)
       if (accountInfo != null) {
         await AccountHomeMessage(msg, user).showDealerAccount(

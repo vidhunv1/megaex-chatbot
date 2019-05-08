@@ -1,4 +1,5 @@
 import { DealsError } from 'chats/exchange/deals'
+import { BotCommand } from 'chats/types'
 
 export const exchangeEN = {
   home: {
@@ -31,11 +32,13 @@ Please select the order you want to sell from.
 
 *Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
 `,
-    'show-buy-deal': `📉 *Buy {{ cryptoCurrencyCode }}* (/o{{ orderId }})
+    'show-buy-deal': `📉 *Buy {{ cryptoCurrencyCode }}* (${
+      BotCommand.ORDER
+    }{{ orderId }})
     
 _This deal is by_ *{{ realName }}*.
 
-Account ID: /u{{ accountId }}
+Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
 Last seen: {{ lastSeenValue }}
 Rating:  {{ rating }} ⭐️
 
@@ -44,11 +47,13 @@ Rating:  {{ rating }} ⭐️
 
 *Price*: {{ rate }} / {{ cryptoCurrencyCode }}
 *Buy Amount*: {{ formattedAmount }}`,
-    'show-sell-deal': `📈 *Sell {{ cryptoCurrencyCode }}* (/o{{ orderId }})
+    'show-sell-deal': `📈 *Sell {{ cryptoCurrencyCode }}* (${
+      BotCommand.ORDER
+    }{{ orderId }})
     
 _This deal is by_ *{{ realName }}*.
 
-Account ID: /u{{ accountId }}
+Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
 Last seen: {{ lastSeenValue }}
 Rating:  {{ rating }} ⭐️
 
@@ -97,9 +102,11 @@ Your request has been sent, this deal will only start after the seller has depos
 *Seller's telegram*: @{{ telegramUsername}}`,
     'show-open-deal-cancel': 'Deal canceled.',
     'trade-opened-message': 'trade opened!',
-    'show-opened-trade': `*Trade* /t{{ tradeId }}
+    'show-opened-trade': `*Trade* ${BotCommand.TRADE}{{ tradeId }}
 
-Waiting for /u{{ traderAccountId }}. If user doesn't appear within {{ timeoutMinutes }} minutes, the deal will automatically cancel.
+Waiting for ${
+      BotCommand.ACCOUNT
+    }{{ traderAccountId }}. If user doesn't appear within {{ timeoutMinutes }} minutes, the deal will automatically cancel.
 
 ⚠️ For your security do not make any trades outside this bot.
 
@@ -126,7 +133,7 @@ _(Click on Active button to enable this order.)_`,
     'show-orders': 'TODO: Show my orders',
 
     'terms-not-added': 'None',
-    'my-buy-order-info': `*📗 My Buy Order* - /o{{orderId}}
+    'my-buy-order-info': `*📗 My Buy Order* - ${BotCommand.ORDER}{{orderId}}
 
 *Status*: {{ status }}
 *Rate {{ cryptoCurrencyCode }}*: {{ rate }}
@@ -138,7 +145,7 @@ Terms: _{{ terms }}_
 *Order share link*: {{ orderLink }}
 (_Anyone who clicks on this link can directly open a deal with you._)
 `,
-    'my-sell-order-info': `*📕 My Sell Order* - /o{{orderId}}
+    'my-sell-order-info': `*📕 My Sell Order* - ${BotCommand.ORDER}{{orderId}}
 
 *Status*: {{ status }}
 *Rate {{ cryptoCurrencyCode }}*: {{ rate }}

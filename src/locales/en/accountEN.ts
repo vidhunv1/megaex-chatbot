@@ -1,11 +1,14 @@
 import { AccountHomeError } from 'chats/account/home'
+import { BotCommand } from 'chats/types'
 
 export const accountEN = {
   home: {
     'back-cbbutton': '⬅️ back',
     'more-cbbutton': 'more »',
     'no-reviews-available': 'No reviews yet',
-    'user-review': `({{ currentPage }}/{{ totalPages }}) Review for /u{{ opAccountId }}
+    'user-review': `({{ currentPage }}/{{ totalPages }}) Review for ${
+      BotCommand.ACCOUNT
+    }{{ opAccountId }}
 
 {{ rating }}
 
@@ -15,7 +18,7 @@ export const accountEN = {
     },
     account: `👤  *My Account*
     
-Account ID: /u{{ accountID }}
+Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
     
 💵  *Total Deals:* {{ dealCount }}
 💎  *Volume:*        {{ tradeVolume }} {{ cryptoCurrencyCode }}
@@ -27,7 +30,7 @@ Account ID: /u{{ accountID }}
     
 💳  *Payment Methods:* {{ paymentMethods }}`,
 
-    'dealer-account': `*Account* (/u{{ accountId }})
+    'dealer-account': `*Account* (${BotCommand.ACCOUNT}{{ accountId }})
 
 Telegram: @{{ telegramUsername }}
 

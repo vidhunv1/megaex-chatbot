@@ -6,7 +6,9 @@ import {
   Wallet,
   Transaction,
   PaymentMethod,
-  Order
+  Order,
+  Referral,
+  UserInfo
 } from 'models'
 import { CONFIG } from '../config'
 
@@ -41,12 +43,15 @@ export class DB {
         }
       })
       sequelize.addModels([
-        TelegramAccount,
-        User,
         Wallet,
         Transaction,
         PaymentMethod,
-        Order
+        Order,
+
+        User,
+        TelegramAccount,
+        Referral,
+        UserInfo
       ])
 
       DB.instance = this

@@ -31,16 +31,17 @@ export enum BotCommand {
   CANCEL = '/cancel',
 
   // App commands
-  USER = '/u',
+  ACCOUNT = '/U',
   TRANSACTIONS = '/transactions',
-  ORDER = '/o'
+  ORDER = '/O',
+  TRADE = '/T'
 }
 
 export enum DeepLink {
   REFERRAL = 'ref',
   ACCOUNT = 'acc',
   ORDER = 'order',
-  TRACK = 'track'
+  TRACK = 'tr'
 }
 
 export interface CallbackDefaults {

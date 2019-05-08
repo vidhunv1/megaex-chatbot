@@ -2,17 +2,23 @@ import * as TelegramBot from 'node-telegram-bot-api'
 import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/I18n'
 import { languageKeyboard, currencyKeyboard } from './utils'
-import { CryptoCurrency } from 'constants/currencies'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { keyboardMainMenu } from 'chats/common'
-import { User, Wallet } from 'models'
+import { User, Wallet, OrderType } from 'models'
 import { SignupState, SignupStateKey } from './SignupState'
+import { DeepLink } from 'chats/types'
+import * as _ from 'lodash'
+import logger from 'modules/Logger'
+import { PaymentMethods } from 'constants/paymentMethods'
+import { DealsMessage } from 'chats/exchange/deals'
+import { AccountHomeMessage } from 'chats/account/home'
 
 export async function signupResponder(
   msg: TelegramBot.Message,
   user: User,
-  nextState: SignupState
+  state: SignupState
 ): Promise<boolean> {
-  const stateKey = nextState.currentStateKey
+  const stateKey = state.currentStateKey
   switch (stateKey) {
     case SignupStateKey.signupError:
       await telegramHook.getWebhook.sendMessage(
@@ -125,8 +131,122 @@ export async function signupResponder(
           reply_markup: keyboardMainMenu(user)
         }
       )
+
+      const data = _.get(state[SignupStateKey.start], 'data', null)
+      if (data != null && data.deeplink != null && data.value != null) {
+        switch (data.deeplink) {
+          case DeepLink.ACCOUNT: {
+            const accountInfo = await getAccount(data.value)
+            if (accountInfo != null) {
+              await AccountHomeMessage(msg, user).showDealerAccount(
+                accountInfo.accountId,
+                accountInfo.telegramUsername,
+                accountInfo.dealCount,
+                accountInfo.tradeVolume,
+                accountInfo.cryptoCurrencyCode,
+                accountInfo.tradeSpeed,
+                accountInfo.rating,
+                accountInfo.reviewCount
+                // accountInfo.isUserBlocked
+              )
+            }
+            break
+          }
+
+          case DeepLink.ORDER: {
+            try {
+              const { order, dealer } = await getOrder(parseInt(data.value))
+              if (order && dealer) {
+                await DealsMessage(msg, user).showDeal(
+                  order.orderType,
+                  order.orderId,
+                  order.cryptoCurrencyCode,
+                  dealer.realName,
+                  dealer.accountId,
+                  dealer.lastSeen,
+                  dealer.rating,
+                  dealer.tradeCount,
+                  order.terms,
+                  order.paymentMethod,
+                  order.rate,
+                  order.amount,
+                  order.availableBalance,
+                  order.fiatCurrencyCode,
+                  dealer.reviewCount
+                )
+              }
+            } catch (e) {
+              logger.warn('Invalid order id in start ' + data.value)
+            }
+            break
+          }
+        }
+      }
+
       return true
   }
 
   return false
+}
+
+async function getOrder(orderId: number) {
+  if (orderId == 1) {
+    return {
+      order: {
+        orderId: orderId,
+        orderType: OrderType.SELL,
+        cryptoCurrencyCode: CryptoCurrency.BTC,
+        fiatCurrencyCode: FiatCurrency.INR,
+        rate: 310002,
+        rating: 4.9,
+        amount: {
+          min: 0.1,
+          max: 0.5
+        },
+        availableBalance: 0.2,
+        paymentMethod: PaymentMethods.CASH,
+        isEnabled: true,
+        terms: 'Please transfer fast..'
+      },
+      dealer: {
+        realName: 'Satoshi',
+        accountId: 'uxawsats',
+        rating: 4.7,
+        lastSeen: new Date(),
+        tradeCount: 5,
+        reviewCount: 30
+      }
+    }
+  } else {
+    return {
+      order: null,
+      dealer: null
+    }
+  }
+}
+
+async function getAccount(
+  accountId: string
+): Promise<{
+  accountId: string
+  telegramUsername: string
+  dealCount: number
+  tradeVolume: number
+  cryptoCurrencyCode: CryptoCurrency
+  tradeSpeed: number
+  reviewCount: number
+  // isUserBlocked: boolean,
+  rating: number
+} | null> {
+  return {
+    accountId,
+    telegramUsername: 'satoshi',
+    dealCount: 4,
+    tradeVolume: 100,
+    cryptoCurrencyCode: CryptoCurrency.BTC,
+    tradeSpeed: 100,
+    reviewCount: 30,
+    // isUserBlocked: false,
+    rating: 4.5
+  }
 }

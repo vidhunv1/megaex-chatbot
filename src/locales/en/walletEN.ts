@@ -1,3 +1,5 @@
+import { BotCommand } from 'chats/types'
+
 export const walletEN = {
   /* Home */
   home: {
@@ -7,7 +9,7 @@ export const walletEN = {
    (Value:       {{ fiatBalance }})
 *In Order*:      {{ blockedBalance }}
     
-📗  /transactions
+📗  ${BotCommand.TRANSACTIONS}
     
 🤝 Invited:    {{ referralCount }} users
 💰 Earnings: {{ earnings }}

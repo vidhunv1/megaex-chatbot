@@ -6,9 +6,11 @@ import logger from 'modules/Logger'
 import { LanguageView, Language } from 'constants/languages'
 import { Account } from 'lib/Account'
 import { FiatCurrency } from 'constants/currencies'
-import { User } from 'models'
+import { User, UserInfo } from 'models'
 import { Namespace } from 'modules/i18n'
 import * as _ from 'lodash'
+import { DeepLink } from 'chats/types'
+import Referral from 'models/Referral'
 
 export async function signupParser(
   msg: TelegramBot.Message,
@@ -162,12 +164,30 @@ export async function signupParser(
     }
 
     case SignupStateKey.accountReady:
-      // TODO: Handle deeplinks
-      logger.error(`Handle deeplinks ${JSON.stringify(currentState)}`)
+      const data = _.get(currentState[SignupStateKey.start], 'data', null)
+      if (data != null && data.deeplink != null && data.value != null) {
+        switch (data.deeplink) {
+          case DeepLink.REFERRAL:
+            const referredByUser = await User.findOne({
+              where: { accountId: data.value }
+            })
+            if (referredByUser) {
+              await Referral.createReferral(referredByUser.id, user.id)
+            }
+            break
+
+          case DeepLink.TRACK:
+            await UserInfo.create<UserInfo>({
+              userId: user.id,
+              tracking: data.value
+            })
+            break
+        }
+      }
       return currentState
 
     case SignupStateKey.homeScreen:
-      return currentState
+      return null
     case SignupStateKey.signupError:
       return currentState
   }

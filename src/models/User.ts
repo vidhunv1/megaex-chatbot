@@ -15,6 +15,8 @@ import i18n from '../modules/i18n'
 import { LanguageISO, Language } from '../constants/languages'
 import { FiatCurrency } from 'constants/currencies'
 import { ExchangeSource } from 'constants/exchangeSource'
+import Referral from './Referral'
+import UserInfo from './UserInfo'
 
 @Table({ timestamps: true, tableName: 'Users' })
 export class User extends Model<User> {
@@ -26,6 +28,12 @@ export class User extends Model<User> {
 
   @HasOne(() => TelegramAccount, 'userId')
   telegramUser!: TelegramAccount
+
+  @HasOne(() => UserInfo, 'userId')
+  userInfo!: UserInfo
+
+  @HasMany(() => Referral, 'userId')
+  referrals!: Referral
 
   @HasMany(() => Wallet, 'userId')
   wallets!: Wallet[]
@@ -66,7 +74,7 @@ export class User extends Model<User> {
   t(key: string, values?: any): string {
     return i18n.getI18n.t(key, {
       ...values,
-      lng: LanguageISO[this.locale] || LanguageISO[Language.ENGLISH]
+      lng: LanguageISO[this.locale]
     })
   }
 }
