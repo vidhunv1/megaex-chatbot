@@ -44,15 +44,16 @@ export class Account {
     const accountCache = await cacheClient.getAsync(
       CacheHelper.getKeyForUser(CacheKey.TelegramAccount, this.telegramId)
     )
+
+    let tAccount: TelegramAccount
     if (accountCache) {
-      console.log('from cache')
       // user exists in cache
 
       const parsed: TelegramAccount = JSON.parse(accountCache)
       const t: TelegramAccount = new TelegramAccount(parsed)
       t.user = new User(parsed.user)
 
-      return t
+      tAccount = t
     } else {
       // no user data available in cache
       // check if user exists
@@ -61,17 +62,15 @@ export class Account {
       })
 
       if (getTAccount) {
-        console.log('From DB')
         this.saveUserToCache(getTAccount)
-        return getTAccount
+        tAccount = getTAccount
       } else {
-        console.log('Creating new User')
+        logger.info('Creating new User')
         if (!this.telegramMessage) {
           logger.error(
             'FATAL: lib/accounts Account details not passed to create new account'
           )
         }
-
         // new user, create account & load cache
         const newT = new TelegramAccount({
           id: this.telegramId,
@@ -90,7 +89,7 @@ export class Account {
           const wallets = new Wallet({ userId: t.user.id })
           await wallets.createAll()
 
-          return t
+          tAccount = t
         } catch (e) {
           logger.error(
             'Error creating account: TelegramUser.create: ' + JSON.stringify(e)
@@ -99,5 +98,47 @@ export class Account {
         }
       }
     }
+
+    if (this.telegramMessage) {
+      if (
+        this.telegramMessage.username &&
+        this.telegramMessage.username !== tAccount.username
+      ) {
+        await TelegramAccount.update(
+          {
+            username: this.telegramMessage.username
+          },
+          {
+            where: {
+              id: tAccount.id
+            }
+          }
+        )
+        Account.clearUserCache(this.telegramId)
+
+        tAccount.username = this.telegramMessage.username
+      }
+
+      if (
+        this.telegramMessage.first_name &&
+        this.telegramMessage.first_name !== tAccount.firstName
+      ) {
+        await TelegramAccount.update(
+          {
+            firstName: this.telegramMessage.first_name
+          },
+          {
+            where: {
+              id: tAccount.id
+            }
+          }
+        )
+        Account.clearUserCache(this.telegramId)
+
+        tAccount.firstName = this.telegramMessage.first_name
+      }
+    }
+
+    return tAccount
   }
 }
