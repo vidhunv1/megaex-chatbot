@@ -10,8 +10,9 @@ import {
 } from 'sequelize-typescript'
 import { User } from './User'
 import RandomGenerator from '../lib/RandomGenerator'
+import logger from 'modules/Logger'
 
-@Table({ timestamps: true, tableName: 'TelegramUsers' })
+@Table({ timestamps: true, tableName: 'TelegramAccount' })
 export class TelegramAccount extends Model<TelegramAccount> {
   @PrimaryKey
   @AllowNull(false)
@@ -49,7 +50,7 @@ export class TelegramAccount extends Model<TelegramAccount> {
       u = await User.findOne({ where: { accountId: accId } })
       i++
     } while (u !== null)
-    console.log(`${i} attempts to generate random user id`)
+    logger.info(`${i} attempts to generate random user id`)
     const us = await User.create<User>({ accountId: accountId }, {})
     const tUser = await TelegramAccount.create<TelegramAccount>(
       {

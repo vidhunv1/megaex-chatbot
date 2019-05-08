@@ -19,7 +19,12 @@ import logger from 'modules/Logger'
     msg: TelegramBot.Message
   ) {
     try {
-      if (msg.from && msg.chat && msg.chat.id === msg.from.id) {
+      if (
+        msg.from &&
+        msg.chat &&
+        msg.chat.id === msg.from.id &&
+        !msg.from.is_bot
+      ) {
         const account = new Account(msg.from.id, msg.from)
 
         try {

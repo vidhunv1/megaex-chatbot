@@ -46,12 +46,6 @@ module.exports = {
         field: 'currencyCode',
         allowNull: true,
       },
-      blockedUsers: {
-        type: Sequelize.STRING,
-        field: 'blockedUsers',
-        defaultValue: '[]',
-        allowNull: false,      
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

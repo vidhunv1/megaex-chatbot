@@ -28,14 +28,16 @@ export const SignupChat: ChatHandler = {
       const currentState =
         (await CacheHelper.getState<SignupState>(tUser.id)) || initialState
 
-      const nextState: SignupState | null = await signupParser(
+      const parsedState: SignupState | null = await signupParser(
         msg,
         tUser.id,
         user,
         currentState
       )
 
-      if (nextState === null) {
+      const nextState = await nextSignupState(parsedState, tUser.id)
+
+      if (nextState == null) {
         return false
       }
 
