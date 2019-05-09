@@ -1,4 +1,4 @@
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models/PaymentMethod'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { OrderType } from 'models'
 
@@ -57,28 +57,28 @@ Here you can find best deals to exchange bitcoins with your local currency here
   'unhandled-callback': `Session on this button expired. Please create a new request.`,
   'payment-methods': {
     names: {
-      [PaymentMethods.PAYTM]: 'PayTM',
-      [PaymentMethods.UPI]: 'UPI',
-      [PaymentMethods.CASH]: 'Direct cash',
-      [PaymentMethods.BANK_TRANSFER_IMPS_INR]: 'IMPS bank transfer'
+      [PaymentMethodType.PAYTM]: 'PayTM',
+      [PaymentMethodType.UPI]: 'UPI',
+      [PaymentMethodType.CASH]: 'Direct cash',
+      [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 'IMPS bank transfer'
     },
     'short-names': {
-      [PaymentMethods.PAYTM]: 'PayTM',
-      [PaymentMethods.UPI]: 'UPI',
-      [PaymentMethods.CASH]: 'Direct cash',
-      [PaymentMethods.BANK_TRANSFER_IMPS_INR]: 'IMPS'
+      [PaymentMethodType.PAYTM]: 'PayTM',
+      [PaymentMethodType.UPI]: 'UPI',
+      [PaymentMethodType.CASH]: 'Direct cash',
+      [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 'IMPS'
     },
     fields: {
-      [PaymentMethods.PAYTM]: {
+      [PaymentMethodType.PAYTM]: {
         field1: 'Mobile number'
       },
-      [PaymentMethods.UPI]: {
+      [PaymentMethodType.UPI]: {
         field1: 'UPI ID'
       },
-      [PaymentMethods.CASH]: {
+      [PaymentMethodType.CASH]: {
         field1: 'location'
       },
-      [PaymentMethods.BANK_TRANSFER_IMPS_INR]: {
+      [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: {
         field1: 'Bank name',
         field2: 'Account Number',
         field3: 'IFSC Code'

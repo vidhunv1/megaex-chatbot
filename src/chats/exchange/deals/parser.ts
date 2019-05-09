@@ -10,7 +10,7 @@ import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { OrderType } from 'models'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 import logger from 'modules/Logger'
 
 export const DealsParser: Parser<ExchangeState> = async (
@@ -387,7 +387,7 @@ async function getOrder(orderId: number) {
       min: 0.3,
       max: 0.5
     },
-    paymentMethod: PaymentMethods.CASH,
+    paymentMethod: PaymentMethodType.CASH,
     isEnabled: true,
     terms: 'Please transfer fast..'
   }

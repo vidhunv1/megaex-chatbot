@@ -8,7 +8,7 @@ import {
 import * as _ from 'lodash'
 import { OrderType, RateTypes } from 'models'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 import logger from 'modules/Logger'
 
 export const CreateOrderParser: Parser<ExchangeState> = async (
@@ -274,7 +274,7 @@ async function createBuyOrder(
   maxAmount: number,
   rateType: RateTypes,
   rateValue: number,
-  paymentMethod: PaymentMethods
+  paymentMethod: PaymentMethodType
 ): Promise<number | null> {
   logger.error(
     `TODO: create BUY order ${minAmount}-${maxAmount} ${rateType} ${rateValue} via ${paymentMethod}`
@@ -287,7 +287,7 @@ async function createSellOrder(
   maxAmount: number,
   rateType: RateTypes,
   rateValue: number,
-  paymentMethod: PaymentMethods,
+  paymentMethod: PaymentMethodType,
   addedPaymentMethodId: number | null
 ): Promise<number | null> {
   logger.error(

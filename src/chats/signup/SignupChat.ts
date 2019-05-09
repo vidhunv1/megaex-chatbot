@@ -10,6 +10,7 @@ import {
 import { CacheHelper } from 'lib/CacheHelper'
 import { signupParser } from './signupParser'
 import { signupResponder } from './signupResponder'
+import * as _ from 'lodash'
 
 export const SignupChat: ChatHandler = {
   async handleCommand(
@@ -68,8 +69,10 @@ export const SignupChat: ChatHandler = {
       !user.currencyCode ||
       !user.locale
     ) {
-      const currentState = state as SignupState
-
+      let currentState = state as SignupState
+      if (!currentState || currentState.key != SIGNUP_STATE_LABEL) {
+        currentState = _.clone(initialState)
+      }
       const updatedState: SignupState | null = await signupParser(
         msg,
         tUser.id,

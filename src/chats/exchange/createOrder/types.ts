@@ -1,5 +1,5 @@
 import { OrderType, RateTypes } from 'models'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 
 export enum CreateOrderStateKey {
   cb_showCreateOrder = 'cb_showCreateOrder',
@@ -68,12 +68,12 @@ export interface CreateOrderState {
 
   [CreateOrderStateKey.selectPaymentMethod]?: {
     data: {
-      paymentMethod: PaymentMethods
+      paymentMethod: PaymentMethodType
     }
   }
 
   [CreateOrderStateKey.cb_selectPaymentMethod]?: {
-    pm: PaymentMethods
+    pm: PaymentMethodType
     pmId?: number
   }
 }

@@ -8,10 +8,8 @@ import {
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { CryptoCurrency } from 'constants/currencies'
-import {
-  PaymentMethods,
-  PaymentMethodsFieldsLocale
-} from 'constants/paymentMethods'
+import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models/PaymentMethod'
 import { RateTypes, OrderType } from 'models'
 import { MyOrdersMessage } from './messages'
 import logger from 'modules/Logger'
@@ -455,7 +453,7 @@ const MOCK_ORDER = {
     min: 0.1,
     max: 0.5
   },
-  paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+  paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
   paymentMethodFields: ['Axis', '21321313', 'AX098098'],
   isEnabled: true,
   terms: null
@@ -504,7 +502,7 @@ async function saveEditedTerms(terms: string) {
   }
 }
 
-async function savePaymentMethod(paymentMethod: PaymentMethods) {
+async function savePaymentMethod(paymentMethod: PaymentMethodType) {
   logger.error('TODO: implement savePaymentMethod')
   return {
     ...MOCK_ORDER,
@@ -526,7 +524,7 @@ async function deleteOrder(orderId: number): Promise<boolean> {
 }
 
 async function savePaymentDetails(
-  paymentMethod: PaymentMethods,
+  paymentMethod: PaymentMethodType,
   fields: string[]
 ): Promise<number> {
   logger.error(

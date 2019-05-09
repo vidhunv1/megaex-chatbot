@@ -5,12 +5,9 @@ import { User } from 'models'
 import { Namespace } from 'modules/i18n'
 import { keyboardMainMenu } from 'chats/common'
 import { stringifyCallbackQuery } from 'chats/utils'
-import {
-  PaymentMethodStateKey,
-  PaymentMethodState,
-  PaymentMethodFields
-} from './types'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodStateKey, PaymentMethodState } from './types'
+import { PaymentMethodType, PaymentMethodFields } from 'models/PaymentMethod'
+import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
 
 export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
   async pmDoesNotExist() {
@@ -47,7 +44,6 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
             PaymentMethodStateKey.cb_editPaymentMethods,
             PaymentMethodState[PaymentMethodStateKey.cb_paymentMethods]
           >(PaymentMethodStateKey.cb_editPaymentMethods, {
-            mId: msg.message_id,
             data: null
           })
         }
@@ -59,7 +55,6 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
           PaymentMethodStateKey.cb_addPaymentMethod,
           PaymentMethodState[PaymentMethodStateKey.cb_addPaymentMethod]
         >(PaymentMethodStateKey.cb_addPaymentMethod, {
-          mId: msg.message_id,
           data: null
         })
       }
@@ -86,12 +81,15 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
     const inline: TelegramBot.InlineKeyboardButton[][] = addedPaymentMethods.map(
       (pm) => [
         {
-          text: user.t(`payment-methods.names.${pm.paymentMethod}`),
+          text: `${user.t(
+            `payment-methods.short-names.${pm.paymentMethod}`
+          )}-${pm.fields[
+            PaymentMethodPrimaryFieldIndex[pm.paymentMethod]
+          ].substring(0, 4)}***`,
           callback_data: stringifyCallbackQuery<
             PaymentMethodStateKey.cb_editPaymentMethodId,
             PaymentMethodState[PaymentMethodStateKey.cb_editPaymentMethodId]
           >(PaymentMethodStateKey.cb_editPaymentMethodId, {
-            mId: msg.message_id,
             paymentMethodId: pm.id,
             data: null
           })
@@ -112,7 +110,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
 
   async selectPaymentMethodInput() {
     const keyboard: TelegramBot.KeyboardButton[][] = Object.values(
-      PaymentMethods
+      PaymentMethodType
     ).map((pm) => [{ text: user.t(`payment-methods.names.${pm}`) }])
     keyboard.push([{ text: user.t('actions.cancel-keyboard-button') }])
     await telegramHook.getWebhook.sendMessage(
@@ -129,7 +127,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
   },
 
   async inputPaymentMethodField(
-    paymentMethod: PaymentMethods,
+    paymentMethod: PaymentMethodType,
     fields: string[]
   ) {
     const fieldName = user.t(
@@ -150,7 +148,10 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
-  async showPMCreateSuccess(paymentMethod: PaymentMethods, fields: string[]) {
+  async showPMCreateSuccess(
+    paymentMethod: PaymentMethodType,
+    fields: string[]
+  ) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Account}:payment-method.created`, {
@@ -171,7 +172,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
-  async showPMEditSuccess(paymentMethod: PaymentMethods, fields: string[]) {
+  async showPMEditSuccess(paymentMethod: PaymentMethodType, fields: string[]) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Account}:payment-method.updated`, {

@@ -10,10 +10,8 @@ import {
 } from './types'
 import { CryptoCurrency } from 'constants/currencies'
 import { ExchangeSource } from 'constants/exchangeSource'
-import {
-  PaymentMethods,
-  PaymentMethodPrimaryFieldIndex
-} from 'constants/paymentMethods'
+import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 import { MyOrdersMessage } from '../myOrders'
 
 export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
@@ -172,7 +170,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       min: number
       max: number
     },
-    paymentMethod: PaymentMethods,
+    paymentMethod: PaymentMethodType,
     isEnabled: boolean,
     terms: string | null
   ) {
@@ -207,7 +205,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       max: number
     },
     availableBalance: number,
-    paymentMethod: PaymentMethods,
+    paymentMethod: PaymentMethodType,
     paymentMethodFields: string[],
     isEnabled: boolean,
     terms: string | null
@@ -260,9 +258,9 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   },
 
   async selectSellPaymentMethod(
-    pmList: PaymentMethods[],
+    pmList: PaymentMethodType[],
     addedPM: {
-      paymentMethod: PaymentMethods
+      paymentMethod: PaymentMethodType
       fields: string[]
       id: number
     }[]
@@ -308,7 +306,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
-  async selectBuyPaymentMethod(pmList: PaymentMethods[]) {
+  async selectBuyPaymentMethod(pmList: PaymentMethodType[]) {
     const inline: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
       {
         text: user.t(`payment-methods.names.${pm}`),

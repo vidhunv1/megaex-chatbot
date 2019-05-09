@@ -1,5 +1,3 @@
-import { PaymentMethods } from 'constants/paymentMethods'
-
 export enum AccountHomeStateKey {
   start = 'start',
   account = 'account',
@@ -10,19 +8,6 @@ export enum AccountHomeStateKey {
 }
 
 export interface AccountHomeState {
-  [AccountHomeStateKey.start]?: {
-    data: {
-      accountId: string
-      totalDeals: number
-      totalVolume: number
-      avgSpeedSec: number
-      rating: number
-      referralCount: number
-      totalEarnings: number
-      addedPaymentMethods: PaymentMethods[]
-    } | null
-  }
-
   [AccountHomeStateKey.cb_showReviews]?: {
     accountId: string
   }

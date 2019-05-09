@@ -1,5 +1,4 @@
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { CallbackDefaults } from 'chats/types'
 
 export enum WithdrawStateKey {
   cb_withdrawCoin = 'cb_withdrawCoin',
@@ -26,7 +25,7 @@ export interface WithdrawState {
       fiatValue: number
       fiatCurrencyCode: FiatCurrency
     } | null
-  } & CallbackDefaults
+  }
   [WithdrawStateKey.withdrawCoin_amount]?: {
     data: {
       cryptoCurrencyAmount: number

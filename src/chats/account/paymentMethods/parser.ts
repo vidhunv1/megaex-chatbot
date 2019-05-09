@@ -1,8 +1,4 @@
-import {
-  PaymentMethodStateKey,
-  PaymentMethodError,
-  PaymentMethodFields
-} from './types'
+import { PaymentMethodStateKey, PaymentMethodError } from './types'
 import { Parser } from 'chats/types'
 import {
   updateNextAccountState,
@@ -12,11 +8,15 @@ import {
 import * as _ from 'lodash'
 import {
   PaymentMethodsFieldsLocale,
-  PaymentMethods,
   PaymentMethodAvailability
 } from 'constants/paymentMethods'
 import logger from 'modules/Logger'
 import { FiatCurrency } from 'constants/currencies'
+import {
+  PaymentMethodType,
+  PaymentMethod,
+  PaymentMethodFields
+} from 'models/PaymentMethod'
 
 export const PaymentMethodParser: Parser<AccountState> = async (
   msg,
@@ -43,7 +43,7 @@ export const PaymentMethodParser: Parser<AccountState> = async (
         [PaymentMethodStateKey.cb_paymentMethods]: {
           ...cbState,
           data: {
-            addedPaymentMethods: getAddedPaymentMethods()
+            addedPaymentMethods: await getSavedPaymentMethods(user.id)
           }
         }
       }
@@ -64,7 +64,7 @@ export const PaymentMethodParser: Parser<AccountState> = async (
         [PaymentMethodStateKey.cb_editPaymentMethods]: {
           ...cbState,
           data: {
-            addedPaymentMethods: getAddedPaymentMethods()
+            addedPaymentMethods: await getSavedPaymentMethods(user.id)
           }
         }
       }
@@ -130,7 +130,27 @@ export const PaymentMethodParser: Parser<AccountState> = async (
           inputs.fields.length ===
           PaymentMethodsFieldsLocale[inputs.paymentMethod].length - 1
         ) {
-          const isSaved = savePaymentMethod(inputs)
+          const fields: string[] = inputs.fields.concat(msg.text)
+          const pmId = _.get(
+            currentState[PaymentMethodStateKey.cb_editPaymentMethodId],
+            'paymentMethodId'
+          )
+
+          let isSaved = false
+          if (pmId) {
+            isSaved = await editPaymentMethod(
+              parseInt(pmId + ''),
+              user.id,
+              inputs.paymentMethod,
+              fields
+            )
+          } else {
+            isSaved = await savePaymentMethod(
+              user.id,
+              inputs.paymentMethod,
+              fields
+            )
+          }
           if (isSaved) {
             return {
               ...currentState,
@@ -138,7 +158,7 @@ export const PaymentMethodParser: Parser<AccountState> = async (
                 data: {
                   inputs: {
                     ...inputs,
-                    fields: inputs.fields.concat(msg.text)
+                    fields
                   },
                   isSaved: true
                 },
@@ -178,7 +198,7 @@ export const PaymentMethodParser: Parser<AccountState> = async (
             data: {
               inputs: {
                 ...inputs,
-                paymentMethod: findPM as PaymentMethods,
+                paymentMethod: findPM as PaymentMethodType,
                 fields: []
               },
               isSaved: false
@@ -207,13 +227,19 @@ export const PaymentMethodParser: Parser<AccountState> = async (
         return null
       }
 
+      const allPms = await getSavedPaymentMethods(user.id)
+      const pm = _.find(allPms, ['id', cbState.paymentMethodId])
+      if (pm == null) {
+        logger.error('PM shouldnt be undefined')
+        return null
+      }
+
       return {
         ...currentState,
         [PaymentMethodStateKey.paymentMethodInput]: {
           data: {
             inputs: {
-              paymentMethod: getAddedPaymentMethods(+cbState.paymentMethodId)[0]
-                .paymentMethod,
+              paymentMethod: pm.paymentMethod,
               editId: parseInt(cbState.paymentMethodId + ''),
               fields: []
             },
@@ -304,38 +330,46 @@ export function nextPaymentMethodState(
   }
 }
 
-const savePaymentMethod = (_pm: any) => {
+async function savePaymentMethod(
+  userId: number,
+  pm: PaymentMethodType,
+  fields: string[]
+) {
+  try {
+    await PaymentMethod.savePaymentMethod(userId, pm, fields)
+  } catch (e) {
+    logger.error('Error saving payment method: ' + JSON.stringify(e))
+    return false
+  }
   return true
 }
 
-const getAllPaymentMethods = (currencyCode: FiatCurrency): PaymentMethods[] =>
+async function editPaymentMethod(
+  id: number,
+  userId: number,
+  pm: PaymentMethodType,
+  fields: string[]
+) {
+  try {
+    await PaymentMethod.editPaymentMethod(id, userId, pm, fields)
+  } catch (e) {
+    logger.error('Error editing payment method: ' + JSON.stringify(e))
+    return false
+  }
+  return true
+}
+
+const getAllPaymentMethods = (
+  currencyCode: FiatCurrency
+): PaymentMethodType[] =>
   // @ts-ignore
   Object.keys(PaymentMethodAvailability).filter(
     // @ts-ignore
     (key) => PaymentMethodAvailability[key] === currencyCode || 'ALL'
   )
 
-const getAddedPaymentMethods = (id?: number): PaymentMethodFields[] => {
-  const pms = [
-    {
-      id: 1,
-      paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
-      fields: ['Axis Bank', '10291029120912', 'IOBA000124']
-    },
-    {
-      id: 2,
-      paymentMethod: PaymentMethods.PAYTM,
-      fields: ['+91 9999999999']
-    }
-  ]
-
-  if (id) {
-    const pm = _.find(pms, { id })
-    if (pm) {
-      return [pm]
-    }
-    return []
-  }
-
-  return pms
+async function getSavedPaymentMethods(
+  userId: number
+): Promise<PaymentMethodFields[]> {
+  return await PaymentMethod.getSavedPaymentMethods(userId)
 }

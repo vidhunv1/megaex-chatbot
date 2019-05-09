@@ -7,9 +7,23 @@ import {
   AutoIncrement,
   ForeignKey,
   DataType,
-  BelongsTo
+  BelongsTo,
+  Default
 } from 'sequelize-typescript'
-import { User, PaymentDetail } from '.'
+import { User } from '.'
+
+export type PaymentMethodFields = {
+  id: number
+  paymentMethod: PaymentMethodType
+  fields: string[]
+}
+
+export enum PaymentMethodType {
+  PAYTM = 'PAYTM',
+  UPI = 'UPI',
+  BANK_TRANSFER_IMPS_INR = 'BANK_TRANSFER_IMPS_INR',
+  CASH = 'CASH'
+}
 
 @Table({ timestamps: true, tableName: 'PaymentMethods', paranoid: true })
 export class PaymentMethod extends Model<PaymentMethod> {
@@ -28,25 +42,59 @@ export class PaymentMethod extends Model<PaymentMethod> {
   user!: User
 
   @AllowNull(false)
-  @ForeignKey(() => PaymentDetail)
-  @Column(DataType.BIGINT)
-  paymentId!: number
+  @Column(DataType.STRING)
+  paymentMethod!: PaymentMethodType
 
   @AllowNull(false)
+  @Default('[]')
   @Column(DataType.STRING)
-  field1!: string
+  fields!: string
 
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  field2!: string
+  static async savePaymentMethod(
+    userId: number,
+    paymentMethod: PaymentMethodType,
+    fields: string[]
+  ) {
+    await PaymentMethod.create<PaymentMethod>(
+      {
+        userId,
+        paymentMethod,
+        fields: JSON.stringify(fields)
+      },
+      {}
+    )
+  }
 
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  field3!: string
+  static async editPaymentMethod(
+    id: number,
+    userId: number,
+    paymentMethod: PaymentMethodType,
+    fields: string[]
+  ) {
+    await PaymentMethod.destroy({
+      where: {
+        id
+      }
+    })
+    await PaymentMethod.savePaymentMethod(userId, paymentMethod, fields)
+  }
 
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  field4!: string
+  static async getSavedPaymentMethods(
+    userId: number
+  ): Promise<PaymentMethodFields[]> {
+    // TODO: Maybe show only payment methods for the currency
+    const pms = await PaymentMethod.findAll<PaymentMethod>({
+      where: {
+        userId
+      }
+    })
+
+    return pms.map((pm) => ({
+      id: pm.id,
+      paymentMethod: pm.paymentMethod,
+      fields: JSON.parse(pm.fields) as string[]
+    }))
+  }
 }
 
 export default PaymentMethod

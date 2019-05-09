@@ -27,7 +27,7 @@ import {
   DealsError
 } from './deals'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 
 export const ExchangeChat: ChatHandler = {
   async handleCommand(
@@ -201,7 +201,7 @@ async function getOrder(orderId: number) {
           max: 0.5
         },
         availableBalance: 0.2,
-        paymentMethod: PaymentMethods.CASH,
+        paymentMethod: PaymentMethodType.CASH,
         isEnabled: true,
         terms: 'Please transfer fast..'
       },

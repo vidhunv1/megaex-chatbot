@@ -2,7 +2,7 @@ import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, OrderType } from 'models'
 import { Namespace } from 'modules/i18n'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 import * as _ from 'lodash'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { DealsStateKey, DealsState, DealsError } from './types'
@@ -184,7 +184,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     ordersList: {
       orderId: number
       rate: number
-      paymentMethod: PaymentMethods
+      paymentMethod: PaymentMethodType
       fiatCurrencyCode: FiatCurrency
       rating: number
       availableBalance: number
@@ -309,7 +309,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     rating: number,
     tradeCount: number,
     terms: string,
-    paymentMethod: PaymentMethods,
+    paymentMethod: PaymentMethodType,
     rate: number,
     amount: { min: number; max: number },
     availableBalance: number,

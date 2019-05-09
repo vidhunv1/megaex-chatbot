@@ -1,4 +1,3 @@
-import { CallbackDefaults } from 'chats/types'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { Language } from 'constants/languages'
 import { FiatCurrency } from 'constants/currencies'
@@ -35,11 +34,11 @@ export interface SettingsState {
   [SettingsStateKey.cb_settings]?: {
     isFromBack: boolean
     data: {} | null
-  } & CallbackDefaults
+  }
 
   [SettingsStateKey.cb_settingsCurrency]?: {
     data: {} | null
-  } & CallbackDefaults
+  }
   [SettingsStateKey.settingsCurrency_show]?: {
     data: {
       cursor: number
@@ -47,16 +46,16 @@ export interface SettingsState {
   }
   [SettingsStateKey.cb_loadMore]?: {
     cursor: number
-  } & CallbackDefaults
+  }
   [SettingsStateKey.cb_settingsLanguage]?: {
     data: {} | null
-  } & CallbackDefaults
+  }
   [SettingsStateKey.cb_settingsRate]?: {
     data: {} | null
-  } & CallbackDefaults
+  }
   [SettingsStateKey.cb_settingsUsername]?: {
     data: {} | null
-  } & CallbackDefaults
+  }
 
   [SettingsStateKey.cb_settingsCurrency_update]?: {
     currency: FiatCurrency

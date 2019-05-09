@@ -4,6 +4,9 @@ import { AccountState } from '../AccountState'
 import { CryptoCurrency } from 'constants/currencies'
 import { AccountHomeMessage } from './messages'
 import * as _ from 'lodash'
+import logger from 'modules/Logger'
+import { PaymentMethod } from 'models'
+import { PaymentMethodFields } from 'models'
 
 export const AccountHomeResponder: Responder<AccountState> = (
   msg,
@@ -16,31 +19,16 @@ export const AccountHomeResponder: Responder<AccountState> = (
     },
 
     [AccountHomeStateKey.account]: async () => {
-      const data = _.get(state[AccountHomeStateKey.start], 'data', null)
-      if (!data) {
-        return false
-      }
-
-      const {
-        accountId,
-        totalDeals,
-        totalEarnings,
-        totalVolume,
-        avgSpeedSec,
-        rating,
-        referralCount,
-        addedPaymentMethods
-      } = data
       await AccountHomeMessage(msg, user).showAccount(
-        accountId,
-        totalDeals,
-        totalVolume,
+        user.accountId,
+        getTotalDeals(),
+        getTotalVolume(),
         CryptoCurrency.BTC,
-        avgSpeedSec,
-        rating,
-        referralCount,
-        totalEarnings,
-        addedPaymentMethods
+        getAvgSpeed(),
+        getRating(),
+        getReferralCount(),
+        getEarnings(),
+        await getSavedPaymentMethods(user.id)
       )
       return true
     },
@@ -125,4 +113,40 @@ async function getUserReviews(_userId: string): Promise<UserReview[]> {
       cryptoCurrencyCode: CryptoCurrency.BTC
     }
   ]
+}
+
+const getReferralCount = () => {
+  logger.error('TODO: Implement referral count')
+  return 0
+}
+
+const getTotalDeals = () => {
+  logger.error('TODO: Implement getTotalDeals')
+  return 100
+}
+
+const getTotalVolume = () => {
+  logger.error('TODO: Implement getTotalVolume')
+  return 100
+}
+
+const getAvgSpeed = () => {
+  logger.error('TODO: Implement getAvgSpeed')
+  return 120
+}
+
+const getEarnings = () => {
+  logger.error('TODO: Implement getEarnings')
+  return 5
+}
+
+const getRating = () => {
+  logger.error('TODO: Implement getRating')
+  return 4.7
+}
+
+async function getSavedPaymentMethods(
+  userId: number
+): Promise<PaymentMethodFields[]> {
+  return await PaymentMethod.getSavedPaymentMethods(userId)
 }

@@ -1,20 +1,14 @@
 import { FiatCurrency } from './currencies'
-
-export enum PaymentMethods {
-  PAYTM = 'PAYTM',
-  UPI = 'UPI',
-  BANK_TRANSFER_IMPS_INR = 'BANK_TRANSFER_IMPS_INR',
-  CASH = 'CASH'
-}
+import { PaymentMethodType } from 'models/PaymentMethod'
 
 export const PaymentMethodAvailability: Record<
-  PaymentMethods,
+  PaymentMethodType,
   FiatCurrency | 'ALL'
 > = {
-  [PaymentMethods.PAYTM]: FiatCurrency.INR,
-  [PaymentMethods.UPI]: FiatCurrency.INR,
-  [PaymentMethods.BANK_TRANSFER_IMPS_INR]: FiatCurrency.INR,
-  [PaymentMethods.CASH]: 'ALL'
+  [PaymentMethodType.PAYTM]: FiatCurrency.INR,
+  [PaymentMethodType.UPI]: FiatCurrency.INR,
+  [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: FiatCurrency.INR,
+  [PaymentMethodType.CASH]: 'ALL'
 }
 
 export enum PMFields {
@@ -24,22 +18,29 @@ export enum PMFields {
 }
 
 const pmFieldsLocaleBase = 'payment-methods.fields'
-export const PaymentMethodsFieldsLocale: Record<PaymentMethods, string[]> = {
-  [PaymentMethods.PAYTM]: [
-    `${pmFieldsLocaleBase}.${PaymentMethods.PAYTM}.field1`
+export const PaymentMethodsFieldsLocale: Record<PaymentMethodType, string[]> = {
+  [PaymentMethodType.PAYTM]: [
+    `${pmFieldsLocaleBase}.${PaymentMethodType.PAYTM}.field1`
   ],
-  [PaymentMethods.UPI]: [`${pmFieldsLocaleBase}.${PaymentMethods.UPI}.field1`],
-  [PaymentMethods.BANK_TRANSFER_IMPS_INR]: [
-    `${pmFieldsLocaleBase}.${PaymentMethods.BANK_TRANSFER_IMPS_INR}.field1`,
-    `${pmFieldsLocaleBase}.${PaymentMethods.BANK_TRANSFER_IMPS_INR}.field2`,
-    `${pmFieldsLocaleBase}.${PaymentMethods.BANK_TRANSFER_IMPS_INR}.field3`
+  [PaymentMethodType.UPI]: [
+    `${pmFieldsLocaleBase}.${PaymentMethodType.UPI}.field1`
   ],
-  [PaymentMethods.CASH]: [`${pmFieldsLocaleBase}.${PaymentMethods.CASH}.field1`]
+  [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: [
+    `${pmFieldsLocaleBase}.${PaymentMethodType.BANK_TRANSFER_IMPS_INR}.field1`,
+    `${pmFieldsLocaleBase}.${PaymentMethodType.BANK_TRANSFER_IMPS_INR}.field2`,
+    `${pmFieldsLocaleBase}.${PaymentMethodType.BANK_TRANSFER_IMPS_INR}.field3`
+  ],
+  [PaymentMethodType.CASH]: [
+    `${pmFieldsLocaleBase}.${PaymentMethodType.CASH}.field1`
+  ]
 }
 
-export const PaymentMethodPrimaryFieldIndex: Record<PaymentMethods, number> = {
-  [PaymentMethods.PAYTM]: 0,
-  [PaymentMethods.UPI]: 0,
-  [PaymentMethods.BANK_TRANSFER_IMPS_INR]: 1,
-  [PaymentMethods.CASH]: 0
+export const PaymentMethodPrimaryFieldIndex: Record<
+  PaymentMethodType,
+  number
+> = {
+  [PaymentMethodType.PAYTM]: 0,
+  [PaymentMethodType.UPI]: 0,
+  [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 1,
+  [PaymentMethodType.CASH]: 0
 }

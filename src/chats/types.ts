@@ -44,10 +44,6 @@ export enum DeepLink {
   TRACK = 'tr'
 }
 
-export interface CallbackDefaults {
-  mId: number
-}
-
 export interface CommandState {
   command: BotCommand
 }

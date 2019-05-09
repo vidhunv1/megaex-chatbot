@@ -65,7 +65,6 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   SendCoinStateKey.cb_sendCoin,
                   SendCoinState[SendCoinStateKey.cb_sendCoin]
                 >(SendCoinStateKey.cb_sendCoin, {
-                  mId: msg.message_id,
                   currencyCode: cryptocurrencyCode,
                   data: null
                 })
@@ -78,7 +77,6 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   DepositStateKey.cb_depositCoin,
                   DepositState[DepositStateKey.cb_depositCoin]
                 >(DepositStateKey.cb_depositCoin, {
-                  mId: msg.message_id,
                   currencyCode: cryptocurrencyCode
                 })
               },
@@ -88,7 +86,6 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   WithdrawStateKey.cb_withdrawCoin,
                   WithdrawState[WithdrawStateKey.cb_withdrawCoin]
                 >(WithdrawStateKey.cb_withdrawCoin, {
-                  mId: msg.message_id,
                   currencyCode: cryptocurrencyCode,
                   data: null
                 })

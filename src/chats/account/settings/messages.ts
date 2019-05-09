@@ -72,7 +72,6 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
           SettingsStateKey.cb_settings,
           SettingsState[SettingsStateKey.cb_settings]
         >(SettingsStateKey.cb_settings, {
-          mId: msg.message_id,
           isFromBack: true,
           data: null
         })
@@ -130,7 +129,6 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
           SettingsStateKey.cb_settings,
           SettingsState[SettingsStateKey.cb_settings]
         >(SettingsStateKey.cb_settings, {
-          mId: msg.message_id,
           isFromBack: true,
           data: null
         })
@@ -141,7 +139,6 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
           SettingsStateKey.cb_loadMore,
           SettingsState[SettingsStateKey.cb_loadMore]
         >(SettingsStateKey.cb_loadMore, {
-          mId: msg.message_id,
           cursor:
             initialList.length < ITEMS_PER_PAGE
               ? ITEMS_PER_PAGE - initialList.length
@@ -192,7 +189,6 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
           SettingsStateKey.cb_settings,
           SettingsState[SettingsStateKey.cb_settings]
         >(SettingsStateKey.cb_settings, {
-          mId: msg.message_id,
           isFromBack: true,
           data: null
         })
@@ -224,7 +220,6 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
             SettingsStateKey.cb_settingsCurrency,
             SettingsState[SettingsStateKey.cb_settingsCurrency]
           >(SettingsStateKey.cb_settingsCurrency, {
-            mId: msg.message_id,
             data: null
           })
         },
@@ -234,7 +229,6 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
             SettingsStateKey.cb_settingsLanguage,
             SettingsState[SettingsStateKey.cb_settingsLanguage]
           >(SettingsStateKey.cb_settingsLanguage, {
-            mId: msg.message_id,
             data: null
           })
         }
@@ -246,7 +240,6 @@ export const SettingsMessage = (msg: TelegramBot.Message, user: User) => ({
             SettingsStateKey.cb_settingsRate,
             SettingsState[SettingsStateKey.cb_settingsRate]
           >(SettingsStateKey.cb_settingsRate, {
-            mId: msg.message_id,
             data: null
           })
         }

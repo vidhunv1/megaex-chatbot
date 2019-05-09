@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { ExchangeState, TradeStatus } from '../ExchangeState'
 import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models/PaymentMethod'
 import { OrderType } from 'models'
 import { DealsConfig } from './config'
 
@@ -209,7 +209,7 @@ const orders = [
       max: 0.5
     },
     availableBalance: 0,
-    paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+    paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
     isEnabled: true,
     terms: 'Please transfer fast..'
   },
@@ -225,7 +225,7 @@ const orders = [
       min: 0.1,
       max: 0.5
     },
-    paymentMethod: PaymentMethods.UPI,
+    paymentMethod: PaymentMethodType.UPI,
     isEnabled: true,
     terms: 'Please transfer fast..'
   },
@@ -241,7 +241,7 @@ const orders = [
       min: 0.1,
       max: 0.5
     },
-    paymentMethod: PaymentMethods.PAYTM,
+    paymentMethod: PaymentMethodType.PAYTM,
     isEnabled: true,
     terms: 'Please transfer fast..'
   },
@@ -257,7 +257,7 @@ const orders = [
       min: 0.1,
       max: 0.5
     },
-    paymentMethod: PaymentMethods.CASH,
+    paymentMethod: PaymentMethodType.CASH,
     isEnabled: true,
     terms: 'Please transfer fast..'
   }
@@ -277,7 +277,7 @@ a.forEach((id) =>
       min: 0.1,
       max: 0.5
     },
-    paymentMethod: PaymentMethods.UPI,
+    paymentMethod: PaymentMethodType.UPI,
     isEnabled: true,
     terms: 'Please transfer fast..'
   })

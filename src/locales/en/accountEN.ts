@@ -86,7 +86,7 @@ Your payment method was updated.
 
 {{ paymentMethodInfo }}
 `,
-    'none-added': `⚠️ You dont have any payment methods added.`
+    'none-added': `❕ You dont have any payment methods added. This will be used to transfer money to you when you are selling.`
   },
 
   referral: {

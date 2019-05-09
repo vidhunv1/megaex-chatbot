@@ -2,10 +2,8 @@ import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, OrderType } from 'models'
 import { Namespace } from 'modules/i18n'
-import {
-  PaymentMethods,
-  PaymentMethodsFieldsLocale
-} from 'constants/paymentMethods'
+import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { dataFormatter } from 'utils/dataFormatter'
 import { linkCreator } from 'utils/linkCreator'
@@ -20,7 +18,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     activeOrders: {
       createdBy: number
       orderType: OrderType
-      paymentMethod: PaymentMethods
+      paymentMethod: PaymentMethodType
       rate: number
       fiatCurrencyCode: FiatCurrency
       orderId: number
@@ -105,7 +103,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
   },
 
   async inputPaymentDetails(
-    paymentMethod: PaymentMethods,
+    paymentMethod: PaymentMethodType,
     nextInputFieldIndex: number
   ) {
     await telegramHook.getWebhook.sendMessage(
@@ -206,7 +204,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
       min: number
       max: number
     },
-    paymentMethod: PaymentMethods,
+    paymentMethod: PaymentMethodType,
     isEnabled: boolean,
     terms: string | null,
     showEditOptions: boolean,
@@ -370,7 +368,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
       max: number
     },
     availableBalance: number,
-    paymentMethod: PaymentMethods,
+    paymentMethod: PaymentMethodType,
     pmFields: string[],
     isEnabled: boolean,
     terms: string | null,
@@ -393,7 +391,6 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
             DepositStateKey.cb_depositCoin,
             DepositState[DepositStateKey.cb_depositCoin]
           >(DepositStateKey.cb_depositCoin, {
-            mId: msg.message_id,
             currencyCode: cryptoCurrencyCode
           })
         })
@@ -579,7 +576,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     }
   },
 
-  async showEditPaymentMethod(paymentMethods: PaymentMethods[]) {
+  async showEditPaymentMethod(paymentMethods: PaymentMethodType[]) {
     const inline: TelegramBot.InlineKeyboardButton[][] = paymentMethods.map(
       (pm) => [
         {

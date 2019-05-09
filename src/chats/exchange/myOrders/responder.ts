@@ -4,10 +4,8 @@ import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { MyOrdersMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import {
-  PaymentMethods,
-  PaymentMethodsFieldsLocale
-} from 'constants/paymentMethods'
+import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 import { OrderType } from 'models'
 import logger from 'modules/Logger'
 
@@ -46,8 +44,8 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     },
     [MyOrdersStateKey.editPaymentMethod_show]: async () => {
       await MyOrdersMessage(msg, user).showEditPaymentMethod(Object.keys(
-        PaymentMethods
-      ) as PaymentMethods[])
+        PaymentMethodType
+      ) as PaymentMethodType[])
       return true
     },
     [MyOrdersStateKey.cb_editPaymentMethodSelected]: async () => {
@@ -190,7 +188,7 @@ async function getOrderInfo(orderId: number) {
       min: 0.1,
       max: 0.5
     },
-    paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+    paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
     paymentMethodFields: ['Axis', '21321313', 'AX098098'],
     isEnabled: true,
     terms: null,
@@ -207,7 +205,7 @@ async function getActiveOrders(userId: number) {
     {
       createdBy: userId,
       orderType: OrderType.SELL,
-      paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+      paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
       rate: 430000,
       fiatCurrencyCode: FiatCurrency.INR,
       orderId: 1
@@ -215,14 +213,14 @@ async function getActiveOrders(userId: number) {
     {
       createdBy: userId,
       orderType: OrderType.SELL,
-      paymentMethod: PaymentMethods.CASH,
+      paymentMethod: PaymentMethodType.CASH,
       rate: 430000,
       fiatCurrencyCode: FiatCurrency.INR,
       orderId: 2
     },
     {
       createdBy: 219038,
-      paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+      paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
       orderType: OrderType.SELL,
       rate: 430000,
       fiatCurrencyCode: FiatCurrency.INR,
@@ -230,7 +228,7 @@ async function getActiveOrders(userId: number) {
     },
     {
       createdBy: 219038,
-      paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+      paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
       orderType: OrderType.BUY,
       rate: 420000,
       fiatCurrencyCode: FiatCurrency.INR,

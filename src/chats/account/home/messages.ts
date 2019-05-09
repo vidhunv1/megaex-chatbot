@@ -1,6 +1,6 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User } from 'models'
+import { User, PaymentMethodFields } from 'models'
 import { Namespace } from 'modules/i18n'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { PaymentMethodStateKey, PaymentMethodState } from '../paymentMethods'
@@ -8,13 +8,13 @@ import { ReferralStateKey, ReferralState } from '../referral'
 import { SettingsStateKey, SettingsState } from '../settings'
 import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
 import { CryptoCurrency } from 'constants/currencies'
-import { PaymentMethods } from 'constants/paymentMethods'
 import {
   AccountHomeError,
   AccountHomeStateKey,
   AccountHomeState
 } from './types'
 import { CommonStateKey, CommonState } from 'chats/common/types'
+import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
 
 export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
   async noReviewsAvailable() {
@@ -170,7 +170,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
     rating: number,
     referralCount: number,
     earnings: number,
-    addedPaymentMethods: PaymentMethods[]
+    addedPaymentMethods: PaymentMethodFields[]
   ) {
     const inline: TelegramBot.InlineKeyboardButton[][] = [
       [
@@ -182,7 +182,6 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
             PaymentMethodStateKey.cb_paymentMethods,
             PaymentMethodState[PaymentMethodStateKey.cb_paymentMethods]
           >(PaymentMethodStateKey.cb_paymentMethods, {
-            mId: msg.message_id,
             data: null
           })
         }
@@ -194,7 +193,6 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
             ReferralStateKey.cb_referralLink,
             ReferralState[ReferralStateKey.cb_referralLink]
           >(ReferralStateKey.cb_referralLink, {
-            mId: msg.message_id,
             data: null
           })
         },
@@ -204,7 +202,6 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
             SettingsStateKey.cb_settings,
             SettingsState[SettingsStateKey.cb_settings]
           >(SettingsStateKey.cb_settings, {
-            mId: msg.message_id,
             isFromBack: false,
             data: null
           })
@@ -242,18 +239,21 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
 })
 
 const stringifyPaymentMethods = (
-  paymentMethods: PaymentMethods[],
+  paymentMethods: PaymentMethodFields[],
   user: User
 ) => {
   if (paymentMethods.length === 0) {
     return user.t(`${Namespace.Account}:home.no-payment-method`)
   }
-  let pmStringified = '\n'
+  let pmStringified = '\n       '
   paymentMethods.forEach((pm, index) => {
-    pmStringified = pmStringified + user.t(`payment-methods.names.${pm}`)
+    pmStringified =
+      pmStringified +
+      user.t(`payment-methods.names.${pm.paymentMethod}`) +
+      `- ${pm.fields[PaymentMethodPrimaryFieldIndex[pm.paymentMethod]]}`
 
     if (index < paymentMethods.length - 1) {
-      pmStringified = pmStringified + ', '
+      pmStringified = pmStringified + '\n       '
     } else {
       pmStringified = pmStringified + ' '
     }

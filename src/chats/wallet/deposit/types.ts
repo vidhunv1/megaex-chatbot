@@ -1,5 +1,4 @@
 import { CryptoCurrency } from 'constants/currencies'
-import { CallbackDefaults } from 'chats/types'
 
 export enum DepositStateKey {
   cb_depositCoin = 'cb_depositCoin',
@@ -9,7 +8,7 @@ export enum DepositStateKey {
 export interface DepositState {
   [DepositStateKey.cb_depositCoin]?: {
     currencyCode: CryptoCurrency
-  } & CallbackDefaults
+  }
 
   [DepositStateKey.depositCoin_show]?: {
     currencyCode: CryptoCurrency

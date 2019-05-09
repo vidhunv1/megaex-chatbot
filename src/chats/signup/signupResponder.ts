@@ -9,7 +9,7 @@ import { SignupState, SignupStateKey } from './SignupState'
 import { DeepLink } from 'chats/types'
 import * as _ from 'lodash'
 import logger from 'modules/Logger'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 import { DealsMessage } from 'chats/exchange/deals'
 import { AccountHomeMessage } from 'chats/account/home'
 
@@ -204,7 +204,7 @@ async function getOrder(orderId: number) {
           max: 0.5
         },
         availableBalance: 0.2,
-        paymentMethod: PaymentMethods.CASH,
+        paymentMethod: PaymentMethodType.CASH,
         isEnabled: true,
         terms: 'Please transfer fast..'
       },

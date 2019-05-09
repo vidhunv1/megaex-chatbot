@@ -9,31 +9,19 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.BIGINT
       },
-      paymentId: {
-        type: Sequelize.BIGINT,
-        allowNull: false,
-        references: { model: 'PaymentDetails', key: 'id' }
-      },
       userId: {
         type: Sequelize.BIGINT,
         allowNull: false,
         references: { model: 'Users', key: 'id' }
       },
-      field1: {
+      paymentMethod: {
         allowNull: false,
         type: Sequelize.STRING
       },
-      field2: {
+      fields: {
         allowNull: true,
-        type: Sequelize.STRING
-      },
-      field3: {
-        allowNull: true,
-        type: Sequelize.STRING
-      },
-      field4: {
-        allowNull: true,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: '[]',
       },
       createdAt: {
         allowNull: false,

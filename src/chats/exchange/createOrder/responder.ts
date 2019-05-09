@@ -6,7 +6,7 @@ import { CreateOrderMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { OrderType } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
-import { PaymentMethods } from 'constants/paymentMethods'
+import { PaymentMethodType } from 'models'
 
 const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
 
@@ -96,11 +96,11 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
 
       if (orderType === OrderType.BUY) {
         await CreateOrderMessage(msg, user).selectBuyPaymentMethod(Object.keys(
-          PaymentMethods
-        ) as PaymentMethods[])
+          PaymentMethodType
+        ) as PaymentMethodType[])
       } else {
         await CreateOrderMessage(msg, user).selectSellPaymentMethod(
-          Object.keys(PaymentMethods) as PaymentMethods[],
+          Object.keys(PaymentMethodType) as PaymentMethodType[],
           await getAddedPaymentMethods()
         )
       }
@@ -168,7 +168,7 @@ async function getOrderInfo(orderId: number) {
       min: 0.1,
       max: 0.5
     },
-    paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+    paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
     paymentMethodFields: ['Axis', '21321313', 'AX098098'],
     isEnabled: true,
     terms: null
@@ -176,7 +176,7 @@ async function getOrderInfo(orderId: number) {
 }
 
 interface PaymentMethodDetails {
-  paymentMethod: PaymentMethods
+  paymentMethod: PaymentMethodType
   fields: string[]
   id: number
 }
@@ -184,12 +184,12 @@ interface PaymentMethodDetails {
 async function getAddedPaymentMethods(): Promise<PaymentMethodDetails[]> {
   return [
     {
-      paymentMethod: PaymentMethods.PAYTM,
+      paymentMethod: PaymentMethodType.PAYTM,
       fields: ['91 9113869518'],
       id: 1
     },
     {
-      paymentMethod: PaymentMethods.BANK_TRANSFER_IMPS_INR,
+      paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
       fields: ['Axis bank', '1982731289371', 'AX001211'],
       id: 2
     }

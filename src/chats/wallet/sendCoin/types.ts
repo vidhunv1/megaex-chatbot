@@ -1,5 +1,4 @@
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { CallbackDefaults } from 'chats/types'
 
 export enum SendCoinStateKey {
   cb_sendCoin = 'cb_sendCoin',
@@ -23,7 +22,7 @@ export interface SendCoinState {
       fiatValue: number
       fiatCurrencyCode: FiatCurrency
     } | null
-  } & CallbackDefaults
+  }
   [SendCoinStateKey.sendCoin_amount]?: {
     data: {
       cryptoCurrencyAmount: number

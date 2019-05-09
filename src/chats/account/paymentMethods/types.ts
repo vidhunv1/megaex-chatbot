@@ -1,11 +1,4 @@
-import { CallbackDefaults } from 'chats/types'
-import { PaymentMethods } from 'constants/paymentMethods'
-
-export type PaymentMethodFields = {
-  id: number
-  paymentMethod: PaymentMethods
-  fields: string[]
-}
+import { PaymentMethodType, PaymentMethodFields } from 'models'
 
 export enum PaymentMethodError {
   INVALID_PAYMENT_METHOD = 'INVALID_PAYMENT_METHOD',
@@ -33,29 +26,29 @@ export interface PaymentMethodState {
     data: {
       addedPaymentMethods: PaymentMethodFields[]
     } | null
-  } & CallbackDefaults
+  }
 
   [PaymentMethodStateKey.cb_editPaymentMethods]?: {
     data: {
       addedPaymentMethods: PaymentMethodFields[]
     } | null
-  } & CallbackDefaults
+  }
 
   [PaymentMethodStateKey.cb_editPaymentMethodId]?: {
     paymentMethodId: number
     data: {} | null
-  } & CallbackDefaults
+  }
 
   [PaymentMethodStateKey.cb_addPaymentMethod]?: {
     data: {
-      paymentMethodsList: PaymentMethods[]
+      paymentMethodsList: PaymentMethodType[]
     } | null
-  } & CallbackDefaults
+  }
 
   [PaymentMethodStateKey.paymentMethodInput]?: {
     data: {
       inputs: {
-        paymentMethod: PaymentMethods
+        paymentMethod: PaymentMethodType
         editId: number | null
         fields: string[]
       }
