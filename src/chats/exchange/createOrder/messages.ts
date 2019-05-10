@@ -1,6 +1,6 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, OrderType } from 'models'
+import { User, OrderType, PaymentMethodFields } from 'models'
 import { Namespace } from 'modules/i18n'
 import { stringifyCallbackQuery } from 'chats/utils'
 import {
@@ -259,11 +259,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
 
   async selectSellPaymentMethod(
     pmList: PaymentMethodType[],
-    addedPM: {
-      paymentMethod: PaymentMethodType
-      fields: string[]
-      id: number
-    }[]
+    addedPM: PaymentMethodFields[]
   ) {
     const inline1: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
       {

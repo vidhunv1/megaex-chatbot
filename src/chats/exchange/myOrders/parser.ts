@@ -142,7 +142,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         pmDetailsData.fields.length ===
         PaymentMethodsFieldsLocale[pmDetailsData.paymentMethod].length
       ) {
-        await savePaymentDetails(pmDetailsData.paymentMethod, fields)
+        await editPaymentDetails(pmDetailsData.paymentMethod, fields)
       }
 
       return {
@@ -523,10 +523,11 @@ async function deleteOrder(orderId: number): Promise<boolean> {
   return true
 }
 
-async function savePaymentDetails(
+async function editPaymentDetails(
   paymentMethod: PaymentMethodType,
   fields: string[]
 ): Promise<number> {
+  // TODO: Edit or save based on if pmID is available
   logger.error(
     'TODO: implement savePaymentDetails ' +
       paymentMethod +

@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { CreateOrderMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { OrderType } from 'models'
+import { OrderType, PaymentMethodFields, PaymentMethod } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethodType } from 'models'
 
@@ -101,7 +101,7 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       } else {
         await CreateOrderMessage(msg, user).selectSellPaymentMethod(
           Object.keys(PaymentMethodType) as PaymentMethodType[],
-          await getAddedPaymentMethods()
+          await getAddedPaymentMethods(user.id)
         )
       }
       return true
@@ -175,25 +175,10 @@ async function getOrderInfo(orderId: number) {
   }
 }
 
-interface PaymentMethodDetails {
-  paymentMethod: PaymentMethodType
-  fields: string[]
-  id: number
-}
-
-async function getAddedPaymentMethods(): Promise<PaymentMethodDetails[]> {
-  return [
-    {
-      paymentMethod: PaymentMethodType.PAYTM,
-      fields: ['91 9113869518'],
-      id: 1
-    },
-    {
-      paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
-      fields: ['Axis bank', '1982731289371', 'AX001211'],
-      id: 2
-    }
-  ]
+async function getAddedPaymentMethods(
+  userId: number
+): Promise<PaymentMethodFields[]> {
+  return await PaymentMethod.getSavedPaymentMethods(userId)
 }
 
 async function getAvailableBalance(
