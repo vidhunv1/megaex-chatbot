@@ -5,7 +5,7 @@ import { ExchangeState } from '../ExchangeState'
 import { MyOrdersMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
-import { PaymentMethodType } from 'models'
+import { PaymentMethodType, Order, PaymentMethod } from 'models'
 import { OrderType } from 'models'
 import logger from 'modules/Logger'
 
@@ -137,30 +137,47 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
       }
 
       const order = await getOrderInfo(orderId)
-      if (order.createdBy == user.id) {
+      if (order && order.userId == user.id) {
         if (order.orderType === OrderType.BUY) {
           await MyOrdersMessage(msg, user).showMyBuyOrder(
             orderId,
             order.cryptoCurrencyCode,
+            order.fiatCurrencyCode,
             order.rate,
-            order.amount,
-            order.paymentMethod,
-            order.isEnabled,
+            order.rateType,
+            {
+              min: order.minAmount,
+              max: order.maxAmount
+            },
+            order.paymentMethodType,
+            order.isActive,
             order.terms,
             false,
             false,
             true
           )
         } else {
+          let paymentMethodFields: string[] = []
+          if (order.paymentMethodId) {
+            const pm = await getPaymentFields(order.paymentMethodId)
+            if (pm) {
+              paymentMethodFields = pm.fields
+            }
+          }
           await MyOrdersMessage(msg, user).showMySellOrder(
             orderId,
             order.cryptoCurrencyCode,
+            order.fiatCurrencyCode,
             order.rate,
-            order.amount,
+            order.rateType,
+            {
+              min: order.minAmount,
+              max: order.maxAmount
+            },
             await getAvailableBalance(user.id),
-            order.paymentMethod,
-            order.paymentMethodFields,
-            order.isEnabled,
+            order.paymentMethodType,
+            paymentMethodFields,
+            order.isActive,
             order.terms,
             false,
             false,
@@ -179,25 +196,15 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
 }
 
 async function getOrderInfo(orderId: number) {
-  return {
-    orderId,
-    orderType: OrderType.SELL,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    rate: 382000,
-    amount: {
-      min: 0.1,
-      max: 0.5
-    },
-    paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
-    paymentMethodFields: ['Axis', '21321313', 'AX098098'],
-    isEnabled: true,
-    terms: null,
-    createdBy: 1
-  }
+  return await Order.getOrder(orderId)
 }
 
 async function getAvailableBalance(_userId: number) {
   return 0.2
+}
+
+async function getPaymentFields(id: number) {
+  return await PaymentMethod.getPaymentMethod(id)
 }
 
 async function getActiveOrders(userId: number) {

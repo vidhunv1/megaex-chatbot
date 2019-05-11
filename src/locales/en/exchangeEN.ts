@@ -137,7 +137,8 @@ _(Click on Active button to enable this order.)_`,
 
 *Status*: {{ status }}
 *Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
+*Min. amount*: {{ minAmount }}
+*Max. amount*: {{ maxAmount }}
 *Payment method*: {{ paymentMethod }}
 
 Terms: _{{ terms }}_
@@ -145,11 +146,15 @@ Terms: _{{ terms }}_
 *Order share link*: {{ orderLink }}
 (_Anyone who clicks on this link can directly open a deal with you._)
 `,
+    'payment-info-not-added': 'Not added',
+    'insufficient-sell-order-balance':
+      '⚠️ Infufficient balance. You need to deposit the equivalent minimum amount to start deals on this order.',
     'my-sell-order-info': `*📕 My Sell Order* - ${BotCommand.ORDER}{{orderId}}
 
 *Status*: {{ status }}
 *Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Amount*: {{ minAmount }} - {{ maxAmount }} {{ cryptoCurrencyCode }}
+*Min. amount*: {{ minAmount }}
+*Max. amount*: {{ maxAmount }}
 *Payment method*: {{ paymentMethod }}
 *Payment Info*: {{ paymentInfo }}
 
@@ -190,7 +195,7 @@ Select the order type.`,
 Enter the fixed rate of {{ cryptoCurrencyCode }} for this order (in {{ fiatCurrencyCode }}).
 
 Example: *{{ marketRate }}*`,
-    'input-margin-rate': `*Rate {{ cryptoCurrencyCode }}*
+    'input-margin-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
 
 Enter the margin in percentage you want over the bitcoin market price. 
 
@@ -203,9 +208,9 @@ Example: *2%*`,
     'back-cbbutton': '⬅️  Back',
     'input-amount-limits': `⚖️ *Order amount*
 
-Enter the amount in *{{ fiatCurrencyCode }}* for this order.
+Enter the order amount in *{{ fiatCurrencyCode }}*.
 
-Example: *{{ marketRate }}* or *100-1000* (min-max limit)
+Example: *1000* or *500-1000* (min-max limit)
 `,
     'buy-order-created': '✅ *Buy order created*',
     'sell-order-created': '✅ *Sell order created*',

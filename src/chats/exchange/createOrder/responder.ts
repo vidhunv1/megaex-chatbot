@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { CreateOrderMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { OrderType, PaymentMethodFields, PaymentMethod } from 'models'
+import { OrderType, PaymentMethodFields, PaymentMethod, Order } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethodType } from 'models'
 
@@ -76,9 +76,7 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       return true
     },
     [CreateOrderStateKey.inputAmountLimit]: async () => {
-      await CreateOrderMessage(msg, user).inputLimits(
-        await getMarketRate(CURRENT_CRYPTOCURRENCY, user.currencyCode)
-      )
+      await CreateOrderMessage(msg, user).inputLimits()
       return true
     },
     [CreateOrderStateKey.cb_selectPaymentMethod]: async () => {
@@ -117,27 +115,47 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       }
 
       const orderInfo = await getOrderInfo(orderData.createdOrderId)
+      if (!orderInfo) {
+        return false
+      }
 
       if (orderData.orderType === OrderType.BUY) {
         await CreateOrderMessage(msg, user).buyOrderCreated(
-          orderInfo.orderId,
+          orderInfo.id,
           orderInfo.cryptoCurrencyCode,
+          orderInfo.fiatCurrencyCode,
           orderInfo.rate,
-          orderInfo.amount,
-          orderInfo.paymentMethod,
-          orderInfo.isEnabled,
+          orderInfo.rateType,
+          {
+            min: orderInfo.minAmount,
+            max: orderInfo.maxAmount
+          },
+          orderInfo.paymentMethodType,
+          orderInfo.isActive,
           orderInfo.terms
         )
       } else {
+        let paymentFields: string[] = []
+        if (orderInfo.paymentMethodId) {
+          const pm = await getPaymentFields(orderInfo.paymentMethodId)
+          if (pm) {
+            paymentFields = pm.fields
+          }
+        }
         await CreateOrderMessage(msg, user).sellOrderCreated(
-          orderInfo.orderId,
+          orderInfo.id,
           orderInfo.cryptoCurrencyCode,
+          orderInfo.fiatCurrencyCode,
           orderInfo.rate,
-          orderInfo.amount,
+          orderInfo.rateType,
+          {
+            max: orderInfo.maxAmount,
+            min: orderInfo.minAmount
+          },
           await getAvailableBalance(orderInfo.cryptoCurrencyCode),
-          orderInfo.paymentMethod,
-          orderInfo.paymentMethodFields,
-          orderInfo.isEnabled,
+          orderInfo.paymentMethodType,
+          paymentFields,
+          orderInfo.isActive,
           orderInfo.terms
         )
       }
@@ -160,25 +178,17 @@ async function getMarketRateSource(): Promise<ExchangeSource> {
 }
 
 async function getOrderInfo(orderId: number) {
-  return {
-    orderId,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    rate: 382000,
-    amount: {
-      min: 0.1,
-      max: 0.5
-    },
-    paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
-    paymentMethodFields: ['Axis', '21321313', 'AX098098'],
-    isEnabled: true,
-    terms: null
-  }
+  return await Order.getOrder(orderId)
 }
 
 async function getAddedPaymentMethods(
   userId: number
 ): Promise<PaymentMethodFields[]> {
   return await PaymentMethod.getSavedPaymentMethods(userId)
+}
+
+async function getPaymentFields(id: number) {
+  return await PaymentMethod.getPaymentMethod(id)
 }
 
 async function getAvailableBalance(

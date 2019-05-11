@@ -4,12 +4,18 @@ export enum CryptoCurrency {
 
 export const cryptoCurrencyInfo: Record<
   CryptoCurrency,
-  { confirmations: number; fee: number; minWithdrawalAmount: number }
+  {
+    confirmations: number
+    fee: number
+    minWithdrawalAmount: number
+    minBuyAmount: number
+  }
 > = {
   [CryptoCurrency.BTC]: {
     confirmations: 1,
     fee: 0.0002,
-    minWithdrawalAmount: 0.002
+    minWithdrawalAmount: 0.002,
+    minBuyAmount: 0.00025
   }
 }
 

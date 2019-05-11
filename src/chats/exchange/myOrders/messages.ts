@@ -1,6 +1,6 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, OrderType } from 'models'
+import { User, OrderType, RateType } from 'models'
 import { Namespace } from 'modules/i18n'
 import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
 import { PaymentMethodType } from 'models'
@@ -13,6 +13,93 @@ import { keyboardMainMenu } from 'chats/common'
 import { DepositStateKey, DepositState } from 'chats/wallet/deposit'
 import * as _ from 'lodash'
 
+const formatRate = (
+  rate: number,
+  rateType: RateType,
+  fiatCode: FiatCurrency
+) => {
+  if (rateType === RateType.FIXED) {
+    return dataFormatter.formatFiatCurrency(rate, fiatCode)
+  } else {
+    return `${rate}%`
+  }
+}
+
+const getEditOrderInline = (
+  orderId: number,
+  isOrderActive: boolean,
+  user: User
+) => {
+  const inline: TelegramBot.InlineKeyboardButton[][] = [
+    [
+      {
+        text: user.t(`${Namespace.Exchange}:my-orders.edit-rate-cbbutton`),
+        callback_data: stringifyCallbackQuery<
+          MyOrdersStateKey.cb_editRate,
+          MyOrdersState[MyOrdersStateKey.cb_editRate]
+        >(MyOrdersStateKey.cb_editRate, {
+          orderId
+        })
+      },
+      {
+        text: user.t(`${Namespace.Exchange}:my-orders.edit-amount-cbbutton`),
+        callback_data: stringifyCallbackQuery<
+          MyOrdersStateKey.cb_editAmount,
+          MyOrdersState[MyOrdersStateKey.cb_editAmount]
+        >(MyOrdersStateKey.cb_editAmount, {
+          orderId: orderId
+        })
+      }
+    ],
+    [
+      {
+        text: user.t(`${Namespace.Exchange}:my-orders.edit-terms-cbbutton`),
+        callback_data: stringifyCallbackQuery<
+          MyOrdersStateKey.cb_editTerms,
+          MyOrdersState[MyOrdersStateKey.cb_editTerms]
+        >(MyOrdersStateKey.cb_editTerms, {
+          orderId: orderId
+        })
+      },
+      {
+        text: user.t(
+          `${Namespace.Exchange}:my-orders.edit-payment-method-cbbutton`
+        ),
+        callback_data: stringifyCallbackQuery<
+          MyOrdersStateKey.cb_editPaymentMethod,
+          MyOrdersState[MyOrdersStateKey.cb_editPaymentMethod]
+        >(MyOrdersStateKey.cb_editPaymentMethod, {
+          orderId: orderId
+        })
+      }
+    ],
+    [
+      {
+        text:
+          (isOrderActive === false ? '  ' : '☑️ ') +
+          user.t(`${Namespace.Exchange}:my-orders.toggle-active-cbbutton`),
+        callback_data: stringifyCallbackQuery<
+          MyOrdersStateKey.cb_toggleActive,
+          MyOrdersState[MyOrdersStateKey.cb_toggleActive]
+        >(MyOrdersStateKey.cb_toggleActive, {
+          orderId: orderId,
+          isEnabled: isOrderActive
+        })
+      },
+      {
+        text: user.t(`${Namespace.Exchange}:my-orders.delete-order-cbbutton`),
+        callback_data: stringifyCallbackQuery<
+          MyOrdersStateKey.cb_deleteOrder,
+          MyOrdersState[MyOrdersStateKey.cb_deleteOrder]
+        >(MyOrdersStateKey.cb_deleteOrder, {
+          orderId: orderId
+        })
+      }
+    ]
+  ]
+
+  return inline
+}
 export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
   async showActiveOrders(
     activeOrders: {
@@ -199,7 +286,9 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
   async showMyBuyOrder(
     orderId: number,
     cryptoCurrencyCode: CryptoCurrency,
+    fiatCode: FiatCurrency,
     rate: number,
+    rateType: RateType,
     amount: {
       min: number
       max: number
@@ -228,77 +317,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
         ]
       ]
     } else {
-      inline = [
-        [
-          {
-            text: user.t(`${Namespace.Exchange}:my-orders.edit-rate-cbbutton`),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_editRate,
-              MyOrdersState[MyOrdersStateKey.cb_editRate]
-            >(MyOrdersStateKey.cb_editRate, {
-              orderId
-            })
-          },
-          {
-            text: user.t(
-              `${Namespace.Exchange}:my-orders.edit-amount-cbbutton`
-            ),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_editAmount,
-              MyOrdersState[MyOrdersStateKey.cb_editAmount]
-            >(MyOrdersStateKey.cb_editAmount, {
-              orderId: orderId
-            })
-          }
-        ],
-        [
-          {
-            text: user.t(`${Namespace.Exchange}:my-orders.edit-terms-cbbutton`),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_editTerms,
-              MyOrdersState[MyOrdersStateKey.cb_editTerms]
-            >(MyOrdersStateKey.cb_editTerms, {
-              orderId: orderId
-            })
-          },
-          {
-            text: user.t(
-              `${Namespace.Exchange}:my-orders.edit-payment-method-cbbutton`
-            ),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_editPaymentMethod,
-              MyOrdersState[MyOrdersStateKey.cb_editPaymentMethod]
-            >(MyOrdersStateKey.cb_editPaymentMethod, {
-              orderId: orderId
-            })
-          }
-        ],
-        [
-          {
-            text:
-              (isEnabled === false ? '  ' : '☑️ ') +
-              user.t(`${Namespace.Exchange}:my-orders.toggle-active-cbbutton`),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_toggleActive,
-              MyOrdersState[MyOrdersStateKey.cb_toggleActive]
-            >(MyOrdersStateKey.cb_toggleActive, {
-              orderId: orderId,
-              isEnabled
-            })
-          },
-          {
-            text: user.t(
-              `${Namespace.Exchange}:my-orders.delete-order-cbbutton`
-            ),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_deleteOrder,
-              MyOrdersState[MyOrdersStateKey.cb_deleteOrder]
-            >(MyOrdersStateKey.cb_deleteOrder, {
-              orderId: orderId
-            })
-          }
-        ]
-      ]
+      inline = getEditOrderInline(orderId, isEnabled, user)
     }
 
     if (showBackButton) {
@@ -315,9 +334,14 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
       ])
     }
 
-    const formattedRate = dataFormatter.formatFiatCurrency(
-      rate,
-      user.currencyCode
+    const formattedRate = formatRate(rate, rateType, fiatCode)
+    const formattedMinAmount = dataFormatter.formatFiatCurrency(
+      amount.min,
+      fiatCode
+    )
+    const formattedMaxAmount = dataFormatter.formatFiatCurrency(
+      amount.max,
+      fiatCode
     )
 
     const message = user.t(
@@ -327,8 +351,9 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
         cryptoCurrencyCode,
         rate: formattedRate,
         paymentMethod: user.t(`payment-methods.names.${paymentMethod}`),
-        minAmount: amount.min,
-        maxAmount: amount.max,
+        fiatCurrencyCode: fiatCode,
+        minAmount: formattedMinAmount,
+        maxAmount: formattedMaxAmount,
         status: user.t(
           `${Namespace.Exchange}:my-orders.${
             isEnabled === true ? 'order-enabled' : 'order-disabled'
@@ -362,12 +387,14 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
   async showMySellOrder(
     orderId: number,
     cryptoCurrencyCode: CryptoCurrency,
+    fiatCurrencyCode: FiatCurrency,
     rate: number,
+    rateType: RateType,
     amount: {
       min: number
       max: number
     },
-    availableBalance: number,
+    availableCryptoBalance: number,
     paymentMethod: PaymentMethodType,
     pmFields: string[],
     isEnabled: boolean,
@@ -377,11 +404,11 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     showBackButton: boolean
   ) {
     let inline: TelegramBot.InlineKeyboardButton[][]
+    const equivFiatBalance = availableCryptoBalance * rate
 
     if (!showEditOptions) {
       const focusInlineButtons: TelegramBot.InlineKeyboardButton[] = []
-
-      if (amount.max > availableBalance) {
+      if (amount.min > equivFiatBalance) {
         focusInlineButtons.push({
           text: user.t(
             `${Namespace.Exchange}:my-orders.deposit-cryptocurrency`,
@@ -436,75 +463,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
             })
           }
         ],
-        [
-          {
-            text: user.t(`${Namespace.Exchange}:my-orders.edit-rate-cbbutton`),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_editRate,
-              MyOrdersState[MyOrdersStateKey.cb_editRate]
-            >(MyOrdersStateKey.cb_editRate, {
-              orderId
-            })
-          },
-          {
-            text: user.t(
-              `${Namespace.Exchange}:my-orders.edit-amount-cbbutton`
-            ),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_editAmount,
-              MyOrdersState[MyOrdersStateKey.cb_editAmount]
-            >(MyOrdersStateKey.cb_editAmount, {
-              orderId: orderId
-            })
-          }
-        ],
-        [
-          {
-            text: user.t(`${Namespace.Exchange}:my-orders.edit-terms-cbbutton`),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_editTerms,
-              MyOrdersState[MyOrdersStateKey.cb_editTerms]
-            >(MyOrdersStateKey.cb_editTerms, {
-              orderId: orderId
-            })
-          },
-          {
-            text: user.t(
-              `${Namespace.Exchange}:my-orders.edit-payment-method-cbbutton`
-            ),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_editPaymentMethod,
-              MyOrdersState[MyOrdersStateKey.cb_editPaymentMethod]
-            >(MyOrdersStateKey.cb_editPaymentMethod, {
-              orderId: orderId
-            })
-          }
-        ],
-        [
-          {
-            text:
-              (isEnabled === false ? '  ' : '☑️ ') +
-              user.t(`${Namespace.Exchange}:my-orders.toggle-active-cbbutton`),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_toggleActive,
-              MyOrdersState[MyOrdersStateKey.cb_toggleActive]
-            >(MyOrdersStateKey.cb_toggleActive, {
-              orderId: orderId,
-              isEnabled
-            })
-          },
-          {
-            text: user.t(
-              `${Namespace.Exchange}:my-orders.delete-order-cbbutton`
-            ),
-            callback_data: stringifyCallbackQuery<
-              MyOrdersStateKey.cb_deleteOrder,
-              MyOrdersState[MyOrdersStateKey.cb_deleteOrder]
-            >(MyOrdersStateKey.cb_deleteOrder, {
-              orderId: orderId
-            })
-          }
-        ]
+        ...getEditOrderInline(orderId, isEnabled, user)
       ]
     }
 
@@ -522,9 +481,14 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
       ])
     }
 
-    const formattedRate = dataFormatter.formatFiatCurrency(
-      rate,
-      user.currencyCode
+    const formattedRate = formatRate(rate, rateType, fiatCurrencyCode)
+    const formattedMinAmount = dataFormatter.formatFiatCurrency(
+      amount.min,
+      fiatCurrencyCode
+    )
+    const formattedMaxAmount = dataFormatter.formatFiatCurrency(
+      amount.max,
+      fiatCurrencyCode
     )
 
     let paymentInfo = ''
@@ -536,28 +500,40 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
         )} - ${field}`
     })
 
-    const message = user.t(
-      `${Namespace.Exchange}:my-orders.my-sell-order-info`,
-      {
-        orderId: orderId,
-        cryptoCurrencyCode,
-        rate: formattedRate,
-        paymentMethod: user.t(`payment-methods.names.${paymentMethod}`),
-        paymentInfo,
-        minAmount: amount.min,
-        maxAmount: amount.max,
-        status: user.t(
-          `${Namespace.Exchange}:my-orders.${
-            isEnabled === true ? 'order-enabled' : 'order-disabled'
-          }`
-        ),
-        orderLink: linkCreator.getOrderLink(orderId),
-        terms:
-          terms != null && terms != ''
-            ? `" ${terms} "`
-            : user.t(`${Namespace.Exchange}:my-orders.terms-not-added`)
-      }
-    )
+    if (pmFields.length === 0) {
+      paymentInfo = user.t(
+        `${Namespace.Exchange}:my-orders.payment-info-not-added`
+      )
+    }
+
+    let message = user.t(`${Namespace.Exchange}:my-orders.my-sell-order-info`, {
+      orderId: orderId,
+      cryptoCurrencyCode,
+      rate: formattedRate,
+      paymentMethod: user.t(`payment-methods.names.${paymentMethod}`),
+      paymentInfo,
+      minAmount: formattedMinAmount,
+      maxAmount: formattedMaxAmount,
+      status: user.t(
+        `${Namespace.Exchange}:my-orders.${
+          isEnabled === true ? 'order-enabled' : 'order-disabled'
+        }`
+      ),
+      orderLink: linkCreator.getOrderLink(orderId),
+      terms:
+        terms != null && terms != ''
+          ? `" ${terms} "`
+          : user.t(`${Namespace.Exchange}:my-orders.terms-not-added`)
+    })
+
+    if (amount.min > equivFiatBalance) {
+      message =
+        message +
+        `\n${user.t(
+          `${Namespace.Exchange}:my-orders.insufficient-sell-order-balance`
+        )}`
+    }
+
     const options = {
       parse_mode: 'Markdown',
       reply_markup: {

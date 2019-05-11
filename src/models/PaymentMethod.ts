@@ -95,6 +95,24 @@ export class PaymentMethod extends Model<PaymentMethod> {
       fields: JSON.parse(pm.fields) as string[]
     }))
   }
+
+  static async getPaymentMethod(pmId: number) {
+    const pm = await PaymentMethod.findOne({
+      where: {
+        id: pmId
+      }
+    })
+
+    if (!pm) {
+      return null
+    }
+
+    return {
+      id: pm.id,
+      paymentMethod: pm.paymentMethod,
+      fields: JSON.parse(pm.fields) as string[]
+    }
+  }
 }
 
 export default PaymentMethod

@@ -1,4 +1,4 @@
-import { RateTypes } from 'models'
+import { RateType } from 'models'
 import { PaymentMethodType } from 'models'
 
 export enum MyOrdersStateKey {
@@ -48,7 +48,7 @@ export interface MyOrdersState {
   [MyOrdersStateKey.editRate_show]?: {
     data: {
       value: number
-      valueType: RateTypes
+      valueType: RateType
     } | null
   }
 

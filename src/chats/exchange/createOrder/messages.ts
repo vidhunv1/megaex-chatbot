@@ -1,6 +1,6 @@
 import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, OrderType, PaymentMethodFields } from 'models'
+import { User, OrderType, PaymentMethodFields, RateType } from 'models'
 import { Namespace } from 'modules/i18n'
 import { stringifyCallbackQuery } from 'chats/utils'
 import {
@@ -8,11 +8,12 @@ import {
   CreateOrderState,
   CreateOrderError
 } from './types'
-import { CryptoCurrency } from 'constants/currencies'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
 import { PaymentMethodType } from 'models'
 import { MyOrdersMessage } from '../myOrders'
+import { dataFormatter } from 'utils/dataFormatter'
 
 export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   async showCreateOrderMessage() {
@@ -108,12 +109,16 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     marketRateSource: ExchangeSource,
     shouldEdit: boolean
   ) {
+    const formattedMarketRate = dataFormatter.formatFiatCurrency(
+      fiatMarketRate,
+      user.currencyCode
+    )
     const text = user.t(
       `${Namespace.Exchange}:create-order.input-margin-rate`,
       {
         fiatCurrencyCode: user.currencyCode,
         cryptoCurrencyCode,
-        marketRate: fiatMarketRate,
+        marketRate: formattedMarketRate,
         marketRateSource
       }
     )
@@ -149,11 +154,11 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     }
   },
 
-  async inputLimits(marketRate: number) {
+  async inputLimits() {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Exchange}:create-order.input-amount-limits`, {
-        marketRate,
+        marketRate: 1000,
         fiatCurrencyCode: user.currencyCode
       }),
       {
@@ -165,7 +170,9 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   async buyOrderCreated(
     orderId: number,
     cryptoCurrencyCode: CryptoCurrency,
+    fiatCurrencyCode: FiatCurrency,
     rate: number,
+    rateType: RateType,
     amount: {
       min: number
       max: number
@@ -185,7 +192,9 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     await MyOrdersMessage(msg, user).showMyBuyOrder(
       orderId,
       cryptoCurrencyCode,
+      fiatCurrencyCode,
       rate,
+      rateType,
       amount,
       paymentMethod,
       isEnabled,
@@ -199,7 +208,9 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   async sellOrderCreated(
     orderId: number,
     cryptoCurrencyCode: CryptoCurrency,
+    fiatCurrencyCode: FiatCurrency,
     rate: number,
+    rateType: RateType,
     amount: {
       min: number
       max: number
@@ -221,7 +232,9 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     await MyOrdersMessage(msg, user).showMySellOrder(
       orderId,
       cryptoCurrencyCode,
+      fiatCurrencyCode,
       rate,
+      rateType,
       amount,
       availableBalance,
       paymentMethod,

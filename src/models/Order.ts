@@ -7,18 +7,20 @@ import {
   BelongsTo,
   PrimaryKey,
   AllowNull,
-  AutoIncrement,
-  Default
+  AutoIncrement
 } from 'sequelize-typescript'
-import { User, Transaction, Wallet } from '.'
+import { User } from '.'
 import logger from '../modules/Logger'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
+import * as _ from 'lodash'
 
 export enum OrderType {
   BUY = 'BUY',
   SELL = 'SELL'
 }
 
-export enum RateTypes {
+export enum RateType {
   MARGIN = 'MARGIN',
   FIXED = 'FIXED'
 }
@@ -39,136 +41,112 @@ export class Order extends Model<Order> {
   @BelongsTo(() => User)
   user!: User
 
-  @AllowNull(true)
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  orderType!: OrderType
+
+  @AllowNull(false)
   @Column(DataType.FLOAT)
-  minAmount!: number | null
+  rate!: number
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  rateType!: RateType
+
+  @AllowNull(false)
+  @Column(DataType.FLOAT)
+  minAmount!: number
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
   maxAmount!: number
 
-  @AllowNull(true)
-  @Column(DataType.FLOAT)
-  price!: number | null // null values are market price orders
-
-  @AllowNull(true)
-  @ForeignKey(() => Order)
-  @Column(DataType.INTEGER)
-  matchedOrderId!: number
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  cryptoCurrencyCode!: CryptoCurrency
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  type!: OrderType
+  fiatCurrencyCode!: FiatCurrency
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  paymentMethodType!: PaymentMethodType
+
+  @AllowNull(true)
+  @ForeignKey(() => PaymentMethod)
+  @Column(DataType.BIGINT)
+  paymentMethodId!: number | null
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  terms!: string
 
   @AllowNull(false)
   @Column(DataType.BOOLEAN)
-  isEnabled!: boolean
+  isActive!: boolean
 
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  currencyCode!: string
-
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  paymentMethodFilters!: string
-
-  @AllowNull(true)
-  @Default(0.0)
-  @Column(DataType.FLOAT)
-  marginPercentage!: number
-
-  @AllowNull(true)
-  @Column(DataType.BOOLEAN)
-  accountVerifiedFilter!: boolean
-
-  @AllowNull(true)
-  @Column(DataType.DATE)
-  confirmedTime!: Date
-
-  @AllowNull(false)
-  @Default(0)
-  @Column(DataType.INTEGER)
-  cancelCount!: number
-
-  async createSellOrder(
+  static async createOrder(
     userId: number,
-    minAmount: number | null,
+    orderType: OrderType,
+    rate: number,
+    rateType: RateType,
+    minAmount: number,
     maxAmount: number,
-    price: number | null,
-    margin: number | null = 0.0,
-    currencyCode: string = 'btc'
+    cryptoCurrencyCode: CryptoCurrency,
+    fiatCurrencyCode: FiatCurrency,
+    paymentMethodType: PaymentMethodType,
+    paymentMethodId: number | null
   ): Promise<Order> {
-    // check if balance available
-    const balance = await Transaction.getTotalBalance(userId, currencyCode)
-    let marginPercentage: number = 0
-    if (maxAmount > balance) {
-      throw new OrderError(OrderError.INSUFFICIENT_BALANCE)
-    }
-    if (minAmount && minAmount < 0) {
-      throw new OrderError(OrderError.INVALID_PARAMS)
-    }
-    if (!price) {
-      price = null
-      marginPercentage = margin || 0
-    }
-
-    return await this.sequelize.transaction(async function(t) {
-      // block balance
-      try {
-        await Wallet.blockBalance(userId, currencyCode, maxAmount, t)
-      } catch (e) {
-        throw new OrderError()
-      }
-      const order = await Order.create<Order>(
-        {
-          price,
-          marginPercentage,
-          minAmount,
-          maxAmount,
-          userId,
-          isEnabled: true,
-          type: OrderType.SELL,
-          currencyCode
-        },
-        { transaction: t }
-      )
-      return order
+    return await Order.create<Order>({
+      userId,
+      orderType,
+      rate,
+      rateType,
+      minAmount,
+      maxAmount,
+      cryptoCurrencyCode,
+      fiatCurrencyCode,
+      paymentMethodType,
+      paymentMethodId,
+      isActive: true
     })
   }
 
-  async createBuyOrder(
-    userId: number,
-    minAmount: number | null,
-    maxAmount: number,
-    price: number | null,
-    currencyCode: string = 'btc'
-  ): Promise<Order> {
-    const order = await Order.create<Order>(
-      {
-        userId,
-        minAmount,
-        maxAmount,
-        isEnabled: true,
-        type: OrderType.BUY,
-        currencyCode,
-        price
-      },
-      {}
-    )
-    return order
+  static async editOrder(orderId: number, order: Order) {
+    if (!order.id) {
+      throw new OrderError(OrderError.INVALID_PARAMS)
+    }
+
+    await Order.update(_.omit(order, ['id', 'userId']), {
+      where: {
+        id: orderId
+      }
+    })
   }
 
-  async updateAccountVerifiedFilter(shouldSet: boolean) {
-    await this.update({ accountVerifiedFilter: shouldSet })
+  static async getAllOrders(userId: number) {
+    return await Order.findAll({
+      where: {
+        userId
+      }
+    })
+  }
+
+  static async getOrder(orderId: number) {
+    return await Order.findOne({
+      where: {
+        id: orderId
+      }
+    })
   }
 }
 
 export class OrderError extends Error {
   public status: number
-  public static INSUFFICIENT_BALANCE = 490
   public static INVALID_PARAMS = 400
 
-  constructor(status: number = 500, message: string = 'Transaction Error') {
+  constructor(status: number = 500, message: string = 'Order Error') {
     super(message)
     this.name = this.constructor.name
     logger.error(this.constructor.name + ', ' + status)

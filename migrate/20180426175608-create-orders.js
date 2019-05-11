@@ -13,57 +13,54 @@ module.exports = {
         allowNull: false,
         references: { model: 'Users', key: 'id' }
       },
-      type: {
+      orderType: {
         allowNull: false,
         type: Sequelize.STRING
       },
-      isEnabled: {
+
+      rate: {
         allowNull: false,
-        type: Sequelize.BOOLEAN
-      },
-      price: {
-        allowNull: true,
         type: Sequelize.FLOAT
       },
+      rateType: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
       minAmount: {
-        allowNull: true,
+        allowNull: false,
         type: Sequelize.FLOAT
       },
       maxAmount: {
         allowNull: false,
         type: Sequelize.FLOAT
       },
-      matchedOrderId: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: { model: 'Orders', key: 'id' }
-      },
-      currencyCode: {
+      cryptoCurrencyCode: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      marginPercentage: {
-        type: Sequelize.FLOAT,
-        default: 0.0,
+      fiatCurrencyCode: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      paymentMethodType: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      paymentMethodId: {
+        allowNull: true,
+        type: Sequelize.INTEGER,
+        references: { model: 'PaymentMethods', key: 'id' }
+      },
+      terms: {
+        type: Sequelize.STRING,
         allowNull: true
       },
-      paymentMethodFilters: {
-        allowNull: true,
-        type: Sequelize.STRING
-      },
-      accountVerifiedFilter: {
-        allowNull: true,
+
+      isActive: {
+        allowNull: false,
         type: Sequelize.BOOLEAN
       },
-      confirmedTime: {
-        allowNull: true,
-        type: Sequelize.DATE
-      },
-      cancelCount: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        default: 0,
-      },
+
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

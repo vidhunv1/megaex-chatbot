@@ -6,10 +6,17 @@ import {
   updateNextExchangeState
 } from '../ExchangeState'
 import * as _ from 'lodash'
-import { OrderType, RateTypes } from 'models'
+import { OrderType, RateType, Order } from 'models'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { PaymentMethodType } from 'models'
+import {
+  CryptoCurrency,
+  FiatCurrency,
+  cryptoCurrencyInfo
+} from 'constants/currencies'
 import logger from 'modules/Logger'
+
+const CURRENT_CRYPTO_CURRENCY_CODE = CryptoCurrency.BTC
 
 export const CreateOrderParser: Parser<ExchangeState> = async (
   msg,
@@ -57,7 +64,7 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
           [CreateOrderStateKey.inputRate]: {
             orderType,
             data: {
-              valueType: RateTypes.MARGIN,
+              valueType: RateType.MARGIN,
               value: parseFloat(msg.text.replace(/[^\d\.]/g, ''))
             }
           }
@@ -68,7 +75,7 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
           [CreateOrderStateKey.inputRate]: {
             orderType,
             data: {
-              valueType: RateTypes.FIXED,
+              valueType: RateType.FIXED,
               value: parsed.amount
             }
           }
@@ -109,37 +116,31 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
         min = parseFloat(a.replace(/[^\d\.]/g, '')) || 0
         max = parseFloat(b.replace(/[^\d\.]/g, '')) || 0
       } else {
-        min = 0
+        min = await getDefaultMin(user.currencyCode)
         max = parseFloat(msg.text.replace(/[^\d\.]/g, '')) || 0
       }
-      if (max <= 0) {
+      if (max <= 0 || min > max) {
         return state
       }
 
       let orderId: number | null = null
-      if (orderType === OrderType.BUY) {
-        orderId = await createBuyOrder(
-          min,
-          max,
-          rateInput.valueType,
-          rateInput.value,
-          paymentMethod
-        )
-      } else {
-        const pmid = _.get(
-          state[CreateOrderStateKey.cb_selectPaymentMethod],
-          'pmId',
-          null
-        )
-        orderId = await createSellOrder(
-          min,
-          max,
-          rateInput.valueType,
-          rateInput.value,
-          paymentMethod,
-          pmid != null ? JSON.parse(pmid + '') : null
-        )
-      }
+      const pmid = _.get(
+        state[CreateOrderStateKey.cb_selectPaymentMethod],
+        'pmId',
+        null
+      )
+      orderId = await createOrder(
+        user.id,
+        orderType,
+        min,
+        max,
+        rateInput.valueType,
+        rateInput.value,
+        paymentMethod,
+        pmid != null ? JSON.parse(pmid + '') : null,
+        CURRENT_CRYPTO_CURRENCY_CODE,
+        user.currencyCode
+      )
 
       if (orderId != null) {
         return {
@@ -269,29 +270,53 @@ function nextCreateOrderState(
   }
 }
 
-async function createBuyOrder(
+async function createOrder(
+  userId: number,
+  orderType: OrderType,
   minAmount: number,
   maxAmount: number,
-  rateType: RateTypes,
-  rateValue: number,
-  paymentMethod: PaymentMethodType
-): Promise<number | null> {
-  logger.error(
-    `TODO: create BUY order ${minAmount}-${maxAmount} ${rateType} ${rateValue} via ${paymentMethod}`
-  )
-  return 12234
-}
-
-async function createSellOrder(
-  minAmount: number,
-  maxAmount: number,
-  rateType: RateTypes,
+  rateType: RateType,
   rateValue: number,
   paymentMethod: PaymentMethodType,
-  addedPaymentMethodId: number | null
+  addedPaymentMethodId: number | null,
+  cryptoCurrencyCode: CryptoCurrency,
+  fiatCurrencyCode: FiatCurrency
 ): Promise<number | null> {
-  logger.error(
-    `TODO: create BUY order ${minAmount}-${maxAmount} ${rateType} ${rateValue} via ${paymentMethod} addedPM: ${addedPaymentMethodId}`
+  try {
+    const order = await Order.createOrder(
+      userId,
+      orderType,
+      rateValue,
+      rateType,
+      minAmount,
+      maxAmount,
+      cryptoCurrencyCode,
+      fiatCurrencyCode,
+      paymentMethod,
+      addedPaymentMethodId
+    )
+
+    if (order) {
+      return order.id
+    }
+    return null
+  } catch (e) {
+    return null
+  }
+}
+
+async function getDefaultMin(fiatCode: FiatCurrency) {
+  logger.error('getDefaultMin amount')
+  const marketRate = await getMarketRate(fiatCode, CURRENT_CRYPTO_CURRENCY_CODE)
+  return (
+    marketRate * cryptoCurrencyInfo[CURRENT_CRYPTO_CURRENCY_CODE].minBuyAmount
   )
-  return 12234
+}
+
+async function getMarketRate(
+  _fiatCode: FiatCurrency,
+  _to: CryptoCurrency
+): Promise<number> {
+  logger.error('Get market rate')
+  return 400000
 }
