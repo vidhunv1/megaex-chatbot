@@ -54,8 +54,8 @@ export class PaymentMethod extends Model<PaymentMethod> {
     userId: number,
     paymentMethod: PaymentMethodType,
     fields: string[]
-  ) {
-    await PaymentMethod.create<PaymentMethod>(
+  ): Promise<number> {
+    const pm = await PaymentMethod.create<PaymentMethod>(
       {
         userId,
         paymentMethod,
@@ -63,6 +63,8 @@ export class PaymentMethod extends Model<PaymentMethod> {
       },
       {}
     )
+
+    return pm.id
   }
 
   static async editPaymentMethod(
@@ -70,13 +72,13 @@ export class PaymentMethod extends Model<PaymentMethod> {
     userId: number,
     paymentMethod: PaymentMethodType,
     fields: string[]
-  ) {
+  ): Promise<number> {
     await PaymentMethod.destroy({
       where: {
         id
       }
     })
-    await PaymentMethod.savePaymentMethod(userId, paymentMethod, fields)
+    return await PaymentMethod.savePaymentMethod(userId, paymentMethod, fields)
   }
 
   static async getSavedPaymentMethods(

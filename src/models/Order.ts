@@ -136,6 +136,17 @@ export class Order extends Model<Order> {
       }
     })
   }
+
+  static async deleteOrder(orderId: number) {
+    logger.error(
+      'TODO: SHould delete order only when there is no ongoing trade'
+    )
+    await Order.destroy({
+      where: {
+        id: orderId
+      }
+    })
+  }
 }
 
 export class OrderError extends Error {

@@ -7,13 +7,19 @@ import {
   updateNextExchangeState
 } from '../ExchangeState'
 import * as _ from 'lodash'
-import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import {
+  CryptoCurrency,
+  FiatCurrency,
+  cryptoCurrencyInfo
+} from 'constants/currencies'
 import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
 import PaymentMethod, { PaymentMethodType } from 'models/PaymentMethod'
 import { RateType, OrderType, Order } from 'models'
 import { MyOrdersMessage } from './messages'
 import logger from 'modules/Logger'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
+
+const CURRENT_CRYPTO_CURRENCY_CODE = CryptoCurrency.BTC
 
 export const MyOrdersParser: Parser<ExchangeState> = async (
   msg,
@@ -153,7 +159,11 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         'data',
         null
       )
-      const orderId = _.get(state[MyOrdersStateKey.cb_editPaymentDetails], 'orderId', null)
+      const orderId = _.get(
+        state[MyOrdersStateKey.cb_editPaymentDetails],
+        'orderId',
+        null
+      )
       if (pmDetailsData === null || !msg.text || orderId === null) {
         return null
       }
@@ -165,7 +175,12 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         pmDetailsData.fields.length ===
         PaymentMethodsFieldsLocale[pmDetailsData.paymentMethod].length
       ) {
-        await editPaymentDetails(pmDetailsData.paymentMethod, fields, orderId)
+        await editPaymentDetails(
+          user.id,
+          orderId,
+          pmDetailsData.paymentMethod,
+          fields
+        )
       }
 
       return {
@@ -191,11 +206,14 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         'pm',
         null
       )
-      const pmId = parseInt(_.get(
-        state[MyOrdersStateKey.cb_editPaymentMethodSelected],
-        'pmId',
-        null
-      ) + '') || null
+      const pmId =
+        parseInt(
+          _.get(
+            state[MyOrdersStateKey.cb_editPaymentMethodSelected],
+            'pmId',
+            null
+          ) + ''
+        ) || null
 
       const orderId = _.get(
         state[MyOrdersStateKey.cb_editPaymentMethod],
@@ -214,9 +232,14 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       return state
     },
     [MyOrdersStateKey.editAmount_show]: async () => {
+      const orderId = _.get(
+        state[MyOrdersStateKey.cb_editRate],
+        'orderId',
+        null
+      )
       let min, max
 
-      if (!msg.text) {
+      if (!msg.text || orderId == null) {
         return null
       }
 
@@ -225,14 +248,14 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         min = parseFloat(a.replace(/[^\d\.]/g, '')) || 0
         max = parseFloat(b.replace(/[^\d\.]/g, '')) || 0
       } else {
-        min = 0
+        min = await getDefaultMin(user.currencyCode)
         max = parseFloat(msg.text.replace(/[^\d\.]/g, '')) || 0
       }
       if (max <= 0) {
         return state
       }
 
-      await saveEditedAmount(min, max)
+      await saveEditedAmount(orderId, min, max)
 
       return {
         ...state,
@@ -249,7 +272,12 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       return state
     },
     [MyOrdersStateKey.editRate_show]: async () => {
-      if (!msg.text) {
+      const orderId = _.get(
+        state[MyOrdersStateKey.cb_editRate],
+        'orderId',
+        null
+      )
+      if (!msg.text || orderId == null) {
         return null
       }
 
@@ -257,7 +285,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       if (msg.text.includes('%')) {
         const valueType = RateType.MARGIN
         const value = parseFloat(msg.text.replace(/[^\d\.]/g, ''))
-        await saveEditedRate(valueType, value)
+        await saveEditedRate(orderId, valueType, value)
 
         return {
           ...state,
@@ -271,7 +299,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       } else if (parsed && parsed.amount > 0) {
         const valueType = RateType.FIXED
         const value = parsed.amount
-        await saveEditedRate(valueType, value)
+        await saveEditedRate(orderId, valueType, value)
 
         return {
           ...state,
@@ -291,13 +319,18 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
       return state
     },
     [MyOrdersStateKey.editTerms_show]: async () => {
-      if (!msg.text) {
+      const orderId = _.get(
+        state[MyOrdersStateKey.cb_editTerms],
+        'orderId',
+        null
+      )
+      if (!msg.text || orderId == null) {
         return null
       }
 
       const TERMS_CHARACTER_LIMIT = 300
       const terms = msg.text.substring(0, TERMS_CHARACTER_LIMIT)
-      await saveEditedTerms(terms)
+      await saveEditedTerms(orderId, terms)
       return {
         ...state,
         [MyOrdersStateKey.editTerms_show]: {
@@ -330,22 +363,34 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         return null
       }
 
-      const orderInfo = await saveActive(JSON.parse(isEnabled + ''))
+      await saveActive(orderId, !JSON.parse(isEnabled + ''))
+      const orderInfo = await getOrderInfo(orderId)
       if (!orderInfo) {
         return null
       }
+
+      let paymentMethodFields: string[] = []
+      if (orderInfo.paymentMethodId) {
+        const pm = await getPaymentFields(orderInfo.paymentMethodId)
+        if (pm && pm.fields) {
+          paymentMethodFields = pm.fields
+        }
+      }
       if (orderInfo.orderType === OrderType.SELL) {
         await MyOrdersMessage(msg, user).showMySellOrder(
-          orderInfo.orderId,
+          orderInfo.id,
           orderInfo.cryptoCurrencyCode,
           orderInfo.fiatCurrencyCode,
           orderInfo.rate,
           orderInfo.rateType,
-          orderInfo.amount,
+          {
+            min: orderInfo.minAmount,
+            max: orderInfo.maxAmount
+          },
           await getAvailableBalance(orderInfo.cryptoCurrencyCode),
-          orderInfo.paymentMethod,
-          orderInfo.paymentMethodFields,
-          orderInfo.isEnabled,
+          orderInfo.paymentMethodType,
+          paymentMethodFields,
+          orderInfo.isActive,
           orderInfo.terms,
           true,
           true,
@@ -353,14 +398,17 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         )
       } else {
         await MyOrdersMessage(msg, user).showMyBuyOrder(
-          orderInfo.orderId,
+          orderInfo.id,
           orderInfo.cryptoCurrencyCode,
           orderInfo.fiatCurrencyCode,
           orderInfo.rate,
           orderInfo.rateType,
-          orderInfo.amount,
-          orderInfo.paymentMethod,
-          orderInfo.isEnabled,
+          {
+            max: orderInfo.maxAmount,
+            min: orderInfo.minAmount
+          },
+          orderInfo.paymentMethodType,
+          orderInfo.isActive,
           orderInfo.terms,
           true,
           true,
@@ -484,29 +532,6 @@ function nextMyOrdersState(
   }
 }
 
-const MOCK_ORDER = {
-  orderId: 213213,
-  orderType: OrderType.SELL,
-  cryptoCurrencyCode: CryptoCurrency.BTC,
-  fiatCurrencyCode: FiatCurrency.USD,
-  rate: 382000,
-  rateType: RateType.FIXED,
-  amount: {
-    min: 0.1,
-    max: 0.5
-  },
-  paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
-  paymentMethodFields: ['Axis', '21321313', 'AX098098'],
-  isEnabled: true,
-  terms: null
-}
-
-async function getAvailableBalance(
-  _currencyCode: CryptoCurrency
-): Promise<number> {
-  return 0
-}
-
 async function getOrderInfo(orderId: number) {
   return await Order.getOrder(orderId)
 }
@@ -515,72 +540,104 @@ async function getPaymentFields(id: number) {
   return await PaymentMethod.getPaymentMethod(id)
 }
 
-// TODO -------------
-async function saveEditedRate(valueType: RateType, value: number) {
-  logger.error('TODO: implement saveEditedrate')
-  return {
-    ...MOCK_ORDER,
-    rate: {
-      value,
-      valueType
-    }
-  }
+async function getMarketRate(
+  _fiatCode: FiatCurrency,
+  _to: CryptoCurrency
+): Promise<number> {
+  logger.error('Get market rate')
+  return 400000
 }
 
-async function saveEditedAmount(min: number, max: number) {
-  logger.error('TODO: implement saveEditedAmount')
-  return {
-    ...MOCK_ORDER,
-    amount: {
-      min,
-      max
-    }
-  }
+async function getDefaultMin(fiatCode: FiatCurrency) {
+  logger.error('getDefaultMin amount')
+  const marketRate = await getMarketRate(fiatCode, CURRENT_CRYPTO_CURRENCY_CODE)
+  return (
+    marketRate * cryptoCurrencyInfo[CURRENT_CRYPTO_CURRENCY_CODE].minBuyAmount
+  )
 }
 
-async function saveEditedTerms(terms: string) {
-  logger.error('TODO: implement saveEditedTerms')
-  return {
-    ...MOCK_ORDER,
+async function saveEditedRate(
+  orderId: number,
+  rateType: RateType,
+  rate: number
+): Promise<void> {
+  await Order.editOrder(orderId, {
+    rateType,
+    rate
+  })
+}
+
+async function saveEditedAmount(
+  orderId: number,
+  min: number,
+  max: number
+): Promise<void> {
+  await Order.editOrder(orderId, {
+    minAmount: min,
+    maxAmount: max
+  })
+}
+
+async function saveEditedTerms(orderId: number, terms: string): Promise<void> {
+  await Order.editOrder(orderId, {
     terms
-  }
+  })
 }
 
-async function savePaymentMethod(orderId: number, paymentMethod: PaymentMethodType, pmId: number | null) {
+async function saveActive(orderId: number, isActive: boolean) {
+  await Order.editOrder(orderId, {
+    isActive
+  })
+}
+
+async function savePaymentMethod(
+  orderId: number,
+  paymentMethod: PaymentMethodType,
+  pmId: number | null
+) {
   await Order.editOrder(orderId, {
     paymentMethodType: paymentMethod,
     paymentMethodId: pmId
   })
 }
 
-async function saveActive(isEnabled: boolean) {
-  logger.error('TODO: implement saveActive ' + isEnabled)
-  return {
-    ...MOCK_ORDER,
-    isEnabled: !isEnabled
+async function editPaymentDetails(
+  userId: number,
+  orderId: number,
+  paymentMethod: PaymentMethodType,
+  fields: string[]
+) {
+  const order = await Order.getOrder(orderId)
+  if (!order) {
+    return
   }
+  let pmId: number
+  if (order.paymentMethodId === null) {
+    pmId = await PaymentMethod.savePaymentMethod(userId, paymentMethod, fields)
+  } else {
+    pmId = await PaymentMethod.editPaymentMethod(
+      order.paymentMethodId,
+      userId,
+      paymentMethod,
+      fields
+    )
+  }
+
+  await Order.editOrder(orderId, {
+    paymentMethodId: pmId
+  })
+}
+
+// TODO -------------
+async function getAvailableBalance(
+  _currencyCode: CryptoCurrency
+): Promise<number> {
+  logger.error('TODO: Implement availableBalance')
+  return 0
 }
 
 async function deleteOrder(orderId: number): Promise<boolean> {
-  logger.error('TODO: implement delete order ' + orderId)
+  logger.error('TODO: implement checks for delete order ' + orderId)
+  await Order.deleteOrder(orderId)
   return true
-}
-
-async function editPaymentDetails(
-  paymentMethod: PaymentMethodType,
-  fields: string[],
-  orderId: number
-): Promise<number | null> {
-  const order = await Order.getOrder(orderId)
-  if (!order) {
-    return null
-  }
-  // TODO: Edit or save based on if pmID is available}
-  logger.error(
-    'TODO: implement savePaymentDetails ' +
-      paymentMethod +
-      ', ' +
-      fields.join(', ')
-  )
-  return 1
 }
