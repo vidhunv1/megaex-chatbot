@@ -10,11 +10,11 @@ import {
   AutoIncrement
 } from 'sequelize-typescript'
 import { User } from '.'
-import logger from '../modules/Logger'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
-import * as _ from 'lodash'
 import { ExchangeSource } from 'constants/exchangeSource'
+import logger from 'modules/Logger'
+import * as _ from 'lodash'
 
 export enum OrderType {
   BUY = 'BUY',
@@ -122,10 +122,11 @@ export class Order extends Model<Order> {
     })
   }
 
-  static async getAllOrders(userId: number) {
+  static async getAllOrders(orderType: OrderType, fiatCode: FiatCurrency) {
     return await Order.findAll({
       where: {
-        userId
+        orderType,
+        fiatCurrencyCode: fiatCode
       }
     })
   }
@@ -147,6 +148,42 @@ export class Order extends Model<Order> {
         id: orderId
       }
     })
+  }
+
+  static async getQuickDealList(orderType: OrderType, fiatCode: FiatCurrency) {
+    const orders = await Order.findAll({
+      where: {
+        orderType,
+        fiatCurrencyCode: fiatCode
+      },
+      include: [{ model: User }]
+    })
+
+    logger.error('TODO: Order: Implement correct values')
+
+    const ordersList = []
+    for (let i = 0; i < orders.length; i++) {
+      const iOrder = orders[i]
+      const fixedRate = await Order.convertToFixedRate(
+        iOrder.rate,
+        iOrder.rateType,
+        iOrder.fiatCurrencyCode,
+        iOrder.user.exchangeRateSource
+      )
+
+      ordersList.push({
+        id: iOrder.id,
+        orderType: iOrder.orderType,
+        minAmount: iOrder.minAmount,
+        paymentMethodType: iOrder.paymentMethodType,
+        fiatCurrencyCode: iOrder.fiatCurrencyCode,
+        rating: 4.5,
+        availableBalance: 0,
+        fixedRate
+      })
+    }
+
+    return ordersList
   }
 
   static async convertToFixedRate(

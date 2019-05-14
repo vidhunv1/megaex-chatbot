@@ -182,15 +182,13 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     cryptoCurrencyCode: CryptoCurrency,
     orderType: OrderType,
     ordersList: {
-      orderId: number
-      rate: number
-      paymentMethod: PaymentMethodType
+      id: number
+      fixedRate: number
+      paymentMethodType: PaymentMethodType
       fiatCurrencyCode: FiatCurrency
       rating: number
       availableBalance: number
-      amount: {
-        min: number
-      }
+      minAmount: number
     }[],
     totalOrders: number,
     currentCursor: number,
@@ -199,16 +197,19 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     const inline: TelegramBot.InlineKeyboardButton[][] = ordersList.map(
       (order) => {
         const formattedFiatRateRate = dataFormatter.formatFiatCurrency(
-          order.rate,
+          order.fixedRate,
           order.fiatCurrencyCode
         )
 
         let text = `${formattedFiatRateRate} - ${user.t(
-          `payment-methods.short-names.${order.paymentMethod}`
+          `payment-methods.short-names.${order.paymentMethodType}`
         )} | ${order.rating.toFixed(1)} ⭐️`
 
-        if (order.availableBalance < order.amount.min) {
-          text = '❕' + text
+        if (
+          order.availableBalance < order.minAmount &&
+          orderType === OrderType.SELL
+        ) {
+          text = '❗️' + text
         }
         return [
           {
@@ -217,7 +218,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
               DealsStateKey.cb_showDealById,
               DealsState[DealsStateKey.cb_showDealById]
             >(DealsStateKey.cb_showDealById, {
-              orderId: order.orderId
+              orderId: order.id
             })
           }
         ]
@@ -262,7 +263,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     }
 
     let text
-    if (orderType === OrderType.BUY) {
+    if (orderType === OrderType.SELL) {
       text = user.t(`${Namespace.Exchange}:deals.show-buy-deals`, {
         cryptoCurrencyCode,
         currentPage: Math.ceil((currentCursor + 1) / DealsConfig.LIST_LIMIT),

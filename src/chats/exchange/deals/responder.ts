@@ -4,7 +4,6 @@ import * as _ from 'lodash'
 import { ExchangeState, TradeStatus } from '../ExchangeState'
 import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { PaymentMethodType } from 'models/PaymentMethod'
 import { OrderType, Order, User } from 'models'
 import { DealsConfig } from './config'
 import logger from 'modules/Logger'
@@ -28,10 +27,8 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         return false
       }
 
-      const orderTypeForUser =
-        orderType === OrderType.BUY ? OrderType.SELL : OrderType.BUY
       const { orderList, totalOrders } = await getOrdersList(
-        orderTypeForUser,
+        orderType,
         user.currencyCode,
         cursor,
         DealsConfig.LIST_LIMIT
@@ -265,24 +262,27 @@ async function getTrade(tradeId: number) {
 
 async function getOrdersList(
   orderType: OrderType,
-  _fiatCurrencyCode: FiatCurrency,
+  fiatCurrencyCode: FiatCurrency,
   cursor: number,
   limit: number
 ) {
-  logger.error('TODO: Implement getOrderList')
+  logger.error('TODO: Implement available balance from wallet')
+
+  // TODO: Fix inefficient query
+  const orders = await Order.getQuickDealList(orderType, fiatCurrencyCode)
   // Show all orders with available balance first, rest are shown at last
   let orderList = _.filter(
     orders,
-    (o) => o.orderType === orderType && o.availableBalance >= o.amount.min
+    (o) => o.orderType === orderType && o.availableBalance >= o.minAmount
   )
-  orderList = _.orderBy(orderList, (o) => o.rate, [
+  orderList = _.orderBy(orderList, (o) => o.fixedRate, [
     orderType === OrderType.BUY ? 'desc' : 'asc'
   ])
   // Move all orders without available balance to end
   orderList.push(
     ..._.filter(
       orders,
-      (o) => o.availableBalance < o.amount.min && o.orderType === orderType
+      (o) => o.availableBalance < o.minAmount && o.orderType === orderType
     )
   )
 
@@ -290,90 +290,3 @@ async function getOrdersList(
 
   return { orderList: orderList.slice(cursor, cursor + limit), totalOrders }
 }
-
-const orders = [
-  {
-    orderId: 1,
-    orderType: OrderType.SELL,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    fiatCurrencyCode: FiatCurrency.INR,
-    rate: 310001,
-    rating: 4.0,
-    amount: {
-      min: 0.3,
-      max: 0.5
-    },
-    availableBalance: 0,
-    paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
-    isEnabled: true,
-    terms: 'Please transfer fast..'
-  },
-  {
-    orderId: 4,
-    orderType: OrderType.SELL,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    fiatCurrencyCode: FiatCurrency.INR,
-    rate: 310004,
-    rating: 4.6,
-    availableBalance: 0.2,
-    amount: {
-      min: 0.1,
-      max: 0.5
-    },
-    paymentMethod: PaymentMethodType.UPI,
-    isEnabled: true,
-    terms: 'Please transfer fast..'
-  },
-  {
-    orderId: 3,
-    orderType: OrderType.BUY,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    fiatCurrencyCode: FiatCurrency.INR,
-    rate: 310003,
-    rating: 4.7,
-    availableBalance: 0.5,
-    amount: {
-      min: 0.1,
-      max: 0.5
-    },
-    paymentMethod: PaymentMethodType.PAYTM,
-    isEnabled: true,
-    terms: 'Please transfer fast..'
-  },
-  {
-    orderId: 2,
-    orderType: OrderType.BUY,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    fiatCurrencyCode: FiatCurrency.INR,
-    rate: 310002,
-    rating: 4.9,
-    availableBalance: 0.5,
-    amount: {
-      min: 0.1,
-      max: 0.5
-    },
-    paymentMethod: PaymentMethodType.CASH,
-    isEnabled: true,
-    terms: 'Please transfer fast..'
-  }
-]
-
-const a = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-a.forEach((id) =>
-  orders.push({
-    orderId: id,
-    orderType: id % 2 === 0 ? OrderType.SELL : OrderType.BUY,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    fiatCurrencyCode: FiatCurrency.INR,
-    rate: 310000 + id,
-    rating: 4.6,
-    availableBalance: 0.5,
-    amount: {
-      min: 0.1,
-      max: 0.5
-    },
-    paymentMethod: PaymentMethodType.UPI,
-    isEnabled: true,
-    terms: 'Please transfer fast..'
-  })
-)

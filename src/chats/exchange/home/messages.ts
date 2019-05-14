@@ -49,7 +49,7 @@ export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   DealsStateKey.cb_deals,
                   DealsState[DealsStateKey.cb_deals]
                 >(DealsStateKey.cb_deals, {
-                  orderType: OrderType.BUY
+                  orderType: OrderType.SELL
                 })
               }
             ],
@@ -60,7 +60,7 @@ export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   DealsStateKey.cb_deals,
                   DealsState[DealsStateKey.cb_deals]
                 >(DealsStateKey.cb_deals, {
-                  orderType: OrderType.SELL
+                  orderType: OrderType.BUY
                 })
               }
             ]
