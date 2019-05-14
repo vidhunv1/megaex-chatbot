@@ -2,7 +2,10 @@ import telegramHook from 'modules/TelegramHook'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, OrderType, RateType } from 'models'
 import { Namespace } from 'modules/i18n'
-import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
+import {
+  PaymentMethodsFieldsLocale,
+  PaymentMethodPrimaryFieldIndex
+} from 'constants/paymentMethods'
 import { PaymentMethodType } from 'models'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { dataFormatter } from 'utils/dataFormatter'
@@ -430,7 +433,8 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
             MyOrdersStateKey.cb_editPaymentDetails,
             MyOrdersState[MyOrdersStateKey.cb_editPaymentDetails]
           >(MyOrdersStateKey.cb_editPaymentDetails, {
-            pm: paymentMethod
+            pm: paymentMethod,
+            orderId
           })
         })
       }
@@ -459,7 +463,8 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
               MyOrdersStateKey.cb_editPaymentDetails,
               MyOrdersState[MyOrdersStateKey.cb_editPaymentDetails]
             >(MyOrdersStateKey.cb_editPaymentDetails, {
-              pm: paymentMethod
+              pm: paymentMethod,
+              orderId
             })
           }
         ],
@@ -552,16 +557,28 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     }
   },
 
-  async showEditPaymentMethod(paymentMethods: PaymentMethodType[]) {
+  async showEditPaymentMethod(
+    paymentMethods: {
+      paymentMethod: PaymentMethodType
+      pmId: number | null
+      pmFields: string[] | null
+    }[]
+  ) {
     const inline: TelegramBot.InlineKeyboardButton[][] = paymentMethods.map(
       (pm) => [
         {
-          text: user.t(`payment-methods.names.${pm}`),
+          text:
+            pm.pmFields && pm.pmId
+              ? `${user.t(`payment-methods.short-names.${pm.paymentMethod}`)}-${
+                  pm.pmFields[PaymentMethodPrimaryFieldIndex[pm.paymentMethod]]
+                }`
+              : user.t(`payment-methods.names.${pm.paymentMethod}`),
           callback_data: stringifyCallbackQuery<
             MyOrdersStateKey.cb_editPaymentMethodSelected,
             MyOrdersState[MyOrdersStateKey.cb_editPaymentMethodSelected]
           >(MyOrdersStateKey.cb_editPaymentMethodSelected, {
-            pm
+            pm: pm.paymentMethod,
+            pmId: pm.pmId
           })
         }
       ]

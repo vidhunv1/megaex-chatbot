@@ -153,7 +153,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         'data',
         null
       )
-      if (pmDetailsData === null || !msg.text) {
+      const orderId = _.get(state[MyOrdersStateKey.cb_editPaymentDetails], 'orderId', null)
+      if (pmDetailsData === null || !msg.text || orderId === null) {
         return null
       }
 
@@ -164,7 +165,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         pmDetailsData.fields.length ===
         PaymentMethodsFieldsLocale[pmDetailsData.paymentMethod].length
       ) {
-        await editPaymentDetails(pmDetailsData.paymentMethod, fields)
+        await editPaymentDetails(pmDetailsData.paymentMethod, fields, orderId)
       }
 
       return {
@@ -190,11 +191,22 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         'pm',
         null
       )
-      if (selectedPaymentMethod === null) {
+      const pmId = parseInt(_.get(
+        state[MyOrdersStateKey.cb_editPaymentMethodSelected],
+        'pmId',
+        null
+      ) + '') || null
+
+      const orderId = _.get(
+        state[MyOrdersStateKey.cb_editPaymentMethod],
+        'orderId',
+        null
+      )
+      if (selectedPaymentMethod === null || orderId === null) {
         return null
       }
 
-      await savePaymentMethod(selectedPaymentMethod)
+      await savePaymentMethod(orderId, selectedPaymentMethod, pmId)
       return state
     },
 
@@ -534,12 +546,11 @@ async function saveEditedTerms(terms: string) {
   }
 }
 
-async function savePaymentMethod(paymentMethod: PaymentMethodType) {
-  logger.error('TODO: implement savePaymentMethod')
-  return {
-    ...MOCK_ORDER,
-    paymentMethod
-  }
+async function savePaymentMethod(orderId: number, paymentMethod: PaymentMethodType, pmId: number | null) {
+  await Order.editOrder(orderId, {
+    paymentMethodType: paymentMethod,
+    paymentMethodId: pmId
+  })
 }
 
 async function saveActive(isEnabled: boolean) {
@@ -557,9 +568,14 @@ async function deleteOrder(orderId: number): Promise<boolean> {
 
 async function editPaymentDetails(
   paymentMethod: PaymentMethodType,
-  fields: string[]
-): Promise<number> {
-  // TODO: Edit or save based on if pmID is available
+  fields: string[],
+  orderId: number
+): Promise<number | null> {
+  const order = await Order.getOrder(orderId)
+  if (!order) {
+    return null
+  }
+  // TODO: Edit or save based on if pmID is available}
   logger.error(
     'TODO: implement savePaymentDetails ' +
       paymentMethod +

@@ -5,7 +5,12 @@ import { ExchangeState } from '../ExchangeState'
 import { MyOrdersMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
-import { PaymentMethodType, Order, PaymentMethod } from 'models'
+import {
+  PaymentMethodType,
+  Order,
+  PaymentMethod,
+  PaymentMethodFields
+} from 'models'
 import { OrderType } from 'models'
 import logger from 'modules/Logger'
 
@@ -43,9 +48,28 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
       return false
     },
     [MyOrdersStateKey.editPaymentMethod_show]: async () => {
-      await MyOrdersMessage(msg, user).showEditPaymentMethod(Object.keys(
-        PaymentMethodType
-      ) as PaymentMethodType[])
+      const addedPm = await getAddedPaymentMethods(user.id)
+
+      let pms: {
+        paymentMethod: PaymentMethodType
+        pmId: number | null
+        pmFields: string[] | null
+      }[] = Object.keys(PaymentMethodType).map((pm) => ({
+        paymentMethod: pm as PaymentMethodType,
+        pmId: null,
+        pmFields: null
+      }))
+
+      pms = [
+        ...addedPm.map((pm) => ({
+          paymentMethod: pm.paymentMethod,
+          pmId: pm.id,
+          pmFields: pm.fields
+        })),
+        ...pms
+      ]
+
+      await MyOrdersMessage(msg, user).showEditPaymentMethod(pms)
       return true
     },
     [MyOrdersStateKey.cb_editPaymentMethodSelected]: async () => {
@@ -205,6 +229,12 @@ async function getAvailableBalance(_userId: number) {
 
 async function getPaymentFields(id: number) {
   return await PaymentMethod.getPaymentMethod(id)
+}
+
+async function getAddedPaymentMethods(
+  userId: number
+): Promise<PaymentMethodFields[]> {
+  return await PaymentMethod.getSavedPaymentMethods(userId)
 }
 
 async function getActiveOrders(userId: number) {

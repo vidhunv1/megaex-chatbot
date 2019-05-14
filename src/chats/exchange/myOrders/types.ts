@@ -77,6 +77,7 @@ export interface MyOrdersState {
   [MyOrdersStateKey.editPaymentMethod_show]?: {}
   [MyOrdersStateKey.cb_editPaymentMethodSelected]?: {
     pm: PaymentMethodType
+    pmId: number | null
   }
 
   [MyOrdersStateKey.cb_toggleActive]?: {
@@ -91,6 +92,7 @@ export interface MyOrdersState {
 
   [MyOrdersStateKey.cb_editPaymentDetails]?: {
     pm: PaymentMethodType
+    orderId: number
   }
   [MyOrdersStateKey.editPaymentDetails_show]?: {
     data: {

@@ -113,11 +113,7 @@ export class Order extends Model<Order> {
     })
   }
 
-  static async editOrder(orderId: number, order: Order) {
-    if (!order.id) {
-      throw new OrderError(OrderError.INVALID_PARAMS)
-    }
-
+  static async editOrder(orderId: number, order: Partial<Order>) {
     await Order.update(_.omit(order, ['id', 'userId']), {
       where: {
         id: orderId
