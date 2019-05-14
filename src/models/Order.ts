@@ -14,6 +14,7 @@ import logger from '../modules/Logger'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
 import * as _ from 'lodash'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 export enum OrderType {
   BUY = 'BUY',
@@ -147,6 +148,27 @@ export class Order extends Model<Order> {
       }
     })
   }
+
+  static async convertToFixedRate(
+    rate: number,
+    rateType: RateType,
+    fiatCode: FiatCurrency,
+    exchangeSource: ExchangeSource
+  ) {
+    if (rateType === RateType.FIXED) {
+      return rate
+    }
+
+    const market = await getMarketRate(fiatCode, exchangeSource)
+    return market + (market * rate) / 100
+  }
+}
+
+async function getMarketRate(
+  _fiatCode: FiatCurrency,
+  _exchangeSource: ExchangeSource
+) {
+  return 400000
 }
 
 export class OrderError extends Error {

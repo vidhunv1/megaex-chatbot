@@ -2,14 +2,13 @@ import * as TelegramBot from 'node-telegram-bot-api'
 import telegramHook from 'modules/TelegramHook'
 import { Namespace } from 'modules/I18n'
 import { languageKeyboard, currencyKeyboard } from './utils'
-import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import { CryptoCurrency } from 'constants/currencies'
 import { keyboardMainMenu } from 'chats/common'
-import { User, Wallet, OrderType } from 'models'
+import { User, Wallet, Order } from 'models'
 import { SignupState, SignupStateKey } from './SignupState'
 import { DeepLink } from 'chats/types'
 import * as _ from 'lodash'
 import logger from 'modules/Logger'
-import { PaymentMethodType } from 'models'
 import { DealsMessage } from 'chats/exchange/deals'
 import { AccountHomeMessage } from 'chats/account/home'
 
@@ -159,18 +158,26 @@ export async function signupResponder(
               if (order && dealer) {
                 await DealsMessage(msg, user).showDeal(
                   order.orderType,
-                  order.orderId,
+                  order.id,
                   order.cryptoCurrencyCode,
-                  dealer.realName,
+                  dealer.telegramUser.firstName,
                   dealer.accountId,
                   dealer.lastSeen,
                   dealer.rating,
                   dealer.tradeCount,
                   order.terms,
-                  order.paymentMethod,
-                  order.rate,
-                  order.amount,
-                  order.availableBalance,
+                  order.paymentMethodType,
+                  await Order.convertToFixedRate(
+                    order.rate,
+                    order.rateType,
+                    order.fiatCurrencyCode,
+                    dealer.exchangeRateSource
+                  ),
+                  {
+                    min: order.minAmount,
+                    max: order.maxAmount
+                  },
+                  await getAvailableBalance(dealer.id),
                   order.fiatCurrencyCode,
                   dealer.reviewCount
                 )
@@ -190,39 +197,39 @@ export async function signupResponder(
 }
 
 async function getOrder(orderId: number) {
-  if (orderId == 1) {
-    return {
-      order: {
-        orderId: orderId,
-        orderType: OrderType.SELL,
-        cryptoCurrencyCode: CryptoCurrency.BTC,
-        fiatCurrencyCode: FiatCurrency.INR,
-        rate: 310002,
-        rating: 4.9,
-        amount: {
-          min: 0.1,
-          max: 0.5
-        },
-        availableBalance: 0.2,
-        paymentMethod: PaymentMethodType.CASH,
-        isEnabled: true,
-        terms: 'Please transfer fast..'
-      },
-      dealer: {
-        realName: 'Satoshi',
-        accountId: 'uxawsats',
-        rating: 4.7,
-        lastSeen: new Date(),
-        tradeCount: 5,
-        reviewCount: 30
-      }
-    }
-  } else {
+  logger.error('TODO: Implement getOrder with user details')
+
+  const order = await Order.getOrder(orderId)
+  if (!order) {
     return {
       order: null,
       dealer: null
     }
   }
+
+  const dealer = await User.getUser(order.userId)
+  if (!dealer) {
+    return {
+      order: null,
+      dealer: null
+    }
+  }
+
+  return {
+    order: order,
+    dealer: {
+      ...dealer,
+      rating: 4.7,
+      lastSeen: new Date(),
+      tradeCount: 5,
+      reviewCount: 30
+    }
+  }
+}
+
+// TODO: -----------
+async function getAvailableBalance(_userId: number) {
+  return 0
 }
 
 async function getAccount(
@@ -238,6 +245,7 @@ async function getAccount(
   // isUserBlocked: boolean,
   rating: number
 } | null> {
+  logger.error('TODO: implement getAccount')
   return {
     accountId,
     telegramUsername: 'satoshi',

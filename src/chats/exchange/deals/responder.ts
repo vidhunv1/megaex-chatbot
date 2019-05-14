@@ -5,8 +5,9 @@ import { ExchangeState, TradeStatus } from '../ExchangeState'
 import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { PaymentMethodType } from 'models/PaymentMethod'
-import { OrderType } from 'models'
+import { OrderType, Order, User } from 'models'
 import { DealsConfig } from './config'
+import logger from 'modules/Logger'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 
@@ -66,21 +67,31 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       }
 
       const { order, dealer } = await getOrder(orderId)
-      if (order) {
+      if (order != null && dealer != null) {
+        const trueRate: number = await Order.convertToFixedRate(
+          order.rate,
+          order.rateType,
+          order.fiatCurrencyCode,
+          dealer.exchangeRateSource
+        )
+
         await DealsMessage(msg, user).showDeal(
           order.orderType,
-          order.orderId,
+          order.id,
           order.cryptoCurrencyCode,
-          dealer.realName,
+          dealer.telegramUser.firstName,
           dealer.accountId,
           dealer.lastSeen,
-          order.rating,
+          dealer.rating,
           dealer.tradeCount,
           order.terms,
-          order.paymentMethod,
-          order.rate,
-          order.amount,
-          order.availableBalance,
+          order.paymentMethodType,
+          trueRate,
+          {
+            min: order.minAmount,
+            max: order.maxAmount
+          },
+          await getAvailableBalance(dealer.id),
           order.fiatCurrencyCode,
           dealer.reviewCount
         )
@@ -107,7 +118,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       const order = await getOrder(orderId)
       if (order.dealer) {
         await DealsMessage(msg, user).showOpenDealRequest(
-          order.dealer.telegramUsername
+          order.dealer.telegramUser.username
         )
         return true
       }
@@ -123,18 +134,25 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       if (orderId == null) {
         return false
       }
-      const order = (await getOrder(orderId)).order
-      if (order == null) {
+      const orderInfo = await getOrder(orderId)
+      if (orderInfo.dealer == null || orderInfo.order == null) {
         return false
       }
+
+      const { order, dealer } = orderInfo
 
       await DealsMessage(msg, user).inputDealAmount(
         order.orderType,
         order.fiatCurrencyCode,
-        order.rate,
+        await Order.convertToFixedRate(
+          order.rate,
+          order.rateType,
+          order.fiatCurrencyCode,
+          dealer.exchangeRateSource
+        ),
         order.cryptoCurrencyCode,
-        order.amount.min,
-        order.amount.max
+        order.minAmount,
+        order.maxAmount
       )
       return true
     },
@@ -194,6 +212,83 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
   }
 
   return resp[state.currentStateKey as DealsStateKey]()
+}
+
+async function getOrder(orderId: number) {
+  logger.error('TODO: Implement getOrder with user details')
+
+  const order = await Order.getOrder(orderId)
+  if (!order) {
+    return {
+      order: null,
+      dealer: null
+    }
+  }
+
+  const dealer = await User.getUser(order.userId)
+  if (!dealer) {
+    return {
+      order: null,
+      dealer: null
+    }
+  }
+
+  return {
+    order: order,
+    dealer: {
+      ...dealer,
+      rating: 4.7,
+      lastSeen: new Date(),
+      tradeCount: 5,
+      reviewCount: 30
+    }
+  }
+}
+
+// TODO: -----------
+async function getAvailableBalance(_userId: number) {
+  return 0
+}
+
+async function getTrade(tradeId: number) {
+  logger.error('TODO: Implement getTrade')
+  return {
+    trade: {
+      tradeId: tradeId,
+      status: TradeStatus.INITIATED
+    },
+    dealer: {
+      accountId: 'uxawsats'
+    }
+  }
+}
+
+async function getOrdersList(
+  orderType: OrderType,
+  _fiatCurrencyCode: FiatCurrency,
+  cursor: number,
+  limit: number
+) {
+  logger.error('TODO: Implement getOrderList')
+  // Show all orders with available balance first, rest are shown at last
+  let orderList = _.filter(
+    orders,
+    (o) => o.orderType === orderType && o.availableBalance >= o.amount.min
+  )
+  orderList = _.orderBy(orderList, (o) => o.rate, [
+    orderType === OrderType.BUY ? 'desc' : 'asc'
+  ])
+  // Move all orders without available balance to end
+  orderList.push(
+    ..._.filter(
+      orders,
+      (o) => o.availableBalance < o.amount.min && o.orderType === orderType
+    )
+  )
+
+  const totalOrders = orderList.length
+
+  return { orderList: orderList.slice(cursor, cursor + limit), totalOrders }
 }
 
 const orders = [
@@ -282,57 +377,3 @@ a.forEach((id) =>
     terms: 'Please transfer fast..'
   })
 )
-
-async function getOrdersList(
-  orderType: OrderType,
-  _fiatCurrencyCode: FiatCurrency,
-  cursor: number,
-  limit: number
-) {
-  // Show all orders with available balance first, rest are shown at last
-  let orderList = _.filter(
-    orders,
-    (o) => o.orderType === orderType && o.availableBalance >= o.amount.min
-  )
-  orderList = _.orderBy(orderList, (o) => o.rate, [
-    orderType === OrderType.BUY ? 'desc' : 'asc'
-  ])
-  // Move all orders without available balance to end
-  orderList.push(
-    ..._.filter(
-      orders,
-      (o) => o.availableBalance < o.amount.min && o.orderType === orderType
-    )
-  )
-
-  const totalOrders = orderList.length
-
-  return { orderList: orderList.slice(cursor, cursor + limit), totalOrders }
-}
-
-async function getOrder(orderId: number) {
-  return {
-    order: _.find(orders, (o) => o.orderId == orderId),
-    dealer: {
-      realName: 'Satoshi',
-      accountId: 'uxawsats',
-      telegramUsername: 'satoshi',
-      rating: 4.7,
-      lastSeen: new Date(),
-      tradeCount: 5,
-      reviewCount: 3
-    }
-  }
-}
-
-async function getTrade(tradeId: number) {
-  return {
-    trade: {
-      tradeId: tradeId,
-      status: TradeStatus.INITIATED
-    },
-    dealer: {
-      accountId: 'uxawsats'
-    }
-  }
-}

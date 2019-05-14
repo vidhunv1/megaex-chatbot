@@ -1,7 +1,6 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { parseDeepLink } from 'chats/utils'
 import { SignupState, SignupStateKey, SignupError } from './SignupState'
-import { get, findKey } from 'lodash'
 import logger from 'modules/Logger'
 import { LanguageView, Language } from 'constants/languages'
 import { Account } from 'lib/Account'
@@ -27,15 +26,15 @@ export async function signupParser(
         ...currentState,
         [SignupStateKey.start]: {
           data: {
-            deeplink: get(deepLinks, 'key', null),
-            value: get(deepLinks, 'value', null)
+            deeplink: _.get(deepLinks, 'key', null),
+            value: _.get(deepLinks, 'value', null)
           }
         }
       }
     }
 
     case SignupStateKey.language: {
-      const chosenLanguage = findKey(LanguageView, (v) => v === msg.text) as
+      const chosenLanguage = _.findKey(LanguageView, (v) => v === msg.text) as
         | Language
         | undefined
 
@@ -83,7 +82,7 @@ export async function signupParser(
             usd -> Valid
             USD ($) -> valid
         */
-      const chosenFiatCurrency: FiatCurrency | undefined = findKey(
+      const chosenFiatCurrency: FiatCurrency | undefined = _.findKey(
         FiatCurrency,
         (c) =>
           msg.text &&

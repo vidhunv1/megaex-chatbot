@@ -115,26 +115,26 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
   async inputDealAmount(
     orderType: OrderType,
     fiatCurrencyCode: FiatCurrency,
-    rate: number,
+    fixedRate: number,
     cryptoCurrencyCode: CryptoCurrency,
-    minCrypto: number,
-    maxCrypto: number
+    minFiat: number,
+    maxFiat: number
   ) {
-    const minFiatValue = dataFormatter.formatFiatCurrency(
-      minCrypto * rate,
-      fiatCurrencyCode
-    )
-    const maxFiatValue = dataFormatter.formatFiatCurrency(
-      maxCrypto * rate,
-      fiatCurrencyCode
-    )
     const minCryptoValue = dataFormatter.formatCryptoCurrency(
-      minCrypto,
+      minFiat / fixedRate,
       cryptoCurrencyCode
     )
     const maxCryptoValue = dataFormatter.formatCryptoCurrency(
-      maxCrypto,
+      maxFiat / fixedRate,
       cryptoCurrencyCode
+    )
+    const minFiatValue = dataFormatter.formatFiatCurrency(
+      minFiat,
+      fiatCurrencyCode
+    )
+    const maxFiatValue = dataFormatter.formatFiatCurrency(
+      maxFiat,
+      fiatCurrencyCode
     )
 
     let message
@@ -310,7 +310,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     tradeCount: number,
     terms: string,
     paymentMethod: PaymentMethodType,
-    rate: number,
+    fixedRate: number, // Margin rates needs to be converted to fixed
     amount: { min: number; max: number },
     availableBalance: number,
     fiatCurrencyCode: FiatCurrency,
@@ -321,15 +321,16 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       .locale(LanguageISO[user.locale])
       .fromNow()
     const formattedRate = dataFormatter.formatFiatCurrency(
-      rate,
+      fixedRate,
       fiatCurrencyCode
     )
+    const formattedTerms = terms != null ? terms : '-'
 
     let openDealInline: TelegramBot.InlineKeyboardButton, showDealText
     if (orderType === OrderType.BUY) {
-      const formattedAmount = `${amount.min} - ${
-        amount.max
-      } ${cryptoCurrencyCode}`
+      const formattedAmount = `${
+        amount.min
+      } - ${dataFormatter.formatFiatCurrency(amount.max, fiatCurrencyCode)}`
 
       openDealInline = {
         text: user.t(`${Namespace.Exchange}:deals.open-sell-deal-cbbutton`, {
@@ -351,7 +352,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         lastSeenValue,
         rating: rating.toFixed(1),
         tradeCount,
-        terms,
+        terms: formattedTerms,
         paymentMethodName: user.t(`payment-methods.names.${paymentMethod}`),
         rate: formattedRate,
         formattedAmount
@@ -364,7 +365,10 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
 
       const formattedAmount = `${
         amount.min
-      } - ${actualMaxAmount} ${cryptoCurrencyCode}`
+      } - ${dataFormatter.formatFiatCurrency(
+        actualMaxAmount,
+        fiatCurrencyCode
+      )}`
 
       showDealText = user.t(`${Namespace.Exchange}:deals.show-buy-deal`, {
         orderId,
@@ -374,7 +378,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         lastSeenValue,
         rating: rating.toFixed(1),
         tradeCount,
-        terms,
+        terms: formattedTerms,
         paymentMethodName: user.t(`payment-methods.names.${paymentMethod}`),
         rate: formattedRate,
         formattedAmount

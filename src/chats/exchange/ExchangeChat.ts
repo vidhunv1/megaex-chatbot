@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount, OrderType } from 'models'
+import { User, TelegramAccount, Order } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
 import {
   EXCHANGE_STATE_LABEL,
@@ -26,8 +26,7 @@ import {
   DealsMessage,
   DealsError
 } from './deals'
-import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { PaymentMethodType } from 'models'
+import logger from 'modules/Logger'
 
 export const ExchangeChat: ChatHandler = {
   async handleCommand(
@@ -39,31 +38,43 @@ export const ExchangeChat: ChatHandler = {
     if (command === BotCommand.ORDER && msg.text) {
       try {
         const orderId = parseInt(msg.text.replace(BotCommand.ORDER, ''))
-        const { order, dealer } = await getOrder(orderId)
-        if (!order || !dealer) {
+        const orderInfo = await getOrderDetails(orderId)
+        if (orderInfo.order == null || orderInfo.dealer == null) {
           await DealsMessage(msg, user).showError(DealsError.ORDER_NOT_FOUND)
           return true
         }
 
+        const order = orderInfo.order
+        const dealer = orderInfo.dealer
         await DealsMessage(msg, user).showDeal(
           order.orderType,
-          order.orderId,
+          order.id,
           order.cryptoCurrencyCode,
-          dealer.realName,
+          dealer.telegramUser.firstName,
           dealer.accountId,
           dealer.lastSeen,
           dealer.rating,
           dealer.tradeCount,
           order.terms,
-          order.paymentMethod,
-          order.rate,
-          order.amount,
-          order.availableBalance,
+          order.paymentMethodType,
+          await Order.convertToFixedRate(
+            order.rate,
+            order.rateType,
+            order.fiatCurrencyCode,
+            dealer.exchangeRateSource
+          ),
+          {
+            max: order.maxAmount,
+            min: order.minAmount
+          },
+          await getAvailableBalance(dealer.id),
           order.fiatCurrencyCode,
           dealer.reviewCount
         )
       } catch (e) {
+        logger.error('ERROR occurred ' + JSON.stringify(e))
         await DealsMessage(msg, user).showError(DealsError.ORDER_NOT_FOUND)
+        throw e
       }
 
       return true
@@ -186,38 +197,38 @@ async function processMessage(
   return false
 }
 
-async function getOrder(orderId: number) {
-  if (orderId == 1) {
-    return {
-      order: {
-        orderId: orderId,
-        orderType: OrderType.SELL,
-        cryptoCurrencyCode: CryptoCurrency.BTC,
-        fiatCurrencyCode: FiatCurrency.INR,
-        rate: 310002,
-        rating: 4.9,
-        amount: {
-          min: 0.1,
-          max: 0.5
-        },
-        availableBalance: 0.2,
-        paymentMethod: PaymentMethodType.CASH,
-        isEnabled: true,
-        terms: 'Please transfer fast..'
-      },
-      dealer: {
-        realName: 'Satoshi',
-        accountId: 'uxawsats',
-        rating: 4.7,
-        lastSeen: new Date(),
-        tradeCount: 5,
-        reviewCount: 30
-      }
-    }
-  } else {
+async function getOrderDetails(orderId: number) {
+  logger.error('TODO: Implement getOrder with user details')
+
+  const order = await Order.getOrder(orderId)
+  if (order == null) {
     return {
       order: null,
       dealer: null
     }
   }
+
+  const dealer = await User.getUser(order.userId)
+  if (dealer == null) {
+    return {
+      order: null,
+      dealer: null
+    }
+  }
+
+  return {
+    order: order,
+    dealer: {
+      ...dealer,
+      rating: 4.7,
+      lastSeen: new Date(),
+      tradeCount: 5,
+      reviewCount: 30
+    }
+  }
+}
+
+async function getAvailableBalance(_userId: number) {
+  logger.error('TODO: Implement getAvailableBalance')
+  return 0
 }

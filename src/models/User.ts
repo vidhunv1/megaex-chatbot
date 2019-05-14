@@ -77,6 +77,21 @@ export class User extends Model<User> {
       lng: LanguageISO[this.locale]
     })
   }
+
+  static async getUser(userId: number) {
+    const user = await User.findOne({
+      where: {
+        id: userId
+      },
+      include: [{ model: TelegramAccount }]
+    })
+
+    return user != null
+      ? user.get({
+          plain: true
+        })
+      : null
+  }
 }
 
 export default User
