@@ -233,7 +233,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
     },
     [MyOrdersStateKey.editAmount_show]: async () => {
       const orderId = _.get(
-        state[MyOrdersStateKey.cb_editRate],
+        state[MyOrdersStateKey.cb_editAmount],
         'orderId',
         null
       )
