@@ -1,4 +1,4 @@
-if (!process.env.NODE_ENV) {
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
   console.log('Using environment variable from .env')
   require('dotenv').config()
 } else {
