@@ -4,15 +4,11 @@ import { WalletJobs, WalletJobProducer } from './types'
 import { CONFIG } from '../../../config'
 import logger from '../../logger'
 import { CryptoCurrency } from '../../../constants/currencies'
-import { Wallet } from '../../../models'
 
 export type ProducerTypes =
-  | WalletJobProducer[WalletJobs.CREATE_ADDRESS]
+  | WalletJobProducer[WalletJobs.GENERATE_NEW_ADDRESS]
   | WalletJobProducer[WalletJobs.DEPOSIT_ALERT]
-  | WalletJobProducer[WalletJobs.GET_TRANSACTION]
   | WalletJobProducer[WalletJobs.WITHDRAW_FUNDS]
-  | WalletJobProducer[WalletJobs.GENERATED_ADDRESS]
-  | WalletJobProducer[WalletJobs.WITHDRAWAL_STATUS_ALERT]
 
 export class WalletQueue {
   static instance: WalletQueue
@@ -67,35 +63,12 @@ export class WalletQueue {
   }
 
   initializeConsumers() {
-    this.queue.process(WalletJobs.GENERATED_ADDRESS, async (jobs: any) => {
-      logger.error(
-        `TODO: ${
-          WalletJobs.GENERATED_ADDRESS
-        } queue needs to check with Bitcoin RPC if the userId address is valid`
-      )
-
-      // TODO: save address to database
-      const {
-        address,
-        userId,
-        currency
-      } = jobs.data as WalletJobProducer['generated-address']
-      return Wallet.updateNewAddress(userId, currency, address)
-    })
-
-    this.queue.process(WalletJobs.DEPOSIT_ALERT, (_jobs: any) => {
-      logger.error('TODO: wallet-queue Handle new deposits')
-      // TODO: Handle new deposit
-
-      // Check transaction hash and address for balance -> true => promise.resolve false => promise.reject
-
-      return Promise.resolve()
-    })
-
-    this.queue.process(WalletJobs.WITHDRAWAL_STATUS_ALERT, (_jobs: any) => {
-      // TODO: Handle withdrawal status
-      return Promise.resolve()
-    })
+    // this.queue.process(WalletJobs.DEPOSIT_ALERT, (_jobs: any) => {
+    //   logger.error('TODO: wallet-queue Handle new deposits')
+    //   // TODO: Handle new deposit
+    //   // Check transaction hash and address for balance -> true => promise.resolve false => promise.reject
+    //   return Promise.resolve()
+    // })
   }
 
   initializeListener() {
@@ -118,9 +91,10 @@ export class WalletQueue {
 
   // Producers
   generateNewAddress(currency: CryptoCurrency, userId: number) {
+    // Used only when RPC fails
     logger.info(`Generating ${currency} address for ${userId}`)
 
-    this.queue.add(WalletJobs.CREATE_ADDRESS, {
+    this.queue.add(WalletJobs.GENERATE_NEW_ADDRESS, {
       userId,
       currency
     })

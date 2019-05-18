@@ -7,10 +7,11 @@ import {
   WalletState,
   updateNextWalletState
 } from '../WalletState'
+import { Wallet } from 'models'
 
 export const DepositParser: Parser<WalletState> = async (
   _msg,
-  _user,
+  user,
   tUser,
   currentState
 ) => {
@@ -29,7 +30,7 @@ export const DepositParser: Parser<WalletState> = async (
       return {
         ...currentState,
         [DepositStateKey.depositCoin_show]: {
-          address: await getWalletAddress(currencyCode),
+          address: await getWalletAddress(user.id, currencyCode),
           currencyCode
         }
       }
@@ -67,6 +68,25 @@ export function nextDepositState(
 }
 
 // Getters
-const getWalletAddress = async (_currencyCode: CryptoCurrency) => {
-  return 'asdlkjasdkjashdashdk'
+const getWalletAddress = async (
+  userId: number,
+  currencyCode: CryptoCurrency
+) => {
+  const wallet = await Wallet.findOne({
+    where: {
+      userId,
+      currencyCode
+    }
+  })
+
+  if (wallet) {
+    return wallet.address
+  } else {
+    logger.error(
+      'Error getting wallet for user ' + userId + ', ' + currencyCode
+    )
+    throw new Error(
+      'Error getting wallet for user ' + userId + ', ' + currencyCode
+    )
+  }
 }

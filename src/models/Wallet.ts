@@ -15,6 +15,7 @@ import walletQueue from '../modules/queue/wallet/WalletQueue'
 import logger from '../modules/Logger'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 import { CryptoCurrency } from '../constants/currencies'
+import btcRpc, { BtcCommands } from 'core/crypto/btcRpc'
 
 @Table({ timestamps: true, tableName: 'Wallets' })
 export class Wallet extends Model<Wallet> {
@@ -53,7 +54,7 @@ export class Wallet extends Model<Wallet> {
 
   @AllowNull(false)
   @Column
-  currencyCode!: string
+  currencyCode!: CryptoCurrency
 
   // calling this will create all wallets for the userId
   async createAll(): Promise<boolean | null> {
@@ -63,8 +64,26 @@ export class Wallet extends Model<Wallet> {
         {}
       )
       // generate btc address queue
-      await walletQueue.generateNewAddress(CryptoCurrency.BTC, this.userId)
+      // await walletQueue.generateNewAddress(CryptoCurrency.BTC, this.userId)
 
+      try {
+        const res = await btcRpc.btcRpcCall<BtcCommands.GET_NEW_ADDRESS>(
+          BtcCommands.GET_NEW_ADDRESS,
+          [this.userId + '']
+        )
+        if (!res.result) {
+          throw new Error('Generate wallet error response')
+        }
+
+        await Wallet.updateNewAddress(
+          this.userId,
+          CryptoCurrency.BTC,
+          res.result
+        )
+      } catch (e) {
+        logger.error('Error generating wallet address: ' + e)
+        await walletQueue.generateNewAddress(CryptoCurrency.BTC, this.userId)
+      }
       return true
     } catch (e) {
       logger.error('error creating wallets: ' + JSON.stringify(e))

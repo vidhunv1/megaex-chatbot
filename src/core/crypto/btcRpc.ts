@@ -6,7 +6,7 @@ export enum BtcCommands {
 }
 
 interface BtcParams {
-  [BtcCommands.GET_NEW_ADDRESS]: []
+  [BtcCommands.GET_NEW_ADDRESS]: [string] // account address
 }
 
 interface BtcResult {
