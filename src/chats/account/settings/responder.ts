@@ -3,7 +3,7 @@ import { Responder } from 'chats/types'
 import { AccountState } from '../AccountState'
 import * as _ from 'lodash'
 import { TelegramAccount, User } from 'models'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { SettingsMessage } from './messages'
 
 export const SettingsResponder: Responder<AccountState> = (

@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize-typescript'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import {
   TelegramAccount,
   User,
@@ -71,5 +71,3 @@ export class DB {
     }
   }
 }
-
-export default new DB()

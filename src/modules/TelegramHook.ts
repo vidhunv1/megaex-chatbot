@@ -1,6 +1,6 @@
 import * as NodeTelegramBot from 'node-telegram-bot-api'
 import { CONFIG } from '../config'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 
 export class TelegramHook {
   static instance: TelegramHook
@@ -42,5 +42,3 @@ export class TelegramHook {
     return this.bot
   }
 }
-
-export default new TelegramHook()

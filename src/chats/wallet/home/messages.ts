@@ -1,7 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { User } from 'models'
-import telegramHook from 'modules/TelegramHook'
+import { telegramHook } from 'modules'
 import { Namespace } from 'modules/i18n'
 import { dataFormatter } from 'utils/dataFormatter'
 import { stringifyCallbackQuery } from 'chats/utils'

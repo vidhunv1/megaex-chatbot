@@ -1,4 +1,4 @@
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { SendCoinStateKey, SendCoinError } from './types'
 import { Parser } from 'chats/types'

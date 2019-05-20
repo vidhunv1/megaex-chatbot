@@ -1,5 +1,5 @@
 import { CONFIG } from '../../config'
-import { RpcClient, RpcResult } from 'modules/RpcClient'
+import { RpcClient, RpcResult } from 'modules/rpcClient'
 
 export enum BtcCommands {
   GET_NEW_ADDRESS = 'getnewaddress'

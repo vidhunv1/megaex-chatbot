@@ -1,4 +1,4 @@
-import telegramHook from 'modules/TelegramHook'
+import { telegramHook } from 'modules'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { User, PaymentMethodFields } from 'models'
 import { Namespace } from 'modules/i18n'

@@ -2,7 +2,7 @@ import Queue = require('bull')
 import { WALLET_QUEUE_NAME } from '../constants'
 import { WalletJobs, WalletJobProducer } from './types'
 import { CONFIG } from '../../../config'
-import logger from '../../logger'
+// import { logger } from 'modules'
 import { CryptoCurrency } from '../../../constants/currencies'
 
 export type ProducerTypes =
@@ -23,12 +23,12 @@ export class WalletQueue {
     }
 
     if (!this.queue) {
-      logger.warn('WalletQueue is not yet initialized.. call init()')
+      // logger.warn('WalletQueue is not yet initialized.. call init()')
     }
   }
 
   async init(): Promise<boolean> {
-    logger.info('Initializing wallet queue')
+    // logger.info('Initializing wallet queue')
 
     this.queue = new Queue(WALLET_QUEUE_NAME, {
       redis: {
@@ -42,10 +42,10 @@ export class WalletQueue {
       await this.queue.isReady()
       this.initializeConsumers()
 
-      logger.info('OK: Wallet Queue')
+      // logger.info('OK: Wallet Queue')
       return true
     } catch (e) {
-      logger.error('Error: Wallet Queue')
+      // logger.error('Error: Wallet Queue')
       throw e
     }
   }
@@ -56,7 +56,7 @@ export class WalletQueue {
 
   async close() {
     if (!this.queue) {
-      logger.error('wallet queue is not initialized')
+      // logger.error('wallet queue is not initialized')
     } else {
       await this.queue.close()
     }
@@ -72,27 +72,27 @@ export class WalletQueue {
   }
 
   initializeListener() {
-    this.queue.on('completed', (job, result) => {
-      logger.info(
-        `wallet-queue: JOB completed ${job.name}-${job.id} ${JSON.stringify(
-          result
-        )}`
-      )
+    this.queue.on('completed', (_job, _result) => {
+      // logger.info(
+      //   `wallet-queue: JOB completed ${job.name}-${job.id} ${JSON.stringify(
+      //     result
+      //   )}`
+      // )
     })
 
-    this.queue.on('error', (job) => {
-      logger.error(`wallet-queue: JOB errored ${job.name}-${job.message}`)
+    this.queue.on('error', (_job) => {
+      // logger.error(`wallet-queue: JOB errored ${job.name}-${job.message}`)
     })
 
-    this.queue.on('failed', (job) => {
-      logger.error(`wallet-queue: JOB Failed ${job.name}-${job.id}`)
+    this.queue.on('failed', (_job) => {
+      // logger.error(`wallet-queue: JOB Failed ${job.name}-${job.id}`)
     })
   }
 
   // Producers
   generateNewAddress(currency: CryptoCurrency, userId: number) {
     // Used only when RPC fails
-    logger.info(`Generating ${currency} address for ${userId}`)
+    // logger.info(`Generating ${currency} address for ${userId}`)
 
     this.queue.add(WalletJobs.GENERATE_NEW_ADDRESS, {
       userId,

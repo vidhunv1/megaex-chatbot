@@ -26,7 +26,7 @@ import {
   DealsMessage,
   DealsError
 } from './deals'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 
 export const ExchangeChat: ChatHandler = {
   async handleCommand(

@@ -2,7 +2,7 @@ import { SendCoinStateKey, SendCoinError } from './types'
 import { Responder } from 'chats/types'
 import { WalletState } from '../WalletState'
 import * as _ from 'lodash'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { SendCoinMessage } from './messages'
 
 export const SendCoinResponder: Responder<WalletState> = (

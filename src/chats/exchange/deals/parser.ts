@@ -11,7 +11,7 @@ import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { OrderType } from 'models'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { PaymentMethodType } from 'models'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 
 export const DealsParser: Parser<ExchangeState> = async (
   msg,

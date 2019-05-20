@@ -5,7 +5,7 @@ import {
   WalletStateKey,
   updateNextWalletState
 } from '../WalletState'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import * as _ from 'lodash'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'

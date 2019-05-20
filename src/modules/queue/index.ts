@@ -1,4 +1,4 @@
-import { WalletQueue } from './wallet/WalletQueue'
+import { WalletQueue } from './wallet/walletQueue'
 
 export * from './wallet/types'
 

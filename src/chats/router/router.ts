@@ -8,8 +8,8 @@ import { AccountChat } from 'chats/account'
 
 import { getBotCommand } from 'chats/utils'
 import { CacheHelper } from 'lib/CacheHelper'
-import telegramHook from 'modules/TelegramHook'
-import logger from 'modules/Logger'
+import { telegramHook } from 'modules'
+import { logger } from 'modules'
 import { CommonChat, keyboardMainMenu } from 'chats/common'
 import { CONFIG } from '../../config'
 

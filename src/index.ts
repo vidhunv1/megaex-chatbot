@@ -7,15 +7,15 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 
 require('module-alias/register')
 
-import db from 'modules/DB'
-import cacheConnection from 'modules/Cache'
+import { db } from 'modules'
+import { cacheConnection } from 'modules'
 import * as TelegramBot from 'node-telegram-bot-api'
-import tHook from 'modules/TelegramHook'
+import { telegramHook } from 'modules'
 import { Account } from 'lib/Account'
 import { Router } from 'chats/router'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 ;(async () => {
-  tHook.getWebhook.on('message', async function onMessage(
+  telegramHook.getWebhook.on('message', async function onMessage(
     msg: TelegramBot.Message
   ) {
     try {
@@ -32,24 +32,27 @@ import logger from 'modules/Logger'
           Router.routeMessage(msg, telegramAccount.user, telegramAccount)
         } catch (e) {
           logger.error('index.ts#44 Unable to create account')
-          tHook.getWebhook.sendMessage(msg.chat.id, 'Error screating account')
+          telegramHook.getWebhook.sendMessage(
+            msg.chat.id,
+            'Error screating account'
+          )
           throw e
         }
       } else if (msg.chat.type === 'group') {
-        tHook.getWebhook.sendMessage(
+        telegramHook.getWebhook.sendMessage(
           msg.chat.id,
           'Group conversations are temporarily disabled.'
         )
       } else {
         logger.error('Unhandled telegram message action')
-        tHook.getWebhook.sendMessage(
+        telegramHook.getWebhook.sendMessage(
           msg.chat.id,
           'ERROR: Unhandled telegram message action'
         )
       }
     } catch (e) {
       logger.error('FATAL: An unknown error occurred: ')
-      tHook.getWebhook.sendMessage(
+      telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         'An error occured. Please try again later.'
       )
@@ -57,8 +60,8 @@ import logger from 'modules/Logger'
     }
   })
 
-  tHook.getWebhook.on('callback_query', async function(callback) {
-    await tHook.getWebhook.answerCallbackQuery(callback.id)
+  telegramHook.getWebhook.on('callback_query', async function(callback) {
+    await telegramHook.getWebhook.answerCallbackQuery(callback.id)
     const msg: TelegramBot.Message = callback.message
 
     const telegramAccount = await new Account(

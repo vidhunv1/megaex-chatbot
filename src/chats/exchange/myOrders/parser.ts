@@ -1,4 +1,4 @@
-import telegramHook from 'modules/TelegramHook'
+import { telegramHook } from 'modules'
 import { MyOrdersStateKey } from './types'
 import { Parser } from 'chats/types'
 import {
@@ -16,7 +16,7 @@ import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
 import PaymentMethod, { PaymentMethodType } from 'models/PaymentMethod'
 import { RateType, OrderType, Order } from 'models'
 import { MyOrdersMessage } from './messages'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 
 const CURRENT_CRYPTO_CURRENCY_CODE = CryptoCurrency.BTC

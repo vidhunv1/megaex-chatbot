@@ -12,7 +12,7 @@ import { TelegramAccount } from 'models'
 import { Account } from 'lib/Account'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { Language } from 'constants/languages'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 
 export const SettingsParser: Parser<AccountState> = async (
   msg,

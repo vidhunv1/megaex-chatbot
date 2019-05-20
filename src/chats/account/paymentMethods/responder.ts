@@ -3,7 +3,7 @@ import { Responder } from 'chats/types'
 import { AccountState } from '../AccountState'
 import * as _ from 'lodash'
 import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { PaymentMethodMessage } from './messages'
 
 export const PaymentMethodResponder: Responder<AccountState> = (

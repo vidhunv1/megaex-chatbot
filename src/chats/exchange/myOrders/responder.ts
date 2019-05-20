@@ -12,7 +12,7 @@ import {
   PaymentMethodFields
 } from 'models'
 import { OrderType } from 'models'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 export const MyOrdersResponder: Responder<ExchangeState> = (

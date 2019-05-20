@@ -1,7 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { parseDeepLink } from 'chats/utils'
 import { SignupState, SignupStateKey, SignupError } from './SignupState'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { LanguageView, Language } from 'constants/languages'
 import { Account } from 'lib/Account'
 import { FiatCurrency } from 'constants/currencies'

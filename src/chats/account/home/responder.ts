@@ -4,7 +4,7 @@ import { AccountState } from '../AccountState'
 import { CryptoCurrency } from 'constants/currencies'
 import { AccountHomeMessage } from './messages'
 import * as _ from 'lodash'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { PaymentMethod } from 'models'
 import { PaymentMethodFields } from 'models'
 

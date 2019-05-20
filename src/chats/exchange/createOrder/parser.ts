@@ -14,7 +14,7 @@ import {
   FiatCurrency,
   cryptoCurrencyInfo
 } from 'constants/currencies'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 
 const CURRENT_CRYPTO_CURRENCY_CODE = CryptoCurrency.BTC
 

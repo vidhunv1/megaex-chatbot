@@ -1,6 +1,6 @@
 import * as Redis from 'redis'
 import * as Bluebird from 'bluebird'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { initializeQueues, closeQueues } from 'modules/queue'
 // import { expirySubscription } from 'chats/subscriptions'
 
@@ -155,5 +155,3 @@ export class Cache {
     return true
   }
 }
-
-export default new Cache()

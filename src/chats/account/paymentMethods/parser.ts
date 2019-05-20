@@ -10,7 +10,7 @@ import {
   PaymentMethodsFieldsLocale,
   PaymentMethodAvailability
 } from 'constants/paymentMethods'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { FiatCurrency } from 'constants/currencies'
 import {
   PaymentMethodType,

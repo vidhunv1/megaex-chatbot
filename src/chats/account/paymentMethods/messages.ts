@@ -1,4 +1,4 @@
-import telegramHook from 'modules/TelegramHook'
+import { telegramHook } from 'modules'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { CONFIG } from '../../../config'
 import { User } from 'models'

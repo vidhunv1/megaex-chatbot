@@ -11,7 +11,7 @@ import {
   HasMany
 } from 'sequelize-typescript'
 import { TelegramAccount, Wallet, Transaction, PaymentMethod } from '.'
-import i18n from '../modules/i18n'
+import { i18n } from '../modules'
 import { LanguageISO, Language } from '../constants/languages'
 import { FiatCurrency } from 'constants/currencies'
 import { ExchangeSource } from 'constants/exchangeSource'

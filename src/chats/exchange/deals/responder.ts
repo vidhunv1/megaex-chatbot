@@ -6,7 +6,7 @@ import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { OrderType, Order, User } from 'models'
 import { DealsConfig } from './config'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 

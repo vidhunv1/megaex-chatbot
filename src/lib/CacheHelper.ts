@@ -1,5 +1,5 @@
-import cacheClient from 'modules/Cache'
-import logger from 'modules/Logger'
+import { cacheConnection } from 'modules'
+import { logger } from 'modules'
 import { State } from 'chats/types'
 
 export const KEY_SEPERATOR = ':'
@@ -50,14 +50,14 @@ export const CacheHelper = {
 
   async setState(state: State<any>, id: number, expiry?: number) {
     if (expiry && expiry > 0) {
-      await cacheClient.getClient.setAsync(
+      await cacheConnection.getClient.setAsync(
         this.getKeyForUser(CacheKey.State, id),
         JSON.stringify(state),
         'EX',
         expiry
       )
     } else {
-      await cacheClient.getClient.setAsync(
+      await cacheConnection.getClient.setAsync(
         this.getKeyForUser(CacheKey.State, id),
         JSON.stringify(state)
       )
@@ -65,11 +65,13 @@ export const CacheHelper = {
   },
 
   async clearState(id: number) {
-    await cacheClient.getClient.delAsync(this.getKeyForUser(CacheKey.State, id))
+    await cacheConnection.getClient.delAsync(
+      this.getKeyForUser(CacheKey.State, id)
+    )
   },
 
   async getState<T>(id: number): Promise<T | null> {
-    const state = await cacheClient.getClient.getAsync(
+    const state = await cacheConnection.getClient.getAsync(
       this.getKeyForUser(CacheKey.State, id)
     )
     if (state != null) {

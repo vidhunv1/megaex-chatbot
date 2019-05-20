@@ -75,5 +75,3 @@ export class I18n {
     return this.i18n
   }
 }
-
-export default new I18n()

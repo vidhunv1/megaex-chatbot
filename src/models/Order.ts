@@ -13,7 +13,7 @@ import { User } from '.'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
 import { ExchangeSource } from 'constants/exchangeSource'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import * as _ from 'lodash'
 
 export enum OrderType {

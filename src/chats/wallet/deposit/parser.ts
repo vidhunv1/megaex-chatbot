@@ -1,4 +1,4 @@
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 import { CryptoCurrency } from 'constants/currencies'
 import { DepositStateKey, DepositState } from './types'
 import { Parser } from 'chats/types'

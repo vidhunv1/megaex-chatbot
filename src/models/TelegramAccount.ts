@@ -10,7 +10,7 @@ import {
 } from 'sequelize-typescript'
 import { User } from './User'
 import RandomGenerator from '../lib/RandomGenerator'
-import logger from 'modules/Logger'
+import { logger } from 'modules'
 
 @Table({ timestamps: true, tableName: 'TelegramAccount' })
 export class TelegramAccount extends Model<TelegramAccount> {

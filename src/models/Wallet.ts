@@ -11,8 +11,8 @@ import {
   AutoIncrement
 } from 'sequelize-typescript'
 import { User } from './User'
-import walletQueue from '../modules/queue/wallet/WalletQueue'
-import logger from '../modules/Logger'
+import walletQueue from '../modules/queue/wallet/walletQueue'
+import { logger } from '../modules'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 import { CryptoCurrency } from '../constants/currencies'
 import btcRpc, { BtcCommands } from 'core/crypto/btcRpc'
