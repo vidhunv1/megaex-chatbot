@@ -60,7 +60,7 @@ import { logger } from 'modules'
     }
   })
 
-  telegramHook.getWebhook.on('callback_query', async function(callback) {
+  telegramHook.getWebhook.on('callback_query', async function(callback: any) {
     await telegramHook.getWebhook.answerCallbackQuery(callback.id)
     const msg: TelegramBot.Message = callback.message
 

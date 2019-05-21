@@ -1,6 +1,6 @@
 import * as url from 'url'
 import axios, { AxiosInstance } from 'axios'
-import logger from 'modules/Logger'
+import logger from 'modules/logger'
 import * as _ from 'lodash'
 
 type RpcProtocol = 'http' | 'https'
