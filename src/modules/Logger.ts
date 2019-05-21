@@ -7,7 +7,6 @@ export class Logger {
 
   constructor() {
     if (Logger.instance) return Logger.instance
-
     const env = CONFIG.NODE_ENV
 
     this.logger = createLogger({
@@ -47,3 +46,5 @@ export class Logger {
     }
   }
 }
+
+export default new Logger().getLogger

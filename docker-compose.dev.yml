@@ -1,0 +1,37 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:10.1
+    command: postgres -c max_connections=500
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  mega-backend:
+      image: registry.gitlab.com/vidhunv1/mega-backend:dev-0.3
+      ports:
+        - "5001:5001"
+      environment:
+        NODE_ENV: development
+        SERVER_PORT: 5001
+        BTC_NODE_HOST: 159.65.155.74
+        BTC_NODE_PORT: 18332
+        BTC_NODE_USERNAME: viko
+        BTC_NODE_PASSWORD: u9SNgvxTD9m_Yibde_v4V3QiFOB2VDhtXZt-ZKqwXac=
+        REDIS_HOST: 127.0.0.1
+        REDIS_PORT: 6379
+        REDIS_DATABASE: 0
+        REDIS_PASSWORD:
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  bull-queue-ui:
+    image: registry.gitlab.com/vidhunv1/bull-queue-ui:dev-0.3
+    ports:
+      - "4567:4567"
+
