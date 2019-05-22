@@ -32,11 +32,7 @@ export class DB {
   init() {
     try {
       const sequelize = new Sequelize({
-        database: CONFIG.DB_DATABASE_NAME,
-        host: CONFIG.DB_HOST,
-        username: CONFIG.DB_USERNAME,
-        password: CONFIG.DB_PASSWORD,
-        port: parseInt(CONFIG.DB_PORT),
+        url: CONFIG.DB_URL,
         dialect: 'postgres',
         logging: function(sql: any, _sequelizeObject: any) {
           logger.info(sql)

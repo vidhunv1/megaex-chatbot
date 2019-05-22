@@ -63,6 +63,11 @@
   resolved "https://registry.yarnpkg.com/@types/cron/-/cron-1.3.0.tgz#0bb4bc0bd8f493b81b5599a3719520d1d633e669"
   integrity sha512-RNJ6Hbxs9CbUw+Bxt8kpN8/yNlYG1xli0JZSO1xTJJxFjgD2KWctFSkJeJpjf9iLJU0jeNPoJ5LEru7eBN3xuA==
 
+"@types/events@*":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/events/-/events-3.0.0.tgz#2862f3f58a9a7f7c3e78d79f130dd4d71c25c2a7"
+  integrity sha512-EaObqwIvayI5a8dCzhFrjKzVwKLxjoG9T6Ppd5CEo07LRKfQ8Yokw54r5+Wq7FaBQ+yXRvQAYPrHwya1/UFt9g==
+
 "@types/express-serve-static-core@*":
   version "4.16.1"
   resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.16.1.tgz#35df7b302299a4ab138a643617bd44078e74d44e"
@@ -119,11 +124,12 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-5.0.0.tgz#a3014921991066193f6c8e47290d4d598dfd19e6"
   integrity sha512-ZS0vBV7Jn5Z/Q4T3VXauEKMDCV8nWOtJJg90OsDylkYJiQwcWtKuLzohWzrthBkerUF7DLMmJcwOPEP0i/AOXw==
 
-"@types/node-telegram-bot-api@0.28.2":
-  version "0.28.2"
-  resolved "https://registry.yarnpkg.com/@types/node-telegram-bot-api/-/node-telegram-bot-api-0.28.2.tgz#5debdb9f8021657b32aaa48b8deaf8472e449486"
-  integrity sha512-GTlUxsdOBVs3aTmMLRSipHYq1qb2N2OFoErO96Iwi5aDmnX7WTJ6JIzmky1qLV0Vxej2QIw/OdXIj+QaLVc6Uw==
+"@types/node-telegram-bot-api@0.30.0":
+  version "0.30.0"
+  resolved "https://registry.yarnpkg.com/@types/node-telegram-bot-api/-/node-telegram-bot-api-0.30.0.tgz#66b9787952d665eb74266c3dc0e46a5df8360e91"
+  integrity sha512-ovC/k0lAmUbzlmSr62f6MrmaxHrGX+wXixP86Yx6+PcFePv95Fr5rJ1aRNqsICBBSE1+1esmO1rUZfK62Bipow==
   dependencies:
+    "@types/events" "*"
     "@types/node" "*"
     "@types/request" "*"
 

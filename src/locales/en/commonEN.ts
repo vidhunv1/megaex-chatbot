@@ -3,6 +3,7 @@ import { ExchangeSource } from 'constants/exchangeSource'
 import { OrderType } from 'models'
 
 export const commonEN = {
+  'callback-error-response': '❗️Error',
   'exchange-source': {
     [ExchangeSource.BINANCE]: 'Binance',
     [ExchangeSource.LBC]: 'LocalBitcoins',

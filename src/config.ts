@@ -19,11 +19,7 @@ export const CONFIG = {
   WEBHOOK_URL: getEnv('WEBHOOK_URL'),
   WEBHOOK_PORT: parseInt(getEnv('WEBHOOK_PORT')),
 
-  DB_USERNAME: getEnv('DB_USERNAME'),
-  DB_PASSWORD: getEnv('DB_PASSWORD'),
-  DB_HOST: getEnv('DB_HOST'),
-  DB_PORT: getEnv('DB_PORT'),
-  DB_DATABASE_NAME: getEnv('DB_DATABASE_NAME'),
+  DB_URL: getEnv('DB_URL'),
 
   REDIS_HOST: getEnv('REDIS_HOST'),
   REDIS_PORT: getEnv('REDIS_PORT'),
