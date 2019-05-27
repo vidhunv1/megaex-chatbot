@@ -11,11 +11,11 @@ import {
   AutoIncrement
 } from 'sequelize-typescript'
 import { User } from './User'
-import walletQueue from '../modules/queue/wallet/walletQueue'
 import { logger } from '../modules'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 import { CryptoCurrency } from '../constants/currencies'
 import btcRpc, { BtcCommands } from 'core/crypto/btcRpc'
+import { amqp } from 'modules'
 
 @Table({ timestamps: true, tableName: 'Wallets' })
 export class Wallet extends Model<Wallet> {
@@ -63,8 +63,6 @@ export class Wallet extends Model<Wallet> {
         { userId: this.userId, currencyCode: CryptoCurrency.BTC },
         {}
       )
-      // generate btc address queue
-      // await walletQueue.generateNewAddress(CryptoCurrency.BTC, this.userId)
 
       try {
         const res = await btcRpc.btcRpcCall<BtcCommands.GET_NEW_ADDRESS>(
@@ -82,7 +80,11 @@ export class Wallet extends Model<Wallet> {
         )
       } catch (e) {
         logger.error('Error generating wallet address: ' + e)
-        await walletQueue.generateNewAddress(CryptoCurrency.BTC, this.userId)
+        // Add to generate address queue
+        await amqp.walletQ.genAddressToQ({
+          currency: CryptoCurrency.BTC,
+          userId: this.userId + ''
+        })
       }
       return true
     } catch (e) {

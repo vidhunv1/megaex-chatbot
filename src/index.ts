@@ -8,7 +8,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 require('module-alias/register')
 
 import { db } from 'modules'
-import { cacheConnection } from 'modules'
+import { cacheConnection, amqp } from 'modules'
 import * as TelegramBot from 'node-telegram-bot-api'
 import { telegramHook } from 'modules'
 import { Account } from 'lib/Account'
@@ -81,7 +81,12 @@ import { logger } from 'modules'
 
     await db.close()
     await cacheConnection.close()
+    await amqp.close()
     // await jobs.stop()
     process.exit(0)
   })
+  setTimeout(async () => {
+    console.log('[DEBUG] Adding test to queue')
+    await amqp.walletQ.testToQ('Hello')
+  }, 5000)
 })()

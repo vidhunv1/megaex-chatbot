@@ -33,7 +33,9 @@ export class TelegramHook {
     // )
     // }
 
-    logger.error('TODO: Enable WebHooks. Currently using polling for telegram bot')
+    logger.error(
+      'TODO: Enable WebHooks. Currently using polling for telegram bot'
+    )
     this.bot = new NodeTelegramBot(CONFIG.TELEGRAM_ACCESS_TOKEN, {
       polling: true
     })

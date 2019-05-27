@@ -23,10 +23,6 @@ export class DB {
       DB.instance = this
       this.init()
     }
-
-    if (!this.sequelize) {
-      logger.warn('DB is not yet initialized')
-    }
   }
 
   init() {

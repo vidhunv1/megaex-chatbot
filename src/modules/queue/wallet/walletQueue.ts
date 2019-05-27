@@ -1,104 +1,78 @@
-import Queue = require('bull')
-import { WALLET_QUEUE_NAME } from '../constants'
-import { WalletJobs, WalletJobProducer } from './types'
-import { CONFIG } from '../../../config'
-// import { logger } from 'modules'
-import { CryptoCurrency } from '../../../constants/currencies'
-
-export type ProducerTypes =
-  | WalletJobProducer[WalletJobs.GENERATE_NEW_ADDRESS]
-  | WalletJobProducer[WalletJobs.DEPOSIT_ALERT]
-  | WalletJobProducer[WalletJobs.WITHDRAW_FUNDS]
+import { amqp } from 'modules'
+import { WalletQueueName, WalletJob } from './types'
+import logger from 'modules/logger'
+import { Channel } from 'amqplib'
 
 export class WalletQueue {
-  static instance: WalletQueue
-  private queue!: Queue.Queue<ProducerTypes>
+  static instance?: WalletQueue = undefined
 
   constructor() {
     if (WalletQueue.instance) {
       return WalletQueue.instance
     } else {
       WalletQueue.instance = this
-      this.init()
-    }
-
-    if (!this.queue) {
-      // logger.warn('WalletQueue is not yet initialized.. call init()')
     }
   }
 
-  async init(): Promise<boolean> {
-    // logger.info('Initializing wallet queue')
+  async init(channel: Channel) {
+    await channel.assertQueue(WalletQueueName.NEW_DEPOSIT, { durable: true })
+    await channel.assertQueue(WalletQueueName.GEN_ADDRESS, { durable: true })
 
-    this.queue = new Queue(WALLET_QUEUE_NAME, {
-      redis: {
-        port: parseInt(CONFIG.REDIS_PORT),
-        host: CONFIG.REDIS_HOST,
-        password: CONFIG.REDIS_PASSWORD
+    await channel.assertQueue(WalletQueueName.TEST, { durable: true })
+
+    await channel.prefetch(1)
+
+    await this.initializeConsumers(channel)
+
+    logger.info('OK: WalletQueue')
+  }
+
+  initializeConsumers(channel: Channel) {
+    channel.consume(WalletQueueName.TEST, (msg) => {
+      if (msg !== null) {
+        console.log(
+          '[Q<][DEBUG] Test received: ' + JSON.stringify(msg.content.toString())
+        )
+
+        channel.ack(msg)
+        console.log('[x] DONE')
       }
     })
 
-    try {
-      await this.queue.isReady()
-      this.initializeConsumers()
-
-      // logger.info('OK: Wallet Queue')
-      return true
-    } catch (e) {
-      // logger.error('Error: Wallet Queue')
-      throw e
-    }
-  }
-
-  get getQueue() {
-    return this.queue
-  }
-
-  async close() {
-    if (!this.queue) {
-      // logger.error('wallet queue is not initialized')
-    } else {
-      await this.queue.close()
-    }
-  }
-
-  initializeConsumers() {
-    // this.queue.process(WalletJobs.DEPOSIT_ALERT, (_jobs: any) => {
-    //   logger.error('TODO: wallet-queue Handle new deposits')
-    //   // TODO: Handle new deposit
-    //   // Check transaction hash and address for balance -> true => promise.resolve false => promise.reject
-    //   return Promise.resolve()
-    // })
-  }
-
-  initializeListener() {
-    this.queue.on('completed', (_job, _result) => {
-      // logger.info(
-      //   `wallet-queue: JOB completed ${job.name}-${job.id} ${JSON.stringify(
-      //     result
-      //   )}`
-      // )
+    channel.consume(WalletQueueName.NEW_DEPOSIT, (msg) => {
+      logger.error(
+        `TODO: handle ${WalletQueueName.NEW_DEPOSIT} Queue: ${
+          msg ? msg.content.toString() : ''
+        }`
+      )
     })
 
-    this.queue.on('error', (_job) => {
-      // logger.error(`wallet-queue: JOB errored ${job.name}-${job.message}`)
-    })
-
-    this.queue.on('failed', (_job) => {
-      // logger.error(`wallet-queue: JOB Failed ${job.name}-${job.id}`)
+    channel.consume(WalletQueueName.GEN_ADDRESS, (msg) => {
+      logger.error(
+        `TODO: handle ${WalletQueueName.NEW_DEPOSIT} Queue ${
+          msg ? msg.content.toString() : ''
+        }`
+      )
     })
   }
 
-  // Producers
-  generateNewAddress(currency: CryptoCurrency, userId: number) {
-    // Used only when RPC fails
-    // logger.info(`Generating ${currency} address for ${userId}`)
+  async genAddressToQ(opts: WalletJob[WalletQueueName.GEN_ADDRESS]) {
+    const channel = amqp.channel
+    await channel.sendToQueue(
+      WalletQueueName.GEN_ADDRESS,
+      Buffer.from(JSON.stringify(opts), 'utf8'),
+      {
+        persistent: true
+      }
+    )
+    console.log('[Q>] Added getAddressToQ ' + JSON.stringify(opts))
+  }
 
-    this.queue.add(WalletJobs.GENERATE_NEW_ADDRESS, {
-      userId,
-      currency
+  async testToQ(msg: string) {
+    const channel = amqp.channel
+    await channel.sendToQueue(WalletQueueName.TEST, Buffer.from(msg, 'utf8'), {
+      persistent: true
     })
+    console.log('[Q>] Added testToQ ' + msg)
   }
 }
-
-export default new WalletQueue()
