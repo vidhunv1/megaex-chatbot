@@ -118,14 +118,26 @@ export class RpcClient {
   }
 
   async rpc(method: string, params: string[]) {
-    const resp = await this.axiosInstance.post('/', {
-      id: getRandomId(),
-      method,
-      params
-    })
+    let resp
+
+    try {
+      resp = await this.axiosInstance.post('/', {
+        id: getRandomId(),
+        method,
+        params
+      })
+    } catch (e) {
+      logger.error('RPC error status code: ' + JSON.stringify(e.response.data))
+      if (e.response.data && e.response.data.error) {
+        resp = e.response
+      } else {
+        throw e
+      }
+    }
 
     const result = _.get(resp.data, 'result', null) as RpcResult['result']
     const error = _.get(resp.data, 'error', null) as RpcResult['error']
+
     return {
       data: result,
       error,

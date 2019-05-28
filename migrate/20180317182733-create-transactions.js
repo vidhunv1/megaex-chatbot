@@ -14,9 +14,8 @@ module.exports = {
         allowNull: false,
         references: { model: 'Users', key: 'id' }
       },
-      transactionId: {
+      txid: {
         allowNull: false,
-        unique: true,
         type: Sequelize.STRING
       },
       transactionType: {
@@ -30,10 +29,6 @@ module.exports = {
       confirmations: {
         allowNull: false,
         type: Sequelize.INTEGER
-      },
-      receivedTime: {
-        allowNull: false,
-        type: Sequelize.DATE
       },
       transactionSource: {
         allowNull: false,

@@ -3,9 +3,8 @@ import { CryptoCurrency } from 'constants/currencies'
 export const WALLET_NAMESPACE = 'wallet'
 
 export enum WalletQueueName {
-  NEW_DEPOSIT = 'NEW-DEPOSIT',
-  GEN_ADDRESS = 'GEN_ADDRESS',
-  TEST = 'TEST'
+  NEW_DEPOSIT = 'NEW_DEPOSIT',
+  GEN_ADDRESS = 'GEN_ADDRESS'
 }
 
 export interface WalletJob {

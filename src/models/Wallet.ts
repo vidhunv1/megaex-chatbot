@@ -7,12 +7,10 @@ import {
   BelongsTo,
   PrimaryKey,
   AllowNull,
-  Default,
   AutoIncrement
 } from 'sequelize-typescript'
 import { User } from './User'
 import { logger } from '../modules'
-import { Transaction as SequelizeTransacion } from 'sequelize'
 import { CryptoCurrency } from '../constants/currencies'
 import btcRpc, { BtcCommands } from 'core/crypto/btcRpc'
 import { amqp } from 'modules'
@@ -32,21 +30,6 @@ export class Wallet extends Model<Wallet> {
 
   @BelongsTo(() => User)
   user!: User
-
-  @AllowNull(false)
-  @Default(0.0)
-  @Column(DataType.FLOAT)
-  availableBalance!: number
-
-  @AllowNull(false)
-  @Default(0.0)
-  @Column(DataType.FLOAT)
-  unconfirmedBalance!: number
-
-  @AllowNull(false)
-  @Default(0.0)
-  @Column(DataType.FLOAT)
-  blockedBalance!: number
 
   @AllowNull(true)
   @Column
@@ -112,66 +95,10 @@ export class Wallet extends Model<Wallet> {
       throw new WalletError(WalletError.NOT_FOUND)
     }
   }
-
-  static async unblockBalance(
-    userId: string | number,
-    currencyCode: CryptoCurrency,
-    amount: number,
-    transaction?: SequelizeTransacion
-  ) {
-    const wallet: Wallet | null = await Wallet.findOne({
-      where: { userId: userId, currencyCode: currencyCode }
-    })
-    if (wallet) {
-      if (wallet.blockedBalance >= amount) {
-        await wallet.updateAttributes(
-          {
-            availableBalance: wallet.availableBalance + amount,
-            blockedBalance: wallet.blockedBalance - amount
-          },
-          { transaction: transaction }
-        )
-        return true
-      } else {
-        throw new WalletError(WalletError.INSUFFICIENT_BALANCE)
-      }
-    } else {
-      logger.error('Wallet not found')
-      throw new WalletError(WalletError.NOT_FOUND)
-    }
-  }
-
-  static async blockBalance(
-    userId: string | number,
-    currencyCode: string,
-    amount: number,
-    transaction?: SequelizeTransacion
-  ) {
-    const wallet: Wallet | null = await Wallet.findOne({
-      where: { userId: userId, currencyCode: currencyCode }
-    })
-    if (wallet) {
-      if (wallet.availableBalance >= amount) {
-        await wallet.updateAttributes(
-          {
-            availableBalance: wallet.availableBalance - amount,
-            blockedBalance: wallet.blockedBalance + amount
-          },
-          { transaction: transaction }
-        )
-        return true
-      } else {
-        throw new WalletError(WalletError.INSUFFICIENT_BALANCE)
-      }
-    } else {
-      throw new WalletError(WalletError.NOT_FOUND)
-    }
-  }
 }
 
 export class WalletError extends Error {
   public status: number
-  public static INSUFFICIENT_BALANCE = 490
   public static NOT_FOUND = 404
 
   constructor(status: number = 500, message: string = 'Wallet Error') {

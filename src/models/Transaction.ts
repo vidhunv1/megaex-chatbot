@@ -3,7 +3,6 @@ import {
   Column,
   Model,
   ForeignKey,
-  Unique,
   DataType,
   BelongsTo,
   PrimaryKey,
@@ -13,6 +12,17 @@ import {
 import { User } from '.'
 import { Transaction as SequelizeTransacion } from 'sequelize'
 import { logger } from '../modules'
+import { CryptoCurrency, cryptoCurrencyInfo } from 'constants/currencies'
+
+export enum TransactionType {
+  SEND = 'SEND',
+  RECEIVE = 'RECEIVE'
+}
+
+export enum TransactionSource {
+  PAYMENT = 'PAYMENT',
+  CORE = 'CORE'
+}
 
 @Table({ timestamps: true, tableName: 'Transactions' })
 export class Transaction extends Model<Transaction> {
@@ -31,63 +41,128 @@ export class Transaction extends Model<Transaction> {
   user!: User
 
   @AllowNull(false)
-  @Unique
   @Column
-  transactionId!: string
+  txid!: string
 
   @AllowNull(false)
   @Column
-  transactionType!: string
+  transactionType!: TransactionType
 
   // All send balances are negative
   @AllowNull(false)
   @Column(DataType.FLOAT)
   amount!: number
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column
   confirmations!: number
 
   @AllowNull(false)
-  @Column(DataType.DATE)
-  receivedTime!: Date
+  @Column
+  transactionSource!: TransactionSource
 
   @AllowNull(false)
   @Column
-  transactionSource!: string
+  currencyCode!: CryptoCurrency
 
-  @AllowNull(false)
-  @Column
-  currencyCode!: string
-
-  static async getTotalBalance(
+  static async getConfirmedBalance(
     userId: number,
-    currencyCode: string
+    currencyCode: CryptoCurrency
   ): Promise<number> {
-    // TODO: If you are paranoid, check validity of all transations from core-wallet and verify jwt for payment codes.
-    // For now this should do.
-
     // some bug, have to parse & stringify to get sum
-    const totalBalance: number = JSON.parse(
+    const bal: number = JSON.parse(
       JSON.stringify(
         await Transaction.find({
           attributes: [[Transaction.sequelize.literal('SUM(amount)'), 'sum']],
-          where: { currencyCode: currencyCode, userId: userId }
+          where: {
+            currencyCode: currencyCode,
+            userId: userId,
+            confirmations: {
+              $gte: cryptoCurrencyInfo[currencyCode].confirmations
+            }
+          }
         })
       )
     ).sum
-    return totalBalance
+    return bal
+  }
+
+  static async getUnonfirmedBalance(
+    userId: number,
+    currencyCode: CryptoCurrency
+  ): Promise<number> {
+    // some bug, have to parse & stringify to get sum
+    const bal: number = JSON.parse(
+      JSON.stringify(
+        await Transaction.find({
+          attributes: [[Transaction.sequelize.literal('SUM(amount)'), 'sum']],
+          where: {
+            currencyCode: currencyCode,
+            userId: userId,
+            confirmations: {
+              $lt: cryptoCurrencyInfo[currencyCode].confirmations
+            }
+          }
+        })
+      )
+    ).sum
+    return bal
+  }
+
+  static async createOrUpdateDepositTx(
+    userId: number,
+    currencyCode: CryptoCurrency,
+    txid: string,
+    amount: number,
+    confirmations: number,
+    transactionSource: TransactionSource
+  ) {
+    const txn = await Transaction.findOne<Transaction>({
+      where: {
+        txid: txid,
+        transactionType: TransactionType.RECEIVE
+      }
+    })
+
+    try {
+      if (txn) {
+        // transaction exists, update it
+        await Transaction.update<Transaction>(
+          {
+            confirmations: confirmations
+          },
+          {
+            where: {
+              txid: txid
+            }
+          }
+        )
+      } else {
+        await Transaction.create<Transaction>({
+          userId: userId,
+          currencyCode: currencyCode,
+          amount: amount,
+          txid: txid,
+          confirmations: confirmations,
+          transactionType: TransactionType.RECEIVE,
+          transactionSource: transactionSource
+        })
+      }
+    } catch (e) {
+      logger.error('TRANSACTION: error creating transaction')
+      throw e
+    }
   }
 
   static async transfer(
     fromUserId: number,
     toUserId: number,
     amount: number,
-    currencyCode: string,
-    transactionID: string,
+    currencyCode: CryptoCurrency,
+    txid: string,
     transaction: SequelizeTransacion
   ) {
-    const balance: number = await Transaction.getTotalBalance(
+    const balance: number = await Transaction.getConfirmedBalance(
       fromUserId,
       currencyCode
     )
@@ -96,28 +171,79 @@ export class Transaction extends Model<Transaction> {
     }
     const senderTransaction = new Transaction({
       userId: fromUserId,
-      transactionId: transactionID + '-s',
+      txid: txid,
       amount: -1 * amount,
-      confirmations: 3,
-      receivedTime: new Date(),
-      transactionSource: 'payment',
-      transactionType: 'send',
+      transactionSource: TransactionSource.PAYMENT,
+      transactionType: TransactionType.SEND,
       currencyCode: currencyCode
     })
     await senderTransaction.save({ transaction: transaction })
 
     const receiverTransaction = new Transaction({
       userId: toUserId,
-      transactionId: transactionID + '-r',
+      txid: txid,
       amount: amount,
-      confirmations: 3,
-      receivedTime: new Date(),
-      transactionSource: 'payment',
-      transactionType: 'receive',
+      transactionSource: TransactionSource.PAYMENT,
+      transactionType: TransactionType.RECEIVE,
       currencyCode: currencyCode
     })
     await receiverTransaction.save({ transaction: transaction })
   }
+
+  // static async unblockBalance(
+  //   userId: string | number,
+  //   currencyCode: CryptoCurrency,
+  //   amount: number,
+  //   transaction?: SequelizeTransacion
+  // ) {
+  //   const wallet: Wallet | null = await Wallet.findOne({
+  //     where: { userId: userId, currencyCode: currencyCode }
+  //   })
+  //   if (wallet) {
+  //     if (wallet.blockedBalance >= amount) {
+  //       await wallet.updateAttributes(
+  //         {
+  //           availableBalance: wallet.availableBalance + amount,
+  //           blockedBalance: wallet.blockedBalance - amount
+  //         },
+  //         { transaction: transaction }
+  //       )
+  //       return true
+  //     } else {
+  //       throw new WalletError(WalletError.INSUFFICIENT_BALANCE)
+  //     }
+  //   } else {
+  //     logger.error('Wallet not found')
+  //     throw new WalletError(WalletError.NOT_FOUND)
+  //   }
+  // }
+
+  // static async blockBalance(
+  //   userId: string | number,
+  //   currencyCode: string,
+  //   amount: number,
+  //   transaction?: SequelizeTransacion
+  // ) {
+  //   const wallet: Wallet | null = await Wallet.findOne({
+  //     where: { userId: userId, currencyCode: currencyCode }
+  //   })
+  //   if (wallet) {
+  //     if (wallet.availableBalance >= amount) {
+  //       await wallet.updateAttributes(
+  //         {
+  //           availableBalance: wallet.availableBalance - amount,
+  //           blockedBalance: wallet.blockedBalance + amount
+  //         },
+  //         { transaction: transaction }
+  //       )
+  //       return true
+  //     } else {
+  //       throw new WalletError(WalletError.INSUFFICIENT_BALANCE)
+  //     }
+  //   } else {
+  //     throw new WalletError(WalletError.NOT_FOUND)
+  //   }
+  // }
 }
 
 export class TransactionError extends Error {

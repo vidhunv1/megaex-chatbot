@@ -14,21 +14,6 @@ module.exports = {
         allowNull: false,
         references: { model: 'Users', key: 'id' }
       },
-      availableBalance: {
-        allowNull: false,
-        defaultValue: 0.0,
-        type: Sequelize.FLOAT
-      },
-      unconfirmedBalance: {
-        allowNull: false,
-        defaultValue: 0.0,
-        type: Sequelize.FLOAT
-      },
-      blockedBalance: {
-        allowNull: false,
-        defaultValue: 0.0,
-        type: Sequelize.FLOAT
-      },
       currencyCode: {
         allowNull: false,
         type: Sequelize.STRING(10)

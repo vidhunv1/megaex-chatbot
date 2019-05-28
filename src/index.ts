@@ -85,8 +85,4 @@ import { logger } from 'modules'
     // await jobs.stop()
     process.exit(0)
   })
-  setTimeout(async () => {
-    console.log('[DEBUG] Adding test to queue')
-    await amqp.walletQ.testToQ('Hello')
-  }, 5000)
 })()
