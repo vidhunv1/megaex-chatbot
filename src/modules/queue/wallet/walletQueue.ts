@@ -83,7 +83,7 @@ export class WalletQueue {
             category: 'receive'
           })
           const confirmations = btcResult.result.confirmations || 0
-          if (receiveInfo) {
+          if (receiveInfo && receiveInfo.label && receiveInfo.amount) {
             const { label, amount } = receiveInfo
             logger.info(
               `UserId: ${label} received ${amount} BTC with ${confirmations} confirmations, txid: ${
@@ -98,6 +98,7 @@ export class WalletQueue {
               confirmations,
               TransactionSource.CORE
             )
+            channel.ack(msg)
           } else {
             logger.error(
               'No receive info in BTC RPC getTransaction for ' +
@@ -105,8 +106,8 @@ export class WalletQueue {
                 ', ' +
                 JSON.stringify(btcResult)
             )
+            channel.ack(msg)
           }
-          channel.ack(msg)
         } catch (e) {
           logger.error(
             '[Q] Error parsing new deposit parasms: ' +

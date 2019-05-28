@@ -14,6 +14,8 @@ import { telegramHook } from 'modules'
 import { Account } from 'lib/Account'
 import { Router } from 'chats/router'
 import { logger } from 'modules'
+
+logger.error('TODO: Write cron to sync BTC transacions')
 ;(async () => {
   telegramHook.getWebhook.on('message', async function onMessage(
     msg: TelegramBot.Message

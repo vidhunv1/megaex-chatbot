@@ -111,5 +111,16 @@ Check and confirm your transaction:
     'create-success': `✅ *Withdrawal added*
 
 Your withdraw request was added to the queue. You will receive a notification upon confirmation.`
+  },
+
+  transaction: {
+    'new-incoming-tx': `🕘 *Incoming {{ cryptoCurrencyCode }}*
+
+You have a new deposit of *{{ cryptoCurrencyValue }}*. This will be available after {{ requiredConfirmation }} network confirmation.
+
+txid: [{{ txid }}]({{ txUrl }})`,
+    'new-tx-confirmed': `📩 *{{ cryptoCurrencyCode }} received*
+
+You received *{{ cryptoCurrencyValue }}*`
   }
 }

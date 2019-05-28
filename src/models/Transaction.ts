@@ -11,8 +11,11 @@ import {
 } from 'sequelize-typescript'
 import { User } from '.'
 import { Transaction as SequelizeTransacion } from 'sequelize'
-import { logger } from '../modules'
+import { logger, telegramHook } from '../modules'
 import { CryptoCurrency, cryptoCurrencyInfo } from 'constants/currencies'
+import TelegramAccount from './TelegramAccount'
+import { dataFormatter } from 'utils/dataFormatter'
+import { Namespace } from 'modules/i18n'
 
 export enum TransactionType {
   SEND = 'SEND',
@@ -137,6 +140,34 @@ export class Transaction extends Model<Transaction> {
             }
           }
         )
+
+        // Notify about the transaction
+        const requiredConfirmation =
+          cryptoCurrencyInfo[currencyCode].confirmations
+        if (confirmations >= requiredConfirmation) {
+          const user = await User.findOne({
+            where: {
+              id: userId
+            },
+            include: [{ model: TelegramAccount }]
+          })
+
+          if (user) {
+            await telegramHook.getWebhook.sendMessage(
+              user.telegramUser.id,
+              user.t(`${Namespace.Wallet}:transaction.new-tx-confirmed`, {
+                cryptoCurrencyValue: dataFormatter.formatCryptoCurrency(
+                  amount,
+                  currencyCode
+                ),
+                cryptoCurrencyCode: currencyCode
+              }),
+              {
+                parse_mode: 'Markdown'
+              }
+            )
+          }
+        }
       } else {
         await Transaction.create<Transaction>({
           userId: userId,
@@ -147,6 +178,37 @@ export class Transaction extends Model<Transaction> {
           transactionType: TransactionType.RECEIVE,
           transactionSource: transactionSource
         })
+
+        // Notify about the transaction
+        const requiredConfirmation =
+          cryptoCurrencyInfo[currencyCode].confirmations
+        if (confirmations < requiredConfirmation) {
+          const user = await User.findOne({
+            where: {
+              id: userId
+            },
+            include: [{ model: TelegramAccount }]
+          })
+
+          if (user) {
+            await telegramHook.getWebhook.sendMessage(
+              user.telegramUser.id,
+              user.t(`${Namespace.Wallet}:transaction.new-incoming-tx`, {
+                cryptoCurrencyCode: currencyCode,
+                cryptoCurrencyValue: dataFormatter.formatCryptoCurrency(
+                  amount,
+                  currencyCode
+                ),
+                requiredConfirmation,
+                txid: txid,
+                txUrl: cryptoCurrencyInfo[currencyCode].getTxUrl(txid)
+              }),
+              {
+                parse_mode: 'Markdown'
+              }
+            )
+          }
+        }
       }
     } catch (e) {
       logger.error('TRANSACTION: error creating transaction')
