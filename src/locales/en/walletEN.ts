@@ -121,6 +121,6 @@ You have a new deposit of *{{ cryptoCurrencyValue }}*. This will be available af
 txid: [{{ txid }}]({{ txUrl }})`,
     'new-tx-confirmed': `📩 *{{ cryptoCurrencyCode }} received*
 
-You received *{{ cryptoCurrencyValue }}*`
+You received *{{ cryptoCurrencyValue }}*.`
   }
 }

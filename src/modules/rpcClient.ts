@@ -117,7 +117,7 @@ export class RpcClient {
     }
   }
 
-  async rpc(method: string, params: string[]) {
+  async rpc(method: string, params: (string | number)[]) {
     let resp
 
     try {

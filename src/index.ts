@@ -6,7 +6,6 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 }
 
 require('module-alias/register')
-
 import { db } from 'modules'
 import { cacheConnection, amqp } from 'modules'
 import * as TelegramBot from 'node-telegram-bot-api'
@@ -15,7 +14,8 @@ import { Account } from 'lib/Account'
 import { Router } from 'chats/router'
 import { logger } from 'modules'
 
-logger.error('TODO: Write cron to sync BTC transacions')
+import Jobs from 'modules/jobs'
+
 ;(async () => {
   telegramHook.getWebhook.on('message', async function onMessage(
     msg: TelegramBot.Message
@@ -77,6 +77,10 @@ logger.error('TODO: Write cron to sync BTC transacions')
     )
   })
 
+  // Start all jobs
+  const jobs = new Jobs()
+  jobs.start()
+
   process.on('SIGINT', async function() {
     logger.info('Ending process...')
     logger.info('closing sql')
@@ -84,7 +88,7 @@ logger.error('TODO: Write cron to sync BTC transacions')
     await db.close()
     await cacheConnection.close()
     await amqp.close()
-    // await jobs.stop()
+    await jobs.stop()
     process.exit(0)
   })
 })()
