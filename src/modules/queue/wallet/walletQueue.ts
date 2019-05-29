@@ -100,7 +100,7 @@ export class WalletQueue {
             )
             channel.ack(msg)
           } else {
-            logger.error(
+            logger.warn(
               'No receive info in BTC RPC getTransaction for ' +
                 btcResult.result.txid +
                 ', ' +

@@ -68,48 +68,45 @@ export class Transaction extends Model<Transaction> {
   @Column
   currencyCode!: CryptoCurrency
 
-  static async getConfirmedBalance(
+  static async getBalance(
     userId: number,
     currencyCode: CryptoCurrency
-  ): Promise<number> {
-    // some bug, have to parse & stringify to get sum
-    const bal: number = JSON.parse(
-      JSON.stringify(
-        await Transaction.find({
-          attributes: [[Transaction.sequelize.literal('SUM(amount)'), 'sum']],
-          where: {
-            currencyCode: currencyCode,
-            userId: userId,
-            confirmations: {
-              $gte: cryptoCurrencyInfo[currencyCode].confirmations
-            }
-          }
-        })
-      )
-    ).sum
-    return bal
-  }
+  ): Promise<{
+    confirmedBalance: number
+    unconfirmedBalance: number
+  } | null> {
+    const requiredConfirmations = cryptoCurrencyInfo[currencyCode].confirmations
 
-  static async getUnonfirmedBalance(
-    userId: number,
-    currencyCode: CryptoCurrency
-  ): Promise<number> {
-    // some bug, have to parse & stringify to get sum
-    const bal: number = JSON.parse(
+    // why to parse & stringify to get sum?
+    return JSON.parse(
       JSON.stringify(
         await Transaction.find({
-          attributes: [[Transaction.sequelize.literal('SUM(amount)'), 'sum']],
+          attributes: [
+            [
+              Transaction.sequelize.literal(
+                `SUM(CASE WHEN confirmations >= ${requiredConfirmations} THEN amount ELSE 0 END)`
+              ),
+              'confirmedBalance'
+            ],
+            [
+              Transaction.sequelize.literal(
+                'SUM(CASE WHEN confirmations = 0 THEN amount ELSE 0 END)'
+              ),
+              'unconfirmedBalance'
+            ]
+          ],
           where: {
+            userId,
             currencyCode: currencyCode,
-            userId: userId,
-            confirmations: {
-              $lt: cryptoCurrencyInfo[currencyCode].confirmations
-            }
+            transactionType: TransactionType.RECEIVE,
+            transactionSource: TransactionSource.CORE
           }
         })
       )
-    ).sum
-    return bal
+    ) as {
+      confirmedBalance: number
+      unconfirmedBalance: number
+    } | null
   }
 
   static async createOrUpdateDepositTx(
@@ -224,11 +221,8 @@ export class Transaction extends Model<Transaction> {
     txid: string,
     transaction: SequelizeTransacion
   ) {
-    const balance: number = await Transaction.getConfirmedBalance(
-      fromUserId,
-      currencyCode
-    )
-    if (balance < amount) {
+    const balance = await Transaction.getBalance(fromUserId, currencyCode)
+    if (!balance || (balance && balance.confirmedBalance < amount)) {
       throw new TransactionError(TransactionError.INSUFFICIENT_BALANCE)
     }
     const senderTransaction = new Transaction({

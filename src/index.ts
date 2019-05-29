@@ -15,7 +15,6 @@ import { Router } from 'chats/router'
 import { logger } from 'modules'
 
 import Jobs from 'modules/jobs'
-
 ;(async () => {
   telegramHook.getWebhook.on('message', async function onMessage(
     msg: TelegramBot.Message

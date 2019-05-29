@@ -1,7 +1,7 @@
 import { CONFIG } from '../../config'
 import { RpcClient, RpcResult } from 'modules/rpcClient'
 import { cryptoCurrencyInfo, CryptoCurrency } from 'constants/currencies'
-import { Transaction, TransactionType, TransactionSource } from 'models'
+import { Transaction, TransactionSource } from 'models'
 import * as _ from 'lodash'
 import logger from 'modules/logger'
 
@@ -119,30 +119,102 @@ export class BtcRpc {
       }
     })
 
-    for (const [userId, userTx] of Object.entries(coreTx)) {
-      const coreBalance: number = JSON.parse(
-        JSON.stringify(
-          await Transaction.find({
-            attributes: [[Transaction.sequelize.literal('SUM(amount)'), 'sum']],
-            where: {
-              currencyCode: CryptoCurrency.BTC,
-              userId,
-              transactionType: TransactionType.RECEIVE,
-              transactionSource: TransactionSource.CORE
-            }
-          })
-        )
-      ).sum
+    for (const [uid, userTx] of Object.entries(coreTx)) {
+      const userId = parseInt(uid)
+      if (!userId) {
+        logger.error('Invalid user id: ' + uid)
+        return
+      }
 
-      if (coreBalance != userTx.amount) {
+      const allBalances = await Transaction.getBalance(
+        userId,
+        CryptoCurrency.BTC
+      )
+      if (!allBalances) {
+        logger.error('Error fetching transaction balances')
+        return
+      }
+
+      const appBtcConfirmedBalance = allBalances.confirmedBalance
+
+      if (appBtcConfirmedBalance < userTx.amount) {
         // TODO: Sync and update transacions
-        logger.error(
+        logger.warn(
           `ALERT! Unsynced balance available for user: ${userId}, actual: ${
             userTx.amount
-          } available: ${coreBalance}`
+          } available: ${appBtcConfirmedBalance}`
+        )
+
+        logger.info('Syncing balance')
+
+        userTx.txids.forEach(async (txId) => {
+          let btcResult
+          try {
+            btcResult = await this.btcRpcCall<BtcCommands.GET_TRANSACTION>(
+              BtcCommands.GET_TRANSACTION,
+              [txId]
+            )
+
+            logger.info('update txid' + JSON.stringify(btcResult.result))
+
+            if (btcResult.error) {
+              if (btcResult.error.code === -5) {
+                logger.error(
+                  '[Q] NEW_DEPOSIT: Invalid or non wallet transaction id'
+                )
+              } else {
+                logger.error(
+                  'Unable to handle BTC core error ' +
+                    JSON.stringify(btcResult.error)
+                )
+              }
+              return
+            }
+            const receiveInfo = _.find(btcResult.result.details, {
+              category: 'receive'
+            })
+            const confirmations = btcResult.result.confirmations || 0
+            if (receiveInfo && receiveInfo.label && receiveInfo.amount) {
+              const { label, amount } = receiveInfo
+
+              logger.info(
+                `Update new TX for UserId: ${label} received ${amount} BTC with ${confirmations} confirmations, txid: ${
+                  btcResult.result.txid
+                }`
+              )
+              await Transaction.createOrUpdateDepositTx(
+                parseInt(label),
+                CryptoCurrency.BTC,
+                txId,
+                amount,
+                confirmations,
+                TransactionSource.CORE
+              )
+            } else {
+              logger.warn(
+                'No receive info in BTC RPC getTransaction for ' +
+                  btcResult.result.txid +
+                  ', ' +
+                  JSON.stringify(btcResult)
+              )
+            }
+          } catch (e) {
+            logger.error('BTC core HTTP error')
+            throw e
+          }
+        })
+      } else if (appBtcConfirmedBalance > userTx.amount) {
+        logger.error(
+          `ALERT: BALANCE MISMATCH for ${userId}, balance more than btc core balance: ${appBtcConfirmedBalance} > ${
+            userTx.amount
+          }`
         )
       } else {
-        logger.info(`SYNC ok for ${userId}: ${userTx.amount} = ${coreBalance}`)
+        logger.info(
+          `Already synced, nothing to do for ${userId}: ${
+            userTx.amount
+          } = ${appBtcConfirmedBalance}`
+        )
       }
     }
   }
