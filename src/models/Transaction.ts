@@ -68,7 +68,8 @@ export class Transaction extends Model<Transaction> {
   @Column
   currencyCode!: CryptoCurrency
 
-  static async getBalance(
+  // Gets sum of all wallet deposit through core
+  static async getCoreDepositAmount(
     userId: number,
     currencyCode: CryptoCurrency
   ): Promise<{
@@ -107,6 +108,34 @@ export class Transaction extends Model<Transaction> {
       confirmedBalance: number
       unconfirmedBalance: number
     } | null
+  }
+
+  // gets the balance available for spending
+  static async getAvailableBalance(
+    userId: number,
+    currencyCode: CryptoCurrency
+  ): Promise<number> {
+    const requiredConfirmations = cryptoCurrencyInfo[currencyCode].confirmations
+    return (
+      JSON.parse(
+        JSON.stringify(
+          await Transaction.find({
+            attributes: [
+              [
+                Transaction.sequelize.literal(
+                  `SUM(CASE WHEN confirmations >= ${requiredConfirmations} THEN amount ELSE 0 END)`
+                ),
+                'availableBalance'
+              ]
+            ],
+            where: {
+              userId,
+              currencyCode: currencyCode
+            }
+          })
+        )
+      ).availableBalance || 0
+    )
   }
 
   static async createOrUpdateDepositTx(
@@ -221,8 +250,11 @@ export class Transaction extends Model<Transaction> {
     txid: string,
     transaction: SequelizeTransacion
   ) {
-    const balance = await Transaction.getBalance(fromUserId, currencyCode)
-    if (!balance || (balance && balance.confirmedBalance < amount)) {
+    const balance = await Transaction.getAvailableBalance(
+      fromUserId,
+      currencyCode
+    )
+    if (!balance || (balance && balance < amount)) {
       throw new TransactionError(TransactionError.INSUFFICIENT_BALANCE)
     }
     const senderTransaction = new Transaction({

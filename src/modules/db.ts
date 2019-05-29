@@ -5,6 +5,7 @@ import {
   User,
   Wallet,
   Transaction,
+  Transfer,
   PaymentMethod,
   Order,
   Referral,
@@ -37,6 +38,7 @@ export class DB {
       sequelize.addModels([
         Wallet,
         Transaction,
+        Transfer,
         PaymentMethod,
         Order,
 

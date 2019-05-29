@@ -62,7 +62,9 @@ Insufficient funds. You need to fund your {{ cryptoCurrencyCode }} wallet to mak
 Please enter a valid amount:
 Example: _100 INR or 0.0005 BTC_
 `,
-    'show-created-link': `✅ *Link generated*
+    'error-creating-payment':
+      'There was an error creating this payment, please try again later.',
+    'show-created-link': `✅ *Created*
 
 {{ paymentLink }}
 (_Share this link privately to send the funds. Anyone with access to this link will get the funds_)

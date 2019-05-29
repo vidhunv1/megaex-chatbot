@@ -7,7 +7,8 @@ export const KEY_SEPERATOR = ':'
 export enum CacheKey {
   TelegramAccount = 't-account',
   Context = 't-context',
-  State = 't-state'
+  State = 't-state',
+  PaymentExpiry = 't-payment-expiry'
 }
 
 const cacheKeys = Object.values(CacheKey)
@@ -38,7 +39,7 @@ export const CacheHelper = {
     }
   },
 
-  getKeyForUser(key: CacheKey, id: number) {
+  getKeyForId(key: CacheKey, id: number) {
     return `${key}${KEY_SEPERATOR}${id}`
   },
 
@@ -51,14 +52,14 @@ export const CacheHelper = {
   async setState(state: State<any>, id: number, expiry?: number) {
     if (expiry && expiry > 0) {
       await cacheConnection.getClient.setAsync(
-        this.getKeyForUser(CacheKey.State, id),
+        this.getKeyForId(CacheKey.State, id),
         JSON.stringify(state),
         'EX',
         expiry
       )
     } else {
       await cacheConnection.getClient.setAsync(
-        this.getKeyForUser(CacheKey.State, id),
+        this.getKeyForId(CacheKey.State, id),
         JSON.stringify(state)
       )
     }
@@ -66,13 +67,13 @@ export const CacheHelper = {
 
   async clearState(id: number) {
     await cacheConnection.getClient.delAsync(
-      this.getKeyForUser(CacheKey.State, id)
+      this.getKeyForId(CacheKey.State, id)
     )
   },
 
   async getState<T>(id: number): Promise<T | null> {
     const state = await cacheConnection.getClient.getAsync(
-      this.getKeyForUser(CacheKey.State, id)
+      this.getKeyForId(CacheKey.State, id)
     )
     if (state != null) {
       return JSON.parse(state)

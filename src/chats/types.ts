@@ -41,7 +41,8 @@ export enum DeepLink {
   REFERRAL = 'ref',
   ACCOUNT = 'acc',
   ORDER = 'order',
-  TRACK = 'tr'
+  TRACK = 'tr',
+  PAYMENT = 'code'
 }
 
 export interface CommandState {

@@ -1,5 +1,5 @@
 export * from './Order'
-// export * from './Transfer'
+export * from './Transfer'
 export * from './Market'
 export * from './Transaction'
 export * from './Wallet'

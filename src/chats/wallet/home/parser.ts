@@ -7,6 +7,7 @@ import {
   WalletState,
   updateNextWalletState
 } from '../WalletState'
+import { Transaction } from 'models'
 
 const CURRENT_CURRENCY_CODE = CryptoCurrency.BTC
 
@@ -22,19 +23,19 @@ export const WalletHomeParser: Parser<WalletState> = async (
   > = {
     [WalletHomeStateKey.start]: async () => {
       const cryptoCurrencyCode = CURRENT_CURRENCY_CODE
-      const cryptoBalance = getWalletBalance(cryptoCurrencyCode)
+      const { cryptoAmount, fiatValue } = await getAvailableBalance(
+        user.id,
+        CURRENT_CURRENCY_CODE,
+        user.currencyCode
+      )
       const fiatCurrencyCode = user.currencyCode
       return {
         ...currentState,
         [WalletHomeStateKey.start]: {
           data: {
             cryptoCurrencyCode,
-            cryptoBalance,
-            fiatValue: getFiatValue(
-              cryptoBalance,
-              cryptoCurrencyCode,
-              fiatCurrencyCode
-            ),
+            cryptoBalance: cryptoAmount,
+            fiatValue: fiatValue,
             fiatCurrencyCode,
             blockedBalance: getBlockedBalance(cryptoCurrencyCode),
             earnings: getEarnings(),
@@ -72,11 +73,6 @@ export function nextWalletHomeState(
 }
 
 // Getters
-const getWalletBalance = (_cryptoCurrency: CryptoCurrency) => {
-  logger.error('TODO: Not implemented getWalletBalance WalletChat#25')
-  return 0.2
-}
-
 const getBlockedBalance = (_cryptoCurrency: CryptoCurrency) => {
   logger.error('TODO: Not implemented getWalletBalance WalletChat#25')
   return 0.01
@@ -99,4 +95,18 @@ const getFiatValue = (
 ) => {
   logger.error('TODO: Not implemented getCryptoValue WalletChat#20')
   return amount * 300000
+}
+
+const getAvailableBalance = async (
+  userId: number,
+  currency: CryptoCurrency,
+  fiatCurrency: FiatCurrency
+) => {
+  const bal = await Transaction.getAvailableBalance(userId, currency)
+  const value = await getFiatValue(bal, currency, fiatCurrency)
+
+  return {
+    cryptoAmount: bal,
+    fiatValue: value
+  }
 }

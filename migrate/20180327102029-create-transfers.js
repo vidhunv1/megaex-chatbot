@@ -35,14 +35,10 @@ module.exports = {
         allowNull: true,
         type: Sequelize.STRING
       },
-      claimant: {
+      receiverUserId: {
         allowNull: true,
         type: Sequelize.BIGINT,
         references: { model: 'Users', key: 'id'}
-      },
-      transferSignature: {
-        allowNull: true,
-        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,

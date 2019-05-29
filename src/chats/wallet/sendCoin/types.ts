@@ -10,7 +10,8 @@ export enum SendCoinStateKey {
 
 export enum SendCoinError {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
-  INVALID_AMOUNT = 'INVALID_AMOUNT'
+  INVALID_AMOUNT = 'INVALID_AMOUNT',
+  CREATE_PAYMENT_ERROR = 'CREATE_PAYMENT_ERROR'
 }
 
 export interface SendCoinState {
@@ -40,5 +41,6 @@ export interface SendCoinState {
       paymentLink: string
       expiryTimeS: number
     } | null
+    error: SendCoinError.CREATE_PAYMENT_ERROR | null
   }
 }

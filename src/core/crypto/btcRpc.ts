@@ -126,7 +126,7 @@ export class BtcRpc {
         return
       }
 
-      const allBalances = await Transaction.getBalance(
+      const allBalances = await Transaction.getCoreDepositAmount(
         userId,
         CryptoCurrency.BTC
       )

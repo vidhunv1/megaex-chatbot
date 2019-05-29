@@ -25,7 +25,7 @@ export class Account {
   private async saveUserToCache(tAccount: TelegramAccount) {
     const cacheClient = await cacheConnection.getClient
     cacheClient.setAsync(
-      CacheHelper.getKeyForUser(CacheKey.TelegramAccount, tAccount.id),
+      CacheHelper.getKeyForId(CacheKey.TelegramAccount, tAccount.id),
       JSON.stringify(tAccount),
       'EX',
       ACCOUNT_CACHE_EXPIRY
@@ -34,7 +34,7 @@ export class Account {
 
   static async clearUserCache(id: number) {
     await cacheConnection.getClient.delAsync(
-      CacheHelper.getKeyForUser(CacheKey.TelegramAccount, id)
+      CacheHelper.getKeyForId(CacheKey.TelegramAccount, id)
     )
   }
 
@@ -42,7 +42,7 @@ export class Account {
   async createOrGetAccount(): Promise<TelegramAccount> {
     const cacheClient = cacheConnection.getClient
     const accountCache = await cacheClient.getAsync(
-      CacheHelper.getKeyForUser(CacheKey.TelegramAccount, this.telegramId)
+      CacheHelper.getKeyForId(CacheKey.TelegramAccount, this.telegramId)
     )
 
     let tAccount: TelegramAccount

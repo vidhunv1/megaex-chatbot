@@ -123,6 +123,17 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
+  errorCreatingPayment: async () => {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Wallet}:send-coin.error-creating-payment`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
+      }
+    )
+  },
+
   showCreated: async (paymentLink: string, expiryTimeS: number) => {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,

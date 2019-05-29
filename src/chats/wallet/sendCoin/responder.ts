@@ -95,6 +95,11 @@ export const SendCoinResponder: Responder<WalletState> = (
           return true
         }
 
+        case SendCoinError.CREATE_PAYMENT_ERROR: {
+          await SendCoinMessage(msg, user).errorCreatingPayment()
+          return true
+        }
+
         default:
           logger.error(
             `walletResponder: ${SendCoinStateKey.sendCoin_error} -> 'default'`
