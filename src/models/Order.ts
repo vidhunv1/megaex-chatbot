@@ -26,7 +26,7 @@ export enum RateType {
   FIXED = 'FIXED'
 }
 
-@Table({ timestamps: true, tableName: 'Orders' })
+@Table({ timestamps: true, tableName: 'Orders', paranoid: true })
 export class Order extends Model<Order> {
   @PrimaryKey
   @AllowNull(false)

@@ -8,7 +8,7 @@ import {
   DataType
 } from 'sequelize-typescript'
 
-@Table({ timestamps: true, tableName: 'Markets' })
+@Table({ timestamps: true, tableName: 'Markets', paranoid: true })
 export class Market extends Model<Market> {
   @PrimaryKey
   @AllowNull(false)

@@ -26,7 +26,7 @@ enum TransferStatus {
   EXPIRED = 'EXPIRED'
 }
 
-@Table({ timestamps: true, tableName: 'Transfers' })
+@Table({ timestamps: true, tableName: 'Transfers', paranoid: true })
 export class Transfer extends Model<Transfer> {
   @PrimaryKey
   @AllowNull(false)
@@ -193,6 +193,17 @@ export class Transfer extends Model<Transfer> {
       where: { secretHash: hash, status: TransferStatus.PENDING }
     })
     return payment
+  }
+
+  static async deletePayment(id: number): Promise<Transfer | null> {
+    const pm = await Transfer.findById(id)
+    await Transfer.destroy({
+      where: {
+        id
+      }
+    })
+
+    return pm
   }
 }
 

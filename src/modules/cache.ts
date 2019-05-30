@@ -4,6 +4,7 @@ import { logger } from 'modules'
 // import { expirySubscription } from 'chats/subscriptions'
 
 import { CONFIG } from '../config'
+import { cacheExpiryhandler } from '../chats/subscriptions/cacheExpiryHandler'
 
 export interface RedisAPI {
   getAsync: (key: string) => Promise<string | null>
@@ -58,10 +59,7 @@ export class Cache {
       Cache.instance = this
       logger.info('OK: Redis')
 
-      logger.error('Init expiry subscription.. Cache.ts#L69')
-      // this.subscribeKeyExpiry((msg: string) =>
-      //   expirySubscription(msg, this.getClient)
-      // )
+      this.subscribeKeyExpiry((msg: string) => cacheExpiryhandler(msg))
     } catch (e) {
       logger.error('Error: Redis')
       throw e

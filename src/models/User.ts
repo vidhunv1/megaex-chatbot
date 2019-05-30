@@ -18,7 +18,7 @@ import { ExchangeSource } from 'constants/exchangeSource'
 import Referral from './Referral'
 import UserInfo from './UserInfo'
 
-@Table({ timestamps: true, tableName: 'Users' })
+@Table({ timestamps: true, tableName: 'Users', paranoid: true })
 export class User extends Model<User> {
   @PrimaryKey
   @AllowNull(false)

@@ -15,7 +15,7 @@ import { CryptoCurrency } from '../constants/currencies'
 import btcRpc, { BtcCommands } from 'core/crypto/btcRpc'
 import { amqp } from 'modules'
 
-@Table({ timestamps: true, tableName: 'Wallets' })
+@Table({ timestamps: true, tableName: 'Wallets', paranoid: true })
 export class Wallet extends Model<Wallet> {
   @PrimaryKey
   @AllowNull(false)

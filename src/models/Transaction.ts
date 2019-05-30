@@ -27,7 +27,7 @@ export enum TransactionSource {
   CORE = 'CORE'
 }
 
-@Table({ timestamps: true, tableName: 'Transactions' })
+@Table({ timestamps: true, tableName: 'Transactions', paranoid: true })
 export class Transaction extends Model<Transaction> {
   @PrimaryKey
   @AllowNull(false)

@@ -248,7 +248,6 @@ const createPayment = async (
   amount: number,
   cryptocurrency: CryptoCurrency
 ): Promise<string | null> => {
-  logger.error('TODO: Not implemented getPaymentLink WalletChat#25')
   try {
     return await Transfer.newPayment(userId, cryptocurrency, amount)
   } catch (e) {

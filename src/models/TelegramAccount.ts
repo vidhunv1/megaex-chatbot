@@ -12,7 +12,7 @@ import { User } from './User'
 import RandomGenerator from '../lib/RandomGenerator'
 import { logger } from 'modules'
 
-@Table({ timestamps: true, tableName: 'TelegramAccount' })
+@Table({ timestamps: true, tableName: 'TelegramAccount', paranoid: true })
 export class TelegramAccount extends Model<TelegramAccount> {
   @PrimaryKey
   @AllowNull(false)

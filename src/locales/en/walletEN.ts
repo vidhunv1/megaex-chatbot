@@ -71,6 +71,8 @@ Example: _100 INR or 0.0005 BTC_
 (_Share this link privately to send the funds. Anyone with access to this link will get the funds_)
 
 This OTP link will expire in *{{ expiryTime }}* hours`,
+    'payment-link-expired':
+      'The payment link you created of *{{ cryptoValue }}* has expired.',
     'transfer-errors': {
       [TransferErrorType.ALREADY_CLAIMED]:
         'This payment link has been claimed.',
