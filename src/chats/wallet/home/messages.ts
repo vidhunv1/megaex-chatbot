@@ -1,6 +1,6 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { User } from 'models'
+import { User, Transaction, TransactionSource } from 'models'
 import { telegramHook } from 'modules'
 import { Namespace } from 'modules/i18n'
 import { dataFormatter } from 'utils/dataFormatter'
@@ -9,7 +9,7 @@ import { SendCoinStateKey, SendCoinState } from '../sendCoin'
 import { DepositStateKey, DepositState } from '../deposit'
 import { WithdrawStateKey, WithdrawState } from '../withdraw'
 import { centerJustify, keyboardMainMenu } from 'chats/common'
-import { TxType } from 'chats/types'
+import logger from 'modules/logger'
 
 export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
   showWalletHome: async (
@@ -97,28 +97,39 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
-  async listTransactions(
-    transactions: {
-      date: number
-      currencyCode: CryptoCurrency
-      txType: TxType
-      amount: number
-    }[]
-  ) {
+  async listTransactions(transactions: Transaction[]) {
     const transactionString = transactions.reduce((acc, current) => {
-      const txTypeString =
-        current.txType === TxType.DEPOSIT ||
-        current.txType === TxType.INTERNAL_SEND
-          ? user.t(`${Namespace.Wallet}:home.transaction-debit`)
-          : user.t(`${Namespace.Wallet}:home.transaction-credit`)
+      let txSourceString = ''
 
+      switch (current.transactionSource) {
+        case TransactionSource.CORE: {
+          txSourceString = user.t(
+            `${Namespace.Wallet}:transaction.source-name.core`
+          )
+          break
+        }
+        case TransactionSource.PAYMENT: {
+          txSourceString = user.t(
+            `${Namespace.Wallet}:transaction.source-name.payment`
+          )
+          break
+        }
+        default: {
+          logger.error('Unhandled locale key for ' + current.transactionSource)
+        }
+      }
+
+      const formattedAmount =
+        current.amount > 0
+          ? '(+) ' + dataFormatter.formatCryptoCurrency(current.amount)
+          : '(-) ' + dataFormatter.formatCryptoCurrency(current.amount * -1)
       return (
         acc +
         '\n' +
         user.t('transaction-row', {
-          cryptoCurrency: centerJustify(current.currencyCode, 10),
-          amount: centerJustify(current.amount, 10),
-          transactionType: centerJustify(txTypeString, 10)
+          cryptoCurrency: centerJustify(current.currencyCode, 5),
+          amount: formattedAmount,
+          transactionType: txSourceString
         })
       )
     }, '')

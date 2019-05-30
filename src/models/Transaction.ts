@@ -281,6 +281,14 @@ export class Transaction extends Model<Transaction> {
     await receiverTransaction.save({ transaction: transaction })
   }
 
+  static async listTransactions(userId: number): Promise<Transaction[]> {
+    return Transaction.findAll({
+      where: {
+        userId: userId
+      }
+    })
+  }
+
   // static async unblockBalance(
   //   userId: string | number,
   //   currencyCode: CryptoCurrency,

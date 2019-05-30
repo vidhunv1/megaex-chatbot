@@ -77,10 +77,3 @@ export interface ChatHandler {
     state: any | null
   ) => Promise<boolean>
 }
-
-export enum TxType {
-  WITHDRAWAL = 'WITHDRAWAL',
-  DEPOSIT = 'DEPOSIT',
-  INTERNAL_SEND = 'INTERNAL_SEND',
-  INTERNAL_RECEIVE = 'INTERNAL_RECEIVE'
-}
