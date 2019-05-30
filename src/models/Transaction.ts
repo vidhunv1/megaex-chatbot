@@ -149,7 +149,8 @@ export class Transaction extends Model<Transaction> {
     const txn = await Transaction.findOne<Transaction>({
       where: {
         txid: txid,
-        transactionType: TransactionType.RECEIVE
+        transactionType: TransactionType.RECEIVE,
+        transactionSource: TransactionSource.CORE
       }
     })
 
@@ -263,7 +264,8 @@ export class Transaction extends Model<Transaction> {
       amount: -1 * amount,
       transactionSource: TransactionSource.PAYMENT,
       transactionType: TransactionType.SEND,
-      currencyCode: currencyCode
+      currencyCode: currencyCode,
+      confirmations: 10
     })
     await senderTransaction.save({ transaction: transaction })
 
@@ -273,7 +275,8 @@ export class Transaction extends Model<Transaction> {
       amount: amount,
       transactionSource: TransactionSource.PAYMENT,
       transactionType: TransactionType.RECEIVE,
-      currencyCode: currencyCode
+      currencyCode: currencyCode,
+      confirmations: 10
     })
     await receiverTransaction.save({ transaction: transaction })
   }

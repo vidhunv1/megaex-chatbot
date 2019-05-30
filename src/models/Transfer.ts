@@ -10,17 +10,15 @@ import {
   Unique,
   AutoIncrement
 } from 'sequelize-typescript'
-// import * as moment from 'moment'
+import * as moment from 'moment'
 import { User, Transaction } from '.'
 import RandomGenerator from '../lib/RandomGenerator'
-import * as Bcrypt from 'bcrypt'
 import logger from '../modules/Logger'
 import { cacheConnection } from '../modules'
 import { CONFIG } from '../config'
-// import { TransactionError } from './Transaction'
-// import { WalletError } from './Wallet'
 import { CryptoCurrency } from '../constants/currencies'
 import { CacheHelper, CacheKey } from 'lib/CacheHelper'
+import crypto = require('crypto')
 
 enum TransferStatus {
   PENDING = 'PENDING',
@@ -78,13 +76,16 @@ export class Transfer extends Model<Transfer> {
     )
 
     if (availableBalance < amount) {
-      throw new TransferError(TransferError.INSUFFICIENT_BALANCE)
+      throw new TransferError(TransferErrorType.INSUFFICIENT_BALANCE)
     }
     const r = new RandomGenerator()
     const transactionId = await r.generateTransactionId()
     const paymentCode = await r.generatePaymentCode()
 
-    const secretHash = await Bcrypt.hash(paymentCode, 6)
+    const secretHash = crypto
+      .createHash('sha256')
+      .update(paymentCode)
+      .digest('base64')
 
     try {
       const payment = await Transfer.create<Transfer>({
@@ -115,172 +116,104 @@ export class Transfer extends Model<Transfer> {
     }
   }
 
-  // static async claimPayment(
-  //   secret: string,
-  //   claimantUserId: number
-  // ): Promise<{
-  //   amount: number
-  //   transactionId: string
-  //   currencyCode: string
-  //   userId: string | number
-  // }> {
-  //   const p: Transfer | null = await this.getBySecret(secret)
+  static async claimPayment(
+    secret: string,
+    receiverUserId: number
+  ): Promise<Transfer> {
+    const payment: Transfer | null = await this.getBySecret(secret)
 
-  //   if (!p) throw new TransferError(TransferError.NOT_FOUND)
-  //   if (p.claimant) throw new TransferError(TransferError.CLAIMED)
-  //   if (p.userId === claimantUserId)
-  //     // TODO: self payment link, show details about payment link
-  //     throw new TransferError(TransferError.SELF_CLAIM)
-  //   if (moment().diff(p.createdAt, 'seconds') >= CONFIG.PAYMENT_EXPIRY_S)
-  //     // expiry
-  //     throw new TransferError(TransferError.EXPIRED)
+    // Error invalid code
+    if (!payment) {
+      throw new TransferError(TransferErrorType.INVALID_CODE)
+    }
+    // expiry
+    if (
+      moment().diff(payment.createdAt, 'seconds') >=
+        parseInt(CONFIG.PAYMENT_EXPIRY_S) ||
+      payment.status === TransferStatus.EXPIRED
+    ) {
+      throw new TransferError(TransferErrorType.EXPIRED)
+    }
+    // Error, self created code
+    if (payment.userId === receiverUserId) {
+      throw new TransferError(TransferErrorType.SELF_CLAIM)
+    }
+    // code already used
+    if (
+      payment.status === TransferStatus.CLAIMED ||
+      payment.receiverUserId != null
+    ) {
+      throw new TransferError(TransferErrorType.ALREADY_CLAIMED)
+    }
+    // Creator has insufficient balance
+    const creatorBalance = await Transaction.getAvailableBalance(
+      payment.userId,
+      payment.currencyCode
+    )
+    if (creatorBalance < payment.amount) {
+      throw new TransferError(TransferErrorType.INSUFFICIENT_BALANCE)
+    }
 
-  //   try {
-  //     await this.sequelize.transaction(async function(t) {
-  //       if (!p) throw new TransferError(TransferError.NOT_FOUND)
-  //       try {
-  //         await Wallet.unblockBalance(p.userId, p.currencyCode, p.amount, t)
-  //       } catch (e) {
-  //         if (e instanceof WalletError) {
-  //           if ((e.status = WalletError.INSUFFICIENT_BALANCE)) {
-  //             throw new TransferError(TransferError.INSUFFICIENT_BALANCE)
-  //           }
-  //         }
-  //       }
+    try {
+      return await this.sequelize.transaction(async function(t) {
+        await Transaction.transfer(
+          payment.userId,
+          receiverUserId,
+          payment.amount,
+          payment.currencyCode,
+          payment.id + '',
+          t
+        )
 
-  //       await Transaction.transfer(
-  //         p.userId,
-  //         claimantUserId,
-  //         p.amount,
-  //         p.currencyCode,
-  //         p.transactionId,
-  //         t
-  //       )
+        const paymentExpiryKey = CacheHelper.getKeyForId(
+          CacheKey.PaymentExpiry,
+          payment.id
+        )
 
-  //       // unset expiry on paymentlink
-  //       const cacheKeys = new CacheKeys(p.id).getKeys()
-  //       cacheClient.getClient.delAsync(cacheKeys.paymentExpiryTimer.shadowKey)
+        cacheConnection.getClient.delAsync(paymentExpiryKey)
 
-  //       return await p.updateAttributes(
-  //         { status: 'claimed', claimant: claimantUserId },
-  //         { transaction: t }
-  //       )
-  //     })
-  //     return {
-  //       amount: p.amount,
-  //       transactionId: p.transactionId + '-r',
-  //       currencyCode: p.currencyCode,
-  //       userId: p.userId
-  //     }
-  //   } catch (e) {
-  //     if (e instanceof TransactionError) {
-  //       if (e.status === TransactionError.INSUFFICIENT_BALANCE) {
-  //         throw new TransferError(TransferError.INSUFFICIENT_BALANCE)
-  //       }
-  //     }
-  //     throw new TransferError()
-  //   }
-  // }
+        return await payment.updateAttributes(
+          { status: TransferStatus.CLAIMED, receiverUserId: receiverUserId },
+          { transaction: t }
+        )
+      })
+    } catch (err) {
+      logger.error(JSON.stringify(err, Object.getOwnPropertyNames(err)))
+      throw new TransferError(TransferErrorType.TRANSACTION_ERROR)
+    }
+  }
 
-  // static async deletePayment(secret: string, userId: number): Promise<boolean> {
-  //   const p: Transfer | null = await this.getBySecret(secret)
-  //   if (!p) throw new TransferError(TransferError.NOT_FOUND)
-  //   if (p.userId != userId) throw new TransferError(TransferError.UNAUTHORIZED)
+  static async getBySecret(secret: string): Promise<Transfer | null> {
+    const hash: string = crypto
+      .createHash('sha256')
+      .update(secret)
+      .digest('base64')
 
-  //   try {
-  //     await p.updateAttributes({ paymentSignature: '', status: 'deleted' })
-  //     await Wallet.unblockBalance(p.userId, p.currencyCode, p.amount)
-  //   } catch (e) {
-  //     throw new TransferError()
-  //   }
-  //   return true
-  // }
-
-  // static async getBySecret(secret: string): Promise<Transfer | null> {
-  //   const salt = CONFIG.HASH_SALT
-  //   const hash: string = await Bcrypt.hash(secret, salt)
-  //   const payment: Transfer | null = await Transfer.findOne({
-  //     where: { secretHash: hash }
-  //   })
-  //   if (payment == null) return null
-  //   try {
-  //     const jwtSecret = CONFIG.JWT_SECRET
-  //     const decoded = JWT.verify(payment.transferSignature, jwtSecret) as any
-  //     if (decoded.userId && decoded.currencyCode && decoded.amount) {
-  //       payment.userId = decoded.userId
-  //       payment.currencyCode = decoded.currencyCode
-  //       payment.amount = decoded.amount
-  //       return payment
-  //     } else {
-  //       return null
-  //     }
-  //   } catch (err) {
-  //     if (err.name === 'JsonWebTokenError')
-  //       logger.error('Error in verifying payment')
-  //     return null
-  //   }
-  // }
-
-  // public static async deletePaymentIfExpired(
-  //   paymentId: number
-  // ): Promise<Transfer | null> {
-  //   if (paymentId) {
-  //     const p: Transfer | null = await Transfer.findOne({
-  //       where: { id: paymentId }
-  //     })
-  //     if (p && p.status === 'pending') {
-  //       await p.updateAttributes({
-  //         paymentSignature: '',
-  //         status: 'expired',
-  //         secretHash: ''
-  //       })
-  //       try {
-  //         await Wallet.unblockBalance(p.userId, p.currencyCode, p.amount)
-  //         return p
-  //       } catch (e) {
-  //         logger.error('error occurred in wallet')
-  //         throw new Error()
-  //       }
-  //     } else {
-  //       throw new TransferError(TransferError.NOT_FOUND)
-  //     }
-  //   }
-  //   return null
-  // }
-
-  // public static async deleteExpiredPayments(): Promise<boolean> {
-  //   const p: Transfer[] | null = await Transfer.findAll({
-  //     where: {
-  //       status: 'pending',
-  //       createdAt: {
-  //         $lte: moment()
-  //           .subtract(CONFIG.PAYMENT_EXPIRY_S, 's')
-  //           .toISOString()
-  //       }
-  //     }
-  //   })
-  //   console.log('Deleting expired payments: ' + JSON.stringify(p))
-  //   for (let i = 0; i < p.length; i++) {
-  //     await Transfer.deletePaymentIfExpired(p[i].id)
-  //   }
-  //   return false
-  // }
+    const payment: Transfer | null = await Transfer.findOne({
+      where: { secretHash: hash, status: TransferStatus.PENDING }
+    })
+    return payment
+  }
 }
 
+export enum TransferErrorType {
+  EXPIRED = 410,
+  INSUFFICIENT_BALANCE = 490,
+  ALREADY_CLAIMED = 409,
+  SELF_CLAIM = 411,
+  INVALID_CODE = 401,
+  TRANSACTION_ERROR = 500
+}
 export class TransferError extends Error {
   public status: number
-  public static EXPIRED = 410
-  public static INSUFFICIENT_BALANCE = 490
-  public static CLAIMED = 409
-  public static NOT_FOUND = 404
-  public static DELETED = 405
-  public static SELF_CLAIM = 411
-  public static UNAUTHORIZED = 401
 
-  constructor(status: number = 500, message: string = 'Payment Error') {
+  constructor(
+    status: TransferErrorType = TransferErrorType.TRANSACTION_ERROR,
+    message: string = 'Payment Error'
+  ) {
     super(message)
     this.name = this.constructor.name
-    logger.error(this.constructor.name + ', ' + status)
+    logger.warn(this.constructor.name + ', ' + status)
     this.status = status
   }
 }

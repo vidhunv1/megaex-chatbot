@@ -31,7 +31,7 @@ export const SignupChat: ChatHandler = {
 
       const parsedState: SignupState | null = await signupParser(
         msg,
-        tUser.id,
+        tUser,
         user,
         currentState
       )
@@ -75,7 +75,7 @@ export const SignupChat: ChatHandler = {
       }
       const updatedState: SignupState | null = await signupParser(
         msg,
-        tUser.id,
+        tUser,
         user,
         currentState || initialState
       )

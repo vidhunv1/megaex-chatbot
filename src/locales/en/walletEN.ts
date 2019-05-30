@@ -1,4 +1,5 @@
 import { BotCommand } from 'chats/types'
+import { TransferErrorType } from 'models'
 
 export const walletEN = {
   /* Home */
@@ -69,8 +70,32 @@ Example: _100 INR or 0.0005 BTC_
 {{ paymentLink }}
 (_Share this link privately to send the funds. Anyone with access to this link will get the funds_)
 
-This OTP link will expire in *{{ expiryTime }}* hours
-`
+This OTP link will expire in *{{ expiryTime }}* hours`,
+    'transfer-errors': {
+      [TransferErrorType.ALREADY_CLAIMED]:
+        'This payment link has been claimed.',
+      [TransferErrorType.EXPIRED]: 'This payment link has expired.',
+      [TransferErrorType.INSUFFICIENT_BALANCE]: `The users account has insufficient balance for this payment, you can contact them to fund their account to retry this payment.
+
+*Contact*: @{{ linkCreatorUsername }}
+`,
+      [TransferErrorType.INVALID_CODE]: 'This payment link is invalid.',
+      [TransferErrorType.SELF_CLAIM]: `*Payment Link*
+
+Amount: *{{ cryptoValue }}*
+(_Share the link privately to send the funds. Anyone with access to this link will get the funds_)
+`,
+      [TransferErrorType.TRANSACTION_ERROR]:
+        'An error occurred. Please try again later.'
+    },
+    'payment-success': {
+      receiver: `🔔 *Credit*
+
+You received *{{ cryptoValueReceived }}* from @{{ senderUsername }}.`,
+      sender: `🔔 *Debit*
+
+@{{ receiverUsername }} received *{{ cryptoValueSent }}* from your payment link.`
+    }
   },
 
   /* Withdraw */

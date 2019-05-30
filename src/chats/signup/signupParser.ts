@@ -5,15 +5,16 @@ import { logger } from 'modules'
 import { LanguageView, Language } from 'constants/languages'
 import { Account } from 'lib/Account'
 import { FiatCurrency } from 'constants/currencies'
-import { User, UserInfo } from 'models'
+import { User, UserInfo, TelegramAccount } from 'models'
 import { Namespace } from 'modules/i18n'
 import * as _ from 'lodash'
 import { DeepLink } from 'chats/types'
 import Referral from 'models/Referral'
+import { claimCode } from 'chats/wallet/sendCoin'
 
 export async function signupParser(
   msg: TelegramBot.Message,
-  telegramId: number,
+  tUser: TelegramAccount,
   user: User,
   currentState: SignupState
 ): Promise<SignupState | null> {
@@ -124,7 +125,7 @@ export async function signupParser(
               { where: { id: user.id } }
             )
 
-            await Account.clearUserCache(telegramId)
+            await Account.clearUserCache(tUser.id)
 
             return nextState
           } else {
@@ -181,6 +182,9 @@ export async function signupParser(
               tracking: data.value
             })
             break
+
+          case DeepLink.PAYMENT:
+            await claimCode(user, tUser, data.value)
         }
       }
       return currentState

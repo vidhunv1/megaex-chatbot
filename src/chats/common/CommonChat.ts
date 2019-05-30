@@ -11,6 +11,7 @@ import { logger } from 'modules'
 import { DealsMessage } from 'chats/exchange/deals'
 import * as _ from 'lodash'
 import { AccountHomeMessage } from 'chats/account/home'
+import { claimCode } from 'chats/wallet/sendCoin'
 
 export const CommonChat: ChatHandler = {
   async handleCommand(
@@ -71,10 +72,10 @@ export const CommonChat: ChatHandler = {
                 dealer.reviewCount
               )
             }
-            return true
           } catch (e) {
             logger.warn('Invalid order id ' + orderId)
           }
+          return true
         } else if (deeplink === DeepLink.ACCOUNT) {
           const accountInfo = await getAccount(value)
           if (accountInfo != null) {
@@ -92,12 +93,15 @@ export const CommonChat: ChatHandler = {
           }
 
           return true
-        } else {
-          return false
+        } else if (deeplink === DeepLink.PAYMENT) {
+          await claimCode(user, tUser, value)
+          return true
         }
+        return false
       }
+      default:
+        return false
     }
-    return false
   },
 
   async handleCallback(

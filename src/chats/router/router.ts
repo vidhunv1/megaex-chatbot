@@ -25,14 +25,14 @@ export const Router = {
     if (botCommand) {
       // Command handlers
       const isHandled =
-        (await CommonChat.handleCommand(
+        (await SignupChat.handleCommand(
           msg,
           botCommand,
           user,
           tUser,
           currentState
         )) ||
-        (await SignupChat.handleCommand(
+        (await CommonChat.handleCommand(
           msg,
           botCommand,
           user,

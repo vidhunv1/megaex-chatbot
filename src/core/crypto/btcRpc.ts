@@ -50,7 +50,6 @@ interface BtcResult {
   }[]
 }
 
-logger.error('TODO: Write cron to sync BTC transacions')
 export class BtcRpc {
   rpcClient!: RpcClient
   static instance: BtcRpc
