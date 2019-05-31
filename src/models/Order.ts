@@ -56,11 +56,11 @@ export class Order extends Model<Order> {
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
-  minAmount!: number
+  minFiatAmount!: number
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
-  maxAmount!: number
+  maxFiatAmount!: number
 
   @AllowNull(false)
   @Column(DataType.STRING)
@@ -92,8 +92,8 @@ export class Order extends Model<Order> {
     orderType: OrderType,
     rate: number,
     rateType: RateType,
-    minAmount: number,
-    maxAmount: number,
+    minFiatAmount: number,
+    maxFiatAmount: number,
     cryptoCurrencyCode: CryptoCurrency,
     fiatCurrencyCode: FiatCurrency,
     paymentMethodType: PaymentMethodType,
@@ -104,8 +104,8 @@ export class Order extends Model<Order> {
       orderType,
       rate,
       rateType,
-      minAmount,
-      maxAmount,
+      minFiatAmount,
+      maxFiatAmount,
       cryptoCurrencyCode,
       fiatCurrencyCode,
       paymentMethodType,
@@ -174,7 +174,7 @@ export class Order extends Model<Order> {
       ordersList.push({
         id: iOrder.id,
         orderType: iOrder.orderType,
-        minAmount: iOrder.minAmount,
+        minAmount: iOrder.minFiatAmount,
         paymentMethodType: iOrder.paymentMethodType,
         fiatCurrencyCode: iOrder.fiatCurrencyCode,
         rating: 4.5,

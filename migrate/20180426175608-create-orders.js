@@ -26,11 +26,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      minAmount: {
+      minFiatAmount: {
         allowNull: false,
         type: Sequelize.FLOAT
       },
-      maxAmount: {
+      maxFiatAmount: {
         allowNull: false,
         type: Sequelize.FLOAT
       },

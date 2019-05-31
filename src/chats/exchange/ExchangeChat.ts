@@ -64,8 +64,8 @@ export const ExchangeChat: ChatHandler = {
             dealer.exchangeRateSource
           ),
           {
-            max: order.maxAmount,
-            min: order.minAmount
+            min: order.minFiatAmount,
+            max: order.maxFiatAmount
           },
           await getAvailableBalance(dealer.id),
           order.fiatCurrencyCode,

@@ -8,9 +8,7 @@ import {
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
-import { OrderType } from 'models'
-import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { PaymentMethodType } from 'models'
+import { Order } from 'models'
 import { logger } from 'modules'
 
 export const DealsParser: Parser<ExchangeState> = async (
@@ -143,10 +141,11 @@ export const DealsParser: Parser<ExchangeState> = async (
       } else if (parsedValue.currencyKind === 'crypto') {
         fiatValue = parsedValue.amount * order.rate
       }
-
       if (fiatValue != null) {
-        const cryptoValue = fiatValue / order.rate
-        if (cryptoValue < order.amount.min || cryptoValue > order.amount.max) {
+        if (
+          fiatValue < order.minFiatAmount ||
+          fiatValue > order.maxFiatAmount
+        ) {
           return state
         }
 
@@ -309,6 +308,7 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
         'jumpState',
         null
       )
+
       if (jumpState == null) {
         return null
       }
@@ -375,20 +375,5 @@ async function initOpenTrade(
 }
 
 async function getOrder(orderId: number) {
-  return {
-    orderId: orderId,
-    orderType: OrderType.BUY,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    fiatCurrencyCode: FiatCurrency.INR,
-    rate: 310001,
-    rating: 4.9,
-    availableBalance: 0.5,
-    amount: {
-      min: 0.3,
-      max: 0.5
-    },
-    paymentMethod: PaymentMethodType.CASH,
-    isEnabled: true,
-    terms: 'Please transfer fast..'
-  }
+  return await Order.getOrder(orderId)
 }

@@ -85,8 +85,8 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
           order.paymentMethodType,
           trueRate,
           {
-            min: order.minAmount,
-            max: order.maxAmount
+            min: order.minFiatAmount,
+            max: order.maxFiatAmount
           },
           await getAvailableBalance(dealer.id),
           order.fiatCurrencyCode,
@@ -148,8 +148,8 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
           dealer.exchangeRateSource
         ),
         order.cryptoCurrencyCode,
-        order.minAmount,
-        order.maxAmount
+        order.minFiatAmount,
+        order.maxFiatAmount
       )
       return true
     },

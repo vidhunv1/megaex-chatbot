@@ -174,8 +174,8 @@ export async function signupResponder(
                     dealer.exchangeRateSource
                   ),
                   {
-                    min: order.minAmount,
-                    max: order.maxAmount
+                    min: order.minFiatAmount,
+                    max: order.maxFiatAmount
                   },
                   await getAvailableBalance(dealer.id),
                   order.fiatCurrencyCode,

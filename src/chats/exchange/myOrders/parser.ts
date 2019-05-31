@@ -98,8 +98,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.rate,
           orderInfo.rateType,
           {
-            min: orderInfo.minAmount,
-            max: orderInfo.maxAmount
+            min: orderInfo.minFiatAmount,
+            max: orderInfo.maxFiatAmount
           },
           await getAvailableBalance(orderInfo.cryptoCurrencyCode),
           orderInfo.paymentMethodType,
@@ -118,8 +118,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.rate,
           orderInfo.rateType,
           {
-            min: orderInfo.minAmount,
-            max: orderInfo.maxAmount
+            min: orderInfo.minFiatAmount,
+            max: orderInfo.maxFiatAmount
           },
           orderInfo.paymentMethodType,
           orderInfo.isActive,
@@ -384,8 +384,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.rate,
           orderInfo.rateType,
           {
-            min: orderInfo.minAmount,
-            max: orderInfo.maxAmount
+            min: orderInfo.minFiatAmount,
+            max: orderInfo.maxFiatAmount
           },
           await getAvailableBalance(orderInfo.cryptoCurrencyCode),
           orderInfo.paymentMethodType,
@@ -404,8 +404,8 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           orderInfo.rate,
           orderInfo.rateType,
           {
-            max: orderInfo.maxAmount,
-            min: orderInfo.minAmount
+            min: orderInfo.minFiatAmount,
+            max: orderInfo.maxFiatAmount
           },
           orderInfo.paymentMethodType,
           orderInfo.isActive,
@@ -573,8 +573,8 @@ async function saveEditedAmount(
   max: number
 ): Promise<void> {
   await Order.editOrder(orderId, {
-    minAmount: min,
-    maxAmount: max
+    minFiatAmount: min,
+    maxFiatAmount: max
   })
 }
 

@@ -170,8 +170,8 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
             order.rate,
             order.rateType,
             {
-              min: order.minAmount,
-              max: order.maxAmount
+              min: order.minFiatAmount,
+              max: order.maxFiatAmount
             },
             order.paymentMethodType,
             order.isActive,
@@ -195,8 +195,8 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
             order.rate,
             order.rateType,
             {
-              min: order.minAmount,
-              max: order.maxAmount
+              min: order.minFiatAmount,
+              max: order.maxFiatAmount
             },
             await getAvailableBalance(user.id),
             order.paymentMethodType,
