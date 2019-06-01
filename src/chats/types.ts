@@ -42,7 +42,7 @@ export enum DeepLink {
   ACCOUNT = 'acc',
   ORDER = 'order',
   TRACK = 'tr',
-  PAYMENT = 'code'
+  PAYMENT = 'cheque'
 }
 
 export interface CommandState {

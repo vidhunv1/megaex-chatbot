@@ -211,6 +211,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     fiatCurrencyCode: FiatCurrency,
     rate: number,
     rateType: RateType,
+    walletBalanceInFiat: number,
     amount: {
       min: number
       max: number
@@ -235,6 +236,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       fiatCurrencyCode,
       rate,
       rateType,
+      walletBalanceInFiat,
       amount,
       availableBalance,
       paymentMethod,

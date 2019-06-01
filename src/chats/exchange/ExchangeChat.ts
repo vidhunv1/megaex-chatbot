@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount, Order } from 'models'
+import { User, TelegramAccount, Order, Transaction } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
 import {
   EXCHANGE_STATE_LABEL,
@@ -27,6 +27,7 @@ import {
   DealsError
 } from './deals'
 import { logger } from 'modules'
+import { CryptoCurrency } from 'constants/currencies'
 
 export const ExchangeChat: ChatHandler = {
   async handleCommand(
@@ -46,6 +47,18 @@ export const ExchangeChat: ChatHandler = {
 
         const order = orderInfo.order
         const dealer = orderInfo.dealer
+
+        const availableBalance = await getAvailableBalance(
+          user.id,
+          order.cryptoCurrencyCode
+        )
+        const availableBalanceInFiat =
+          (await Order.convertToFixedRate(
+            order.rate,
+            order.rateType,
+            order.fiatCurrencyCode,
+            user.exchangeRateSource
+          )) * availableBalance
         await DealsMessage(msg, user).showDeal(
           order.orderType,
           order.id,
@@ -67,7 +80,7 @@ export const ExchangeChat: ChatHandler = {
             min: order.minFiatAmount,
             max: order.maxFiatAmount
           },
-          await getAvailableBalance(dealer.id),
+          availableBalanceInFiat,
           order.fiatCurrencyCode,
           dealer.reviewCount
         )
@@ -228,7 +241,9 @@ async function getOrderDetails(orderId: number) {
   }
 }
 
-async function getAvailableBalance(_userId: number) {
-  logger.error('TODO: Implement getAvailableBalance')
-  return 0
+async function getAvailableBalance(
+  userId: number,
+  currencyCode: CryptoCurrency
+) {
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }

@@ -14,7 +14,7 @@ import {
 } from 'constants/currencies'
 import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
 import PaymentMethod, { PaymentMethodType } from 'models/PaymentMethod'
-import { RateType, OrderType, Order } from 'models'
+import { RateType, OrderType, Order, Transaction } from 'models'
 import { MyOrdersMessage } from './messages'
 import { logger } from 'modules'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
@@ -91,17 +91,29 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           }
         }
 
+        const availableBalance = await getAvailableBalance(
+          user.id,
+          orderInfo.cryptoCurrencyCode
+        )
+        const availableBalanceInFiat =
+          (await Order.convertToFixedRate(
+            orderInfo.rate,
+            orderInfo.rateType,
+            orderInfo.fiatCurrencyCode,
+            user.exchangeRateSource
+          )) * availableBalance
         await MyOrdersMessage(msg, user).showMySellOrder(
           orderInfo.id,
           orderInfo.cryptoCurrencyCode,
           orderInfo.fiatCurrencyCode,
           orderInfo.rate,
           orderInfo.rateType,
+          availableBalanceInFiat,
           {
             min: orderInfo.minFiatAmount,
             max: orderInfo.maxFiatAmount
           },
-          await getAvailableBalance(orderInfo.cryptoCurrencyCode),
+          availableBalance,
           orderInfo.paymentMethodType,
           paymentFields,
           orderInfo.isActive,
@@ -377,17 +389,29 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         }
       }
       if (orderInfo.orderType === OrderType.SELL) {
+        const availableBalance = await getAvailableBalance(
+          user.id,
+          orderInfo.cryptoCurrencyCode
+        )
+        const availableBalanceInFiat =
+          (await Order.convertToFixedRate(
+            orderInfo.rate,
+            orderInfo.rateType,
+            orderInfo.fiatCurrencyCode,
+            user.exchangeRateSource
+          )) * availableBalance
         await MyOrdersMessage(msg, user).showMySellOrder(
           orderInfo.id,
           orderInfo.cryptoCurrencyCode,
           orderInfo.fiatCurrencyCode,
           orderInfo.rate,
           orderInfo.rateType,
+          availableBalanceInFiat,
           {
             min: orderInfo.minFiatAmount,
             max: orderInfo.maxFiatAmount
           },
-          await getAvailableBalance(orderInfo.cryptoCurrencyCode),
+          availableBalance,
           orderInfo.paymentMethodType,
           paymentMethodFields,
           orderInfo.isActive,
@@ -628,14 +652,14 @@ async function editPaymentDetails(
   })
 }
 
-// TODO -------------
 async function getAvailableBalance(
-  _currencyCode: CryptoCurrency
+  userId: number,
+  currencyCode: CryptoCurrency
 ): Promise<number> {
-  logger.error('TODO: Implement availableBalance')
-  return 0
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
+// TODO -------------
 async function deleteOrder(orderId: number): Promise<boolean> {
   logger.error('TODO: implement checks for delete order ' + orderId)
   await Order.deleteOrder(orderId)

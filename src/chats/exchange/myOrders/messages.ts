@@ -393,11 +393,12 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     fiatCurrencyCode: FiatCurrency,
     rate: number,
     rateType: RateType,
+    walletFiatValue: number,
     amount: {
       min: number
       max: number
     },
-    availableCryptoBalance: number,
+    _availableCryptoBalance: number,
     paymentMethod: PaymentMethodType,
     pmFields: string[],
     isEnabled: boolean,
@@ -407,11 +408,9 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     showBackButton: boolean
   ) {
     let inline: TelegramBot.InlineKeyboardButton[][]
-    const equivFiatBalance = availableCryptoBalance * rate
-
     if (!showEditOptions) {
       const focusInlineButtons: TelegramBot.InlineKeyboardButton[] = []
-      if (amount.min > equivFiatBalance) {
+      if (amount.min > walletFiatValue) {
         focusInlineButtons.push({
           text: user.t(
             `${Namespace.Exchange}:my-orders.deposit-cryptocurrency`,
@@ -531,7 +530,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
           : user.t(`${Namespace.Exchange}:my-orders.terms-not-added`)
     })
 
-    if (amount.min > equivFiatBalance) {
+    if (amount.min > walletFiatValue) {
       message =
         message +
         `\n${user.t(

@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount, Order } from 'models'
+import { User, TelegramAccount, Order, Transaction } from 'models'
 import { ChatHandler, BotCommand, DeepLink } from 'chats/types'
 import { telegramHook } from 'modules'
 import { keyboardMainMenu } from './utils'
@@ -46,6 +46,18 @@ export const CommonChat: ChatHandler = {
           try {
             const { order, dealer } = await getOrder(parseInt(orderId))
             if (order && dealer) {
+              const availableBalance = await getAvailableBalance(
+                user.id,
+                order.cryptoCurrencyCode
+              )
+              const availableBalanceInFiat =
+                (await Order.convertToFixedRate(
+                  order.rate,
+                  order.rateType,
+                  order.fiatCurrencyCode,
+                  user.exchangeRateSource
+                )) * availableBalance
+
               await DealsMessage(msg, user).showDeal(
                 order.orderType,
                 order.id,
@@ -67,7 +79,7 @@ export const CommonChat: ChatHandler = {
                   min: order.minFiatAmount,
                   max: order.maxFiatAmount
                 },
-                await getAvailableBalance(dealer.id),
+                availableBalanceInFiat,
                 order.fiatCurrencyCode,
                 dealer.reviewCount
               )
@@ -181,11 +193,14 @@ async function getOrder(orderId: number) {
   }
 }
 
-// TODO: -----------
-async function getAvailableBalance(_userId: number) {
-  return 0
+async function getAvailableBalance(
+  userId: number,
+  currencyCode: CryptoCurrency
+) {
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
+// TODO: -----------
 async function getAccount(
   accountId: string
 ): Promise<{

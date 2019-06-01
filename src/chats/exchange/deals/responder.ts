@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { ExchangeState, TradeStatus } from '../ExchangeState'
 import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { OrderType, Order, User } from 'models'
+import { OrderType, Order, User, Transaction } from 'models'
 import { DealsConfig } from './config'
 import { logger } from 'modules'
 
@@ -72,6 +72,17 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
           dealer.exchangeRateSource
         )
 
+        const availableBalance = await getAvailableBalance(
+          user.id,
+          order.cryptoCurrencyCode
+        )
+        const availableBalanceInFiat =
+          (await Order.convertToFixedRate(
+            order.rate,
+            order.rateType,
+            order.fiatCurrencyCode,
+            user.exchangeRateSource
+          )) * availableBalance
         await DealsMessage(msg, user).showDeal(
           order.orderType,
           order.id,
@@ -88,7 +99,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
             min: order.minFiatAmount,
             max: order.maxFiatAmount
           },
-          await getAvailableBalance(dealer.id),
+          availableBalanceInFiat,
           order.fiatCurrencyCode,
           dealer.reviewCount
         )
@@ -242,9 +253,11 @@ async function getOrder(orderId: number) {
   }
 }
 
-// TODO: -----------
-async function getAvailableBalance(_userId: number) {
-  return 0
+async function getAvailableBalance(
+  userId: number,
+  currencyCode: CryptoCurrency
+) {
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
 async function getTrade(tradeId: number) {
@@ -288,5 +301,7 @@ async function getOrdersList(
 
   const totalOrders = orderList.length
 
-  return { orderList: orderList.slice(cursor, cursor + limit), totalOrders }
+  const slicedOrderList = orderList.slice(cursor, cursor + limit)
+  logger.error('TODO: Fetch all user available balances')
+  return { orderList: slicedOrderList, totalOrders }
 }

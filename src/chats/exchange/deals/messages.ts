@@ -313,7 +313,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     paymentMethod: PaymentMethodType,
     fixedRate: number, // Margin rates needs to be converted to fixed
     amount: { min: number; max: number },
-    availableBalance: number,
+    availableBalanceInFiat: number,
     fiatCurrencyCode: FiatCurrency,
     reviewCount: number
   ) {
@@ -360,8 +360,9 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       })
     } else {
       const actualMaxAmount =
-        availableBalance >= amount.min && availableBalance < amount.max
-          ? availableBalance
+        availableBalanceInFiat >= amount.min &&
+        availableBalanceInFiat < amount.max
+          ? availableBalanceInFiat
           : amount.max
 
       const formattedAmount = `${
@@ -385,7 +386,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         formattedAmount
       })
 
-      if (availableBalance < amount.min) {
+      if (availableBalanceInFiat < amount.min) {
         showDealText =
           showDealText +
           '\n\n' +

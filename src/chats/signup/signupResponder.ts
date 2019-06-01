@@ -4,7 +4,7 @@ import { Namespace } from 'modules/i18n'
 import { languageKeyboard, currencyKeyboard } from './utils'
 import { CryptoCurrency } from 'constants/currencies'
 import { keyboardMainMenu } from 'chats/common'
-import { User, Wallet, Order } from 'models'
+import { User, Wallet, Order, Transaction } from 'models'
 import { SignupState, SignupStateKey } from './SignupState'
 import { DeepLink } from 'chats/types'
 import * as _ from 'lodash'
@@ -156,6 +156,18 @@ export async function signupResponder(
             try {
               const { order, dealer } = await getOrder(parseInt(data.value))
               if (order && dealer) {
+                const availableBalance = await getAvailableBalance(
+                  user.id,
+                  order.cryptoCurrencyCode
+                )
+                const availableBalanceInFiat =
+                  (await Order.convertToFixedRate(
+                    order.rate,
+                    order.rateType,
+                    order.fiatCurrencyCode,
+                    user.exchangeRateSource
+                  )) * availableBalance
+
                 await DealsMessage(msg, user).showDeal(
                   order.orderType,
                   order.id,
@@ -177,7 +189,7 @@ export async function signupResponder(
                     min: order.minFiatAmount,
                     max: order.maxFiatAmount
                   },
-                  await getAvailableBalance(dealer.id),
+                  availableBalanceInFiat,
                   order.fiatCurrencyCode,
                   dealer.reviewCount
                 )
@@ -227,10 +239,14 @@ async function getOrder(orderId: number) {
   }
 }
 
-// TODO: -----------
-async function getAvailableBalance(_userId: number) {
-  return 0
+async function getAvailableBalance(
+  userId: number,
+  currencyCode: CryptoCurrency
+) {
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
+
+// TODO: -----------
 
 async function getAccount(
   accountId: string

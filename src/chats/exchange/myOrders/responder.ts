@@ -9,7 +9,8 @@ import {
   PaymentMethodType,
   Order,
   PaymentMethod,
-  PaymentMethodFields
+  PaymentMethodFields,
+  Transaction
 } from 'models'
 import { OrderType } from 'models'
 import { logger } from 'modules'
@@ -188,17 +189,30 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
               paymentMethodFields = pm.fields
             }
           }
+
+          const availableBalance = await getAvailableBalance(
+            user.id,
+            order.cryptoCurrencyCode
+          )
+          const availableBalanceInFiat =
+            (await Order.convertToFixedRate(
+              order.rate,
+              order.rateType,
+              order.fiatCurrencyCode,
+              user.exchangeRateSource
+            )) * availableBalance
           await MyOrdersMessage(msg, user).showMySellOrder(
             orderId,
             order.cryptoCurrencyCode,
             order.fiatCurrencyCode,
             order.rate,
             order.rateType,
+            availableBalanceInFiat,
             {
               min: order.minFiatAmount,
               max: order.maxFiatAmount
             },
-            await getAvailableBalance(user.id),
+            availableBalance,
             order.paymentMethodType,
             paymentMethodFields,
             order.isActive,
@@ -223,8 +237,11 @@ async function getOrderInfo(orderId: number) {
   return await Order.getOrder(orderId)
 }
 
-async function getAvailableBalance(_userId: number) {
-  return 0.2
+async function getAvailableBalance(
+  userId: number,
+  currencyCode: CryptoCurrency
+) {
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
 async function getPaymentFields(id: number) {
@@ -238,6 +255,7 @@ async function getAddedPaymentMethods(
 }
 
 async function getActiveOrders(userId: number) {
+  logger.error('myorders/responder getActiveOrders')
   return [
     {
       createdBy: userId,
@@ -278,5 +296,6 @@ async function getMarketRate(
   _cryptocurrency: CryptoCurrency,
   _fiatCurrency: FiatCurrency
 ): Promise<number> {
+  logger.error('myorders/responder Implement market rate')
   return 400000
 }

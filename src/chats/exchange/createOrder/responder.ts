@@ -4,9 +4,16 @@ import * as _ from 'lodash'
 import { ExchangeState } from '../ExchangeState'
 import { CreateOrderMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { OrderType, PaymentMethodFields, PaymentMethod, Order } from 'models'
+import {
+  OrderType,
+  PaymentMethodFields,
+  PaymentMethod,
+  Order,
+  Transaction
+} from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethodType } from 'models'
+import logger from 'modules/logger'
 
 const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
 
@@ -142,17 +149,29 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
             paymentFields = pm.fields
           }
         }
+        const availableBalance = await getAvailableBalance(
+          user.id,
+          orderInfo.cryptoCurrencyCode
+        )
+        const availableBalanceInFiat =
+          (await Order.convertToFixedRate(
+            orderInfo.rate,
+            orderInfo.rateType,
+            orderInfo.fiatCurrencyCode,
+            user.exchangeRateSource
+          )) * availableBalance
         await CreateOrderMessage(msg, user).sellOrderCreated(
           orderInfo.id,
           orderInfo.cryptoCurrencyCode,
           orderInfo.fiatCurrencyCode,
           orderInfo.rate,
           orderInfo.rateType,
+          availableBalanceInFiat,
           {
             max: orderInfo.maxFiatAmount,
             min: orderInfo.minFiatAmount
           },
-          await getAvailableBalance(orderInfo.cryptoCurrencyCode),
+          await getAvailableBalance(user.id, orderInfo.cryptoCurrencyCode),
           orderInfo.paymentMethodType,
           paymentFields,
           orderInfo.isActive,
@@ -170,10 +189,12 @@ async function getMarketRate(
   _cryptocurrency: CryptoCurrency,
   _fiatCurrency: FiatCurrency
 ): Promise<number> {
+  logger.error('TODO: Implement getmarket rate createorder/responder')
   return 400000
 }
 
 async function getMarketRateSource(): Promise<ExchangeSource> {
+  logger.error('TODO: Implement getmarket rate source createorder/responder')
   return ExchangeSource.BINANCE
 }
 
@@ -192,7 +213,8 @@ async function getPaymentFields(id: number) {
 }
 
 async function getAvailableBalance(
-  _currencyCode: CryptoCurrency
+  userId: number,
+  currencyCode: CryptoCurrency
 ): Promise<number> {
-  return 0.1
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
