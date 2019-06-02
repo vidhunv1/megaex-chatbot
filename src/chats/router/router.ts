@@ -156,6 +156,8 @@ export const Router = {
           reply_markup: keyboardMainMenu(user)
         }
       )
+    } else {
+      await telegramHook.getWebhook.answerCallbackQuery(callback.id, {})
     }
 
     if (!callback.data) {

@@ -365,8 +365,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
           DealsStateKey.cb_openDeal,
           DealsState[DealsStateKey.cb_openDeal]
         >(DealsStateKey.cb_openDeal, {
-          orderId,
-          error: null
+          orderId
         })
       }
 
@@ -428,8 +427,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
             DealsStateKey.cb_requestDealDeposit,
             DealsState[DealsStateKey.cb_requestDealDeposit]
           >(DealsStateKey.cb_requestDealDeposit, {
-            orderId,
-            error: null
+            orderId
           })
         }
       } else {
@@ -441,8 +439,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
             DealsStateKey.cb_openDeal,
             DealsState[DealsStateKey.cb_openDeal]
           >(DealsStateKey.cb_openDeal, {
-            orderId,
-            error: null
+            orderId
           })
         }
       }

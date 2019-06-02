@@ -135,8 +135,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
 
     [DealsStateKey.dealError]: async () => {
       const error = _.get(state, `${state.previousStateKey}.error`, null)
-
-      DealsMessage(msg, user).showDealsError(error)
+      await DealsMessage(msg, user).showDealsError(error)
       return true
     },
 

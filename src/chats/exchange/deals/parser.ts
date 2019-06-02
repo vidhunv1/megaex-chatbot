@@ -8,8 +8,10 @@ import {
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
-import { Order } from 'models'
-import { logger } from 'modules'
+import { Order, User, TelegramAccount } from 'models'
+import { logger, telegramHook } from 'modules'
+import { Namespace } from 'modules/i18n'
+import { dataFormatter } from 'utils/dataFormatter'
 
 export const DealsParser: Parser<ExchangeState> = async (
   msg,
@@ -224,7 +226,12 @@ export const DealsParser: Parser<ExchangeState> = async (
       ) {
         switch (jumpState) {
           case DealsStateKey.cb_requestDealDeposit:
-            const isInitialized = await sendOpenDealRequest(orderId)
+            const isInitialized = await sendOpenDealRequest(
+              orderId,
+              user,
+              tUser,
+              parseInt(inputDealData.fiatValue + '')
+            )
             return {
               ...state,
               [DealsStateKey.cb_confirmInputDealAmount]: {
@@ -321,8 +328,10 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
       return DealsStateKey.showDealById
 
     case DealsStateKey.cb_requestDealDeposit: {
-      const dealError = JSON.parse(
-        _.get(state[DealsStateKey.cb_requestDealDeposit], 'error', null) + ''
+      const dealError = _.get(
+        state[DealsStateKey.cb_requestDealDeposit],
+        'error',
+        null
       )
 
       if (dealError) {
@@ -333,9 +342,7 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
     }
 
     case DealsStateKey.cb_openDeal: {
-      const dealError = JSON.parse(
-        _.get(state[DealsStateKey.cb_requestDealDeposit], 'error', null) + ''
-      )
+      const dealError = _.get(state[DealsStateKey.cb_openDeal], 'error', null)
       if (dealError) {
         return DealsStateKey.dealError
       }
@@ -397,14 +404,70 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
 
       return null
     }
+    case DealsStateKey.dealError:
+      return null
     default:
       return null
   }
 }
 
-async function sendOpenDealRequest(orderId: number) {
-  // TODO: Potential area for spamming.
-  logger.error('TODO: sendOpenDealRequest for ' + orderId)
+async function sendOpenDealRequest(
+  orderId: number,
+  requesterUser: User,
+  requestorTelegram: TelegramAccount,
+  dealFiatAmount: number
+) {
+  logger.warn(
+    'TODO: Potential area for spamming. deals/parser sendOpenDealRequest'
+  )
+  const order = await getOrder(orderId)
+
+  if (!order) {
+    return false
+  }
+
+  const op = await User.findById(order.userId, {
+    include: [{ model: TelegramAccount }]
+  })
+
+  if (!op) {
+    return false
+  }
+
+  logger.info(
+    `deals/parser/sendOpenDealRequest: /O${orderId} requester: ${
+      requesterUser.id
+    } to user ${order.userId}`
+  )
+
+  const dealCryptoAmount: number =
+    dealFiatAmount /
+    (await Order.convertToFixedRate(
+      order.rate,
+      order.rateType,
+      order.fiatCurrencyCode,
+      requesterUser.exchangeRateSource
+    ))
+
+  await telegramHook.getWebhook.sendMessage(
+    op.telegramUser.id,
+    op.t(`${Namespace.Exchange}:deals.request-deposit-notify`, {
+      orderId: order.id,
+      requesterName: requestorTelegram.firstName,
+      requesterUsername: requestorTelegram.username,
+      formattedFiatValue: dataFormatter.formatFiatCurrency(
+        dealFiatAmount,
+        order.fiatCurrencyCode
+      ),
+      formattedCryptoValue: dataFormatter.formatCryptoCurrency(
+        dealCryptoAmount,
+        order.cryptoCurrencyCode
+      )
+    }),
+    {
+      parse_mode: 'Markdown'
+    }
+  )
   return true
 }
 

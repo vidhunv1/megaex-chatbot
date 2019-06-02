@@ -54,11 +54,11 @@ export interface DealsState {
 
   [DealsStateKey.cb_openDeal]?: {
     orderId: number
-    error: DealsError | null
+    error?: DealsError
   }
   [DealsStateKey.cb_requestDealDeposit]?: {
     orderId: number
-    error: DealsError | null
+    error?: DealsError
   }
 
   [DealsStateKey.showDealInitOpened]?: {

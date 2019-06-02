@@ -15,6 +15,13 @@ export const exchangeEN = {
   },
 
   deals: {
+    'request-deposit-notify': `🛎 *New Match*
+
+You have a new buy request on your order ${BotCommand.ORDER}{{ orderId }}.
+
+*{{ requesterName }}* (@{{ requesterUsername }}) wants to buy *{{ formattedCryptoValue }}* for *{{ formattedFiatValue }}*.
+
+⚠️ You need to deposit the required funds before you can start this trade.`,
     errors: {
       [DealsError.ORDER_NOT_FOUND]: 'Order not found.',
       [DealsError.SELF_OPEN_DEAL_REQUEST]:
