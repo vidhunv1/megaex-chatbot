@@ -16,7 +16,10 @@ export const exchangeEN = {
 
   deals: {
     errors: {
-      [DealsError.ORDER_NOT_FOUND]: 'Order not found.'
+      [DealsError.ORDER_NOT_FOUND]: 'Order not found.',
+      [DealsError.SELF_OPEN_DEAL_REQUEST]:
+        'You cannot open deal on your own order!',
+      default: 'An error occured. Please try again later.'
     },
     'next-cbbutton': 'next',
     'prev-cbbutton': 'prev',

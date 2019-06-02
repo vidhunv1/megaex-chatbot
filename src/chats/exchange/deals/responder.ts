@@ -73,7 +73,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         )
 
         const availableBalance = await getAvailableBalance(
-          user.id,
+          order.userId,
           order.cryptoCurrencyCode
         )
         const availableBalanceInFiat =
@@ -131,6 +131,13 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         return true
       }
       return false
+    },
+
+    [DealsStateKey.dealError]: async () => {
+      const error = _.get(state, `${state.previousStateKey}.error`, null)
+
+      DealsMessage(msg, user).showDealsError(error)
+      return true
     },
 
     [DealsStateKey.inputDealAmount]: async () => {

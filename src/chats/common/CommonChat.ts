@@ -47,7 +47,7 @@ export const CommonChat: ChatHandler = {
             const { order, dealer } = await getOrder(parseInt(orderId))
             if (order && dealer) {
               const availableBalance = await getAvailableBalance(
-                user.id,
+                order.userId,
                 order.cryptoCurrencyCode
               )
               const availableBalanceInFiat =

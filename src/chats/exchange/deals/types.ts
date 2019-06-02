@@ -19,11 +19,14 @@ export enum DealsStateKey {
   cb_confirmInputDealAmount = 'cb_confirmInputDealAmount',
 
   showDealInitOpened = 'showDealInitOpened',
-  showDealInitCancel = 'showDealInitCancel'
+  showDealInitCancel = 'showDealInitCancel',
+
+  dealError = 'dealError'
 }
 
 export enum DealsError {
-  ORDER_NOT_FOUND = 'ORDER_NOT_FOUND'
+  ORDER_NOT_FOUND = 'ORDER_NOT_FOUND',
+  SELF_OPEN_DEAL_REQUEST = 'SELF_OPEN_DEAL_REQUEST'
 }
 
 export interface DealsState {
@@ -51,9 +54,11 @@ export interface DealsState {
 
   [DealsStateKey.cb_openDeal]?: {
     orderId: number
+    error: DealsError | null
   }
   [DealsStateKey.cb_requestDealDeposit]?: {
     orderId: number
+    error: DealsError | null
   }
 
   [DealsStateKey.showDealInitOpened]?: {

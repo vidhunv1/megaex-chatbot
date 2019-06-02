@@ -157,7 +157,7 @@ export async function signupResponder(
               const { order, dealer } = await getOrder(parseInt(data.value))
               if (order && dealer) {
                 const availableBalance = await getAvailableBalance(
-                  user.id,
+                  order.userId,
                   order.cryptoCurrencyCode
                 )
                 const availableBalanceInFiat =

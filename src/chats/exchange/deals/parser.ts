@@ -1,4 +1,4 @@
-import { DealsStateKey } from './types'
+import { DealsStateKey, DealsError } from './types'
 import { Parser } from 'chats/types'
 import {
   ExchangeState,
@@ -78,6 +78,18 @@ export const DealsParser: Parser<ExchangeState> = async (
       if (orderId === null) {
         return null
       }
+      const order = await getOrder(orderId)
+      if (!order) return null
+
+      if (order.userId === user.id) {
+        return {
+          ...state,
+          [DealsStateKey.cb_openDeal]: {
+            error: DealsError.SELF_OPEN_DEAL_REQUEST,
+            orderId
+          }
+        }
+      }
 
       return {
         ...state,
@@ -97,6 +109,18 @@ export const DealsParser: Parser<ExchangeState> = async (
       )
       if (orderId === null) {
         return null
+      }
+      const order = await getOrder(orderId)
+      if (!order) return null
+
+      if (order.userId === user.id) {
+        return {
+          ...state,
+          [DealsStateKey.cb_requestDealDeposit]: {
+            orderId,
+            error: DealsError.SELF_OPEN_DEAL_REQUEST
+          }
+        }
       }
 
       return {
@@ -157,7 +181,8 @@ export const DealsParser: Parser<ExchangeState> = async (
             data: {
               fiatValue,
               fiatCurrencyCode: order.fiatCurrencyCode
-            }
+            },
+            error: null
           }
         }
       }
@@ -261,6 +286,9 @@ export const DealsParser: Parser<ExchangeState> = async (
     },
     [DealsStateKey.showDealInitCancel]: async () => {
       return null
+    },
+    [DealsStateKey.dealError]: async () => {
+      return null
     }
   }
 
@@ -292,10 +320,28 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
     case DealsStateKey.cb_showDealById:
       return DealsStateKey.showDealById
 
-    case DealsStateKey.cb_requestDealDeposit:
+    case DealsStateKey.cb_requestDealDeposit: {
+      const dealError = JSON.parse(
+        _.get(state[DealsStateKey.cb_requestDealDeposit], 'error', null) + ''
+      )
+
+      if (dealError) {
+        return DealsStateKey.dealError
+      }
+
       return DealsStateKey.inputDealAmount
-    case DealsStateKey.cb_openDeal:
+    }
+
+    case DealsStateKey.cb_openDeal: {
+      const dealError = JSON.parse(
+        _.get(state[DealsStateKey.cb_requestDealDeposit], 'error', null) + ''
+      )
+      if (dealError) {
+        return DealsStateKey.dealError
+      }
+
       return DealsStateKey.inputDealAmount
+    }
 
     case DealsStateKey.inputDealAmount: {
       const amountData = _.get(

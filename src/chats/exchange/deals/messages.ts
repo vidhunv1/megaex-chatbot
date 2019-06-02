@@ -16,6 +16,30 @@ import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 import { keyboardMainMenu } from 'chats/common'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
+  async showDealsError(error: DealsError) {
+    let transKey = ''
+    switch (error) {
+      case DealsError.SELF_OPEN_DEAL_REQUEST:
+        transKey = user.t(
+          `${Namespace.Exchange}:deals.errors.${
+            DealsError.SELF_OPEN_DEAL_REQUEST
+          }`
+        )
+        break
+      case DealsError.ORDER_NOT_FOUND:
+        transKey = user.t(
+          `${Namespace.Exchange}:deals.errors.${DealsError.ORDER_NOT_FOUND}`
+        )
+        break
+      default:
+        transKey = user.t(`${Namespace.Exchange}:deals.errors.default`)
+    }
+    await telegramHook.getWebhook.sendMessage(msg.chat.id, transKey, {
+      parse_mode: 'Markdown',
+      reply_markup: keyboardMainMenu(user)
+    })
+  },
+
   async showOpenDealRequest(sellerTelegramUsername: string) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
@@ -341,7 +365,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
           DealsStateKey.cb_openDeal,
           DealsState[DealsStateKey.cb_openDeal]
         >(DealsStateKey.cb_openDeal, {
-          orderId
+          orderId,
+          error: null
         })
       }
 
@@ -403,7 +428,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
             DealsStateKey.cb_requestDealDeposit,
             DealsState[DealsStateKey.cb_requestDealDeposit]
           >(DealsStateKey.cb_requestDealDeposit, {
-            orderId
+            orderId,
+            error: null
           })
         }
       } else {
@@ -415,7 +441,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
             DealsStateKey.cb_openDeal,
             DealsState[DealsStateKey.cb_openDeal]
           >(DealsStateKey.cb_openDeal, {
-            orderId
+            orderId,
+            error: null
           })
         }
       }
