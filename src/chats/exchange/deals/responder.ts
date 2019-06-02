@@ -286,7 +286,8 @@ async function getOrdersList(
   // Show all orders with available balance first, rest are shown at last
   let orderList = _.filter(
     orders,
-    (o) => o.orderType === orderType && o.availableBalance >= o.minAmount
+    (o) =>
+      o.orderType === orderType && o.availableFiatBalance >= o.minFiatAmount
   )
   orderList = _.orderBy(orderList, (o) => o.fixedRate, [
     orderType === OrderType.BUY ? 'desc' : 'asc'
@@ -295,13 +296,26 @@ async function getOrdersList(
   orderList.push(
     ..._.filter(
       orders,
-      (o) => o.availableBalance < o.minAmount && o.orderType === orderType
+      (o) =>
+        o.availableFiatBalance < o.minFiatAmount && o.orderType === orderType
     )
   )
 
   const totalOrders = orderList.length
 
   const slicedOrderList = orderList.slice(cursor, cursor + limit)
-  logger.error('TODO: Fetch all user available balances')
-  return { orderList: slicedOrderList, totalOrders }
+
+  const mapOrders = slicedOrderList.map((o) => {
+    return {
+      id: o.id,
+      fixedRate: o.fixedRate,
+      paymentMethodType: o.paymentMethodType,
+      fiatCurrencyCode: o.fiatCurrencyCode,
+      rating: o.rating,
+      availableBalance: o.availableFiatBalance,
+      minFiatAmount: o.minFiatAmount
+    }
+  })
+
+  return { orderList: mapOrders, totalOrders }
 }

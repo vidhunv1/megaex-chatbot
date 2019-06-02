@@ -188,7 +188,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       fiatCurrencyCode: FiatCurrency
       rating: number
       availableBalance: number
-      minAmount: number
+      minFiatAmount: number
     }[],
     totalOrders: number,
     currentCursor: number,
@@ -206,7 +206,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         )} | ${order.rating.toFixed(1)} ⭐️`
 
         if (
-          order.availableBalance < order.minAmount &&
+          order.availableBalance < order.minFiatAmount &&
           orderType === OrderType.SELL
         ) {
           text = '❗️' + text

@@ -15,6 +15,7 @@ import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { logger } from 'modules'
 import * as _ from 'lodash'
+import { Transaction } from 'models'
 
 export enum OrderType {
   BUY = 'BUY',
@@ -171,14 +172,19 @@ export class Order extends Model<Order> {
         iOrder.user.exchangeRateSource
       )
 
+      logger.error('TODO: models/order connect rating')
       ordersList.push({
         id: iOrder.id,
-        orderType: iOrder.orderType,
-        minAmount: iOrder.minFiatAmount,
+        minFiatAmount: iOrder.minFiatAmount,
         paymentMethodType: iOrder.paymentMethodType,
         fiatCurrencyCode: iOrder.fiatCurrencyCode,
+        orderType: iOrder.orderType,
         rating: 4.5,
-        availableBalance: 0,
+        availableFiatBalance:
+          (await Transaction.getAvailableBalance(
+            iOrder.userId,
+            iOrder.cryptoCurrencyCode
+          )) * fixedRate,
         fixedRate
       })
     }
