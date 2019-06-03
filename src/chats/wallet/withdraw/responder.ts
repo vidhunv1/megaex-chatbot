@@ -3,6 +3,7 @@ import { Responder } from 'chats/types'
 import { WalletState } from '../WalletState'
 import * as _ from 'lodash'
 import { WithdrawMessage } from './messages'
+import { cryptoCurrencyInfo } from 'constants/currencies'
 
 export const WithdrawResponder: Responder<WalletState> = (
   msg,
@@ -93,6 +94,24 @@ export const WithdrawResponder: Responder<WalletState> = (
           await WithdrawMessage(msg, user).errorCreateWithdraw()
           return true
         }
+
+        case WithdrawCoinError.LESS_THAN_MIN_AMOUNT: {
+          const cryptoCurrencyCode = _.get(
+            currentState[WithdrawStateKey.cb_withdrawCoin],
+            'currencyCode',
+            null
+          )
+
+          if (!cryptoCurrencyCode) {
+            return false
+          }
+
+          await WithdrawMessage(msg, user).errorLessThanMin(
+            cryptoCurrencyInfo[cryptoCurrencyCode].minWithdrawalAmount,
+            cryptoCurrencyCode
+          )
+          return true
+        }
       }
 
       return false
@@ -144,7 +163,9 @@ export const WithdrawResponder: Responder<WalletState> = (
         return false
       }
 
-      await WithdrawMessage(msg, user).showCreatedWithdrawalSuccess()
+      await WithdrawMessage(msg, user).showCreatedWithdrawalSuccess(
+        amountState.cryptoCurrency
+      )
       return true
     },
 

@@ -24,7 +24,8 @@ export enum TransactionType {
 
 export enum TransactionSource {
   PAYMENT = 'PAYMENT',
-  CORE = 'CORE'
+  CORE = 'CORE',
+  WITHDRAWAL = 'WITHDRAWAL'
 }
 
 @Table({ timestamps: true, tableName: 'Transactions', paranoid: true })
@@ -287,6 +288,37 @@ export class Transaction extends Model<Transaction> {
         userId: userId
       }
     })
+  }
+
+  static async addWithdrawalTransaction(
+    userId: number,
+    amount: number,
+    currencyCode: CryptoCurrency,
+    txid: string,
+    transaction: SequelizeTransacion
+  ): Promise<Transaction> {
+    const balance = await Transaction.getAvailableBalance(userId, currencyCode)
+    if (!balance || (balance && balance < amount)) {
+      throw new TransactionError(TransactionError.INSUFFICIENT_BALANCE)
+    }
+
+    if (amount < cryptoCurrencyInfo[currencyCode].minWithdrawalAmount) {
+      logger.error('withdrawal amount less than min. model/withdrawal')
+      throw new Error('withdrawal amount less than min')
+    }
+
+    const tx = new Transaction({
+      userId,
+      txid,
+      amount: amount >= 0 ? -1 * amount : amount,
+      transactionSource: TransactionSource.WITHDRAWAL,
+      transactionType: TransactionType.SEND,
+      currencyCode: currencyCode,
+      confirmations: 10
+    })
+    await tx.save({ transaction: transaction })
+
+    return tx
   }
 
   // static async unblockBalance(

@@ -1,3 +1,5 @@
+import { CONFIG } from '../config'
+
 export enum CryptoCurrency {
   BTC = 'BTC'
 }
@@ -14,7 +16,7 @@ export const cryptoCurrencyInfo: Record<
 > = {
   [CryptoCurrency.BTC]: {
     confirmations: 1,
-    fee: 0.0002,
+    fee: parseFloat(CONFIG.BTC_FEES),
     minWithdrawalAmount: 0.002,
     minBuyAmount: 0.00025,
     getTxUrl: (txid: string) => `https://live.blockcypher.com/btc/tx/${txid}/`

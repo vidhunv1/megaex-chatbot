@@ -125,6 +125,10 @@ The address you entered is not a valid *{{ cryptoCurrencyName }}* address.
 
 Please try again with a valid address.
 `,
+    'less-than-min-error': `❌ *Error*
+
+The minimum withdrawal amount is *{{ minWithdrawAmount }}*
+`,
     'create-error': `An error occurred. 
   
 Please try again later. If you are still facing an issue, contact support @{{ supportUsername}}`,
@@ -139,7 +143,15 @@ Check and confirm your transaction:
     'confirm-button': '✅ Confirm',
     'create-success': `✅ *Withdrawal added*
 
-Your withdraw request was added to the queue. You will receive a notification upon confirmation.`
+Your withdraw request was added to the queue. You will receive a notification when processed.
+
+❕Network fee of *{{ feeValue }}* will be used for this withdrawal.
+`,
+    'withdraw-processed': `🔔 *Withdrawal Processed*
+
+Your withdrawal of *{{ cryptoCurrencyAmount }}* has been processed.
+
+{{ withdrawalLink }}`
   },
 
   transaction: {
@@ -153,7 +165,8 @@ txid: [{{ txid }}]({{ txUrl }})`,
 You received *{{ cryptoCurrencyValue }}*.`,
     'source-name': {
       core: 'deposit',
-      payment: 'payment'
+      payment: 'payment',
+      withdrawal: 'withdraw'
     }
   }
 }

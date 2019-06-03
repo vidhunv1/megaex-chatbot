@@ -114,6 +114,12 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
           )
           break
         }
+        case TransactionSource.WITHDRAWAL: {
+          txSourceString = user.t(
+            `${Namespace.Wallet}:transaction.source-name.withdrawal`
+          )
+          break
+        }
         default: {
           logger.error('Unhandled locale key for ' + current.transactionSource)
         }

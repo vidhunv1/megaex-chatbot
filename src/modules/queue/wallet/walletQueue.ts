@@ -1,11 +1,20 @@
-import { amqp } from 'modules'
+import { amqp, telegramHook } from 'modules'
 import { WalletQueueName, WalletJob } from './types'
 import logger from 'modules/logger'
 import { Channel } from 'amqplib'
 import btcRPC, { BtcCommands } from 'core/crypto/btcRpc'
-import { CryptoCurrency } from 'constants/currencies'
+import { CryptoCurrency, cryptoCurrencyInfo } from 'constants/currencies'
 import * as _ from 'lodash'
-import { Transaction, TransactionSource } from 'models'
+import {
+  Transaction,
+  TransactionSource,
+  Withdrawal,
+  TelegramAccount,
+  User,
+  WithdrawalStatus
+} from 'models'
+import { Namespace } from 'modules/i18n'
+import { dataFormatter } from 'utils/dataFormatter'
 
 export class WalletQueue {
   static instance?: WalletQueue = undefined
@@ -21,6 +30,9 @@ export class WalletQueue {
   async init(channel: Channel) {
     await channel.assertQueue(WalletQueueName.NEW_DEPOSIT, { durable: true })
     await channel.assertQueue(WalletQueueName.GEN_ADDRESS, { durable: true })
+    await channel.assertQueue(WalletQueueName.COMPLETE_WITHDRAWAL, {
+      durable: true
+    })
 
     await channel.prefetch(1)
     await this.initializeConsumers(channel)
@@ -113,10 +125,87 @@ export class WalletQueue {
             '[Q] Error parsing new deposit parasms: ' +
               JSON.stringify(msg.content.toString())
           )
+          channel.nack(msg)
           throw e
         }
       } else {
         logger.error('[Q] New deposit params null' + JSON.stringify(msg))
+      }
+    })
+
+    channel.consume(WalletQueueName.COMPLETE_WITHDRAWAL, async (msg) => {
+      logger.info('[Q] COMPLETE_WITHDRAWAL: ' + JSON.stringify(msg))
+      if (msg != null) {
+        try {
+          const params: WalletJob[WalletQueueName.COMPLETE_WITHDRAWAL] = JSON.parse(
+            msg.content.toString()
+          )
+
+          if (!params || !params.txid || !params.withdrawalId) {
+            logger.error(
+              '[Q] COMPLETE_WUTHDRAWAL: Invalid params: ' +
+                JSON.stringify(params)
+            )
+            channel.ack(msg)
+            return
+          }
+
+          const withdrawal = await Withdrawal.findById(params.withdrawalId)
+          if (!withdrawal) {
+            logger.error(
+              '[Q] No withdrawal with id found: ' + JSON.stringify(params)
+            )
+            channel.ack(msg)
+            return
+          }
+
+          if (withdrawal.status === WithdrawalStatus.COMPLETED) {
+            logger.info('[Q] Withdrawal already processed')
+            channel.ack(msg)
+            return
+          }
+
+          await Withdrawal.processCompletedWithdrawal(
+            params.withdrawalId,
+            params.txid
+          )
+
+          channel.ack(msg)
+          logger.info('[Q] OK COMPLETE_WITHDRAWAL: ' + msg.content.toString())
+          const user = await User.findById(withdrawal.userId, {
+            include: [{ model: TelegramAccount }]
+          })
+
+          if (user) {
+            const txUrl = cryptoCurrencyInfo[
+              withdrawal.cryptoCurrencyCode
+            ].getTxUrl(params.txid)
+            const cryptoAmount = dataFormatter.formatCryptoCurrency(
+              withdrawal.amount,
+              withdrawal.cryptoCurrencyCode
+            )
+
+            await telegramHook.getWebhook.sendMessage(
+              user.telegramUser.id,
+              user.t(`${Namespace.Wallet}:withdraw.withdraw-processed`, {
+                cryptoCurrencyAmount: cryptoAmount,
+                withdrawalLink: txUrl
+              }),
+              {
+                parse_mode: 'Markdown'
+              }
+            )
+          }
+        } catch (e) {
+          logger.error(
+            '[Q] Error processing withdrawal' +
+              msg.content.toString() +
+              '\n' +
+              e.stack
+          )
+          channel.nack(msg)
+          throw e
+        }
       }
     })
 

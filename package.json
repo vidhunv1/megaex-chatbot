@@ -42,6 +42,7 @@
     "reflect-metadata": "0.1.12",
     "sequelize": "4.36.1",
     "sequelize-typescript": "0.6.3",
+    "wallet-address-validator": "0.2.4",
     "winston": "3.1.0"
   },
   "devDependencies": {

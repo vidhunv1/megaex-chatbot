@@ -3,6 +3,7 @@ export * from './Transfer'
 export * from './Market'
 export * from './Transaction'
 export * from './Wallet'
+export * from './Withdrawal'
 
 export * from './User'
 export * from './TelegramAccount'

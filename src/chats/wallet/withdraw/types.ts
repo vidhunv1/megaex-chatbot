@@ -13,7 +13,8 @@ export enum WithdrawCoinError {
   INVALID_ADDRESS = 'INVALID_ADDRESS',
   INVALID_AMOUNT = 'INVALID_AMOUNT',
   CREATE_ERROR = 'CREATE_ERROR',
-  INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE'
+  INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
+  LESS_THAN_MIN_AMOUNT = 'LESS_THAN_MIN_AMOUNT'
 }
 
 export interface WithdrawState {
@@ -36,6 +37,7 @@ export interface WithdrawState {
     error:
       | WithdrawCoinError.INSUFFICIENT_BALANCE
       | WithdrawCoinError.INVALID_AMOUNT
+      | WithdrawCoinError.LESS_THAN_MIN_AMOUNT
       | null
   }
   [WithdrawStateKey.withdrawCoin_address]?: {

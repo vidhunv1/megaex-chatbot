@@ -7,9 +7,15 @@ import {
 } from '../WalletState'
 import { logger } from 'modules'
 import * as _ from 'lodash'
-import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import {
+  CryptoCurrency,
+  FiatCurrency,
+  cryptoCurrencyInfo
+} from 'constants/currencies'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { Namespace } from 'modules/i18n'
+import { Transaction, Withdrawal } from 'models'
+const WAValidator = require('wallet-address-validator')
 
 export const WithdrawParser: Parser<WalletState> = async (
   msg,
@@ -83,7 +89,22 @@ export const WithdrawParser: Parser<WalletState> = async (
           }
         }
 
-        if (cryptocurrencyValue <= getWalletBalance(cryptocurrencyCode)) {
+        const availableBalance: number = await getWalletBalance(
+          user.id,
+          cryptocurrencyCode
+        )
+        if (
+          cryptocurrencyValue <
+          cryptoCurrencyInfo[cryptocurrencyCode].minWithdrawalAmount
+        ) {
+          return {
+            ...currentState,
+            [WithdrawStateKey.withdrawCoin_amount]: {
+              data: null,
+              error: WithdrawCoinError.LESS_THAN_MIN_AMOUNT
+            }
+          }
+        } else if (cryptocurrencyValue <= availableBalance) {
           return {
             ...currentState,
             [WithdrawStateKey.withdrawCoin_amount]: {
@@ -131,7 +152,13 @@ export const WithdrawParser: Parser<WalletState> = async (
           cryptoCurrency
         } = withdrawAmountState.data
         const { address } = withdrawAddressState.data
-        if (processWithdrawal(cryptoCurrencyAmount, address, cryptoCurrency)) {
+        const isWithdrawProcessed = await processWithdrawal(
+          user.id,
+          cryptoCurrency,
+          cryptoCurrencyAmount,
+          address
+        )
+        if (isWithdrawProcessed) {
           return {
             ...currentState,
             [WithdrawStateKey.withdrawCoin_confirm]: {
@@ -169,7 +196,10 @@ export const WithdrawParser: Parser<WalletState> = async (
         return null
       }
       const cryptoCurrencyCode = cbState.currencyCode
-      const cryptoBalance = getWalletBalance(cryptoCurrencyCode)
+      const cryptoBalance: number = await getWalletBalance(
+        user.id,
+        cryptoCurrencyCode
+      )
       const fiatCurrencyCode = user.currencyCode
       return {
         ...currentState,
@@ -262,8 +292,34 @@ export function nextWithdrawState(
   }
 }
 
-const isValidAddress = (_address: string, _currencyCode: CryptoCurrency) => {
-  return true
+const isValidAddress = (address: string, currencyCode: CryptoCurrency) => {
+  return WAValidator.validate(address, currencyCode)
+}
+
+const getWalletBalance = async (
+  userId: number,
+  cryptoCurrency: CryptoCurrency
+) => {
+  return await Transaction.getAvailableBalance(userId, cryptoCurrency)
+}
+
+const processWithdrawal = async (
+  userId: number,
+  currencyCode: CryptoCurrency,
+  amount: number,
+  address: string
+) => {
+  const w = await Withdrawal.createWithdrawal(
+    userId,
+    currencyCode,
+    amount,
+    address
+  )
+  if (w) {
+    return true
+  }
+
+  return false
 }
 
 const getFiatValue = (
@@ -271,19 +327,6 @@ const getFiatValue = (
   _fromCurrency: CryptoCurrency,
   _toCurrency: FiatCurrency
 ) => {
-  logger.error('TODO: Not implemented getCryptoValue WalletChat#20')
+  logger.error('TODO: Not implemented getCryptoValue WalletChat/parser/')
   return amount * 300000
-}
-
-const getWalletBalance = (_cryptoCurrency: CryptoCurrency) => {
-  logger.error('TODO: Not implemented getWalletBalance WalletChat#25')
-  return 0.2
-}
-
-const processWithdrawal = (
-  _amount: number,
-  _address: string,
-  _currencyCode: CryptoCurrency
-) => {
-  return true
 }
