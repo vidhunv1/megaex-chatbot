@@ -11,9 +11,10 @@ import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { Namespace } from 'modules/i18n'
 import * as _ from 'lodash'
 import { CONFIG } from '../../../config'
-import { Transaction } from 'models'
+import { Transaction, Market } from 'models'
 import Transfer from 'models/Transfer'
 import { linkCreator } from 'utils/linkCreator'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 export const SendCoinParser: Parser<WalletState> = async (
   msg,
@@ -36,10 +37,11 @@ export const SendCoinParser: Parser<WalletState> = async (
           ...cbState,
           data: {
             cryptoBalance,
-            fiatValue: getFiatValue(
+            fiatValue: await getFiatValue(
               cryptoBalance,
               cryptoCurrencyCode,
-              fiatCurrencyCode
+              fiatCurrencyCode,
+              user.exchangeRateSource
             ),
             fiatCurrencyCode
           }
@@ -70,15 +72,21 @@ export const SendCoinParser: Parser<WalletState> = async (
 
         let cryptocurrencyValue, fiatValue
         if (currencyKind === 'fiat') {
-          cryptocurrencyValue = getCryptoValue(
+          cryptocurrencyValue = await getCryptoValue(
             amount,
             currencyCode as FiatCurrency,
-            cryptocurrencyCode
+            cryptocurrencyCode,
+            user.exchangeRateSource
           )
           fiatValue = amount
         } else if (currencyKind === 'crypto') {
           cryptocurrencyValue = amount
-          fiatValue = getFiatValue(amount, cryptocurrencyCode, fiatcurrencyCode)
+          fiatValue = await getFiatValue(
+            amount,
+            cryptocurrencyCode,
+            fiatcurrencyCode,
+            user.exchangeRateSource
+          )
         } else {
           return null
         }
@@ -234,13 +242,18 @@ export function nextSendCoinState(
 }
 
 // Getters
-const getCryptoValue = (
+const getCryptoValue = async (
   amount: number,
-  _fromCurrency: FiatCurrency,
-  _toCurrency: CryptoCurrency
+  fiatCurrency: FiatCurrency,
+  cryptoCurrency: CryptoCurrency,
+  exchangeRateSource: ExchangeSource
 ) => {
-  logger.error('TODO: Not implemented getCryptoValue WalletChat#20')
-  return amount / 300000
+  const marketRate = await Market.getFiatValue(
+    cryptoCurrency,
+    fiatCurrency,
+    exchangeRateSource
+  )
+  return amount / marketRate
 }
 
 const createPayment = async (
@@ -259,13 +272,18 @@ const getExpiryTime = () => {
   return parseInt(CONFIG.PAYMENT_EXPIRY_S)
 }
 
-const getFiatValue = (
+const getFiatValue = async (
   amount: number,
-  _fromCurrency: CryptoCurrency,
-  _toCurrency: FiatCurrency
+  fromCurrency: CryptoCurrency,
+  toCurrency: FiatCurrency,
+  exchangeSource: ExchangeSource
 ) => {
-  logger.error('TODO: Not implemented getCryptoValue WalletChat#20')
-  return amount * 300000
+  const marketRate = await Market.getFiatValue(
+    fromCurrency,
+    toCurrency,
+    exchangeSource
+  )
+  return amount * marketRate
 }
 
 const getWalletBalance = async (

@@ -6,7 +6,9 @@ export const exchangeEN = {
     exchange: `💵  *Exchange BTC-{{ fiatCurrency }}*
 
 ✅  24/7 support via {{ supportBotUsername }}
-🔒  All deals are secured with escrow protection`,
+🔒  All deals are secured with escrow protection
+
+*Market rate*: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
 
     'my-orders-cbbutton': 'Active Orders ({{ orderCount }})',
     'create-order-cbbutton': '📊 Create Order',

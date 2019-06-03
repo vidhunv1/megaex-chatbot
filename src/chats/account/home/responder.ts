@@ -90,6 +90,7 @@ interface UserReview {
 }
 
 async function getUserReviews(_userId: string): Promise<UserReview[]> {
+  logger.error('TODO: account/responder getUserRevews')
   return [
     {
       reviewerName: 'Vitalik buterin',
@@ -116,32 +117,32 @@ async function getUserReviews(_userId: string): Promise<UserReview[]> {
 }
 
 const getReferralCount = () => {
-  logger.error('TODO: Implement referral count')
+  logger.error('TODO: account/responder Implement referral count')
   return 0
 }
 
 const getTotalDeals = () => {
-  logger.error('TODO: Implement getTotalDeals')
+  logger.error('TODO: account/responder Implement getTotalDeals')
   return 100
 }
 
 const getTotalVolume = () => {
-  logger.error('TODO: Implement getTotalVolume')
+  logger.error('TODO: account/responder Implement getTotalVolume')
   return 100
 }
 
 const getAvgSpeed = () => {
-  logger.error('TODO: Implement getAvgSpeed')
+  logger.error('TODO: account/responder Implement getAvgSpeed')
   return 120
 }
 
 const getEarnings = () => {
-  logger.error('TODO: Implement getEarnings')
+  logger.error('TODO: account/responder Implement getEarnings')
   return 5
 }
 
 const getRating = () => {
-  logger.error('TODO: Implement getRating')
+  logger.error('TODO: account/responder Implement getRating')
   return 4.7
 }
 

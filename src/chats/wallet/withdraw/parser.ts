@@ -14,7 +14,8 @@ import {
 } from 'constants/currencies'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { Namespace } from 'modules/i18n'
-import { Transaction, Withdrawal } from 'models'
+import { Transaction, Withdrawal, Market } from 'models'
+import { ExchangeSource } from 'constants/exchangeSource'
 const WAValidator = require('wallet-address-validator')
 
 export const WithdrawParser: Parser<WalletState> = async (
@@ -78,7 +79,12 @@ export const WithdrawParser: Parser<WalletState> = async (
         let cryptocurrencyValue, fiatValue
         if (currencyKind === 'crypto') {
           cryptocurrencyValue = amount
-          fiatValue = getFiatValue(amount, cryptocurrencyCode, fiatcurrencyCode)
+          fiatValue = await getFiatValue(
+            amount,
+            cryptocurrencyCode,
+            fiatcurrencyCode,
+            user.exchangeRateSource
+          )
         } else {
           return {
             ...currentState,
@@ -207,10 +213,11 @@ export const WithdrawParser: Parser<WalletState> = async (
           ...cbState,
           data: {
             cryptoBalance,
-            fiatValue: getFiatValue(
+            fiatValue: await getFiatValue(
               cryptoBalance,
               cryptoCurrencyCode,
-              fiatCurrencyCode
+              fiatCurrencyCode,
+              user.exchangeRateSource
             ),
             fiatCurrencyCode
           }
@@ -322,11 +329,16 @@ const processWithdrawal = async (
   return false
 }
 
-const getFiatValue = (
+const getFiatValue = async (
   amount: number,
-  _fromCurrency: CryptoCurrency,
-  _toCurrency: FiatCurrency
+  fromCurrency: CryptoCurrency,
+  toCurrency: FiatCurrency,
+  exchangeSource: ExchangeSource
 ) => {
-  logger.error('TODO: Not implemented getCryptoValue WalletChat/parser/')
-  return amount * 300000
+  const marketRate = await Market.getFiatValue(
+    fromCurrency,
+    toCurrency,
+    exchangeSource
+  )
+  return amount * marketRate
 }

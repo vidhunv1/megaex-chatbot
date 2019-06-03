@@ -6,7 +6,7 @@ import {
   updateNextExchangeState
 } from '../ExchangeState'
 import * as _ from 'lodash'
-import { OrderType, RateType, Order } from 'models'
+import { OrderType, RateType, Order, Market } from 'models'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { PaymentMethodType } from 'models'
 import {
@@ -14,7 +14,7 @@ import {
   FiatCurrency,
   cryptoCurrencyInfo
 } from 'constants/currencies'
-import { logger } from 'modules'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 const CURRENT_CRYPTO_CURRENCY_CODE = CryptoCurrency.BTC
 
@@ -116,7 +116,7 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
         min = parseFloat(a.replace(/[^\d\.]/g, '')) || 0
         max = parseFloat(b.replace(/[^\d\.]/g, '')) || 0
       } else {
-        min = await getDefaultMin(user.currencyCode)
+        min = await getDefaultMin(user.currencyCode, user.exchangeRateSource)
         max = parseFloat(msg.text.replace(/[^\d\.]/g, '')) || 0
       }
       if (max <= 0 || min > max) {
@@ -305,18 +305,24 @@ async function createOrder(
   }
 }
 
-async function getDefaultMin(fiatCode: FiatCurrency) {
-  logger.error('getDefaultMin amount')
-  const marketRate = await getMarketRate(fiatCode, CURRENT_CRYPTO_CURRENCY_CODE)
+async function getDefaultMin(
+  fiatCode: FiatCurrency,
+  exchangeSource: ExchangeSource
+) {
+  const marketRate = await getMarketRate(
+    CURRENT_CRYPTO_CURRENCY_CODE,
+    fiatCode,
+    exchangeSource
+  )
   return (
     marketRate * cryptoCurrencyInfo[CURRENT_CRYPTO_CURRENCY_CODE].minBuyAmount
   )
 }
 
 async function getMarketRate(
-  _fiatCode: FiatCurrency,
-  _to: CryptoCurrency
+  fromCrypto: CryptoCurrency,
+  toFiat: FiatCurrency,
+  exchangeSource: ExchangeSource
 ): Promise<number> {
-  logger.error('Get market rate')
-  return 400000
+  return await Market.getFiatValue(fromCrypto, toFiat, exchangeSource)
 }

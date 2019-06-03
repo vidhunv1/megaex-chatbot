@@ -209,7 +209,7 @@ export async function signupResponder(
 }
 
 async function getOrder(orderId: number) {
-  logger.error('TODO: Implement getOrder with user details')
+  logger.error('TODO: signupresponder Implement getOrder with user details')
 
   const order = await Order.getOrder(orderId)
   if (!order) {
@@ -261,7 +261,7 @@ async function getAccount(
   // isUserBlocked: boolean,
   rating: number
 } | null> {
-  logger.error('TODO: implement getAccount')
+  logger.error('TODO: singupresponder implement getAccount')
   return {
     accountId,
     telegramUsername: 'satoshi',

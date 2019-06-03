@@ -6,6 +6,7 @@ import {
   AccountState
 } from '../AccountState'
 import * as _ from 'lodash'
+import logger from 'modules/logger'
 
 export const ReferralParser: Parser<AccountState> = async (
   _msg,
@@ -69,13 +70,16 @@ export function nextReferralState(
 }
 
 const getReferralLink = () => {
+  logger.error('referral/parser getReferralLink')
   return 'https://t.me/megadealsbot?start=ref-fqwkjqel'
 }
 
 const getReferralCount = () => {
+  logger.error('referral/parser getReferralCount')
   return 0
 }
 
 const getReferralFees = () => {
+  logger.error('referral/parser getReferralFees')
   return 90
 }

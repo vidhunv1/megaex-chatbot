@@ -9,11 +9,11 @@ import {
   PaymentMethodFields,
   PaymentMethod,
   Order,
-  Transaction
+  Transaction,
+  Market
 } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethodType } from 'models'
-import logger from 'modules/logger'
 
 const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
 
@@ -58,9 +58,13 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       if (state.previousStateKey === CreateOrderStateKey.cb_useMarginPrice) {
         await CreateOrderMessage(msg, user).inputRateMarginPrice(
           CURRENT_CRYPTOCURRENCY,
-          await getMarketRate(CURRENT_CRYPTOCURRENCY, user.currencyCode),
+          await getMarketRate(
+            CURRENT_CRYPTOCURRENCY,
+            user.currencyCode,
+            user.exchangeRateSource
+          ),
           OrderType.BUY,
-          await getMarketRateSource(),
+          user.exchangeRateSource,
           true
         )
       } else if (
@@ -68,14 +72,22 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       ) {
         await CreateOrderMessage(msg, user).inputRateFixedPrice(
           CURRENT_CRYPTOCURRENCY,
-          await getMarketRate(CURRENT_CRYPTOCURRENCY, user.currencyCode),
+          await getMarketRate(
+            CURRENT_CRYPTOCURRENCY,
+            user.currencyCode,
+            user.exchangeRateSource
+          ),
           OrderType.BUY,
           true
         )
       } else {
         await CreateOrderMessage(msg, user).inputRateFixedPrice(
           CURRENT_CRYPTOCURRENCY,
-          await getMarketRate(CURRENT_CRYPTOCURRENCY, user.currencyCode),
+          await getMarketRate(
+            CURRENT_CRYPTOCURRENCY,
+            user.currencyCode,
+            user.exchangeRateSource
+          ),
           OrderType.BUY,
           false
         )
@@ -186,16 +198,15 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
 }
 
 async function getMarketRate(
-  _cryptocurrency: CryptoCurrency,
-  _fiatCurrency: FiatCurrency
+  cryptocurrency: CryptoCurrency,
+  fiatCurrency: FiatCurrency,
+  exchangeRateSource: ExchangeSource
 ): Promise<number> {
-  logger.error('TODO: Implement getmarket rate createorder/responder')
-  return 400000
-}
-
-async function getMarketRateSource(): Promise<ExchangeSource> {
-  logger.error('TODO: Implement getmarket rate source createorder/responder')
-  return ExchangeSource.BINANCE
+  return await Market.getFiatValue(
+    cryptocurrency,
+    fiatCurrency,
+    exchangeRateSource
+  )
 }
 
 async function getOrderInfo(orderId: number) {

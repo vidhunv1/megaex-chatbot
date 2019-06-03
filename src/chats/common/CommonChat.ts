@@ -163,7 +163,7 @@ export const CommonChat: ChatHandler = {
 }
 
 async function getOrder(orderId: number) {
-  logger.error('TODO: Implement getOrder with user details')
+  logger.error('TODO: CommonChat: Implement user details on getOrder')
 
   const order = await Order.getOrder(orderId)
   if (!order) {
@@ -214,7 +214,7 @@ async function getAccount(
   // isUserBlocked: boolean,
   rating: number
 } | null> {
-  logger.error('TODO: implement getAccount')
+  logger.error('TODO: CommonChat implement getAccount')
   return {
     accountId,
     telegramUsername: 'satoshi',

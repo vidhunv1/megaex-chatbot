@@ -7,7 +7,8 @@ import {
   WalletState,
   updateNextWalletState
 } from '../WalletState'
-import { Transaction } from 'models'
+import { Transaction, Market, User } from 'models'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 const CURRENT_CURRENCY_CODE = CryptoCurrency.BTC
 
@@ -24,7 +25,7 @@ export const WalletHomeParser: Parser<WalletState> = async (
     [WalletHomeStateKey.start]: async () => {
       const cryptoCurrencyCode = CURRENT_CURRENCY_CODE
       const { cryptoAmount, fiatValue } = await getAvailableBalance(
-        user.id,
+        user,
         CURRENT_CURRENCY_CODE,
         user.currencyCode
       )
@@ -88,22 +89,32 @@ const getReferralCount = () => {
   return 100
 }
 
-const getFiatValue = (
+const getFiatValue = async (
   amount: number,
-  _fromCurrency: CryptoCurrency,
-  _toCurrency: FiatCurrency
+  fromCurrency: CryptoCurrency,
+  toCurrency: FiatCurrency,
+  exchangeSource: ExchangeSource
 ) => {
-  logger.error('TODO: Not implemented getCryptoValue WalletChat#20')
-  return amount * 300000
+  const marketRate = await Market.getFiatValue(
+    fromCurrency,
+    toCurrency,
+    exchangeSource
+  )
+  return amount * marketRate
 }
 
 const getAvailableBalance = async (
-  userId: number,
+  user: User,
   currency: CryptoCurrency,
   fiatCurrency: FiatCurrency
 ) => {
-  const bal = await Transaction.getAvailableBalance(userId, currency)
-  const value = await getFiatValue(bal, currency, fiatCurrency)
+  const bal = await Transaction.getAvailableBalance(user.id, currency)
+  const value = await getFiatValue(
+    bal,
+    currency,
+    fiatCurrency,
+    user.exchangeRateSource
+  )
 
   return {
     cryptoAmount: bal,

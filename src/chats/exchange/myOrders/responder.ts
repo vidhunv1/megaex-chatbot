@@ -10,10 +10,12 @@ import {
   Order,
   PaymentMethod,
   PaymentMethodFields,
-  Transaction
+  Transaction,
+  Market
 } from 'models'
 import { OrderType } from 'models'
 import { logger } from 'modules'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 export const MyOrdersResponder: Responder<ExchangeState> = (
@@ -109,7 +111,8 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     [MyOrdersStateKey.editRate_show]: async () => {
       const marketRate = await getMarketRate(
         CURRENT_CRYPTOCURRENCY_CODE,
-        user.currencyCode
+        user.currencyCode,
+        user.exchangeRateSource
       )
       await MyOrdersMessage(msg, user).showEditRate(
         CURRENT_CRYPTOCURRENCY_CODE,
@@ -124,7 +127,8 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
     [MyOrdersStateKey.editAmount_show]: async () => {
       const marketRate = await getMarketRate(
         CURRENT_CRYPTOCURRENCY_CODE,
-        user.currencyCode
+        user.currencyCode,
+        user.exchangeRateSource
       )
       await MyOrdersMessage(msg, user).showEditAmount(marketRate)
       return true
@@ -293,9 +297,13 @@ async function getActiveOrders(userId: number) {
 }
 
 async function getMarketRate(
-  _cryptocurrency: CryptoCurrency,
-  _fiatCurrency: FiatCurrency
+  cryptocurrency: CryptoCurrency,
+  fiatCurrency: FiatCurrency,
+  exchangeRateSource: ExchangeSource
 ): Promise<number> {
-  logger.error('myorders/responder Implement market rate')
-  return 400000
+  return await Market.getFiatValue(
+    cryptocurrency,
+    fiatCurrency,
+    exchangeRateSource
+  )
 }

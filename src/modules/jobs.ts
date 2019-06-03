@@ -9,6 +9,7 @@ export default class Jobs {
     this.jobs = []
     this.jobs.push(this.getSyncTransactionsJob())
     this.jobs.push(this.getSyncTickersJob())
+    this.jobs.push(this.getSyncFiatRatesJob())
   }
 
   start() {
@@ -39,6 +40,17 @@ export default class Jobs {
   private getSyncTickersJob() {
     return new CronJob({
       cronTime: '*/30 * * * *',
+      onTick: async function() {
+        await Market.syncTickerData()
+      },
+      onComplete: function() {},
+      start: false
+    })
+  }
+
+  private getSyncFiatRatesJob() {
+    return new CronJob({
+      cronTime: '0 */12 * * *',
       onTick: async function() {
         await Market.syncTickerData()
       },

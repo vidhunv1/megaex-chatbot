@@ -19,6 +19,7 @@ import {
   AccountHomeError
 } from './home'
 import { CryptoCurrency } from 'constants/currencies'
+import logger from 'modules/logger'
 
 export const AccountChat: ChatHandler = {
   async handleCommand(
@@ -178,6 +179,7 @@ async function getAccount(
   // isUserBlocked: boolean,
   rating: number
 } | null> {
+  logger.error('TODO: Accountchat getAccount')
   return {
     accountId,
     telegramUsername: 'satoshi',

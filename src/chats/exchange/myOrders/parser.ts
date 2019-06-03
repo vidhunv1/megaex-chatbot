@@ -14,10 +14,11 @@ import {
 } from 'constants/currencies'
 import { PaymentMethodsFieldsLocale } from 'constants/paymentMethods'
 import PaymentMethod, { PaymentMethodType } from 'models/PaymentMethod'
-import { RateType, OrderType, Order, Transaction } from 'models'
+import { RateType, OrderType, Order, Transaction, Market } from 'models'
 import { MyOrdersMessage } from './messages'
 import { logger } from 'modules'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
+import { ExchangeSource } from 'constants/exchangeSource'
 
 const CURRENT_CRYPTO_CURRENCY_CODE = CryptoCurrency.BTC
 
@@ -260,7 +261,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
         min = parseFloat(a.replace(/[^\d\.]/g, '')) || 0
         max = parseFloat(b.replace(/[^\d\.]/g, '')) || 0
       } else {
-        min = await getDefaultMin(user.currencyCode)
+        min = await getDefaultMin(user.currencyCode, user.exchangeRateSource)
         max = parseFloat(msg.text.replace(/[^\d\.]/g, '')) || 0
       }
       if (max <= 0) {
@@ -565,16 +566,26 @@ async function getPaymentFields(id: number) {
 }
 
 async function getMarketRate(
-  _fiatCode: FiatCurrency,
-  _to: CryptoCurrency
+  cryptocurrency: CryptoCurrency,
+  fiatCurrency: FiatCurrency,
+  exchangeRateSource: ExchangeSource
 ): Promise<number> {
-  logger.error('Get market rate')
-  return 400000
+  return await Market.getFiatValue(
+    cryptocurrency,
+    fiatCurrency,
+    exchangeRateSource
+  )
 }
 
-async function getDefaultMin(fiatCode: FiatCurrency) {
-  logger.error('getDefaultMin amount')
-  const marketRate = await getMarketRate(fiatCode, CURRENT_CRYPTO_CURRENCY_CODE)
+async function getDefaultMin(
+  fiatCode: FiatCurrency,
+  exchangeRateSource: ExchangeSource
+) {
+  const marketRate = await getMarketRate(
+    CURRENT_CRYPTO_CURRENCY_CODE,
+    fiatCode,
+    exchangeRateSource
+  )
   return (
     marketRate * cryptoCurrencyInfo[CURRENT_CRYPTO_CURRENCY_CODE].minBuyAmount
   )
@@ -661,6 +672,7 @@ async function getAvailableBalance(
 
 // TODO -------------
 async function deleteOrder(orderId: number): Promise<boolean> {
+  // TODO: Check if there are any active trades
   logger.error('TODO: implement checks for delete order ' + orderId)
   await Order.deleteOrder(orderId)
   return true

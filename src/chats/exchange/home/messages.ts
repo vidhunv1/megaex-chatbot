@@ -7,14 +7,27 @@ import { stringifyCallbackQuery } from 'chats/utils'
 import { MyOrdersStateKey, MyOrdersState } from '../myOrders'
 import { CreateOrderStateKey, CreateOrderState } from '../createOrder'
 import { DealsStateKey, DealsState } from '../deals'
+import { FiatCurrency } from 'constants/currencies'
+import { ExchangeSource } from 'constants/exchangeSource'
+import { dataFormatter } from 'utils/dataFormatter'
 
 export const ExchangeHomeMessage = (msg: TelegramBot.Message, user: User) => ({
-  async showExchangeHome(activeOrdersCount: number) {
+  async showExchangeHome(
+    activeOrdersCount: number,
+    marketRate: number,
+    fiatCurrency: FiatCurrency,
+    marketRateSource: ExchangeSource
+  ) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Exchange}:home.exchange`, {
         fiatCurrency: user.currencyCode,
-        supportBotUsername: `@${CONFIG.SUPPORT_USERNAME}`
+        supportBotUsername: `@${CONFIG.SUPPORT_USERNAME}`,
+        formattedMarketRate: dataFormatter.formatFiatCurrency(
+          marketRate,
+          fiatCurrency
+        ),
+        exchangeSourceName: user.t(`exchange-source.${marketRateSource}`)
       }),
       {
         parse_mode: 'Markdown',
