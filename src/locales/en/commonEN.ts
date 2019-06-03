@@ -8,7 +8,7 @@ export const commonEN = {
     [ExchangeSource.BINANCE]: 'Binance',
     [ExchangeSource.LBC]: 'LocalBitcoins',
     [ExchangeSource.COINBASE]: 'Coinbase',
-    [ExchangeSource.BITMEX]: 'Bitmex'
+    [ExchangeSource.KRAKEN]: 'Kraken'
   },
   updated: 'Updated!',
   'cryptocurrency-names': {

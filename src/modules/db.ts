@@ -10,7 +10,8 @@ import {
   Order,
   Referral,
   UserInfo,
-  Withdrawal
+  Withdrawal,
+  Market
 } from 'models'
 import { CONFIG } from '../config'
 
@@ -43,6 +44,7 @@ export class DB {
         PaymentMethod,
         Order,
         Withdrawal,
+        Market,
 
         User,
         TelegramAccount,

@@ -1,12 +1,14 @@
 import { CronJob } from 'cron'
 import logger from '../modules/Logger'
 import btcRpc from 'core/crypto/btcRpc'
+import { Market } from 'models'
 
 export default class Jobs {
   jobs: CronJob[]
   constructor() {
     this.jobs = []
     this.jobs.push(this.getSyncTransactionsJob())
+    this.jobs.push(this.getSyncTickersJob())
   }
 
   start() {
@@ -23,23 +25,22 @@ export default class Jobs {
     }
   }
 
-  //   private getDeleteExpiredPaymentsJob() {
-  //     return new CronJob({
-  //       cronTime: '*/2 * * * *',
-  //       onTick: async function() {
-  //         console.log('Deleting expired payments')
-  //         await Transfer.deleteExpiredPayments()
-  //       },
-  //       onComplete: function() {},
-  //       start: false
-  //     })
-  //   }
-
   private getSyncTransactionsJob() {
     return new CronJob({
-      cronTime: '*/5 * * * *',
+      cronTime: '*/10 * * * *',
       onTick: async function() {
         await btcRpc.syncTransactions()
+      },
+      onComplete: function() {},
+      start: false
+    })
+  }
+
+  private getSyncTickersJob() {
+    return new CronJob({
+      cronTime: '*/30 * * * *',
+      onTick: async function() {
+        await Market.syncTickerData()
       },
       onComplete: function() {},
       start: false

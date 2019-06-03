@@ -21,11 +21,7 @@ module.exports = {
         allowNull: true,
         type: Sequelize.FLOAT
       },
-      fromCurrencyUsdValue: {
-        allowNull: true,
-        type: Sequelize.FLOAT
-      },
-      toCurrencyType: { // fiat or crypto
+      dataSource: {
         allowNull: false,
         type: Sequelize.STRING
       },
