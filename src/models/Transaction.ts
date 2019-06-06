@@ -25,7 +25,9 @@ export enum TransactionType {
 export enum TransactionSource {
   PAYMENT = 'PAYMENT',
   CORE = 'CORE',
-  WITHDRAWAL = 'WITHDRAWAL'
+  WITHDRAWAL = 'WITHDRAWAL',
+  BLOCK = 'BLOCK',
+  RELEASE = 'RELEASE'
 }
 
 @Table({ timestamps: true, tableName: 'Transactions', paranoid: true })
@@ -319,6 +321,78 @@ export class Transaction extends Model<Transaction> {
     await tx.save({ transaction: transaction })
 
     return tx
+  }
+
+  static async blockBalance(
+    userId: number,
+    cryptoCurrency: CryptoCurrency,
+    amount: number,
+    txid: string,
+    transaction?: SequelizeTransacion
+  ): Promise<Transaction> {
+    const balance = await Transaction.getAvailableBalance(
+      userId,
+      cryptoCurrency
+    )
+    if (balance < amount) {
+      logger.error('Not enough balance to block balance')
+      throw new TransactionError(TransactionError.INSUFFICIENT_BALANCE)
+    }
+
+    const tx = new Transaction({
+      userId,
+      txid: txid,
+      amount: -1 * amount,
+      transactionSource: TransactionSource.BLOCK,
+      transactionType: TransactionType.SEND,
+      currencyCode: cryptoCurrency,
+      confirmations: 10
+    })
+    return await tx.save({ transaction: transaction })
+  }
+
+  static async releaseBlockedTx(
+    transactionId: number,
+    releaseToUserId: number,
+    transaction?: SequelizeTransacion
+  ): Promise<Transaction> {
+    const tx = await Transaction.findById(transactionId, {
+      transaction
+    })
+
+    if (!tx) {
+      throw new TransactionError(
+        404,
+        'No Transaction with id found for releaseBlockTx'
+      )
+    }
+
+    if (tx.transactionSource != TransactionSource.BLOCK) {
+      throw new Error('This is not a blocked transaction')
+    }
+
+    // Credit to user
+    const releasedTx = await Transaction.create<Transaction>(
+      {
+        userId: releaseToUserId,
+        txid: tx.txid,
+        amount: tx.amount,
+        transactionSource: TransactionSource.RELEASE,
+        transactionType: TransactionType.RECEIVE,
+        currencyCode: tx.currencyCode,
+        confirmations: tx.confirmations
+      },
+      {
+        transaction
+      }
+    )
+
+    // Delete the blocked payment
+    await tx.destroy({
+      transaction: transaction
+    })
+
+    return releasedTx
   }
 
   // static async unblockBalance(
