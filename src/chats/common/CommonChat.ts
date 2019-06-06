@@ -54,6 +54,7 @@ export const CommonChat: ChatHandler = {
                 (await Order.convertToFixedRate(
                   order.rate,
                   order.rateType,
+                  order.cryptoCurrencyCode,
                   order.fiatCurrencyCode,
                   user.exchangeRateSource
                 )) * availableBalance
@@ -72,6 +73,7 @@ export const CommonChat: ChatHandler = {
                 await Order.convertToFixedRate(
                   order.rate,
                   order.rateType,
+                  order.cryptoCurrencyCode,
                   order.fiatCurrencyCode,
                   dealer.exchangeRateSource
                 ),

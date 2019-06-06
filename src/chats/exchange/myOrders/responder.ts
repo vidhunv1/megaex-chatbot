@@ -202,6 +202,7 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
             (await Order.convertToFixedRate(
               order.rate,
               order.rateType,
+              order.cryptoCurrencyCode,
               order.fiatCurrencyCode,
               user.exchangeRateSource
             )) * availableBalance

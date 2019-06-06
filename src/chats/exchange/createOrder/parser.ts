@@ -65,7 +65,7 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
             orderType,
             data: {
               valueType: RateType.MARGIN,
-              value: parseFloat(msg.text.replace(/[^\d\.]/g, ''))
+              value: parseFloat(msg.text.replace(/[^-\d\.]/g, ''))
             }
           }
         }

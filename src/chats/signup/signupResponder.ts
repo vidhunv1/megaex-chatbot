@@ -164,6 +164,7 @@ export async function signupResponder(
                   (await Order.convertToFixedRate(
                     order.rate,
                     order.rateType,
+                    order.cryptoCurrencyCode,
                     order.fiatCurrencyCode,
                     user.exchangeRateSource
                   )) * availableBalance
@@ -182,6 +183,7 @@ export async function signupResponder(
                   await Order.convertToFixedRate(
                     order.rate,
                     order.rateType,
+                    order.cryptoCurrencyCode,
                     order.fiatCurrencyCode,
                     dealer.exchangeRateSource
                   ),

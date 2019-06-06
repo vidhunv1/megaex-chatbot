@@ -100,6 +100,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           (await Order.convertToFixedRate(
             orderInfo.rate,
             orderInfo.rateType,
+            orderInfo.cryptoCurrencyCode,
             orderInfo.fiatCurrencyCode,
             user.exchangeRateSource
           )) * availableBalance
@@ -398,6 +399,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
           (await Order.convertToFixedRate(
             orderInfo.rate,
             orderInfo.rateType,
+            orderInfo.cryptoCurrencyCode,
             orderInfo.fiatCurrencyCode,
             user.exchangeRateSource
           )) * availableBalance

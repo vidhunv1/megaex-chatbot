@@ -445,6 +445,7 @@ async function sendOpenDealRequest(
     (await Order.convertToFixedRate(
       order.rate,
       order.rateType,
+      order.cryptoCurrencyCode,
       order.fiatCurrencyCode,
       requesterUser.exchangeRateSource
     ))
