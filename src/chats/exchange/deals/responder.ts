@@ -288,25 +288,30 @@ async function getOrdersList(
   cursor: number,
   limit: number
 ) {
-  logger.error('TODO: Implement available balance from wallet')
-
   // TODO: Fix inefficient query
   const orders = await Order.getQuickDealList(orderType, fiatCurrencyCode)
-  // Show all orders with available balance first, rest are shown at last
+  // for SELL: Show all orders with available balance first, rest are shown at last
   let orderList = _.filter(
     orders,
     (o) =>
-      o.orderType === orderType && o.availableFiatBalance >= o.minFiatAmount
+      o.orderType === orderType &&
+      (o.availableFiatBalance >= o.minFiatAmount || orderType == OrderType.BUY)
   )
   orderList = _.orderBy(orderList, (o) => o.fixedRate, [
     orderType === OrderType.BUY ? 'desc' : 'asc'
   ])
   // Move all orders without available balance to end
   orderList.push(
-    ..._.filter(
-      orders,
-      (o) =>
-        o.availableFiatBalance < o.minFiatAmount && o.orderType === orderType
+    ..._.orderBy(
+      _.filter(
+        orders,
+        (o) =>
+          o.availableFiatBalance < o.minFiatAmount &&
+          orderType === OrderType.SELL &&
+          o.orderType === orderType
+      ),
+      (o) => o.fixedRate,
+      [orderType === OrderType.BUY ? 'desc' : 'asc']
     )
   )
 

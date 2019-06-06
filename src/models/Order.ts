@@ -174,6 +174,7 @@ export class Order extends Model<Order> {
       )
 
       logger.error('TODO: models/order connect rating')
+      // TODO: Getting balance for buy orders might be unnecessary
       ordersList.push({
         id: iOrder.id,
         minFiatAmount: iOrder.minFiatAmount,
