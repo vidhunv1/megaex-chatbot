@@ -70,7 +70,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
           order.rateType,
           order.cryptoCurrencyCode,
           order.fiatCurrencyCode,
-          dealer.exchangeRateSource
+          order.user.exchangeRateSource
         )
 
         const availableBalance = await getAvailableBalance(
@@ -83,7 +83,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
             order.rateType,
             order.cryptoCurrencyCode,
             order.fiatCurrencyCode,
-            user.exchangeRateSource
+            order.user.exchangeRateSource
           )) * availableBalance
         await DealsMessage(msg, user).showDeal(
           order.orderType,
@@ -155,7 +155,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         return false
       }
 
-      const { order, dealer } = orderInfo
+      const { order } = orderInfo
 
       await DealsMessage(msg, user).inputDealAmount(
         order.orderType,
@@ -165,7 +165,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
           order.rateType,
           order.cryptoCurrencyCode,
           order.fiatCurrencyCode,
-          dealer.exchangeRateSource
+          order.user.exchangeRateSource
         ),
         order.cryptoCurrencyCode,
         order.minFiatAmount,
@@ -197,11 +197,20 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         order.cryptoCurrencyCode,
         order.fiatCurrencyCode,
         inputData.fiatValue,
-        order.rate
+        await Order.convertToFixedRate(
+          order.rate,
+          order.rateType,
+          order.cryptoCurrencyCode,
+          order.fiatCurrencyCode,
+          order.user.exchangeRateSource
+        )
       )
       return true
     },
     [DealsStateKey.cb_confirmInputDealAmount]: async () => {
+      return false
+    },
+    [DealsStateKey.cb_respondDealInit]: async () => {
       return false
     },
     [DealsStateKey.showDealInitOpened]: async () => {

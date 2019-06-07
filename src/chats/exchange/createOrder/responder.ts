@@ -171,7 +171,7 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
             orderInfo.rateType,
             orderInfo.cryptoCurrencyCode,
             orderInfo.fiatCurrencyCode,
-            user.exchangeRateSource
+            orderInfo.user.exchangeRateSource
           )) * availableBalance
         await CreateOrderMessage(msg, user).sellOrderCreated(
           orderInfo.id,

@@ -1,4 +1,4 @@
-import { OrderType } from 'models'
+import { OrderType, TradeErrorTypes } from 'models'
 import { FiatCurrency } from 'constants/currencies'
 
 export enum DealsStateKey {
@@ -21,12 +21,15 @@ export enum DealsStateKey {
   showDealInitOpened = 'showDealInitOpened',
   showDealInitCancel = 'showDealInitCancel',
 
+  cb_respondDealInit = 'cb_respondDealInit',
+
   dealError = 'dealError'
 }
 
 export enum DealsError {
   ORDER_NOT_FOUND = 'ORDER_NOT_FOUND',
-  SELF_OPEN_DEAL_REQUEST = 'SELF_OPEN_DEAL_REQUEST'
+  SELF_OPEN_DEAL_REQUEST = 'SELF_OPEN_DEAL_REQUEST',
+  DEFAULT = 'DEFAULT'
 }
 
 export interface DealsState {
@@ -36,6 +39,10 @@ export interface DealsState {
 
   [DealsStateKey.cb_showDealById]?: {
     orderId: number
+  }
+
+  [DealsStateKey.cb_respondDealInit]?: {
+    confirmation: 'yes' | 'no'
   }
 
   [DealsStateKey.deals_show]?: {
@@ -54,7 +61,7 @@ export interface DealsState {
 
   [DealsStateKey.cb_openDeal]?: {
     orderId: number
-    error?: DealsError
+    error?: DealsError | TradeErrorTypes
   }
   [DealsStateKey.cb_requestDealDeposit]?: {
     orderId: number
@@ -73,6 +80,7 @@ export interface DealsState {
     data: {
       fiatValue: number
       fiatCurrencyCode: FiatCurrency
+      fixedRate: number
     } | null
   }
 
@@ -81,5 +89,6 @@ export interface DealsState {
     data: {
       isInitialized: boolean
     } | null
+    error?: DealsError | TradeErrorTypes
   }
 }

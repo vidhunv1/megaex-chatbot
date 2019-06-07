@@ -18,9 +18,13 @@ module.exports = {
         allowNull: false,
         references: { model: 'Orders', key: 'id' }
       },
-      amount: {
+      cryptoAmount: {
         allowNull: false,
-        type: Sequelize.NUMBER
+        type: Sequelize.FLOAT
+      },
+      fixedRate: {
+        allowNull: false,
+        type: Sequelize.FLOAT
       },
       status: {
         allowNull: false,

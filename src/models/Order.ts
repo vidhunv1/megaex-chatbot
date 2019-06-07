@@ -136,7 +136,8 @@ export class Order extends Model<Order> {
     return await Order.findOne({
       where: {
         id: orderId
-      }
+      },
+      include: [{ model: User }]
     })
   }
 

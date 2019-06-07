@@ -17,6 +17,20 @@ export const exchangeEN = {
   },
 
   deals: {
+    trade: {
+      errors: {
+        409: '❌ You already have an existing trade on this order.'
+      },
+      'init-get-confirm': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
+
+${
+        BotCommand.ACCOUNT
+      }{{ requestorAccountId }} wants to buy *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}*.
+
+Do you want to accept this trade?`,
+      'trade-init-yes-cbbutton': 'Yes',
+      'trade-init-no-cbbutton': 'No'
+    },
     'request-deposit-notify': `🛎 *New Match*
 
 You have a new buy request on your order ${BotCommand.ORDER}{{ orderId }}.
@@ -94,7 +108,7 @@ Input the amount between *{{ minFiatValue }}* and *{{ maxFiatValue }}* or from *
 If you want to specify {{ cryptoCurrencyCode }} value, then add the ticker(*{{ cryptoCurrencyCode }}*) (Example: 0.1 {{ cryptoCurrencyCode }})`,
     'confirm-input-buy-amount': `*Confirm*
     
-Are you sure you want to buy *{{ cryptoValue }}* for *{{ fiatValue }}* at rate *{{ rate }}*?
+Are you sure you want to buy *{{ cryptoValue }}* for *{{ fiatValue }}* at rate {{ rate }}?
 
 ❕By continuing you agree to the deal terms.`,
 

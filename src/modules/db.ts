@@ -11,7 +11,8 @@ import {
   Referral,
   UserInfo,
   Withdrawal,
-  Market
+  Market,
+  Trade
 } from 'models'
 import { CONFIG } from '../config'
 
@@ -45,6 +46,7 @@ export class DB {
         Order,
         Withdrawal,
         Market,
+        Trade,
 
         User,
         TelegramAccount,

@@ -1,17 +1,18 @@
-import { DealsStateKey, DealsError } from './types'
+import { DealsStateKey, DealsError, DealsState } from './types'
 import { Parser } from 'chats/types'
 import {
   ExchangeState,
   ExchangeStateKey,
-  updateNextExchangeState,
-  TradeStatus
+  updateNextExchangeState
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
-import { Order, User, TelegramAccount } from 'models'
+import { Order, User, TelegramAccount, TradeError } from 'models'
 import { logger, telegramHook } from 'modules'
 import { Namespace } from 'modules/i18n'
 import { dataFormatter } from 'utils/dataFormatter'
+import { Trade } from 'models'
+import { stringifyCallbackQuery } from 'chats/utils'
 
 export const DealsParser: Parser<ExchangeState> = async (
   msg,
@@ -165,7 +166,15 @@ export const DealsParser: Parser<ExchangeState> = async (
       if (parsedValue.currencyKind === 'fiat') {
         fiatValue = parsedValue.amount
       } else if (parsedValue.currencyKind === 'crypto') {
-        fiatValue = parsedValue.amount * order.rate
+        fiatValue =
+          parsedValue.amount *
+          (await Order.convertToFixedRate(
+            order.rate,
+            order.rateType,
+            order.cryptoCurrencyCode,
+            order.fiatCurrencyCode,
+            order.user.exchangeRateSource
+          ))
       }
       if (fiatValue != null) {
         if (
@@ -182,7 +191,14 @@ export const DealsParser: Parser<ExchangeState> = async (
             jumpState,
             data: {
               fiatValue,
-              fiatCurrencyCode: order.fiatCurrencyCode
+              fiatCurrencyCode: order.fiatCurrencyCode,
+              fixedRate: await Order.convertToFixedRate(
+                order.rate,
+                order.rateType,
+                order.cryptoCurrencyCode,
+                order.fiatCurrencyCode,
+                order.user.exchangeRateSource
+              )
             },
             error: null
           }
@@ -192,6 +208,9 @@ export const DealsParser: Parser<ExchangeState> = async (
       return state
     },
     [DealsStateKey.confirmInputDealAmount]: async () => {
+      return null
+    },
+    [DealsStateKey.cb_respondDealInit]: async () => {
       return null
     },
     [DealsStateKey.cb_confirmInputDealAmount]: async () => {
@@ -241,38 +260,73 @@ export const DealsParser: Parser<ExchangeState> = async (
                 }
               }
             }
-          case DealsStateKey.cb_openDeal:
-            const tradeInfo = await initOpenTrade(
-              orderId,
-              inputDealData.fiatValue,
-              user.id
-            )
-            if (tradeInfo.tradeId) {
-              return {
-                ...state,
-                [DealsStateKey.showDealInitOpened]: {
-                  data: {
-                    tradeId: tradeInfo.tradeId
-                  }
-                },
-                [DealsStateKey.cb_confirmInputDealAmount]: {
-                  isConfirmed,
-                  data: {
-                    isInitialized: true
+          case DealsStateKey.cb_openDeal: {
+            try {
+              const tradeInfo = await initOpenTrade(
+                orderId,
+                inputDealData.fiatValue,
+                inputDealData.fixedRate,
+                user
+              )
+
+              if (!tradeInfo) {
+                return {
+                  ...state,
+                  [DealsStateKey.cb_openDeal]: {
+                    orderId,
+                    error: DealsError.DEFAULT
                   }
                 }
               }
-            } else {
-              return {
-                ...state,
-                [DealsStateKey.cb_confirmInputDealAmount]: {
-                  isConfirmed,
-                  data: {
-                    isInitialized: false
+
+              if (tradeInfo.id) {
+                return {
+                  ...state,
+                  [DealsStateKey.showDealInitOpened]: {
+                    data: {
+                      tradeId: tradeInfo.id
+                    }
+                  },
+                  [DealsStateKey.cb_confirmInputDealAmount]: {
+                    isConfirmed,
+                    data: {
+                      isInitialized: true
+                    }
+                  }
+                }
+              } else {
+                return {
+                  ...state,
+                  [DealsStateKey.cb_confirmInputDealAmount]: {
+                    isConfirmed,
+                    data: {
+                      isInitialized: false
+                    }
+                  }
+                }
+              }
+            } catch (e) {
+              if (e instanceof TradeError) {
+                return {
+                  ...state,
+                  [DealsStateKey.cb_confirmInputDealAmount]: {
+                    isConfirmed,
+                    data: null,
+                    error: e.status
+                  }
+                }
+              } else {
+                return {
+                  ...state,
+                  [DealsStateKey.cb_confirmInputDealAmount]: {
+                    isConfirmed,
+                    data: null,
+                    error: DealsError.DEFAULT
                   }
                 }
               }
             }
+          }
           default:
             return null
         }
@@ -371,6 +425,15 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
       return DealsStateKey.inputDealAmount
     }
     case DealsStateKey.cb_confirmInputDealAmount: {
+      const dealError = _.get(
+        state[DealsStateKey.cb_confirmInputDealAmount],
+        'error',
+        null
+      )
+      if (dealError) {
+        return DealsStateKey.dealError
+      }
+
       const amountData = _.get(
         state[DealsStateKey.inputDealAmount],
         'data',
@@ -447,7 +510,7 @@ async function sendOpenDealRequest(
       order.rateType,
       order.cryptoCurrencyCode,
       order.fiatCurrencyCode,
-      requesterUser.exchangeRateSource
+      order.user.exchangeRateSource
     ))
 
   await telegramHook.getWebhook.sendMessage(
@@ -474,14 +537,82 @@ async function sendOpenDealRequest(
 
 async function initOpenTrade(
   orderId: number,
-  amount: number,
-  openedByUserId: number
-) {
-  logger.error(`TODO: initOpenTrade ${orderId} ${amount} ${openedByUserId}`)
-  return {
-    tradeId: 1,
-    tradeStatus: TradeStatus.INITIATED
+  fiatAmount: number,
+  fixedRate: number,
+  openedByUser: User
+): Promise<Trade | null> {
+  const cryptoAmount: number = fiatAmount / fixedRate
+
+  const trade = await Trade.initiateTrade(
+    openedByUser.id,
+    orderId,
+    cryptoAmount,
+    fixedRate
+  )
+  const order = await Order.getOrder(orderId)
+  if (!order) {
+    logger.error('deals/parser/initOpenTrade No order found')
+    return null
   }
+
+  const telegramAccountOP = await TelegramAccount.findOne({
+    where: {
+      userId: order.userId
+    }
+  })
+  // send message to OP
+  if (!telegramAccountOP) {
+    throw new Error('No Telegram account found')
+  }
+
+  await telegramHook.getWebhook.sendMessage(
+    telegramAccountOP.id,
+    order.user.t(`${Namespace.Exchange}:deals.trade.init-get-confirm`, {
+      tradeId: trade.id,
+      requestorAccountId: openedByUser.accountId,
+      cryptoCurrencyAmount: dataFormatter.formatCryptoCurrency(
+        cryptoAmount,
+        order.cryptoCurrencyCode
+      ),
+      fiatValue: dataFormatter.formatFiatCurrency(
+        fiatAmount,
+        order.fiatCurrencyCode
+      )
+    }),
+    {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: order.user.t(
+                `${Namespace.Exchange}:deals.trade.trade-init-yes-cbbutton`
+              ),
+              callback_data: stringifyCallbackQuery<
+                DealsStateKey.cb_respondDealInit,
+                DealsState[DealsStateKey.cb_respondDealInit]
+              >(DealsStateKey.cb_respondDealInit, {
+                confirmation: 'yes'
+              })
+            },
+            {
+              text: order.user.t(
+                `${Namespace.Exchange}:deals.trade.trade-init-no-cbbutton`
+              ),
+              callback_data: stringifyCallbackQuery<
+                DealsStateKey.cb_respondDealInit,
+                DealsState[DealsStateKey.cb_respondDealInit]
+              >(DealsStateKey.cb_respondDealInit, {
+                confirmation: 'no'
+              })
+            }
+          ]
+        ]
+      }
+    }
+  )
+
+  return trade
 }
 
 async function getOrder(orderId: number) {

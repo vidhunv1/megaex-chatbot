@@ -102,7 +102,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
             orderInfo.rateType,
             orderInfo.cryptoCurrencyCode,
             orderInfo.fiatCurrencyCode,
-            user.exchangeRateSource
+            orderInfo.user.exchangeRateSource
           )) * availableBalance
         await MyOrdersMessage(msg, user).showMySellOrder(
           orderInfo.id,
@@ -401,7 +401,7 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
             orderInfo.rateType,
             orderInfo.cryptoCurrencyCode,
             orderInfo.fiatCurrencyCode,
-            user.exchangeRateSource
+            orderInfo.user.exchangeRateSource
           )) * availableBalance
         await MyOrdersMessage(msg, user).showMySellOrder(
           orderInfo.id,

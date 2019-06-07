@@ -23,6 +23,10 @@ export enum TradeStatus {
   PAYMENT_DISPUTE = 'PAYMENT_DISPUTE'
 }
 
+export enum TradeErrorTypes {
+  TRADE_EXISTS_ON_ORDER = 409
+}
+
 @Table({ timestamps: true, tableName: 'Trades', paranoid: true })
 export class Trade extends Model<Trade> {
   @PrimaryKey
@@ -49,22 +53,58 @@ export class Trade extends Model<Trade> {
   @BelongsTo(() => Order)
   order!: Order
 
+  @AllowNull(false)
   @Column(DataType.FLOAT)
-  amount!: number
+  cryptoAmount!: number
 
+  @AllowNull(false)
+  @Column(DataType.FLOAT)
+  fixedRate!: number
+
+  @AllowNull(false)
   @Column(DataType.STRING)
   status!: TradeStatus
 
-  async initiateTrade(openedByUserId: number, orderId: number, amount: number) {
-    await Trade.create<Trade>({
+  static getActiveStatuses() {
+    return [
+      TradeStatus.INITIATED,
+      TradeStatus.ACCEPTED,
+      TradeStatus.PAYMENT_MARKED,
+      TradeStatus.PAYMENT_DISPUTE
+    ]
+  }
+
+  static async initiateTrade(
+    openedByUserId: number,
+    orderId: number,
+    cryptoAmount: number,
+    fixedRate: number
+  ): Promise<Trade> {
+    const t = await Trade.findOne({
+      where: {
+        openedByUserId,
+        orderId,
+        status: Trade.getActiveStatuses()
+      }
+    })
+
+    if (t) {
+      throw new TradeError(TradeError.TRADE_EXISTS_ON_ORDER)
+    }
+    const order = await Order.findById(orderId)
+    if (!order || (order && cryptoAmount * fixedRate < order.minFiatAmount)) {
+      throw new Error('Invalid order')
+    }
+    return await Trade.create<Trade>({
       openedByUserId,
       orderId,
-      amount,
+      cryptoAmount: cryptoAmount,
+      fixedRate,
       status: TradeStatus.INITIATED
     })
   }
 
-  async acceptTrade(tradeId: number): Promise<Trade> {
+  static async acceptTrade(tradeId: number): Promise<Trade> {
     const trade = await Trade.findById(tradeId, {
       include: [{ model: Order }]
     })
@@ -75,7 +115,7 @@ export class Trade extends Model<Trade> {
     const tx = await Transaction.blockBalance(
       trade.order.userId,
       trade.order.cryptoCurrencyCode,
-      trade.amount,
+      trade.cryptoAmount,
       trade.id + ''
     )
     if (tx) {
@@ -88,7 +128,7 @@ export class Trade extends Model<Trade> {
     }
   }
 
-  async releasePayment(tradeId: number): Promise<Trade> {
+  static async releasePayment(tradeId: number): Promise<Trade> {
     const trade = await Trade.findById(tradeId, {
       include: [{ model: Order }]
     })
@@ -114,6 +154,20 @@ export class Trade extends Model<Trade> {
     } else {
       throw new Error('Error unblocking transaction / no blocked amount found')
     }
+  }
+}
+
+export class TradeError extends Error {
+  public status: number
+  public static TRADE_EXISTS_ON_ORDER = 409
+
+  constructor(
+    status: TradeErrorTypes = 500,
+    message: string = 'Transaction Error'
+  ) {
+    super(message)
+    this.name = this.constructor.name
+    this.status = status
   }
 }
 

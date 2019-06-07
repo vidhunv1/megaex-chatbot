@@ -1,6 +1,6 @@
 import { telegramHook } from 'modules'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, OrderType } from 'models'
+import { User, OrderType, TradeError, TradeErrorTypes } from 'models'
 import { Namespace } from 'modules/i18n'
 import { PaymentMethodType } from 'models'
 import * as _ from 'lodash'
@@ -16,7 +16,7 @@ import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 import { keyboardMainMenu } from 'chats/common'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
-  async showDealsError(error: DealsError) {
+  async showDealsError(error: DealsError | TradeErrorTypes) {
     let transKey = ''
     switch (error) {
       case DealsError.SELF_OPEN_DEAL_REQUEST:
@@ -29,6 +29,13 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       case DealsError.ORDER_NOT_FOUND:
         transKey = user.t(
           `${Namespace.Exchange}:deals.errors.${DealsError.ORDER_NOT_FOUND}`
+        )
+        break
+      case TradeErrorTypes.TRADE_EXISTS_ON_ORDER:
+        transKey = user.t(
+          `${Namespace.Exchange}:deals.trade.errors.${
+            TradeError.TRADE_EXISTS_ON_ORDER
+          }`
         )
         break
       default:
@@ -69,10 +76,10 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     cryptoCurrencyCode: CryptoCurrency,
     fiatCurrencyCode: FiatCurrency,
     fiatValue: number,
-    rate: number
+    fixedRate: number
   ) {
     const formattedCryptoValue = dataFormatter.formatCryptoCurrency(
-      fiatValue / rate,
+      fiatValue / fixedRate,
       cryptoCurrencyCode
     )
     const formattedFiatValue = dataFormatter.formatFiatCurrency(
@@ -80,7 +87,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       fiatCurrencyCode
     )
     const formattedRate = dataFormatter.formatFiatCurrency(
-      rate,
+      fixedRate,
       fiatCurrencyCode
     )
     let message

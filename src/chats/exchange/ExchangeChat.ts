@@ -58,7 +58,7 @@ export const ExchangeChat: ChatHandler = {
             order.rateType,
             order.cryptoCurrencyCode,
             order.fiatCurrencyCode,
-            user.exchangeRateSource
+            order.user.exchangeRateSource
           )) * availableBalance
         await DealsMessage(msg, user).showDeal(
           order.orderType,
@@ -76,7 +76,7 @@ export const ExchangeChat: ChatHandler = {
             order.rateType,
             order.cryptoCurrencyCode,
             order.fiatCurrencyCode,
-            dealer.exchangeRateSource
+            order.user.exchangeRateSource
           ),
           {
             min: order.minFiatAmount,
