@@ -9,18 +9,34 @@ import {
   DataType,
   BelongsTo
 } from 'sequelize-typescript'
+import * as moment from 'moment'
 import User from './User'
 import Order from './Order'
 import Transaction from './Transaction'
+import { CacheHelper, CacheKey } from 'lib/CacheHelper'
+import { cacheConnection } from 'modules'
+import { CONFIG } from '../config'
 
 export enum TradeStatus {
   INITIATED = 'INITIATED',
   ACCEPTED = 'ACCEPTED',
   CANCELED = 'CANCELED',
+  EXPIRED = 'EXPIRED',
 
   PAYMENT_MARKED = 'PAYMENT_MARKED',
   PAYMENT_RELEASED = 'PAYMENT_RELEASED',
   PAYMENT_DISPUTE = 'PAYMENT_DISPUTE'
+}
+
+export const activeTradeStatus: Record<TradeStatus, boolean> = {
+  [TradeStatus.INITIATED]: true,
+  [TradeStatus.ACCEPTED]: true,
+  [TradeStatus.PAYMENT_MARKED]: true,
+  [TradeStatus.PAYMENT_DISPUTE]: true,
+
+  [TradeStatus.EXPIRED]: false,
+  [TradeStatus.CANCELED]: false,
+  [TradeStatus.PAYMENT_RELEASED]: false
 }
 
 export enum TradeErrorTypes {
@@ -65,13 +81,10 @@ export class Trade extends Model<Trade> {
   @Column(DataType.STRING)
   status!: TradeStatus
 
-  static getActiveStatuses() {
-    return [
-      TradeStatus.INITIATED,
-      TradeStatus.ACCEPTED,
-      TradeStatus.PAYMENT_MARKED,
-      TradeStatus.PAYMENT_DISPUTE
-    ]
+  static getActiveStatuses(): TradeStatus[] {
+    return Object.keys(TradeStatus).filter(
+      (ts) => activeTradeStatus[ts as TradeStatus] === true
+    ) as TradeStatus[]
   }
 
   static async initiateTrade(
@@ -88,20 +101,38 @@ export class Trade extends Model<Trade> {
       }
     })
 
-    if (t) {
+    if (
+      t &&
+      moment().diff(t.createdAt, 'seconds') <=
+        parseInt(CONFIG.DEAL_INIT_TIMEOUT_S)
+    ) {
       throw new TradeError(TradeError.TRADE_EXISTS_ON_ORDER)
     }
+
     const order = await Order.findById(orderId)
     if (!order || (order && cryptoAmount * fixedRate < order.minFiatAmount)) {
       throw new Error('Invalid order')
     }
-    return await Trade.create<Trade>({
+    const trade = await Trade.create<Trade>({
       openedByUserId,
       orderId,
       cryptoAmount: cryptoAmount,
       fixedRate,
       status: TradeStatus.INITIATED
     })
+
+    const tradeExpiryKey = CacheHelper.getKeyForId(
+      CacheKey.TradeInitExpiry,
+      trade.id
+    )
+    await cacheConnection.getClient.setAsync(
+      tradeExpiryKey,
+      '',
+      'EX',
+      parseInt(CONFIG.DEAL_INIT_TIMEOUT_S)
+    )
+
+    return trade
   }
 
   static async acceptTrade(tradeId: number): Promise<Trade> {
@@ -109,7 +140,7 @@ export class Trade extends Model<Trade> {
       include: [{ model: Order }]
     })
     if (!trade || !trade.order) {
-      throw new Error('Trade / Order now found')
+      throw new TradeError(TradeError.NOT_FOUND)
     }
 
     const tx = await Transaction.blockBalance(
@@ -155,11 +186,27 @@ export class Trade extends Model<Trade> {
       throw new Error('Error unblocking transaction / no blocked amount found')
     }
   }
+
+  static async setExpired(tradeId: number): Promise<Trade | null> {
+    const trade = await Trade.findById(tradeId, {
+      include: [{ model: Order }]
+    })
+
+    if (trade && trade.status === TradeStatus.INITIATED) {
+      return await trade.update({
+        status: TradeStatus.EXPIRED
+      })
+    }
+
+    return null
+  }
 }
 
 export class TradeError extends Error {
   public status: number
   public static TRADE_EXISTS_ON_ORDER = 409
+  public static NOT_FOUND = 404
+  public static TRADE_EXPIRED = 400
 
   constructor(
     status: TradeErrorTypes = 500,

@@ -8,7 +8,8 @@ export enum CacheKey {
   TelegramAccount = 't-account',
   Context = 't-context',
   State = 't-state',
-  PaymentExpiry = 't-payment-expiry'
+  PaymentExpiry = 't-payment-expiry',
+  TradeInitExpiry = 't-trade-init-expiry'
 }
 
 const cacheKeys = Object.values(CacheKey)

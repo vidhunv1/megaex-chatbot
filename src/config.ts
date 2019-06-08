@@ -33,5 +33,7 @@ export const CONFIG = {
   BTC_FEES: getEnv('BTC_FEES'),
   AMPQ_URL: getEnv('AMPQ_URL'),
 
-  PAYMENT_EXPIRY_S: getEnv('PAYMENT_EXPIRY_S')
+  PAYMENT_EXPIRY_S: getEnv('PAYMENT_EXPIRY_S'),
+
+  DEAL_INIT_TIMEOUT_S: getEnv('DEAL_INIT_TIMEOUT_S')
 }

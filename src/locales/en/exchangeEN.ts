@@ -19,7 +19,9 @@ export const exchangeEN = {
   deals: {
     trade: {
       errors: {
-        409: '❌ You already have an existing trade on this order.'
+        409: '❌ You already have an existing trade on this order.',
+        404: '❌ Could not find this trade.',
+        400: '❌ This trade is invalid or expired.'
       },
       'init-get-confirm': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
 
@@ -29,7 +31,17 @@ ${
 
 Do you want to accept this trade?`,
       'trade-init-yes-cbbutton': 'Yes',
-      'trade-init-no-cbbutton': 'No'
+      'trade-init-no-cbbutton': 'No',
+      'trade-init-no-response': `💤 *No Response*
+
+This user is currently away. Please try other trades.`,
+      'trade-init-expired': `⏳ *Trade expired*
+
+The trade request ${
+        BotCommand.TRADE
+      }{{ tradeId }} has expired and canceled since you did not respond.
+
+❕You can pause your order easily if you are away. This ensures a good experience for everyone.`
     },
     'request-deposit-notify': `🛎 *New Match*
 
