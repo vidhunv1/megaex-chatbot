@@ -210,9 +210,6 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     [DealsStateKey.cb_confirmInputDealAmount]: async () => {
       return false
     },
-    [DealsStateKey.cb_respondDealInit]: async () => {
-      return false
-    },
     [DealsStateKey.showDealInitOpened]: async () => {
       const stateData = _.get(
         state[DealsStateKey.showDealInitOpened],
@@ -233,6 +230,20 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     },
     [DealsStateKey.showDealInitCancel]: async () => {
       await DealsMessage(msg, user).showDealInitCancel()
+      return true
+    },
+
+    [DealsStateKey.cb_respondToTradeInit]: async () => {
+      return false
+    },
+    [DealsStateKey.cb_cancelTrade]: async () => {
+      return false
+    },
+    [DealsStateKey.cancelTrade]: async () => {
+      const data = _.get(state[DealsStateKey.cancelTrade], 'data', null)
+      const canceledTradeId = _.get(data, 'canceledTradeId', null)
+      await DealsMessage(msg, user).cancelTradeResp(canceledTradeId)
+
       return true
     }
   }

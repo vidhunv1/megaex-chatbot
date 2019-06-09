@@ -21,9 +21,11 @@ export enum DealsStateKey {
   showDealInitOpened = 'showDealInitOpened',
   showDealInitCancel = 'showDealInitCancel',
 
-  cb_respondDealInit = 'cb_respondDealInit',
+  dealError = 'dealError',
 
-  dealError = 'dealError'
+  cb_respondToTradeInit = 'cb_respondToTradeInit',
+  cb_cancelTrade = 'cb_cancelTrade',
+  cancelTrade = 'cancelTrade'
 }
 
 export enum DealsError {
@@ -41,7 +43,7 @@ export interface DealsState {
     orderId: number
   }
 
-  [DealsStateKey.cb_respondDealInit]?: {
+  [DealsStateKey.cb_respondToTradeInit]?: {
     confirmation: 'yes' | 'no'
   }
 
@@ -90,5 +92,14 @@ export interface DealsState {
       isInitialized: boolean
     } | null
     error?: DealsError | TradeErrorTypes
+  }
+
+  [DealsStateKey.cb_cancelTrade]?: {
+    tradeId: number
+  }
+  [DealsStateKey.cancelTrade]?: {
+    data: {
+      canceledTradeId: number | null
+    }
   }
 }

@@ -18,6 +18,11 @@ export const exchangeEN = {
 
   deals: {
     trade: {
+      'cancel-trade-success': 'This trade was canceled.',
+      'cancel-trade-fail': 'The trade was already canceled or expired.',
+      'cancel-trade-notify': `❗️The trade ${
+        BotCommand.TRADE
+      }{{ tradeId }} was canceled by the user.`,
       errors: {
         409: '❌ You already have an existing trade on this order.',
         404: '❌ Could not find this trade.',

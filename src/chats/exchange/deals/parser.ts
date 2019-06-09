@@ -1,4 +1,4 @@
-import { DealsStateKey, DealsError, DealsState } from './types'
+import { DealsStateKey, DealsError } from './types'
 import { Parser } from 'chats/types'
 import {
   ExchangeState,
@@ -7,12 +7,8 @@ import {
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
-import { Order, User, TelegramAccount, TradeError } from 'models'
-import { logger, telegramHook } from 'modules'
-import { Namespace } from 'modules/i18n'
-import { dataFormatter } from 'utils/dataFormatter'
-import { Trade } from 'models'
-import { stringifyCallbackQuery } from 'chats/utils'
+import { Order, TradeError } from 'models'
+import { dealUtils } from './dealUtils'
 
 export const DealsParser: Parser<ExchangeState> = async (
   msg,
@@ -81,7 +77,7 @@ export const DealsParser: Parser<ExchangeState> = async (
       if (orderId === null) {
         return null
       }
-      const order = await getOrder(orderId)
+      const order = await dealUtils.getOrder(orderId)
       if (!order) return null
 
       if (order.userId === user.id) {
@@ -113,7 +109,7 @@ export const DealsParser: Parser<ExchangeState> = async (
       if (orderId === null) {
         return null
       }
-      const order = await getOrder(orderId)
+      const order = await dealUtils.getOrder(orderId)
       if (!order) return null
 
       if (order.userId === user.id) {
@@ -152,7 +148,7 @@ export const DealsParser: Parser<ExchangeState> = async (
       if (!msg.text || orderId == null || jumpState == null) {
         return null
       }
-      const order = await getOrder(orderId)
+      const order = await dealUtils.getOrder(orderId)
       if (order == null) {
         return null
       }
@@ -210,9 +206,6 @@ export const DealsParser: Parser<ExchangeState> = async (
     [DealsStateKey.confirmInputDealAmount]: async () => {
       return null
     },
-    [DealsStateKey.cb_respondDealInit]: async () => {
-      return null
-    },
     [DealsStateKey.cb_confirmInputDealAmount]: async () => {
       const isConfirmed: boolean = JSON.parse(
         _.get(
@@ -245,7 +238,7 @@ export const DealsParser: Parser<ExchangeState> = async (
       ) {
         switch (jumpState) {
           case DealsStateKey.cb_requestDealDeposit:
-            const isInitialized = await sendOpenDealRequest(
+            const isInitialized = await dealUtils.sendOpenDealRequest(
               orderId,
               user,
               tUser,
@@ -262,7 +255,7 @@ export const DealsParser: Parser<ExchangeState> = async (
             }
           case DealsStateKey.cb_openDeal: {
             try {
-              const tradeInfo = await initOpenTrade(
+              const tradeInfo = await dealUtils.initOpenTrade(
                 orderId,
                 inputDealData.fiatValue,
                 inputDealData.fixedRate,
@@ -349,6 +342,33 @@ export const DealsParser: Parser<ExchangeState> = async (
       return null
     },
     [DealsStateKey.dealError]: async () => {
+      return null
+    },
+
+    [DealsStateKey.cb_respondToTradeInit]: async () => {
+      return null
+    },
+    [DealsStateKey.cb_cancelTrade]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_cancelTrade],
+        'tradeId',
+        null
+      )
+      if (tradeId) {
+        const canceledTrade = await dealUtils.cancelTrade(tradeId)
+        return {
+          ...state,
+          [DealsStateKey.cancelTrade]: {
+            data: {
+              canceledTradeId: canceledTrade ? canceledTrade.id : null
+            }
+          }
+        }
+      }
+
+      return null
+    },
+    [DealsStateKey.cancelTrade]: async () => {
       return null
     }
   }
@@ -469,152 +489,10 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
     }
     case DealsStateKey.dealError:
       return null
+
+    case DealsStateKey.cb_cancelTrade:
+      return DealsStateKey.cancelTrade
     default:
       return null
   }
-}
-
-async function sendOpenDealRequest(
-  orderId: number,
-  requesterUser: User,
-  requestorTelegram: TelegramAccount,
-  dealFiatAmount: number
-) {
-  logger.warn(
-    'TODO: Potential area for spamming. deals/parser sendOpenDealRequest'
-  )
-  const order = await getOrder(orderId)
-
-  if (!order) {
-    return false
-  }
-
-  const op = await User.findById(order.userId, {
-    include: [{ model: TelegramAccount }]
-  })
-
-  if (!op) {
-    return false
-  }
-
-  logger.info(
-    `deals/parser/sendOpenDealRequest: /O${orderId} requester: ${
-      requesterUser.id
-    } to user ${order.userId}`
-  )
-
-  const dealCryptoAmount: number =
-    dealFiatAmount /
-    (await Order.convertToFixedRate(
-      order.rate,
-      order.rateType,
-      order.cryptoCurrencyCode,
-      order.fiatCurrencyCode,
-      order.user.exchangeRateSource
-    ))
-
-  await telegramHook.getWebhook.sendMessage(
-    op.telegramUser.id,
-    op.t(`${Namespace.Exchange}:deals.request-deposit-notify`, {
-      orderId: order.id,
-      requesterName: requestorTelegram.firstName,
-      requesterUsername: requestorTelegram.username,
-      formattedFiatValue: dataFormatter.formatFiatCurrency(
-        dealFiatAmount,
-        order.fiatCurrencyCode
-      ),
-      formattedCryptoValue: dataFormatter.formatCryptoCurrency(
-        dealCryptoAmount,
-        order.cryptoCurrencyCode
-      )
-    }),
-    {
-      parse_mode: 'Markdown'
-    }
-  )
-  return true
-}
-
-async function initOpenTrade(
-  orderId: number,
-  fiatAmount: number,
-  fixedRate: number,
-  openedByUser: User
-): Promise<Trade | null> {
-  const cryptoAmount: number = fiatAmount / fixedRate
-
-  const trade = await Trade.initiateTrade(
-    openedByUser.id,
-    orderId,
-    cryptoAmount,
-    fixedRate
-  )
-  const order = await Order.getOrder(orderId)
-  if (!order) {
-    logger.error('deals/parser/initOpenTrade No order found')
-    return null
-  }
-
-  const telegramAccountOP = await TelegramAccount.findOne({
-    where: {
-      userId: order.userId
-    }
-  })
-  // send message to OP
-  if (!telegramAccountOP) {
-    throw new Error('No Telegram account found')
-  }
-
-  await telegramHook.getWebhook.sendMessage(
-    telegramAccountOP.id,
-    order.user.t(`${Namespace.Exchange}:deals.trade.init-get-confirm`, {
-      tradeId: trade.id,
-      requestorAccountId: openedByUser.accountId,
-      cryptoCurrencyAmount: dataFormatter.formatCryptoCurrency(
-        cryptoAmount,
-        order.cryptoCurrencyCode
-      ),
-      fiatValue: dataFormatter.formatFiatCurrency(
-        fiatAmount,
-        order.fiatCurrencyCode
-      )
-    }),
-    {
-      parse_mode: 'Markdown',
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: order.user.t(
-                `${Namespace.Exchange}:deals.trade.trade-init-yes-cbbutton`
-              ),
-              callback_data: stringifyCallbackQuery<
-                DealsStateKey.cb_respondDealInit,
-                DealsState[DealsStateKey.cb_respondDealInit]
-              >(DealsStateKey.cb_respondDealInit, {
-                confirmation: 'yes'
-              })
-            },
-            {
-              text: order.user.t(
-                `${Namespace.Exchange}:deals.trade.trade-init-no-cbbutton`
-              ),
-              callback_data: stringifyCallbackQuery<
-                DealsStateKey.cb_respondDealInit,
-                DealsState[DealsStateKey.cb_respondDealInit]
-              >(DealsStateKey.cb_respondDealInit, {
-                confirmation: 'no'
-              })
-            }
-          ]
-        ]
-      }
-    }
-  )
-
-  return trade
-}
-
-async function getOrder(orderId: number) {
-  return await Order.getOrder(orderId)
 }

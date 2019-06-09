@@ -16,6 +16,20 @@ import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 import { keyboardMainMenu } from 'chats/common'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
+  async cancelTradeResp(tradeId: number | null) {
+    let transKey
+    if (tradeId) {
+      transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-success`
+    } else {
+      transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-fail`
+    }
+
+    await telegramHook.getWebhook.sendMessage(msg.chat.id, user.t(transKey), {
+      parse_mode: 'Markdown',
+      reply_markup: keyboardMainMenu(user)
+    })
+  },
+
   async showDealsError(error: DealsError | TradeErrorTypes) {
     let transKey = ''
     switch (error) {
@@ -516,9 +530,11 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
                   `${Namespace.Exchange}:deals.cancel-trade-cbbutton`
                 ),
                 callback_data: stringifyCallbackQuery<
-                  CommonStateKey.cb_deleteThisMessage,
-                  CommonState[CommonStateKey.cb_deleteThisMessage]
-                >(CommonStateKey.cb_deleteThisMessage, {})
+                  DealsStateKey.cb_cancelTrade,
+                  DealsState[DealsStateKey.cb_cancelTrade]
+                >(DealsStateKey.cb_cancelTrade, {
+                  tradeId
+                })
               }
             ]
           ]

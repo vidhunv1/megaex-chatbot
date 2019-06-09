@@ -21,6 +21,7 @@ export enum TradeStatus {
   INITIATED = 'INITIATED',
   ACCEPTED = 'ACCEPTED',
   CANCELED = 'CANCELED',
+  REJECTED = 'REJECTED',
   EXPIRED = 'EXPIRED',
 
   PAYMENT_MARKED = 'PAYMENT_MARKED',
@@ -36,6 +37,7 @@ export const activeTradeStatus: Record<TradeStatus, boolean> = {
 
   [TradeStatus.EXPIRED]: false,
   [TradeStatus.CANCELED]: false,
+  [TradeStatus.REJECTED]: false,
   [TradeStatus.PAYMENT_RELEASED]: false
 }
 
@@ -188,14 +190,45 @@ export class Trade extends Model<Trade> {
   }
 
   static async setExpired(tradeId: number): Promise<Trade | null> {
-    const trade = await Trade.findById(tradeId, {
-      include: [{ model: Order }]
+    const trade = await Trade.findOne({
+      include: [{ model: Order }],
+      where: {
+        status: TradeStatus.INITIATED,
+        id: tradeId
+      }
     })
 
-    if (trade && trade.status === TradeStatus.INITIATED) {
+    if (trade) {
       return await trade.update({
         status: TradeStatus.EXPIRED
       })
+    }
+
+    return null
+  }
+
+  static async setCanceled(tradeId: number): Promise<Trade | null> {
+    const trade = await Trade.findOne({
+      include: [{ model: Order }],
+      where: {
+        status: [TradeStatus.INITIATED, TradeStatus.ACCEPTED],
+        id: tradeId
+      }
+    })
+
+    if (trade) {
+      console.log('TRADE TO CANCEL: ' + trade.status)
+      const tt = await trade.update({
+        status: TradeStatus.CANCELED
+      })
+
+      const tradeExpiryKey = CacheHelper.getKeyForId(
+        CacheKey.TradeInitExpiry,
+        trade.id
+      )
+      await cacheConnection.getClient.delAsync(tradeExpiryKey)
+
+      return tt
     }
 
     return null
