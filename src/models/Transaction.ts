@@ -141,6 +141,42 @@ export class Transaction extends Model<Transaction> {
     )
   }
 
+  static async getBlockedBalance(
+    userId: number,
+    currencyCode: CryptoCurrency
+  ): Promise<number> {
+    const tx = JSON.parse(
+      JSON.stringify(
+        await Transaction.find({
+          attributes: [
+            [
+              Transaction.sequelize.literal(
+                `SUM(CASE WHEN "transactionSource" = '${
+                  TransactionSource.BLOCK
+                }' THEN amount ELSE 0 END)`
+              ),
+              'blockedBalance'
+            ],
+            [
+              Transaction.sequelize.literal(
+                `SUM(CASE WHEN "transactionSource" = '${
+                  TransactionSource.RELEASE
+                }' THEN amount ELSE 0 END)`
+              ),
+              'releasedBalance'
+            ]
+          ],
+          where: {
+            userId,
+            currencyCode: currencyCode
+          }
+        })
+      )
+    )
+
+    return (tx.blockedBalance || 0) + (tx.releasedBalance || 0)
+  }
+
   static async createOrUpdateDepositTx(
     userId: number,
     currencyCode: CryptoCurrency,
@@ -312,7 +348,7 @@ export class Transaction extends Model<Transaction> {
     const tx = new Transaction({
       userId,
       txid,
-      amount: amount >= 0 ? -1 * amount : amount,
+      amount: -1 * Math.abs(amount),
       transactionSource: TransactionSource.WITHDRAWAL,
       transactionType: TransactionType.SEND,
       currencyCode: currencyCode,
@@ -376,7 +412,7 @@ export class Transaction extends Model<Transaction> {
       {
         userId: releaseToUserId,
         txid: tx.txid,
-        amount: tx.amount,
+        amount: Math.abs(tx.amount),
         transactionSource: TransactionSource.RELEASE,
         transactionType: TransactionType.RECEIVE,
         currencyCode: tx.currencyCode,
@@ -386,11 +422,6 @@ export class Transaction extends Model<Transaction> {
         transaction
       }
     )
-
-    // Delete the blocked payment
-    await tx.destroy({
-      transaction: transaction
-    })
 
     return releasedTx
   }

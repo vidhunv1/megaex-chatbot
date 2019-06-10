@@ -30,6 +30,78 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     })
   },
 
+  async showAcceptDealError() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade.trade-accepted-fail`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
+      }
+    )
+  },
+
+  async showDealRejected() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade.trade-rejected-success`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
+      }
+    )
+  },
+
+  async showDealAcceptSuccess(
+    tradeId: number,
+    fiatPayAmount: number,
+    fiatCurrencyCode: FiatCurrency,
+    paymentMethodType: PaymentMethodType
+  ) {
+    const formattedFiat = dataFormatter.formatFiatCurrency(
+      fiatPayAmount,
+      fiatCurrencyCode
+    )
+
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade.trade-accepted-success`, {
+        paymentMethodName: user.t(`payment-methods.names.${paymentMethodType}`),
+        fiatPayAmount: formattedFiat,
+        tradeId
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: user.t(
+                  `${Namespace.Exchange}:deals.trade.payment-received-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  DealsStateKey.cb_confirmPaymentReceived,
+                  DealsState[DealsStateKey.cb_confirmPaymentReceived]
+                >(DealsStateKey.cb_confirmPaymentReceived, {
+                  tradeId: tradeId
+                })
+              },
+              {
+                text: user.t(
+                  `${Namespace.Exchange}:deals.trade.dispute-payment-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  DealsStateKey.cb_paymentDispute,
+                  DealsState[DealsStateKey.cb_paymentDispute]
+                >(DealsStateKey.cb_paymentDispute, {})
+              }
+            ]
+          ]
+        }
+      }
+    )
+  },
+
   async showDealsError(error: DealsError | TradeErrorTypes) {
     let transKey = ''
     switch (error) {

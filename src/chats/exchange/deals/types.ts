@@ -24,8 +24,12 @@ export enum DealsStateKey {
   dealError = 'dealError',
 
   cb_respondToTradeInit = 'cb_respondToTradeInit',
+  respondToTradeInit = 'respondToTradeInit',
   cb_cancelTrade = 'cb_cancelTrade',
-  cancelTrade = 'cancelTrade'
+  cancelTrade = 'cancelTrade',
+  cb_confirmPaymentSent = 'cb_confirmPaymentSent',
+  cb_confirmPaymentReceived = 'cb_confirmPaymentReceived',
+  cb_paymentDispute = 'cb_paymentDispute'
 }
 
 export enum DealsError {
@@ -41,10 +45,6 @@ export interface DealsState {
 
   [DealsStateKey.cb_showDealById]?: {
     orderId: number
-  }
-
-  [DealsStateKey.cb_respondToTradeInit]?: {
-    confirmation: 'yes' | 'no'
   }
 
   [DealsStateKey.deals_show]?: {
@@ -102,4 +102,19 @@ export interface DealsState {
       canceledTradeId: number | null
     }
   }
+  [DealsStateKey.cb_respondToTradeInit]?: {
+    confirmation: 'yes' | 'no'
+    tradeId: number
+    data?: {
+      openedTradeId: number | null
+    } | null
+    error?: TradeErrorTypes | DealsError | null
+  }
+  [DealsStateKey.cb_confirmPaymentSent]?: {
+    tradeId: number
+  }
+  [DealsStateKey.cb_confirmPaymentReceived]?: {
+    tradeId: number
+  }
+  [DealsStateKey.cb_paymentDispute]?: {}
 }

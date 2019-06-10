@@ -1,4 +1,4 @@
-import { Order, Trade } from 'models'
+import { Order, Trade, PaymentMethod } from 'models'
 import { DealsStateKey, DealsState } from './types'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { Namespace } from 'modules/i18n'
@@ -128,7 +128,8 @@ export const dealUtils = {
                   DealsStateKey.cb_respondToTradeInit,
                   DealsState[DealsStateKey.cb_respondToTradeInit]
                 >(DealsStateKey.cb_respondToTradeInit, {
-                  confirmation: 'yes'
+                  confirmation: 'yes',
+                  tradeId: trade.id
                 })
               },
               {
@@ -139,7 +140,8 @@ export const dealUtils = {
                   DealsStateKey.cb_respondToTradeInit,
                   DealsState[DealsStateKey.cb_respondToTradeInit]
                 >(DealsStateKey.cb_respondToTradeInit, {
-                  confirmation: 'no'
+                  confirmation: 'no',
+                  tradeId: trade.id
                 })
               }
             ]
@@ -171,6 +173,109 @@ export const dealUtils = {
           {
             parse_mode: 'Markdown',
             reply_markup: keyboardMainMenu(opUser)
+          }
+        )
+      }
+    }
+
+    return trade
+  },
+  acceptTrade: async function(
+    opTUser: TelegramAccount,
+    tradeId: number
+  ): Promise<Trade | null> {
+    const trade = await Trade.acceptTrade(tradeId)
+    const openedByUser = await User.findById(trade.openedByUserId, {
+      include: [{ model: TelegramAccount }]
+    })
+    if (trade && openedByUser) {
+      const fiatPayAmount = dataFormatter.formatFiatCurrency(
+        trade.cryptoAmount * trade.fixedRate,
+        trade.order.fiatCurrencyCode
+      )
+      let paymentDetails = ''
+      if (trade.order.paymentMethodId) {
+        const pm = await PaymentMethod.getPaymentMethod(
+          trade.order.paymentMethodId
+        )
+
+        if (pm) {
+          pm.fields.forEach((field, index) => {
+            paymentDetails =
+              paymentDetails +
+              `\n${openedByUser.t(
+                `payment-methods.fields.${pm.paymentMethod}.field${index + 1}`
+              )}: ${field}`
+          })
+        }
+      }
+      await telegramHook.getWebhook.sendMessage(
+        openedByUser.telegramUser.id,
+        openedByUser.t(
+          `${Namespace.Exchange}:deals.trade.trade-accepted-notify`,
+          {
+            tradeId: trade.id,
+            fiatPayAmount: fiatPayAmount,
+            paymentMethodName: openedByUser.t(
+              `payment-methods.names.${trade.order.paymentMethodType}`
+            ),
+            telegramUsername: '@' + opTUser.username || '-',
+            paymentDetails: paymentDetails
+          }
+        ),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: openedByUser.t(
+                    `${Namespace.Exchange}:deals.trade.payment-sent-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    DealsStateKey.cb_confirmPaymentSent,
+                    DealsState[DealsStateKey.cb_confirmPaymentSent]
+                  >(DealsStateKey.cb_confirmPaymentSent, {
+                    tradeId: trade.id
+                  })
+                },
+                {
+                  text: openedByUser.t(
+                    `${Namespace.Exchange}:deals.trade.dispute-payment-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    DealsStateKey.cb_paymentDispute,
+                    DealsState[DealsStateKey.cb_paymentDispute]
+                  >(DealsStateKey.cb_paymentDispute, {})
+                }
+              ]
+            ]
+          }
+        }
+      )
+    }
+
+    return trade
+  },
+  rejectTrade: async function(tradeId: number): Promise<Trade | null> {
+    const trade = await Trade.rejectTrade(tradeId)
+    if (trade) {
+      const openedByUser = await User.findById(trade.openedByUserId, {
+        include: [{ model: TelegramAccount }]
+      })
+
+      if (openedByUser) {
+        await telegramHook.getWebhook.sendMessage(
+          openedByUser.telegramUser.id,
+          openedByUser.t(
+            `${Namespace.Exchange}:deals.trade.trade-rejected-notify`,
+            {
+              tradeId: trade.id
+            }
+          ),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(openedByUser)
           }
         )
       }

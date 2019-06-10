@@ -9,6 +9,7 @@ import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { Order, TradeError } from 'models'
 import { dealUtils } from './dealUtils'
+import logger from 'modules/logger'
 
 export const DealsParser: Parser<ExchangeState> = async (
   msg,
@@ -346,7 +347,84 @@ export const DealsParser: Parser<ExchangeState> = async (
     },
 
     [DealsStateKey.cb_respondToTradeInit]: async () => {
-      return null
+      const confirmation = _.get(
+        state[DealsStateKey.cb_respondToTradeInit],
+        'confirmation',
+        null
+      )
+      const tradeId = parseInt(
+        _.get(state[DealsStateKey.cb_respondToTradeInit], 'tradeId', null) + ''
+      )
+
+      if (confirmation === null || tradeId === null) {
+        return null
+      }
+      if (confirmation === 'yes') {
+        try {
+          const trade = await dealUtils.acceptTrade(tUser, tradeId)
+          if (!trade) {
+            logger.error(
+              'deals/parser/acceptTrade error accepting trade, trade is null'
+            )
+            throw new Error('Error accetpting trade')
+          }
+          return {
+            ...state,
+            [DealsStateKey.cb_respondToTradeInit]: {
+              confirmation: confirmation,
+              tradeId: tradeId,
+              data: {
+                openedTradeId: _.get(trade, 'id', null)
+              },
+              error: null
+            }
+          }
+        } catch (e) {
+          return {
+            ...state,
+            [DealsStateKey.cb_respondToTradeInit]: {
+              confirmation: confirmation,
+              tradeId: tradeId,
+              data: null,
+              error: e instanceof TradeError ? e.status : DealsError.DEFAULT
+            }
+          }
+        }
+      } else {
+        try {
+          const trade = await dealUtils.rejectTrade(tradeId)
+          if (!trade) {
+            logger.error(
+              'deals/parser/acceptTrade error rejecting trade, trade is null'
+            )
+            throw new Error('Error rejecting trade')
+          }
+          return {
+            ...state,
+            [DealsStateKey.cb_respondToTradeInit]: {
+              confirmation: confirmation,
+              tradeId: tradeId,
+              data: {
+                openedTradeId: null
+              },
+              error: null
+            }
+          }
+        } catch (e) {
+          return {
+            ...state,
+            [DealsStateKey.cb_respondToTradeInit]: {
+              confirmation: confirmation,
+              tradeId: tradeId,
+              data: null,
+              error: e instanceof TradeError ? e.status : DealsError.DEFAULT
+            }
+          }
+        }
+      }
+    },
+    [DealsStateKey.respondToTradeInit]: async () => {
+      return state
     },
     [DealsStateKey.cb_cancelTrade]: async () => {
       const tradeId = _.get(
@@ -369,6 +447,15 @@ export const DealsParser: Parser<ExchangeState> = async (
       return null
     },
     [DealsStateKey.cancelTrade]: async () => {
+      return null
+    },
+    [DealsStateKey.cb_confirmPaymentSent]: async () => {
+      return null
+    },
+    [DealsStateKey.cb_confirmPaymentReceived]: async () => {
+      return null
+    },
+    [DealsStateKey.cb_paymentDispute]: async () => {
       return null
     }
   }
@@ -492,6 +579,17 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
 
     case DealsStateKey.cb_cancelTrade:
       return DealsStateKey.cancelTrade
+    case DealsStateKey.cb_respondToTradeInit:
+      const dealError = _.get(
+        state[DealsStateKey.cb_respondToTradeInit],
+        'error',
+        null
+      )
+      if (dealError) {
+        return DealsStateKey.dealError
+      }
+
+      return DealsStateKey.respondToTradeInit
     default:
       return null
   }

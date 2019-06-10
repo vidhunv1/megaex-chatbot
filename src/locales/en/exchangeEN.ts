@@ -6,7 +6,7 @@ export const exchangeEN = {
     exchange: `💵  *Exchange BTC-{{ fiatCurrency }}*
 
 ✅  24/7 support via {{ supportBotUsername }}
-🔒  All deals are secured with escrow protection
+🔒  All trades are secured with escrow protection
 
 *Market rate*: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
 
@@ -23,6 +23,26 @@ export const exchangeEN = {
       'cancel-trade-notify': `❗️The trade ${
         BotCommand.TRADE
       }{{ tradeId }} was canceled by the user.`,
+      'trade-rejected-notify': '❗️The user has canceled this trade.',
+      'trade-rejected-success': 'Trade canceled',
+      'trade-accepted-success': `🛎 *Trade Open* ${BotCommand.TRADE}{{ tradeId }}
+
+The user has been notified to deposit *{{ fiatPayAmount }}* in *{{ paymentMethodName }}*.
+
+Click confirm below once you receive this payment.`,
+      'trade-accepted-notify': `🛎 *Trade Open* ${BotCommand.TRADE}{{ tradeId }}
+      
+🔒 _Escrow secured_
+
+Make a payment of *{{ fiatPayAmount }}* to the sellers *{{ paymentMethodName }}* account.
+{{ paymentDetails }}
+
+Telegram: {{ telegramUsername }}`,
+      'payment-received-cbbutton': '💵  Payment Received',
+      'dispute-payment-cbbutton': 'Open dispute',
+      'payment-sent-cbbutton': '💸  Payment done',
+      'trade-accepted-fail': 'There was an error in opening this trade.',
+
       errors: {
         409: '❌ You already have an existing trade on this order.',
         404: '❌ Could not find this trade.',

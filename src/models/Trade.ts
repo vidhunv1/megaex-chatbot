@@ -138,8 +138,12 @@ export class Trade extends Model<Trade> {
   }
 
   static async acceptTrade(tradeId: number): Promise<Trade> {
-    const trade = await Trade.findById(tradeId, {
-      include: [{ model: Order }]
+    const trade = await Trade.find({
+      include: [{ model: Order }],
+      where: {
+        id: tradeId,
+        status: TradeStatus.INITIATED
+      }
     })
     if (!trade || !trade.order) {
       throw new TradeError(TradeError.NOT_FOUND)
@@ -152,10 +156,16 @@ export class Trade extends Model<Trade> {
       trade.id + ''
     )
     if (tx) {
-      return await trade.update({
+      const tt = await trade.update({
         status: TradeStatus.ACCEPTED,
         blockedTransactionId: tx.id
       })
+
+      if (tt) {
+        Trade.deleteTradeExpiration(trade.id)
+      }
+
+      return tt
     } else {
       throw new Error('Error blocking the balance')
     }
@@ -189,6 +199,29 @@ export class Trade extends Model<Trade> {
     }
   }
 
+  static async rejectTrade(tradeId: number): Promise<Trade | null> {
+    const trade = await Trade.findOne({
+      include: [{ model: Order }],
+      where: {
+        id: tradeId,
+        status: TradeStatus.INITIATED
+      }
+    })
+    if (!trade || !trade.order) {
+      throw new TradeError(TradeError.NOT_FOUND)
+    }
+
+    const tt = await trade.update({
+      status: TradeStatus.REJECTED
+    })
+
+    if (tt) {
+      Trade.deleteTradeExpiration(tt.id)
+    }
+
+    return tt
+  }
+
   static async setExpired(tradeId: number): Promise<Trade | null> {
     const trade = await Trade.findOne({
       include: [{ model: Order }],
@@ -199,9 +232,15 @@ export class Trade extends Model<Trade> {
     })
 
     if (trade) {
-      return await trade.update({
+      const tt = await trade.update({
         status: TradeStatus.EXPIRED
       })
+
+      if (tt) {
+        Trade.deleteTradeExpiration(trade.id)
+      }
+
+      return tt
     }
 
     return null
@@ -217,21 +256,33 @@ export class Trade extends Model<Trade> {
     })
 
     if (trade) {
-      console.log('TRADE TO CANCEL: ' + trade.status)
+      if (trade.status === TradeStatus.ACCEPTED) {
+        await Transaction.releaseBlockedTx(
+          trade.blockedTransactionId,
+          trade.order.id
+        )
+      }
+
       const tt = await trade.update({
         status: TradeStatus.CANCELED
       })
 
-      const tradeExpiryKey = CacheHelper.getKeyForId(
-        CacheKey.TradeInitExpiry,
-        trade.id
-      )
-      await cacheConnection.getClient.delAsync(tradeExpiryKey)
+      if (tt) {
+        Trade.deleteTradeExpiration(trade.id)
+      }
 
       return tt
     }
 
     return null
+  }
+
+  static async deleteTradeExpiration(tradeId: number) {
+    const tradeExpiryKey = CacheHelper.getKeyForId(
+      CacheKey.TradeInitExpiry,
+      tradeId
+    )
+    await cacheConnection.getClient.delAsync(tradeExpiryKey)
   }
 }
 

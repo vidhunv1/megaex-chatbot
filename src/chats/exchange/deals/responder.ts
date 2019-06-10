@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { ExchangeState, TradeStatus } from '../ExchangeState'
 import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { OrderType, Order, User, Transaction } from 'models'
+import { OrderType, Order, User, Transaction, Trade } from 'models'
 import { DealsConfig } from './config'
 import { logger } from 'modules'
 
@@ -236,6 +236,50 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     [DealsStateKey.cb_respondToTradeInit]: async () => {
       return false
     },
+    [DealsStateKey.respondToTradeInit]: async () => {
+      const confirmation = _.get(
+        state[DealsStateKey.cb_respondToTradeInit],
+        'confirmation',
+        null
+      )
+      const tradeId = parseInt(
+        _.get(state[DealsStateKey.cb_respondToTradeInit], 'tradeId', null) + ''
+      )
+      if (confirmation === null || tradeId === null) {
+        return false
+      }
+
+      const openedTradeId = parseInt(
+        _.get(
+          state[DealsStateKey.cb_respondToTradeInit],
+          'data.openedTradeId',
+          null
+        ) + ''
+      )
+
+      if (isNaN(openedTradeId)) {
+        await DealsMessage(msg, user).showDealRejected()
+        return true
+      }
+
+      if (openedTradeId != tradeId) {
+        await DealsMessage(msg, user).showAcceptDealError()
+        return true
+      }
+
+      const trade = await Trade.findById(tradeId, {
+        include: [{ model: Order }]
+      })
+      if (!trade) return false
+
+      await DealsMessage(msg, user).showDealAcceptSuccess(
+        tradeId,
+        trade.cryptoAmount * trade.fixedRate,
+        trade.order.fiatCurrencyCode,
+        trade.order.paymentMethodType
+      )
+      return true
+    },
     [DealsStateKey.cb_cancelTrade]: async () => {
       return false
     },
@@ -245,6 +289,15 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       await DealsMessage(msg, user).cancelTradeResp(canceledTradeId)
 
       return true
+    },
+    [DealsStateKey.cb_confirmPaymentSent]: async () => {
+      return false
+    },
+    [DealsStateKey.cb_paymentDispute]: async () => {
+      return false
+    },
+    [DealsStateKey.cb_confirmPaymentReceived]: async () => {
+      return false
     }
   }
 

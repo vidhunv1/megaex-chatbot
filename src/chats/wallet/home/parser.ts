@@ -38,7 +38,10 @@ export const WalletHomeParser: Parser<WalletState> = async (
             cryptoBalance: cryptoAmount,
             fiatValue: fiatValue,
             fiatCurrencyCode,
-            blockedBalance: getBlockedBalance(cryptoCurrencyCode),
+            blockedBalance: await getBlockedBalance(
+              user.id,
+              cryptoCurrencyCode
+            ),
             earnings: getEarnings(),
             referralCount: getReferralCount()
           }
@@ -74,9 +77,11 @@ export function nextWalletHomeState(
 }
 
 // Getters
-const getBlockedBalance = (_cryptoCurrency: CryptoCurrency) => {
-  logger.error('TODO: Not implemented getWalletBalance WalletChat#25')
-  return 0.01
+const getBlockedBalance = async (
+  userId: number,
+  cryptoCurrency: CryptoCurrency
+) => {
+  return await Transaction.getBlockedBalance(userId, cryptoCurrency)
 }
 
 const getEarnings = () => {
