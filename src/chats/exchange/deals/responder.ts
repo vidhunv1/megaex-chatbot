@@ -4,7 +4,14 @@ import * as _ from 'lodash'
 import { ExchangeState, TradeStatus } from '../ExchangeState'
 import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
-import { OrderType, Order, User, Transaction, Trade } from 'models'
+import {
+  OrderType,
+  Order,
+  User,
+  Transaction,
+  Trade,
+  TelegramAccount
+} from 'models'
 import { DealsConfig } from './config'
 import { logger } from 'modules'
 
@@ -272,11 +279,17 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       })
       if (!trade) return false
 
+      const openedByUser = await User.findById(trade.openedByUserId, {
+        include: [{ model: TelegramAccount }]
+      })
+      if (!openedByUser) return false
+
       await DealsMessage(msg, user).showDealAcceptSuccess(
         tradeId,
         trade.cryptoAmount * trade.fixedRate,
         trade.order.fiatCurrencyCode,
-        trade.order.paymentMethodType
+        trade.order.paymentMethodType,
+        openedByUser.telegramUser.username
       )
       return true
     },

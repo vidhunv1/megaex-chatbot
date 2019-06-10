@@ -166,7 +166,9 @@ You received *{{ cryptoCurrencyValue }}*.`,
     'source-name': {
       core: 'deposit',
       payment: 'payment',
-      withdrawal: 'withdraw'
+      withdrawal: 'withdraw',
+      release: 'trade',
+      block: 'block'
     }
   }
 }

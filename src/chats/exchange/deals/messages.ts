@@ -56,7 +56,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     tradeId: number,
     fiatPayAmount: number,
     fiatCurrencyCode: FiatCurrency,
-    paymentMethodType: PaymentMethodType
+    paymentMethodType: PaymentMethodType,
+    openedByUsername: string
   ) {
     const formattedFiat = dataFormatter.formatFiatCurrency(
       fiatPayAmount,
@@ -68,24 +69,14 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       user.t(`${Namespace.Exchange}:deals.trade.trade-accepted-success`, {
         paymentMethodName: user.t(`payment-methods.names.${paymentMethodType}`),
         fiatPayAmount: formattedFiat,
-        tradeId
+        tradeId,
+        openedTelegramUsername: openedByUsername ? '@' + openedByUsername : ''
       }),
       {
         parse_mode: 'Markdown',
         reply_markup: {
           inline_keyboard: [
             [
-              {
-                text: user.t(
-                  `${Namespace.Exchange}:deals.trade.payment-received-cbbutton`
-                ),
-                callback_data: stringifyCallbackQuery<
-                  DealsStateKey.cb_confirmPaymentReceived,
-                  DealsState[DealsStateKey.cb_confirmPaymentReceived]
-                >(DealsStateKey.cb_confirmPaymentReceived, {
-                  tradeId: tradeId
-                })
-              },
               {
                 text: user.t(
                   `${Namespace.Exchange}:deals.trade.dispute-payment-cbbutton`

@@ -101,7 +101,7 @@ export const dealUtils = {
       throw new Error('No Telegram account found')
     }
 
-    await telegramHook.getWebhook.sendMessage(
+    telegramHook.getWebhook.sendMessage(
       telegramAccountOP.id,
       order.user.t(`${Namespace.Exchange}:deals.trade.init-get-confirm`, {
         tradeId: trade.id,
@@ -238,15 +238,6 @@ export const dealUtils = {
                   >(DealsStateKey.cb_confirmPaymentSent, {
                     tradeId: trade.id
                   })
-                },
-                {
-                  text: openedByUser.t(
-                    `${Namespace.Exchange}:deals.trade.dispute-payment-cbbutton`
-                  ),
-                  callback_data: stringifyCallbackQuery<
-                    DealsStateKey.cb_paymentDispute,
-                    DealsState[DealsStateKey.cb_paymentDispute]
-                  >(DealsStateKey.cb_paymentDispute, {})
                 }
               ]
             ]

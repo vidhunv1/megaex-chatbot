@@ -103,11 +103,14 @@ export class Trade extends Model<Trade> {
       }
     })
 
-    if (
+    // Incase for some reason if it was not expired
+    const isNotExpired =
       t &&
+      t.status === TradeStatus.INITIATED &&
       moment().diff(t.createdAt, 'seconds') <=
         parseInt(CONFIG.DEAL_INIT_TIMEOUT_S)
-    ) {
+
+    if (t || isNotExpired) {
       throw new TradeError(TradeError.TRADE_EXISTS_ON_ORDER)
     }
 

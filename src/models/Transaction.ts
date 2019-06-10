@@ -174,7 +174,7 @@ export class Transaction extends Model<Transaction> {
       )
     )
 
-    return (tx.blockedBalance || 0) + (tx.releasedBalance || 0)
+    return Math.abs((tx.blockedBalance || 0) + (tx.releasedBalance || 0))
   }
 
   static async createOrUpdateDepositTx(

@@ -23,13 +23,16 @@ export const exchangeEN = {
       'cancel-trade-notify': `❗️The trade ${
         BotCommand.TRADE
       }{{ tradeId }} was canceled by the user.`,
-      'trade-rejected-notify': '❗️The user has canceled this trade.',
+      'trade-rejected-notify':
+        '❗️The user canceled this trade. You can try other deals.',
       'trade-rejected-success': 'Trade canceled',
       'trade-accepted-success': `🛎 *Trade Open* ${BotCommand.TRADE}{{ tradeId }}
 
-The user has been notified to deposit *{{ fiatPayAmount }}* in *{{ paymentMethodName }}*.
+The user has been notified to deposit *{{ fiatPayAmount }}* in your *{{ paymentMethodName }}*.
 
-Click confirm below once you receive this payment.`,
+Telegram: {{ openedTelegramUsername }}
+
+You will be notified when this payment has been marked as completed.`,
       'trade-accepted-notify': `🛎 *Trade Open* ${BotCommand.TRADE}{{ tradeId }}
       
 🔒 _Escrow secured_
