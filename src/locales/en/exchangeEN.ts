@@ -18,7 +18,13 @@ export const exchangeEN = {
 
   deals: {
     trade: {
+      'cancel-trade-confirm': `⚠️ Are you sure you want to cancel the trade ${
+        BotCommand.TRADE
+      }{{ tradeId }} on *{{ fiatAmount }}*?`,
+      'cancel-trade-confirm-yes-cbbutton': 'yes',
+      'cancel-trade-confirm-no-cbbutton': 'no',
       'cancel-trade-success': 'This trade was canceled.',
+      'cancel-trade-not-canceled': 'This trade is active.',
       'cancel-trade-fail': 'The trade was already canceled or expired.',
       'cancel-trade-notify': `❗️The trade ${
         BotCommand.TRADE
@@ -35,7 +41,9 @@ Telegram: {{ openedTelegramUsername }}
 You will be notified when this payment has been marked as completed.`,
       'trade-accepted-notify': `🛎 *Trade Open* ${BotCommand.TRADE}{{ tradeId }}
       
-🔒 _Escrow secured_
+🔒 _This transaction is secured._
+
+❕You need to make this payment within *{{ paymentSendTimeoutS }}* mins.
 
 Make a payment of *{{ fiatPayAmount }}* to the sellers *{{ paymentMethodName }}* account.
 {{ paymentDetails }}
@@ -43,7 +51,7 @@ Make a payment of *{{ fiatPayAmount }}* to the sellers *{{ paymentMethodName }}*
 Telegram: {{ telegramUsername }}`,
       'payment-received-cbbutton': '💵  Payment Received',
       'dispute-payment-cbbutton': 'Open dispute',
-      'payment-sent-cbbutton': '💸  Payment done',
+      'payment-sent-cbbutton': '💸  I have paid',
       'trade-accepted-fail': 'There was an error in opening this trade.',
 
       errors: {

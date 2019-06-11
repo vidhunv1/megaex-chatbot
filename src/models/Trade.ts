@@ -108,7 +108,7 @@ export class Trade extends Model<Trade> {
       t &&
       t.status === TradeStatus.INITIATED &&
       moment().diff(t.createdAt, 'seconds') <=
-        parseInt(CONFIG.DEAL_INIT_TIMEOUT_S)
+        parseInt(CONFIG.TRADE_INIT_TIMEOUT_S)
 
     if (t || isNotExpired) {
       throw new TradeError(TradeError.TRADE_EXISTS_ON_ORDER)
@@ -134,7 +134,7 @@ export class Trade extends Model<Trade> {
       tradeExpiryKey,
       '',
       'EX',
-      parseInt(CONFIG.DEAL_INIT_TIMEOUT_S)
+      parseInt(CONFIG.TRADE_INIT_TIMEOUT_S)
     )
 
     return trade
@@ -262,7 +262,7 @@ export class Trade extends Model<Trade> {
       if (trade.status === TradeStatus.ACCEPTED) {
         await Transaction.releaseBlockedTx(
           trade.blockedTransactionId,
-          trade.order.id
+          trade.order.userId
         )
       }
 

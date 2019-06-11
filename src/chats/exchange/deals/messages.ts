@@ -16,9 +16,62 @@ import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 import { keyboardMainMenu } from 'chats/common'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
-  async cancelTradeResp(tradeId: number | null) {
+  async cancelTradeConfirm(
+    tradeId: number,
+    fiatAmount: number,
+    fiatCurrencyCode: FiatCurrency
+  ) {
+    const f = dataFormatter.formatFiatCurrency(fiatAmount, fiatCurrencyCode)
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade.cancel-trade-confirm`, {
+        fiatAmount: f,
+        tradeId: tradeId
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: user.t(
+                  `${
+                    Namespace.Exchange
+                  }:deals.trade.cancel-trade-confirm-yes-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  DealsStateKey.cb_cancelTradeConfirm,
+                  DealsState[DealsStateKey.cb_cancelTradeConfirm]
+                >(DealsStateKey.cb_cancelTradeConfirm, {
+                  tradeId,
+                  confirmation: 'yes'
+                })
+              },
+              {
+                text: user.t(
+                  `${
+                    Namespace.Exchange
+                  }:deals.trade.cancel-trade-confirm-no-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  DealsStateKey.cb_cancelTradeConfirm,
+                  DealsState[DealsStateKey.cb_cancelTradeConfirm]
+                >(DealsStateKey.cb_cancelTradeConfirm, {
+                  tradeId,
+                  confirmation: 'no'
+                })
+              }
+            ]
+          ]
+        }
+      }
+    )
+  },
+  async cancelTradeResp(confirmation: 'yes' | 'no', tradeId: number | null) {
     let transKey
-    if (tradeId) {
+    if (confirmation === 'no') {
+      transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-not-canceled`
+    } else if (tradeId) {
       transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-success`
     } else {
       transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-fail`
@@ -73,22 +126,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         openedTelegramUsername: openedByUsername ? '@' + openedByUsername : ''
       }),
       {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: user.t(
-                  `${Namespace.Exchange}:deals.trade.dispute-payment-cbbutton`
-                ),
-                callback_data: stringifyCallbackQuery<
-                  DealsStateKey.cb_paymentDispute,
-                  DealsState[DealsStateKey.cb_paymentDispute]
-                >(DealsStateKey.cb_paymentDispute, {})
-              }
-            ]
-          ]
-        }
+        parse_mode: 'Markdown'
       }
     )
   },

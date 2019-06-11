@@ -425,61 +425,6 @@ export class Transaction extends Model<Transaction> {
 
     return releasedTx
   }
-
-  // static async unblockBalance(
-  //   userId: string | number,
-  //   currencyCode: CryptoCurrency,
-  //   amount: number,
-  //   transaction?: SequelizeTransacion
-  // ) {
-  //   const wallet: Wallet | null = await Wallet.findOne({
-  //     where: { userId: userId, currencyCode: currencyCode }
-  //   })
-  //   if (wallet) {
-  //     if (wallet.blockedBalance >= amount) {
-  //       await wallet.updateAttributes(
-  //         {
-  //           availableBalance: wallet.availableBalance + amount,
-  //           blockedBalance: wallet.blockedBalance - amount
-  //         },
-  //         { transaction: transaction }
-  //       )
-  //       return true
-  //     } else {
-  //       throw new WalletError(WalletError.INSUFFICIENT_BALANCE)
-  //     }
-  //   } else {
-  //     logger.error('Wallet not found')
-  //     throw new WalletError(WalletError.NOT_FOUND)
-  //   }
-  // }
-
-  // static async blockBalance(
-  //   userId: string | number,
-  //   currencyCode: string,
-  //   amount: number,
-  //   transaction?: SequelizeTransacion
-  // ) {
-  //   const wallet: Wallet | null = await Wallet.findOne({
-  //     where: { userId: userId, currencyCode: currencyCode }
-  //   })
-  //   if (wallet) {
-  //     if (wallet.availableBalance >= amount) {
-  //       await wallet.updateAttributes(
-  //         {
-  //           availableBalance: wallet.availableBalance - amount,
-  //           blockedBalance: wallet.blockedBalance + amount
-  //         },
-  //         { transaction: transaction }
-  //       )
-  //       return true
-  //     } else {
-  //       throw new WalletError(WalletError.INSUFFICIENT_BALANCE)
-  //     }
-  //   } else {
-  //     throw new WalletError(WalletError.NOT_FOUND)
-  //   }
-  // }
 }
 
 export class TransactionError extends Error {

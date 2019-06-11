@@ -26,9 +26,13 @@ export enum DealsStateKey {
   cb_respondToTradeInit = 'cb_respondToTradeInit',
   respondToTradeInit = 'respondToTradeInit',
   cb_cancelTrade = 'cb_cancelTrade',
-  cancelTrade = 'cancelTrade',
+  cancelTradeGetConfirm = 'cancelTradeGetConfirm',
+  cb_cancelTradeConfirm = 'cb_cancelTradeConfirm',
+  cancelTradeConfirm = 'cancelTradeConfirm',
+  cb_paymentSent = 'cb_paymentSent',
+  paymentSent = 'paymentSent',
   cb_confirmPaymentSent = 'cb_confirmPaymentSent',
-  cb_confirmPaymentReceived = 'cb_confirmPaymentReceived',
+  cb_paymentReceived = 'cb_paymentReceived',
   cb_paymentDispute = 'cb_paymentDispute'
 }
 
@@ -94,10 +98,14 @@ export interface DealsState {
     error?: DealsError | TradeErrorTypes
   }
 
+  [DealsStateKey.cb_cancelTradeConfirm]?: {
+    confirmation: 'yes' | 'no'
+    tradeId: number
+  }
   [DealsStateKey.cb_cancelTrade]?: {
     tradeId: number
   }
-  [DealsStateKey.cancelTrade]?: {
+  [DealsStateKey.cancelTradeConfirm]?: {
     data: {
       canceledTradeId: number | null
     }
@@ -110,10 +118,10 @@ export interface DealsState {
     } | null
     error?: TradeErrorTypes | DealsError | null
   }
-  [DealsStateKey.cb_confirmPaymentSent]?: {
+  [DealsStateKey.cb_paymentSent]?: {
     tradeId: number
   }
-  [DealsStateKey.cb_confirmPaymentReceived]?: {
+  [DealsStateKey.cb_paymentReceived]?: {
     tradeId: number
   }
   [DealsStateKey.cb_paymentDispute]?: {}

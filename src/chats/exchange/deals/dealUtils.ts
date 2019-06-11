@@ -8,6 +8,7 @@ import logger from 'modules/logger'
 import { telegramHook } from 'modules'
 import { dataFormatter } from 'utils/dataFormatter'
 import { keyboardMainMenu } from 'chats/common'
+import { CONFIG } from '../../../config'
 
 export const dealUtils = {
   sendOpenDealRequest: async function(
@@ -220,7 +221,10 @@ export const dealUtils = {
               `payment-methods.names.${trade.order.paymentMethodType}`
             ),
             telegramUsername: '@' + opTUser.username || '-',
-            paymentDetails: paymentDetails
+            paymentDetails: paymentDetails,
+            paymentSendTimeoutS: (
+              parseInt(CONFIG.TRADE_PAYMENT_SENT_TIMEOUT) / 60
+            ).toFixed(0)
           }
         ),
         {
@@ -233,10 +237,21 @@ export const dealUtils = {
                     `${Namespace.Exchange}:deals.trade.payment-sent-cbbutton`
                   ),
                   callback_data: stringifyCallbackQuery<
-                    DealsStateKey.cb_confirmPaymentSent,
-                    DealsState[DealsStateKey.cb_confirmPaymentSent]
-                  >(DealsStateKey.cb_confirmPaymentSent, {
+                    DealsStateKey.cb_paymentSent,
+                    DealsState[DealsStateKey.cb_paymentSent]
+                  >(DealsStateKey.cb_paymentSent, {
                     tradeId: trade.id
+                  })
+                },
+                {
+                  text: openedByUser.t(
+                    `${Namespace.Exchange}:deals.cancel-trade-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    DealsStateKey.cb_cancelTrade,
+                    DealsState[DealsStateKey.cb_cancelTrade]
+                  >(DealsStateKey.cb_cancelTrade, {
+                    tradeId
                   })
                 }
               ]

@@ -1,7 +1,7 @@
 import { DealsStateKey } from './types'
 import { Responder } from 'chats/types'
 import * as _ from 'lodash'
-import { ExchangeState, TradeStatus } from '../ExchangeState'
+import { ExchangeState } from '../ExchangeState'
 import { DealsMessage } from './messages'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import {
@@ -228,8 +228,12 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       }
 
       const trade = await getTrade(stateData.tradeId)
+      if (!trade) {
+        return false
+      }
+
       await DealsMessage(msg, user).showOpenedTrade(
-        trade.trade.tradeId,
+        trade.trade.id,
         trade.dealer.accountId
       )
 
@@ -296,12 +300,54 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     [DealsStateKey.cb_cancelTrade]: async () => {
       return false
     },
-    [DealsStateKey.cancelTrade]: async () => {
-      const data = _.get(state[DealsStateKey.cancelTrade], 'data', null)
-      const canceledTradeId = _.get(data, 'canceledTradeId', null)
-      await DealsMessage(msg, user).cancelTradeResp(canceledTradeId)
+    [DealsStateKey.cb_cancelTradeConfirm]: async () => {
+      return false
+    },
+    [DealsStateKey.cancelTradeConfirm]: async () => {
+      const confirmation = _.get(
+        state[DealsStateKey.cb_cancelTradeConfirm],
+        'confirmation',
+        null
+      )
+      if (!confirmation) {
+        return false
+      }
 
+      const data = _.get(state[DealsStateKey.cancelTradeConfirm], 'data', null)
+      const canceledTradeId = _.get(data, 'canceledTradeId', null)
+      await DealsMessage(msg, user).cancelTradeResp(
+        confirmation,
+        canceledTradeId
+      )
       return true
+    },
+    [DealsStateKey.cancelTradeGetConfirm]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_cancelTrade],
+        'tradeId',
+        null
+      )
+      if (!tradeId) {
+        return false
+      }
+
+      const trade = await getTrade(tradeId)
+      if (!trade) {
+        return false
+      }
+
+      await DealsMessage(msg, user).cancelTradeConfirm(
+        trade.trade.id,
+        trade.trade.cryptoAmount * trade.trade.fixedRate,
+        trade.order.fiatCurrencyCode
+      )
+      return true
+    },
+    [DealsStateKey.cb_paymentSent]: async () => {
+      return false
+    },
+    [DealsStateKey.paymentSent]: async () => {
+      return false
     },
     [DealsStateKey.cb_confirmPaymentSent]: async () => {
       return false
@@ -309,7 +355,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     [DealsStateKey.cb_paymentDispute]: async () => {
       return false
     },
-    [DealsStateKey.cb_confirmPaymentReceived]: async () => {
+    [DealsStateKey.cb_paymentReceived]: async () => {
       return false
     }
   }
@@ -355,16 +401,30 @@ async function getAvailableBalance(
   return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
-async function getTrade(tradeId: number) {
+async function getTrade(
+  tradeId: number
+): Promise<{
+  trade: Trade
+  dealer: User
+  order: Order
+} | null> {
   logger.error('TODO: Implement getTrade')
+  const trade = await Trade.findById(tradeId, {
+    include: [{ model: Order }]
+  })
+  if (!trade) {
+    return null
+  }
+
+  const dealer = await User.findById(trade.order.userId)
+  if (!dealer) {
+    return null
+  }
+
   return {
-    trade: {
-      tradeId: tradeId,
-      status: TradeStatus.INITIATED
-    },
-    dealer: {
-      accountId: 'uxawsats'
-    }
+    trade: trade,
+    dealer,
+    order: trade.order
   }
 }
 

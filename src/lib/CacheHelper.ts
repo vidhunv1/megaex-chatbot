@@ -9,7 +9,9 @@ export enum CacheKey {
   Context = 't-context',
   State = 't-state',
   PaymentExpiry = 't-payment-expiry',
-  TradeInitExpiry = 't-trade-init-expiry'
+  TradeInitExpiry = 't-trade-init-expiry',
+  TradePaymentSentExpiry = 't-trade-payment-sent-expiry',
+  TradePaymentReceiveExpiry = 't-trade-payment-receive-expiry'
 }
 
 const cacheKeys = Object.values(CacheKey)

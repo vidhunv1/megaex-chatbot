@@ -380,6 +380,7 @@ export const DealsParser: Parser<ExchangeState> = async (
             }
           }
         } catch (e) {
+          logger.error('Trade accept error: ' + e.message)
           return {
             ...state,
             [DealsStateKey.cb_respondToTradeInit]: {
@@ -426,33 +427,67 @@ export const DealsParser: Parser<ExchangeState> = async (
     [DealsStateKey.respondToTradeInit]: async () => {
       return state
     },
-    [DealsStateKey.cb_cancelTrade]: async () => {
-      const tradeId = _.get(
-        state[DealsStateKey.cb_cancelTrade],
-        'tradeId',
+    [DealsStateKey.cancelTradeGetConfirm]: async () => {
+      return null
+    },
+    [DealsStateKey.cb_cancelTradeConfirm]: async () => {
+      const confimation = _.get(
+        state[DealsStateKey.cb_cancelTradeConfirm],
+        'confirmation',
         null
       )
-      if (tradeId) {
+      if (!confimation) {
+        return null
+      }
+
+      if (confimation === 'yes') {
+        const tradeId = _.get(
+          state[DealsStateKey.cb_cancelTradeConfirm],
+          'tradeId',
+          null
+        )
+
+        if (!tradeId) {
+          return null
+        }
+
         const canceledTrade = await dealUtils.cancelTrade(tradeId)
         return {
           ...state,
-          [DealsStateKey.cancelTrade]: {
+          [DealsStateKey.cancelTradeConfirm]: {
             data: {
               canceledTradeId: canceledTrade ? canceledTrade.id : null
             }
           }
         }
+      } else {
+        return state
       }
-
+    },
+    [DealsStateKey.cancelTradeConfirm]: async () => {
       return null
     },
-    [DealsStateKey.cancelTrade]: async () => {
+    [DealsStateKey.cb_cancelTrade]: async () => {
+      return state
+    },
+    [DealsStateKey.cb_paymentSent]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_paymentSent],
+        'tradeId',
+        null
+      )
+      if (tradeId == null) {
+        return null
+      }
+      return state
+    },
+    [DealsStateKey.paymentSent]: async () => {
       return null
     },
     [DealsStateKey.cb_confirmPaymentSent]: async () => {
       return null
     },
-    [DealsStateKey.cb_confirmPaymentReceived]: async () => {
+    [DealsStateKey.cb_paymentReceived]: async () => {
       return null
     },
     [DealsStateKey.cb_paymentDispute]: async () => {
@@ -578,7 +613,9 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
       return null
 
     case DealsStateKey.cb_cancelTrade:
-      return DealsStateKey.cancelTrade
+      return DealsStateKey.cancelTradeGetConfirm
+    case DealsStateKey.cb_cancelTradeConfirm:
+      return DealsStateKey.cancelTradeConfirm
     case DealsStateKey.cb_respondToTradeInit:
       const dealError = _.get(
         state[DealsStateKey.cb_respondToTradeInit],
@@ -590,6 +627,8 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
       }
 
       return DealsStateKey.respondToTradeInit
+    case DealsStateKey.cb_paymentSent:
+      return DealsStateKey.cb_confirmPaymentSent
     default:
       return null
   }

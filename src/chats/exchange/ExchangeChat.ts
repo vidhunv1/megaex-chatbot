@@ -117,7 +117,7 @@ export const ExchangeChat: ChatHandler = {
             DealsStateKey.cb_showDealById,
             DealsStateKey.cb_respondToTradeInit,
             DealsStateKey.cb_cancelTrade,
-            DealsStateKey.cb_confirmPaymentSent,
+            DealsStateKey.cb_paymentSent,
             DealsStateKey.cb_paymentDispute,
             MyOrdersStateKey.cb_showActiveOrders,
             MyOrdersStateKey.cb_editRate,
