@@ -14,6 +14,7 @@ import { LanguageISO } from 'constants/languages'
 import { CommonStateKey, CommonState } from 'chats/common/types'
 import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 import { keyboardMainMenu } from 'chats/common'
+import { CONFIG } from '../../../config'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
   async cancelTradeConfirm(
@@ -604,7 +605,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
   },
 
   async showOpenedTrade(tradeId: number, traderAccountId: string) {
-    const timeoutMinutes = DealsConfig.INITATED_TRADE_TIMEOUT / 60
+    const timeoutMinutes = parseInt(CONFIG.TRADE_INIT_TIMEOUT_S) / 60
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Exchange}:deals.trade-opened-message`),

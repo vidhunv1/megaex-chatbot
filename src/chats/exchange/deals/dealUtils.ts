@@ -114,6 +114,10 @@ export const dealUtils = {
         fiatValue: dataFormatter.formatFiatCurrency(
           fiatAmount,
           order.fiatCurrencyCode
+        ),
+        fixedRate: dataFormatter.formatFiatCurrency(
+          trade.fixedRate,
+          order.fiatCurrencyCode
         )
       }),
       {
@@ -224,7 +228,11 @@ export const dealUtils = {
             paymentDetails: paymentDetails,
             paymentSendTimeoutS: (
               parseInt(CONFIG.TRADE_PAYMENT_SENT_TIMEOUT) / 60
-            ).toFixed(0)
+            ).toFixed(0),
+            cryptoAmount: dataFormatter.formatCryptoCurrency(
+              trade.cryptoAmount,
+              trade.order.cryptoCurrencyCode
+            )
           }
         ),
         {

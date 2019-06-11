@@ -24,7 +24,7 @@ export const exchangeEN = {
       'cancel-trade-confirm-yes-cbbutton': 'yes',
       'cancel-trade-confirm-no-cbbutton': 'no',
       'cancel-trade-success': 'This trade was canceled.',
-      'cancel-trade-not-canceled': 'This trade is active.',
+      'cancel-trade-not-canceled': '-',
       'cancel-trade-fail': 'The trade was already canceled or expired.',
       'cancel-trade-notify': `❗️The trade ${
         BotCommand.TRADE
@@ -34,21 +34,23 @@ export const exchangeEN = {
       'trade-rejected-success': 'Trade canceled',
       'trade-accepted-success': `🛎 *Trade Open* ${BotCommand.TRADE}{{ tradeId }}
 
-The user has been notified to deposit *{{ fiatPayAmount }}* in your *{{ paymentMethodName }}*.
+The user has been notified to deposit *{{ fiatPayAmount }}* in *{{ paymentMethodName }}*.
 
 Telegram: {{ openedTelegramUsername }}
 
 You will be notified when this payment has been marked as completed.`,
-      'trade-accepted-notify': `🛎 *Trade Open* ${BotCommand.TRADE}{{ tradeId }}
-      
-🔒 _This transaction is secured._
+      'trade-accepted-notify': `🛎 *Trade Accepted* ${
+        BotCommand.TRADE
+      }{{ tradeId }}
 
-❕You need to make this payment within *{{ paymentSendTimeoutS }}* mins.
+Make a payment of *{{ fiatPayAmount }}* through *{{ paymentMethodName }}*.
+*{{ paymentDetails }}*
 
-Make a payment of *{{ fiatPayAmount }}* to the sellers *{{ paymentMethodName }}* account.
-{{ paymentDetails }}
+Telegram: {{ telegramUsername }}
 
-Telegram: {{ telegramUsername }}`,
+🔒 _Transaction is secure._ *{{ cryptoAmount }}* _is blocked from seller._
+️
+⚠️ Make this payment within *{{ paymentSendTimeoutS }}* mins.`,
       'payment-received-cbbutton': '💵  Payment Received',
       'dispute-payment-cbbutton': 'Open dispute',
       'payment-sent-cbbutton': '💸  I have paid',
@@ -63,7 +65,7 @@ Telegram: {{ telegramUsername }}`,
 
 ${
         BotCommand.ACCOUNT
-      }{{ requestorAccountId }} wants to buy *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}*.
+      }{{ requestorAccountId }} wants to buy *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}* at rate {{ fixedRate }}.
 
 Do you want to accept this trade?`,
       'trade-init-yes-cbbutton': 'Yes',
@@ -137,7 +139,7 @@ Rating:  {{ rating }} ⭐️
 *Price*: {{ rate }} / {{ cryptoCurrencyCode }}
 *Sell Amount*: {{ formattedAmount }}`,
 
-    'show-sell-insufficient-funds': `❗️ There is not enough balance on sellers account to start this deal. You may request the seller to deposit the funds after which the deal can begin.`,
+    'show-sell-insufficient-funds': `❗️ There is not enough balance on sellers account to start this deal. You may request the seller to deposit the funds after which you can create a new trade again.`,
     'request-buy-deal-deposit-cbbutton': '📲 Contact seller',
 
     'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',
