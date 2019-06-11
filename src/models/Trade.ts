@@ -24,7 +24,7 @@ export enum TradeStatus {
   REJECTED = 'REJECTED',
   EXPIRED = 'EXPIRED',
 
-  PAYMENT_MARKED = 'PAYMENT_MARKED',
+  PAYMENT_SENT = 'PAYMENT_SENT',
   PAYMENT_RELEASED = 'PAYMENT_RELEASED',
   PAYMENT_DISPUTE = 'PAYMENT_DISPUTE'
 }
@@ -32,7 +32,7 @@ export enum TradeStatus {
 export const activeTradeStatus: Record<TradeStatus, boolean> = {
   [TradeStatus.INITIATED]: true,
   [TradeStatus.ACCEPTED]: true,
-  [TradeStatus.PAYMENT_MARKED]: true,
+  [TradeStatus.PAYMENT_SENT]: true,
   [TradeStatus.PAYMENT_DISPUTE]: true,
 
   [TradeStatus.EXPIRED]: false,
@@ -168,6 +168,31 @@ export class Trade extends Model<Trade> {
         Trade.deleteTradeExpiration(trade.id)
       }
 
+      const escrowClosedTimeout = parseInt(CONFIG.TRADE_ESCROW_TIMEOUT_S)
+      const escrowWarnTimeout = escrowClosedTimeout * 0.75
+
+      const escrowClosedExpiryKey = CacheHelper.getKeyForId(
+        CacheKey.TradeEscrowClosedExpiry,
+        trade.id
+      )
+      const escrowWarnExpiryKey = CacheHelper.getKeyForId(
+        CacheKey.TradeEscrowWarnExpiry,
+        trade.id
+      )
+
+      await cacheConnection.getClient.setAsync(
+        escrowWarnExpiryKey,
+        '',
+        'EX',
+        escrowWarnTimeout
+      )
+      await cacheConnection.getClient.setAsync(
+        escrowClosedExpiryKey,
+        '',
+        'EX',
+        escrowClosedTimeout
+      )
+
       return tt
     } else {
       throw new Error('Error blocking the balance')
@@ -278,6 +303,25 @@ export class Trade extends Model<Trade> {
     }
 
     return null
+  }
+
+  static async paymentSent(tradeId: number): Promise<Trade | null> {
+    const trade = await Trade.findOne({
+      include: [{ model: Order }],
+      where: {
+        status: TradeStatus.ACCEPTED,
+        id: tradeId
+      }
+    })
+
+    if (!trade) {
+      return null
+    }
+
+    const tt = trade.update({
+      status: TradeStatus.PAYMENT_SENT
+    })
+    return tt
   }
 
   static async deleteTradeExpiration(tradeId: number) {

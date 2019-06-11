@@ -208,12 +208,19 @@ export const dealUtils = {
           pm.fields.forEach((field, index) => {
             paymentDetails =
               paymentDetails +
-              `\n${openedByUser.t(
+              `${openedByUser.t(
                 `payment-methods.fields.${pm.paymentMethod}.field${index + 1}`
-              )}: ${field}`
+              )}: ${field}\n`
           })
         }
+      } else {
+        paymentDetails = openedByUser.t(
+          `${
+            Namespace.Exchange
+          }:deals.trade.trade-accepted-notify-no-payment-info`
+        )
       }
+
       await telegramHook.getWebhook.sendMessage(
         openedByUser.telegramUser.id,
         openedByUser.t(
@@ -227,7 +234,7 @@ export const dealUtils = {
             telegramUsername: '@' + opTUser.username || '-',
             paymentDetails: paymentDetails,
             paymentSendTimeoutS: (
-              parseInt(CONFIG.TRADE_PAYMENT_SENT_TIMEOUT) / 60
+              parseInt(CONFIG.TRADE_ESCROW_TIMEOUT_S) / 60
             ).toFixed(0),
             cryptoAmount: dataFormatter.formatCryptoCurrency(
               trade.cryptoAmount,

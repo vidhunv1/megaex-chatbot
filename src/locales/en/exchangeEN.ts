@@ -18,9 +18,11 @@ export const exchangeEN = {
 
   deals: {
     trade: {
-      'cancel-trade-confirm': `⚠️ Are you sure you want to cancel the trade ${
+      'cancel-trade-confirm': `Are you sure you want to cancel the trade ${
         BotCommand.TRADE
-      }{{ tradeId }} on *{{ fiatAmount }}*?`,
+      }{{ tradeId }} on *{{ fiatAmount }}*?
+
+⚠️ Never cancel if you have already paid the seller.`,
       'cancel-trade-confirm-yes-cbbutton': 'yes',
       'cancel-trade-confirm-no-cbbutton': 'no',
       'cancel-trade-success': 'This trade was canceled.',
@@ -39,16 +41,19 @@ The user has been notified to deposit *{{ fiatPayAmount }}* in *{{ paymentMethod
 Telegram: {{ openedTelegramUsername }}
 
 You will be notified when this payment has been marked as completed.`,
+      'trade-accepted-notify-no-payment-info':
+        'Send a message to seller for the payment details.',
       'trade-accepted-notify': `🛎 *Trade Accepted* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
 Make a payment of *{{ fiatPayAmount }}* through *{{ paymentMethodName }}*.
+
 *{{ paymentDetails }}*
 
 Telegram: {{ telegramUsername }}
 
-🔒 _Transaction is secure._ *{{ cryptoAmount }}* _is blocked from seller._
+🔒 _This transaction is secure._ *{{ cryptoAmount }}* _is blocked from seller._
 ️
 ⚠️ Make this payment within *{{ paymentSendTimeoutS }}* mins.`,
       'payment-received-cbbutton': '💵  Payment Received',
@@ -139,7 +144,7 @@ Rating:  {{ rating }} ⭐️
 *Price*: {{ rate }} / {{ cryptoCurrencyCode }}
 *Sell Amount*: {{ formattedAmount }}`,
 
-    'show-sell-insufficient-funds': `❗️ There is not enough balance on sellers account to start this deal. You may request the seller to deposit the funds after which you can create a new trade again.`,
+    'show-sell-insufficient-funds': `❗️ There is not enough balance on sellers account to start this deal. You may request the seller to deposit the funds after which you can start the trade again.`,
     'request-buy-deal-deposit-cbbutton': '📲 Contact seller',
 
     'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',

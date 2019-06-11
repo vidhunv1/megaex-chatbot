@@ -7,8 +7,7 @@ export const PaymentMethodAvailability: Record<
 > = {
   [PaymentMethodType.PAYTM]: FiatCurrency.INR,
   [PaymentMethodType.UPI]: FiatCurrency.INR,
-  [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: FiatCurrency.INR,
-  [PaymentMethodType.CASH]: 'ALL'
+  [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: FiatCurrency.INR
 }
 
 export enum PMFields {
@@ -29,9 +28,6 @@ export const PaymentMethodsFieldsLocale: Record<PaymentMethodType, string[]> = {
     `${pmFieldsLocaleBase}.${PaymentMethodType.BANK_TRANSFER_IMPS_INR}.field1`,
     `${pmFieldsLocaleBase}.${PaymentMethodType.BANK_TRANSFER_IMPS_INR}.field2`,
     `${pmFieldsLocaleBase}.${PaymentMethodType.BANK_TRANSFER_IMPS_INR}.field3`
-  ],
-  [PaymentMethodType.CASH]: [
-    `${pmFieldsLocaleBase}.${PaymentMethodType.CASH}.field1`
   ]
 }
 
@@ -41,6 +37,5 @@ export const PaymentMethodPrimaryFieldIndex: Record<
 > = {
   [PaymentMethodType.PAYTM]: 0,
   [PaymentMethodType.UPI]: 0,
-  [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 1,
-  [PaymentMethodType.CASH]: 0
+  [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 1
 }

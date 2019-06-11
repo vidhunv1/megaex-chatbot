@@ -271,14 +271,6 @@ async function getActiveOrders(userId: number) {
       orderId: 1
     },
     {
-      createdBy: userId,
-      orderType: OrderType.SELL,
-      paymentMethod: PaymentMethodType.CASH,
-      rate: 430000,
-      fiatCurrencyCode: FiatCurrency.INR,
-      orderId: 2
-    },
-    {
       createdBy: 219038,
       paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
       orderType: OrderType.SELL,

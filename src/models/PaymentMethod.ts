@@ -21,8 +21,7 @@ export type PaymentMethodFields = {
 export enum PaymentMethodType {
   PAYTM = 'PAYTM',
   UPI = 'UPI',
-  BANK_TRANSFER_IMPS_INR = 'BANK_TRANSFER_IMPS_INR',
-  CASH = 'CASH'
+  BANK_TRANSFER_IMPS_INR = 'BANK_TRANSFER_IMPS_INR'
 }
 
 @Table({ timestamps: true, tableName: 'PaymentMethods', paranoid: true })
