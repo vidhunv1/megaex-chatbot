@@ -4,7 +4,6 @@ export * from './Market'
 export * from './Transaction'
 export * from './Wallet'
 export * from './Withdrawal'
-export { TradeErrorTypes } from './Trade'
 export * from './Trade'
 
 export * from './User'

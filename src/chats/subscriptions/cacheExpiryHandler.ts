@@ -4,6 +4,7 @@ import { Transfer, User, TelegramAccount, Trade, TradeStatus } from 'models'
 import { telegramHook } from 'modules'
 import { Namespace } from 'modules/i18n'
 import { dataFormatter } from 'utils/dataFormatter'
+import { sendTradeMessage } from 'chats/exchange/deals/tradeMessage'
 
 export async function cacheExpiryhandler(msg: string) {
   logger.info('Redis key Expired: ' + msg)
@@ -39,39 +40,34 @@ export async function cacheExpiryhandler(msg: string) {
       }
     }
   } else if (key === CacheKey.TradeInitExpiry) {
-    logger.info('Trade Init expired: ' + key)
     const tradeId = parseInt(CacheHelper.getIdFromKey(msg))
     if (tradeId) {
       const trade = await Trade.setExpired(tradeId)
       if (trade && trade.status === TradeStatus.EXPIRED) {
-        const openedByUser = await User.findById(trade.openedByUserId, {
+        const openedByUser = await User.findById(trade.createdByUserId, {
           include: [{ model: TelegramAccount }]
         })
-        const opUser = await User.findById(trade.order.userId, {
+        const opUser = await User.findById(trade.getOpUserId(), {
           include: [{ model: TelegramAccount }]
         })
 
         if (openedByUser) {
-          await telegramHook.getWebhook.sendMessage(
-            openedByUser.telegramUser.id,
-            openedByUser.t(
-              `${Namespace.Exchange}:deals.trade.trade-init-no-response`
-            ),
-            {
-              parse_mode: 'Markdown'
-            }
+          await sendTradeMessage[trade.status](
+            trade,
+            openedByUser,
+            openedByUser.telegramUser
           )
+        } else {
+          logger.error('cacheExpiryHandler, tradeInitExpiry: no openedByUser')
         }
         if (opUser) {
-          await telegramHook.getWebhook.sendMessage(
-            opUser.telegramUser.id,
-            opUser.t(`${Namespace.Exchange}:deals.trade.trade-init-expired`, {
-              tradeId
-            }),
-            {
-              parse_mode: 'Markdown'
-            }
+          await sendTradeMessage[trade.status](
+            trade,
+            opUser,
+            opUser.telegramUser
           )
+        } else {
+          logger.error('cacheExpiryHandler, tradeInitExpiry: no opUser')
         }
 
         logger.info('Handled expired trade: ' + tradeId)

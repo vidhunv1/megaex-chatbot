@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount, Order, Transaction } from 'models'
+import { User, TelegramAccount, Order, Transaction, Trade } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
 import {
   EXCHANGE_STATE_LABEL,
@@ -28,15 +28,28 @@ import {
 } from './deals'
 import { logger } from 'modules'
 import { CryptoCurrency } from 'constants/currencies'
+import { sendTradeMessage } from './deals/tradeMessage'
 
 export const ExchangeChat: ChatHandler = {
   async handleCommand(
     msg: TelegramBot.Message,
     command: BotCommand,
     user: User,
-    _tUser: TelegramAccount
+    tUser: TelegramAccount
   ) {
-    if (command === BotCommand.ORDER && msg.text) {
+    if (command === BotCommand.TRADE && msg.text) {
+      const tradeId = parseInt(msg.text.replace(BotCommand.TRADE, ''))
+      if (!tradeId) {
+        return false
+      }
+      const trade = await Trade.findById(tradeId)
+      if (!trade) {
+        return false
+      }
+
+      await sendTradeMessage[trade.status](trade, user, tUser)
+      return true
+    } else if (command === BotCommand.ORDER && msg.text) {
       try {
         const orderId = parseInt(msg.text.replace(BotCommand.ORDER, ''))
         const orderInfo = await getOrderDetails(orderId)

@@ -14,6 +14,7 @@ import {
 } from 'models'
 import { DealsConfig } from './config'
 import { logger } from 'modules'
+import { sendTradeMessage } from './tradeMessage'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 
@@ -232,11 +233,20 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         return false
       }
 
-      await DealsMessage(msg, user).showOpenedTrade(
-        trade.trade.id,
-        trade.dealer.accountId
-      )
+      const telegramAccount = await TelegramAccount.findOne({
+        where: {
+          userId: user.id
+        }
+      })
+      if (!telegramAccount) {
+        return false
+      }
 
+      await sendTradeMessage[trade.trade.status](
+        trade.trade,
+        user,
+        telegramAccount
+      )
       return true
     },
     [DealsStateKey.showDealInitCancel]: async () => {
@@ -283,7 +293,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       })
       if (!trade) return false
 
-      const openedByUser = await User.findById(trade.openedByUserId, {
+      const openedByUser = await User.findById(trade.createdByUserId, {
         include: [{ model: TelegramAccount }]
       })
       if (!openedByUser) return false
@@ -291,8 +301,8 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       await DealsMessage(msg, user).showDealAcceptSuccess(
         tradeId,
         trade.cryptoAmount * trade.fixedRate,
-        trade.order.fiatCurrencyCode,
-        trade.order.paymentMethodType,
+        trade.fiatCurrencyCode,
+        trade.paymentMethodType,
         openedByUser.telegramUser.username
       )
       return true
@@ -315,10 +325,22 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
 
       const data = _.get(state[DealsStateKey.cancelTradeConfirm], 'data', null)
       const canceledTradeId = _.get(data, 'canceledTradeId', null)
-      await DealsMessage(msg, user).cancelTradeResp(
-        confirmation,
-        canceledTradeId
-      )
+      if (canceledTradeId) {
+        const trade = await Trade.findById(canceledTradeId)
+        if (trade) {
+          const telegramAccount = await TelegramAccount.findOne({
+            where: {
+              userId: user.id
+            }
+          })
+          if (!telegramAccount) {
+            return false
+          }
+          await sendTradeMessage[trade.status](trade, user, telegramAccount)
+        }
+      } else {
+        await DealsMessage(msg, user).cancelTradeBadResp(confirmation)
+      }
       return true
     },
     [DealsStateKey.cancelTradeGetConfirm]: async () => {
@@ -339,7 +361,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       await DealsMessage(msg, user).cancelTradeConfirm(
         trade.trade.id,
         trade.trade.cryptoAmount * trade.trade.fixedRate,
-        trade.order.fiatCurrencyCode
+        trade.trade.fiatCurrencyCode
       )
       return true
     },
@@ -406,25 +428,21 @@ async function getTrade(
 ): Promise<{
   trade: Trade
   dealer: User
-  order: Order
 } | null> {
   logger.error('TODO: Implement getTrade')
-  const trade = await Trade.findById(tradeId, {
-    include: [{ model: Order }]
-  })
+  const trade = await Trade.findById(tradeId)
   if (!trade) {
     return null
   }
 
-  const dealer = await User.findById(trade.order.userId)
+  const dealer = await User.findById(trade.getOpUserId())
   if (!dealer) {
     return null
   }
 
   return {
     trade: trade,
-    dealer,
-    order: trade.order
+    dealer
   }
 }
 

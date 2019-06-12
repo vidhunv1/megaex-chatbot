@@ -14,7 +14,6 @@ import { LanguageISO } from 'constants/languages'
 import { CommonStateKey, CommonState } from 'chats/common/types'
 import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 import { keyboardMainMenu } from 'chats/common'
-import { CONFIG } from '../../../config'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
   async cancelTradeConfirm(
@@ -68,12 +67,10 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     )
   },
-  async cancelTradeResp(confirmation: 'yes' | 'no', tradeId: number | null) {
+  async cancelTradeBadResp(confirmation: 'yes' | 'no') {
     let transKey
     if (confirmation === 'no') {
       transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-not-canceled`
-    } else if (tradeId) {
-      transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-success`
     } else {
       transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-fail`
     }
@@ -169,17 +166,6 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       user.t(`${Namespace.Exchange}:deals.show-open-deal-request`, {
         telegramUsername: sellerTelegramUsername
       }),
-      {
-        parse_mode: 'Markdown',
-        reply_markup: keyboardMainMenu(user)
-      }
-    )
-  },
-
-  async showDealInitCancel() {
-    await telegramHook.getWebhook.sendMessage(
-      msg.chat.id,
-      user.t(`${Namespace.Exchange}:deals.show-open-deal-cancel`),
       {
         parse_mode: 'Markdown',
         reply_markup: keyboardMainMenu(user)
@@ -447,6 +433,17 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     }
   },
 
+  async showDealInitCancel() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.show-open-deal-cancel`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
+      }
+    )
+  },
+
   async showDeal(
     orderType: OrderType,
     orderId: number,
@@ -602,46 +599,5 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         inline_keyboard: inline
       }
     })
-  },
-
-  async showOpenedTrade(tradeId: number, traderAccountId: string) {
-    const timeoutMinutes = parseInt(CONFIG.TRADE_INIT_TIMEOUT_S) / 60
-    await telegramHook.getWebhook.sendMessage(
-      msg.chat.id,
-      user.t(`${Namespace.Exchange}:deals.trade-opened-message`),
-      {
-        parse_mode: 'Markdown',
-        reply_markup: keyboardMainMenu(user)
-      }
-    )
-
-    await telegramHook.getWebhook.sendMessage(
-      msg.chat.id,
-      user.t(`${Namespace.Exchange}:deals.show-opened-trade`, {
-        tradeId,
-        traderAccountId,
-        timeoutMinutes
-      }),
-      {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: user.t(
-                  `${Namespace.Exchange}:deals.cancel-trade-cbbutton`
-                ),
-                callback_data: stringifyCallbackQuery<
-                  DealsStateKey.cb_cancelTrade,
-                  DealsState[DealsStateKey.cb_cancelTrade]
-                >(DealsStateKey.cb_cancelTrade, {
-                  tradeId
-                })
-              }
-            ]
-          ]
-        }
-      }
-    )
   }
 })

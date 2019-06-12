@@ -23,6 +23,8 @@ export const getBotCommand = (msg: TelegramBot.Message): BotCommand | null => {
       return BotCommand.TRANSACTIONS
     } else if (message.startsWith(BotCommand.ORDER)) {
       return BotCommand.ORDER
+    } else if (message.startsWith(BotCommand.TRADE)) {
+      return BotCommand.TRADE
     }
   }
 

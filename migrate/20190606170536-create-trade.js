@@ -8,7 +8,17 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      openedByUserId: {
+      sellerUserId: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+        references: { model: 'Users', key: 'id' }
+      },
+      buyerUserId: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+        references: { model: 'Users', key: 'id' }
+      },
+      createdByUserId: {
         type: Sequelize.BIGINT,
         allowNull: false,
         references: { model: 'Users', key: 'id' }
@@ -18,7 +28,36 @@ module.exports = {
         allowNull: false,
         references: { model: 'Orders', key: 'id' }
       },
+      blockedTransactionId: {
+        allowNull: true,
+        type: Sequelize.BIGINT,
+        references: { model: 'Transactions', key: 'id' }
+      },
+      status: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      orderType: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      terms: {
+        allowNull: true,
+        type: Sequelize.STRING
+      },
+      cryptoCurrencyCode: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      fiatCurrencyCode: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
       cryptoAmount: {
+        allowNull: false,
+        type: Sequelize.FLOAT
+      },
+      fiatAmount: {
         allowNull: false,
         type: Sequelize.FLOAT
       },
@@ -26,14 +65,14 @@ module.exports = {
         allowNull: false,
         type: Sequelize.FLOAT
       },
-      status: {
+      paymentMethodType: {
         allowNull: false,
         type: Sequelize.STRING
       },
-      blockedTransactionId: {
+      paymentMethodId: {
         allowNull: true,
-        type: Sequelize.BIGINT,
-        references: { model: 'Transactions', key: 'id' }
+        type: Sequelize.INTEGER,
+        references: { model: 'PaymentMethods', key: 'id' }
       },
       createdAt: {
         allowNull: false,

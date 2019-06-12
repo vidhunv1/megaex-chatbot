@@ -11,11 +11,14 @@ import {
 } from 'sequelize-typescript'
 import * as moment from 'moment'
 import User from './User'
-import Order from './Order'
+import { OrderType, Order } from './Order'
 import Transaction from './Transaction'
 import { CacheHelper, CacheKey } from 'lib/CacheHelper'
 import { cacheConnection } from 'modules'
 import { CONFIG } from '../config'
+import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
+import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import logger from 'modules/logger'
 
 export enum TradeStatus {
   INITIATED = 'INITIATED',
@@ -47,6 +50,9 @@ export enum TradeErrorTypes {
 
 @Table({ timestamps: true, tableName: 'Trades', paranoid: true })
 export class Trade extends Model<Trade> {
+  @BelongsTo(() => Order)
+  order!: Order
+
   @PrimaryKey
   @AllowNull(false)
   @AutoIncrement
@@ -56,7 +62,22 @@ export class Trade extends Model<Trade> {
   @AllowNull(false)
   @ForeignKey(() => User)
   @Column(DataType.BIGINT)
-  openedByUserId!: number
+  sellerUserId!: number
+
+  @AllowNull(false)
+  @ForeignKey(() => User)
+  @Column(DataType.BIGINT)
+  buyerUserId!: number
+
+  @AllowNull(false)
+  @ForeignKey(() => User)
+  @Column(DataType.BIGINT)
+  createdByUserId!: number
+
+  @AllowNull(false)
+  @ForeignKey(() => Order)
+  @Column(DataType.BIGINT)
+  orderId!: number
 
   @AllowNull(true)
   @ForeignKey(() => Transaction)
@@ -64,12 +85,25 @@ export class Trade extends Model<Trade> {
   blockedTransactionId!: number
 
   @AllowNull(false)
-  @ForeignKey(() => Order)
-  @Column(DataType.BIGINT)
-  orderId!: number
+  @Column(DataType.STRING)
+  status!: TradeStatus
 
-  @BelongsTo(() => Order)
-  order!: Order
+  // Fields copied from Order to fix values.
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  orderType!: OrderType
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  terms!: string
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  cryptoCurrencyCode!: CryptoCurrency
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  fiatCurrencyCode!: FiatCurrency
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
@@ -77,11 +111,22 @@ export class Trade extends Model<Trade> {
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
+  fiatAmount!: number
+
+  @AllowNull(false)
+  @Column(DataType.FLOAT)
   fixedRate!: number
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  status!: TradeStatus
+  paymentMethodType!: PaymentMethodType
+
+  @AllowNull(true)
+  @ForeignKey(() => PaymentMethod)
+  @Column(DataType.BIGINT)
+  paymentMethodId!: number | null
+
+  public static TradeStatus = TradeStatus
 
   static getActiveStatuses(): TradeStatus[] {
     return Object.keys(TradeStatus).filter(
@@ -90,15 +135,15 @@ export class Trade extends Model<Trade> {
   }
 
   static async initiateTrade(
-    openedByUserId: number,
+    createdByUserId: number,
     orderId: number,
     cryptoAmount: number,
     fixedRate: number
   ): Promise<Trade> {
     const t = await Trade.findOne({
       where: {
-        openedByUserId,
-        orderId,
+        createdByUserId,
+        orderId: orderId,
         status: Trade.getActiveStatuses()
       }
     })
@@ -116,14 +161,35 @@ export class Trade extends Model<Trade> {
 
     const order = await Order.findById(orderId)
     if (!order || (order && cryptoAmount * fixedRate < order.minFiatAmount)) {
-      throw new Error('Invalid order')
+      throw new Error(
+        'Invalid trade params: (cryptoAmount * fixedRate) < order.minFiatAmount)'
+      )
     }
+
+    let sellerUserId, buyerUserId
+    if (order.orderType === OrderType.SELL) {
+      sellerUserId = order.userId
+      buyerUserId = createdByUserId
+    } else {
+      buyerUserId = order.userId
+      sellerUserId = createdByUserId
+    }
+
     const trade = await Trade.create<Trade>({
-      openedByUserId,
-      orderId,
+      sellerUserId,
+      buyerUserId,
+      orderId: orderId,
+      createdByUserId,
+      status: TradeStatus.INITIATED,
+      orderType: order.orderType,
+      terms: order.terms,
+      cryptoCurrencyCode: order.cryptoCurrencyCode,
+      fiatCurrencyCode: order.fiatCurrencyCode,
       cryptoAmount: cryptoAmount,
+      fiatAmount: fixedRate * cryptoAmount,
       fixedRate,
-      status: TradeStatus.INITIATED
+      paymentMethodType: order.paymentMethodType,
+      paymentMethodId: order.paymentMethodId
     })
 
     const tradeExpiryKey = CacheHelper.getKeyForId(
@@ -142,19 +208,18 @@ export class Trade extends Model<Trade> {
 
   static async acceptTrade(tradeId: number): Promise<Trade> {
     const trade = await Trade.find({
-      include: [{ model: Order }],
       where: {
         id: tradeId,
         status: TradeStatus.INITIATED
       }
     })
-    if (!trade || !trade.order) {
+    if (!trade) {
       throw new TradeError(TradeError.NOT_FOUND)
     }
 
     const tx = await Transaction.blockBalance(
-      trade.order.userId,
-      trade.order.cryptoCurrencyCode,
+      trade.sellerUserId,
+      trade.cryptoCurrencyCode,
       trade.cryptoAmount,
       trade.id + ''
     )
@@ -200,21 +265,23 @@ export class Trade extends Model<Trade> {
   }
 
   static async releasePayment(tradeId: number): Promise<Trade> {
-    const trade = await Trade.findById(tradeId, {
-      include: [{ model: Order }]
-    })
+    const trade = await Trade.findById(tradeId)
 
-    if (!trade || !trade.order) {
-      throw new Error('Trade / Order now found')
+    if (!trade) {
+      logger.error('Release payment: Trade not found ' + tradeId)
+      throw new TradeError(TradeError.NOT_FOUND)
     }
 
     if (!trade.blockedTransactionId) {
+      logger.error(
+        'No blocked amount blockedTransactionId on trade: ' + trade.id
+      )
       throw new Error('No blocked amount here')
     }
 
     const tx = await Transaction.releaseBlockedTx(
       trade.blockedTransactionId,
-      trade.openedByUserId
+      trade.buyerUserId
     )
     if (tx) {
       const t = await trade.update({
@@ -223,19 +290,19 @@ export class Trade extends Model<Trade> {
 
       return t
     } else {
+      logger.error('Trade: Error unblocking transaction')
       throw new Error('Error unblocking transaction / no blocked amount found')
     }
   }
 
   static async rejectTrade(tradeId: number): Promise<Trade | null> {
     const trade = await Trade.findOne({
-      include: [{ model: Order }],
       where: {
         id: tradeId,
         status: TradeStatus.INITIATED
       }
     })
-    if (!trade || !trade.order) {
+    if (!trade) {
       throw new TradeError(TradeError.NOT_FOUND)
     }
 
@@ -252,7 +319,6 @@ export class Trade extends Model<Trade> {
 
   static async setExpired(tradeId: number): Promise<Trade | null> {
     const trade = await Trade.findOne({
-      include: [{ model: Order }],
       where: {
         status: TradeStatus.INITIATED,
         id: tradeId
@@ -276,7 +342,6 @@ export class Trade extends Model<Trade> {
 
   static async setCanceled(tradeId: number): Promise<Trade | null> {
     const trade = await Trade.findOne({
-      include: [{ model: Order }],
       where: {
         status: [TradeStatus.INITIATED, TradeStatus.ACCEPTED],
         id: tradeId
@@ -287,7 +352,7 @@ export class Trade extends Model<Trade> {
       if (trade.status === TradeStatus.ACCEPTED) {
         await Transaction.releaseBlockedTx(
           trade.blockedTransactionId,
-          trade.order.userId
+          trade.sellerUserId
         )
       }
 
@@ -307,7 +372,6 @@ export class Trade extends Model<Trade> {
 
   static async paymentSent(tradeId: number): Promise<Trade | null> {
     const trade = await Trade.findOne({
-      include: [{ model: Order }],
       where: {
         status: TradeStatus.ACCEPTED,
         id: tradeId
@@ -330,6 +394,12 @@ export class Trade extends Model<Trade> {
       tradeId
     )
     await cacheConnection.getClient.delAsync(tradeExpiryKey)
+  }
+
+  getOpUserId(): number {
+    return this.orderType === OrderType.BUY
+      ? this.buyerUserId
+      : this.sellerUserId
   }
 }
 
