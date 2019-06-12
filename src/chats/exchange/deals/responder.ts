@@ -10,7 +10,8 @@ import {
   User,
   Transaction,
   Trade,
-  TelegramAccount
+  TelegramAccount,
+  TradeStatus
 } from 'models'
 import { DealsConfig } from './config'
 import { logger } from 'modules'
@@ -279,7 +280,21 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       )
 
       if (isNaN(openedTradeId)) {
-        await DealsMessage(msg, user).showDealRejected()
+        const telegramAccount = await TelegramAccount.findOne({
+          where: {
+            userId: user.id
+          }
+        })
+        const trade = await Trade.findById(tradeId)
+        if (!telegramAccount || !trade) {
+          return false
+        }
+
+        await sendTradeMessage[TradeStatus.REJECTED](
+          trade,
+          user,
+          telegramAccount
+        )
         return true
       }
 
@@ -293,18 +308,16 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       })
       if (!trade) return false
 
-      const openedByUser = await User.findById(trade.createdByUserId, {
-        include: [{ model: TelegramAccount }]
+      const telegramAccount = await TelegramAccount.findOne({
+        where: {
+          userId: user.id
+        }
       })
-      if (!openedByUser) return false
 
-      await DealsMessage(msg, user).showDealAcceptSuccess(
-        tradeId,
-        trade.cryptoAmount * trade.fixedRate,
-        trade.fiatCurrencyCode,
-        trade.paymentMethodType,
-        openedByUser.telegramUser.username
-      )
+      if (!telegramAccount) {
+        return false
+      }
+      await sendTradeMessage[trade.status](trade, user, telegramAccount)
       return true
     },
     [DealsStateKey.cb_cancelTrade]: async () => {

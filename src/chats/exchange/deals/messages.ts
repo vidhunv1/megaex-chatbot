@@ -92,43 +92,6 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
-  async showDealRejected() {
-    await telegramHook.getWebhook.sendMessage(
-      msg.chat.id,
-      user.t(`${Namespace.Exchange}:deals.trade.trade-rejected-success`),
-      {
-        parse_mode: 'Markdown',
-        reply_markup: keyboardMainMenu(user)
-      }
-    )
-  },
-
-  async showDealAcceptSuccess(
-    tradeId: number,
-    fiatPayAmount: number,
-    fiatCurrencyCode: FiatCurrency,
-    paymentMethodType: PaymentMethodType,
-    openedByUsername: string
-  ) {
-    const formattedFiat = dataFormatter.formatFiatCurrency(
-      fiatPayAmount,
-      fiatCurrencyCode
-    )
-
-    await telegramHook.getWebhook.sendMessage(
-      msg.chat.id,
-      user.t(`${Namespace.Exchange}:deals.trade.trade-accepted-success`, {
-        paymentMethodName: user.t(`payment-methods.names.${paymentMethodType}`),
-        fiatPayAmount: formattedFiat,
-        tradeId,
-        openedTelegramUsername: openedByUsername ? '@' + openedByUsername : ''
-      }),
-      {
-        parse_mode: 'Markdown'
-      }
-    )
-  },
-
   async showDealsError(error: DealsError | TradeErrorTypes) {
     let transKey = ''
     switch (error) {

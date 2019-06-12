@@ -37,7 +37,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      orderType: {
+      tradeType: {
         allowNull: false,
         type: Sequelize.STRING
       },

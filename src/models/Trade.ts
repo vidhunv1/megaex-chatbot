@@ -91,7 +91,7 @@ export class Trade extends Model<Trade> {
   // Fields copied from Order to fix values.
   @AllowNull(false)
   @Column(DataType.STRING)
-  orderType!: OrderType
+  tradeType!: OrderType
 
   @AllowNull(true)
   @Column(DataType.STRING)
@@ -181,7 +181,8 @@ export class Trade extends Model<Trade> {
       orderId: orderId,
       createdByUserId,
       status: TradeStatus.INITIATED,
-      orderType: order.orderType,
+      tradeType:
+        order.orderType === OrderType.BUY ? OrderType.SELL : OrderType.BUY,
       terms: order.terms,
       cryptoCurrencyCode: order.cryptoCurrencyCode,
       fiatCurrencyCode: order.fiatCurrencyCode,
@@ -397,9 +398,9 @@ export class Trade extends Model<Trade> {
   }
 
   getOpUserId(): number {
-    return this.orderType === OrderType.BUY
-      ? this.buyerUserId
-      : this.sellerUserId
+    return this.tradeType === OrderType.BUY
+      ? this.sellerUserId
+      : this.buyerUserId
   }
 }
 

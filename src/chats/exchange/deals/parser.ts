@@ -361,7 +361,7 @@ export const DealsParser: Parser<ExchangeState> = async (
       }
       if (confirmation === 'yes') {
         try {
-          const trade = await dealUtils.acceptTrade(tUser, tradeId)
+          const trade = await dealUtils.acceptTrade(tradeId)
           if (!trade) {
             logger.error(
               'deals/parser/acceptTrade error accepting trade, trade is null'

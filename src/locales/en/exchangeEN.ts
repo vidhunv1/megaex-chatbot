@@ -25,7 +25,7 @@ export const exchangeEN = {
 ⚠️ Never cancel if you have already paid the seller.`,
       'cancel-trade-confirm-yes-cbbutton': 'yes',
       'cancel-trade-confirm-no-cbbutton': 'no',
-      'cancel-trade-success': 'This trade was canceled.',
+      'cancel-trade-success': 'You canceled this trade.',
       'cancel-trade-not-canceled': '-',
       'cancel-trade-fail': 'The trade was already canceled or expired.',
       'cancel-trade-notify': `❗️The trade ${
@@ -33,24 +33,25 @@ export const exchangeEN = {
       }{{ tradeId }} was canceled by the user.`,
       'trade-rejected-notify':
         '❗️The user canceled this trade. You can try other deals.',
-      'trade-rejected-success': 'Trade canceled',
-      'trade-accepted-success': `🛎 *Trade Open* ${BotCommand.TRADE}{{ tradeId }}
+      'trade-rejected-success': 'You rejected this trade.',
+      'trade-accepted-seller-success': `🛎 *Trade Open* ${
+        BotCommand.TRADE
+      }{{ tradeId }}
 
-The user has been notified to deposit *{{ fiatPayAmount }}* in *{{ paymentMethodName }}*.
+The user has been notified to deposit *{{ fiatPayAmount }}* in your *{{ paymentMethodName }}*.
 
-Telegram: {{ openedTelegramUsername }}
+Telegram: {{ buyerUsername }}
 
 You will be notified when this payment has been marked as completed.`,
-      'trade-accepted-notify-no-payment-info':
+      'trade-accepted-buyer-no-payment-info':
         'Send a message to seller for the payment details.',
-      'trade-accepted-notify': `🛎 *Trade Accepted* ${
+      'trade-accepted-buyer': `🛎 *Trade Accepted* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
 Make a payment of *{{ fiatPayAmount }}* through *{{ paymentMethodName }}*.
 
 *{{ paymentDetails }}*
-
 Telegram: {{ telegramUsername }}
 
 🔒 _This transaction is secure._ *{{ cryptoAmount }}* _is blocked from seller._
@@ -66,11 +67,18 @@ Telegram: {{ telegramUsername }}
         404: '❌ Could not find this trade.',
         400: '❌ This trade is invalid or expired.'
       },
-      'init-get-confirm': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
+      'init-get-confirm-buy': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
 
 ${
         BotCommand.ACCOUNT
       }{{ requestorAccountId }} wants to buy *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}* at rate {{ fixedRate }}.
+
+Do you want to accept this trade?`,
+      'init-get-confirm-sell': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
+
+${
+        BotCommand.ACCOUNT
+      }{{ requestorAccountId }} wants to sell *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}* at rate {{ fixedRate }}.
 
 Do you want to accept this trade?`,
       'trade-init-yes-cbbutton': 'Yes',
