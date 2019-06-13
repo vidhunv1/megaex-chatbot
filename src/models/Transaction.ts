@@ -27,7 +27,8 @@ export enum TransactionSource {
   CORE = 'CORE',
   WITHDRAWAL = 'WITHDRAWAL',
   BLOCK = 'BLOCK',
-  RELEASE = 'RELEASE'
+  RELEASE = 'RELEASE',
+  TRADE = 'TRADE'
 }
 
 @Table({ timestamps: true, tableName: 'Transactions', paranoid: true })
@@ -387,9 +388,8 @@ export class Transaction extends Model<Transaction> {
     return await tx.save({ transaction: transaction })
   }
 
-  static async releaseBlockedTx(
+  static async unblockTx(
     transactionId: number,
-    releaseToUserId: number,
     transaction?: SequelizeTransacion
   ): Promise<Transaction> {
     const tx = await Transaction.findById(transactionId, {
@@ -410,7 +410,7 @@ export class Transaction extends Model<Transaction> {
     // Credit to user
     const releasedTx = await Transaction.create<Transaction>(
       {
-        userId: releaseToUserId,
+        userId: tx.userId,
         txid: tx.txid,
         amount: Math.abs(tx.amount),
         transactionSource: TransactionSource.RELEASE,
@@ -422,6 +422,48 @@ export class Transaction extends Model<Transaction> {
         transaction
       }
     )
+
+    return releasedTx
+  }
+
+  static async releaseTradeToBuyer(
+    transactionId: number,
+    buyerUserId: number,
+    transaction?: SequelizeTransacion
+  ): Promise<Transaction> {
+    const tx = await Transaction.findById(transactionId, {
+      transaction
+    })
+
+    if (!tx) {
+      throw new TransactionError(
+        404,
+        'No Transaction with id found for releaseBlockTx'
+      )
+    }
+
+    if (tx.transactionSource != TransactionSource.BLOCK) {
+      throw new Error('This is not a blocked transaction')
+    }
+
+    // Credit to user
+    const releasedTx = await Transaction.create<Transaction>(
+      {
+        userId: buyerUserId,
+        txid: tx.txid,
+        amount: Math.abs(tx.amount),
+        transactionSource: TransactionSource.TRADE,
+        transactionType: TransactionType.RECEIVE,
+        currencyCode: tx.currencyCode,
+        confirmations: tx.confirmations
+      },
+      {
+        transaction
+      }
+    )
+    await tx.update({
+      transactionSource: TransactionSource.TRADE
+    })
 
     return releasedTx
   }

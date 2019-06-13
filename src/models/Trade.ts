@@ -269,37 +269,6 @@ export class Trade extends Model<Trade> {
     }
   }
 
-  static async releasePayment(tradeId: number): Promise<Trade> {
-    const trade = await Trade.findById(tradeId)
-
-    if (!trade) {
-      logger.error('Release payment: Trade not found ' + tradeId)
-      throw new TradeError(TradeError.NOT_FOUND)
-    }
-
-    if (!trade.blockedTransactionId) {
-      logger.error(
-        'No blocked amount blockedTransactionId on trade: ' + trade.id
-      )
-      throw new Error('No blocked amount here')
-    }
-
-    const tx = await Transaction.releaseBlockedTx(
-      trade.blockedTransactionId,
-      trade.buyerUserId
-    )
-    if (tx) {
-      const t = await trade.update({
-        status: TradeStatus.PAYMENT_RELEASED
-      })
-
-      return t
-    } else {
-      logger.error('Trade: Error unblocking transaction')
-      throw new Error('Error unblocking transaction / no blocked amount found')
-    }
-  }
-
   static async rejectTrade(tradeId: number): Promise<Trade | null> {
     const trade = await Trade.findOne({
       where: {
@@ -355,10 +324,7 @@ export class Trade extends Model<Trade> {
 
     if (trade) {
       if (trade.status === TradeStatus.ACCEPTED) {
-        await Transaction.releaseBlockedTx(
-          trade.blockedTransactionId,
-          trade.sellerUserId
-        )
+        await Transaction.unblockTx(trade.blockedTransactionId)
       }
 
       const tt = await trade.update({
@@ -416,7 +382,7 @@ export class Trade extends Model<Trade> {
     })
 
     if (tt) {
-      await Transaction.releaseBlockedTx(
+      await Transaction.releaseTradeToBuyer(
         trade.blockedTransactionId,
         trade.buyerUserId
       )
@@ -435,10 +401,7 @@ export class Trade extends Model<Trade> {
     }
 
     if (trade.status === TradeStatus.ACCEPTED) {
-      await Transaction.releaseBlockedTx(
-        trade.blockedTransactionId,
-        trade.sellerUserId
-      )
+      await Transaction.unblockTx(trade.blockedTransactionId)
       await trade.update({
         status: TradeStatus.ESCROW_CLOSED
       })
