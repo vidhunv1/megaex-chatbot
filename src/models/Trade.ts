@@ -29,7 +29,9 @@ export enum TradeStatus {
 
   PAYMENT_SENT = 'PAYMENT_SENT',
   PAYMENT_RELEASED = 'PAYMENT_RELEASED',
-  PAYMENT_DISPUTE = 'PAYMENT_DISPUTE'
+  PAYMENT_DISPUTE = 'PAYMENT_DISPUTE',
+
+  ESCROW_CLOSED = 'ESCROW_CLOSED'
 }
 
 export const activeTradeStatus: Record<TradeStatus, boolean> = {
@@ -41,7 +43,9 @@ export const activeTradeStatus: Record<TradeStatus, boolean> = {
   [TradeStatus.EXPIRED]: false,
   [TradeStatus.CANCELED]: false,
   [TradeStatus.REJECTED]: false,
-  [TradeStatus.PAYMENT_RELEASED]: false
+  [TradeStatus.PAYMENT_RELEASED]: false,
+
+  [TradeStatus.ESCROW_CLOSED]: false
 }
 
 export enum TradeErrorTypes {
@@ -388,6 +392,35 @@ export class Trade extends Model<Trade> {
       status: TradeStatus.PAYMENT_SENT
     })
     return tt
+  }
+
+  static async closeEscrow(tradeId: number): Promise<Trade | null> {
+    const trade = await Trade.findById(tradeId)
+    if (!trade) {
+      logger.error(
+        'ALERT! Tradeid does not exist for escrow release. ' + tradeId
+      )
+      return null
+    }
+
+    if (trade.status === TradeStatus.ACCEPTED) {
+      await Transaction.releaseBlockedTx(
+        trade.blockedTransactionId,
+        trade.sellerUserId
+      )
+      await trade.update({
+        status: TradeStatus.ESCROW_CLOSED
+      })
+      return trade
+    } else {
+      logger.error(
+        'Invalid trade status to release escrow: ' +
+          trade.status +
+          ', ' +
+          tradeId
+      )
+      return null
+    }
   }
 
   static async deleteTradeExpiration(tradeId: number) {

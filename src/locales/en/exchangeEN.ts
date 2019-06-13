@@ -32,6 +32,18 @@ You are yet to make the payment for the trade ${
       }{{ tradeId }}. Click the button below if you have already made the payment.
 
 ⚠️ You have *{{ paymentSendTimeout }} mins* left to make this payment. Please note that any payment made after this time will be invalid.`,
+      'escrow-closed-seller': `*Trade closed*
+
+The buyer did not confirm any payment made to you for trade ${
+        BotCommand.TRADE
+      }{{ tradeId }}.
+
+Your *{{ cryptoAmount }}* has been returned back to you. For issues related to this trade please contact our *legal team*.`,
+      'escrow-closed-buyer': `*Trade closed*
+
+You did not make any payment to the seller for the trade ${
+        BotCommand.TRADE
+      }{{ tradeId }}. For issues related to this trade please contact our *legal team*.`,
       'open-dispute-cbbutton': '👩‍🎓 Open Dispute',
       'cancel-trade-confirm': `Are you sure you want to cancel the trade ${
         BotCommand.TRADE

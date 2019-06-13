@@ -174,6 +174,33 @@ export async function cacheExpiryhandler(msg: string) {
   } else if (key === CacheKey.TradeEscrowClosedExpiry) {
     const tradeId = parseInt(CacheHelper.getIdFromKey(msg))
     if (tradeId) {
+      const trade = await Trade.closeEscrow(tradeId)
+      if (trade) {
+        const sellerUser = await User.findById(trade.sellerUserId, {
+          include: [{ model: TelegramAccount }]
+        })
+        const buyerUser = await User.findById(trade.buyerUserId, {
+          include: [{ model: TelegramAccount }]
+        })
+        if (sellerUser) {
+          sendTradeMessage[trade.status](
+            trade,
+            sellerUser,
+            sellerUser.telegramUser
+          )
+        }
+        if (buyerUser) {
+          sendTradeMessage[trade.status](
+            trade,
+            buyerUser,
+            buyerUser.telegramUser
+          )
+        }
+      } else {
+        logger.error(
+          'ALERT: TradeEscrowClosedExpiry could not close escrow for ' + tradeId
+        )
+      }
     }
   }
 }

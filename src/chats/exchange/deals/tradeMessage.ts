@@ -8,6 +8,7 @@ import { stringifyCallbackQuery } from 'chats/utils'
 import { DealsStateKey, DealsState } from './types'
 import { dataFormatter } from 'utils/dataFormatter'
 import logger from 'modules/logger'
+import { CommonStateKey, CommonState } from 'chats/common/types'
 
 export const sendTradeMessage: Record<
   TradeStatus,
@@ -380,5 +381,72 @@ export const sendTradeMessage: Record<
     _contextTUser: TelegramAccount
   ) {
     return false
+  },
+  [TradeStatus.ESCROW_CLOSED]: async function(
+    trade: Trade,
+    contextUser: User,
+    contextTUser: TelegramAccount
+  ) {
+    if (contextUser.id === trade.buyerUserId) {
+      await telegramHook.getWebhook.sendMessage(
+        contextTUser.id,
+        contextUser.t(`${Namespace.Exchange}:deals.trade.escrow-closed-buyer`, {
+          tradeId: trade.id
+        }),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: contextUser.t('contact-legal-cbbutton'),
+                  callback_data: stringifyCallbackQuery<
+                    CommonStateKey.cb_contactLegal,
+                    CommonState[CommonStateKey.cb_contactLegal]
+                  >(CommonStateKey.cb_contactLegal, {
+                    tradeId: trade.id,
+                    userId: contextUser.id
+                  })
+                }
+              ]
+            ]
+          }
+        }
+      )
+    } else {
+      await telegramHook.getWebhook.sendMessage(
+        contextTUser.id,
+        contextUser.t(
+          `${Namespace.Exchange}:deals.trade.escrow-closed-seller`,
+          {
+            tradeId: trade.id,
+            cryptoAmount: dataFormatter.formatCryptoCurrency(
+              trade.cryptoAmount,
+              trade.cryptoCurrencyCode
+            )
+          }
+        ),
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: contextUser.t('contact-legal-cbbutton'),
+                  callback_data: stringifyCallbackQuery<
+                    CommonStateKey.cb_contactLegal,
+                    CommonState[CommonStateKey.cb_contactLegal]
+                  >(CommonStateKey.cb_contactLegal, {
+                    tradeId: trade.id,
+                    userId: contextUser.id
+                  })
+                }
+              ]
+            ]
+          }
+        }
+      )
+    }
+    return true
   }
 }

@@ -7,7 +7,7 @@ export const commonEN = {
   'contact-legal-cbbutton': '👩‍🎓 Contact Legal',
   'contact-legal': `👩‍🎓 *Legal support*
 
-Contact for issues related to your trade or any disputes with your issue (include your trade id or other information to resolve your issue quickly).
+Contact for issues related to your trade or any disputes with your trades/orders (include your trade id or other information to resolve your issue quickly).
 
 Send message: @{{ legalUsername }}`,
   'contact-support-cbbutton': '👨‍💼 Contact Support',
