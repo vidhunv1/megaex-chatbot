@@ -239,8 +239,7 @@ export class Trade extends Model<Trade> {
       }
 
       const escrowClosedTimeout = parseInt(CONFIG.TRADE_ESCROW_TIMEOUT_S)
-      const disputeTimeout = parseInt(CONFIG.TRADE_DISPUTE_TIMEOUT_S)
-      const escrowWarnTimeout = disputeTimeout
+      const escrowWarnTimeout = parseInt(escrowClosedTimeout * 0.33 + '')
 
       const escrowClosedExpiryKey = CacheHelper.getKeyForId(
         CacheKey.TradeEscrowClosedExpiry,
@@ -368,6 +367,7 @@ export class Trade extends Model<Trade> {
 
       if (tt) {
         Trade.deleteTradeExpiration(trade.id)
+        Trade.deleteEscrowExpiration(trade.id)
       }
 
       return tt
@@ -391,6 +391,37 @@ export class Trade extends Model<Trade> {
     const tt = trade.update({
       status: TradeStatus.PAYMENT_SENT
     })
+
+    if (tt) {
+      Trade.deleteEscrowExpiration(trade.id)
+    }
+    return tt
+  }
+
+  static async paymentReceived(tradeId: number): Promise<Trade | null> {
+    // TODO: Lock all in sequelize transaction
+    const trade = await Trade.findOne({
+      where: {
+        status: TradeStatus.PAYMENT_SENT,
+        id: tradeId
+      }
+    })
+
+    if (!trade) {
+      return null
+    }
+
+    const tt = trade.update({
+      status: TradeStatus.PAYMENT_RELEASED
+    })
+
+    if (tt) {
+      await Transaction.releaseBlockedTx(
+        trade.blockedTransactionId,
+        trade.buyerUserId
+      )
+    }
+
     return tt
   }
 
@@ -429,6 +460,20 @@ export class Trade extends Model<Trade> {
       tradeId
     )
     await cacheConnection.getClient.delAsync(tradeExpiryKey)
+  }
+
+  static async deleteEscrowExpiration(tradeId: number) {
+    const escrowClosedExpiryKey = CacheHelper.getKeyForId(
+      CacheKey.TradeEscrowClosedExpiry,
+      tradeId
+    )
+    const escrowWarnExpiryKey = CacheHelper.getKeyForId(
+      CacheKey.TradeEscrowWarnExpiry,
+      tradeId
+    )
+
+    await cacheConnection.getClient.delAsync(escrowWarnExpiryKey)
+    await cacheConnection.getClient.delAsync(escrowClosedExpiryKey)
   }
 
   getOpUserId(): number {

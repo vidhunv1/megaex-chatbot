@@ -18,11 +18,51 @@ export const exchangeEN = {
 
   deals: {
     trade: {
+      'confirm-payment-received': `*Confirm*
+
+Are you sure you have received *{{ fiatAmount }}* from the buyer?`,
+      'confirm-payment-received-yes-cbbutton': 'Yes',
+      'confirm-payment-received-no-cbbutton': 'No',
+      'payment-released-buyer': `🚀 *{{ cryptoCurrency }} credited* ${
+        BotCommand.TRADE
+      }{{ tradeId }}
+
+Your wallet is credited with *{{ cryptoAmount }}* from this trade.
+
+🎉 _Invite your friends and family here so they can also have the best experience to buy/sell bitcoins (Use your referral link so you can earn from their trades)._
+{{ referralLink }}`,
+      'payment-released-seller': `🚀 *Trade success* ${
+        BotCommand.TRADE
+      }{{ tradeId }}
+
+*{{ cryptoAmount }}* was sent to the buyer.
+
+🎉 _Invite your friends and family here so they can also have the best experience to buy/sell bitcoins (Use your referral link so you can earn from their trades)._
+{{ referralLink }}`,
+      'confirm-payment-sent': `*Confirm*
+
+Are you sure you have sent *{{ fiatAmount }}* to the sellers *{{ paymentMethodType }}*?`,
+      'confirm-payment-sent-yes-cbbutton': 'Yes',
+      'confirm-payment-sent-no-cbbutton': 'No',
+      'payment-sent-buyer': `*🛎 Trade* ${BotCommand.TRADE}{{ tradeId }}
+
+Seller has been notified. Please wait for the the seller to confirm your payment.
+
+❕If there is no confirmation you should open a dispute.`,
+      'payment-sent-seller': `*🛎 Payment confirmed* ${
+        BotCommand.TRADE
+      }{{ tradeId }}
+
+The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. Please confirm when you receive this transaction.
+
+❕If you have not received this transaction in some time you should open a dispute.`,
       'escrow-warn-seller': `*Info*
 
 The seller is yet to make payment for the trade ${
         BotCommand.TRADE
-      }{{ tradeId }} You may contact our *legal team* if you think something is wrong, they will take care of this issue for you.
+      }{{ tradeId }}.
+      
+You can contact our *support* if you think something is wrong, they will take care of this issue for you.
 
 ❕_If no confirmation is received in_ *{{ paymentSendTimeout }} mins*, _the blocked amount will be automatically released to you._`,
       'escrow-warn-buyer': `*Reminder*
@@ -38,12 +78,12 @@ The buyer did not confirm any payment made to you for trade ${
         BotCommand.TRADE
       }{{ tradeId }}.
 
-Your *{{ cryptoAmount }}* has been returned back to you. For issues related to this trade please contact our *legal team*.`,
+Your *{{ cryptoAmount }}* has been returned back to you. For issues related to this trade please contact our *support*.`,
       'escrow-closed-buyer': `*Trade closed*
 
 You did not make any payment to the seller for the trade ${
         BotCommand.TRADE
-      }{{ tradeId }}. For issues related to this trade please contact our *legal team*.`,
+      }{{ tradeId }}. For issues related to this trade please contact our *support*.`,
       'open-dispute-cbbutton': '👩‍🎓 Open Dispute',
       'cancel-trade-confirm': `Are you sure you want to cancel the trade ${
         BotCommand.TRADE
@@ -181,7 +221,7 @@ Rating:  {{ rating }} ⭐️
 *Price*: {{ rate }} / {{ cryptoCurrencyCode }}
 *Sell Amount*: {{ formattedAmount }}`,
 
-    'show-sell-insufficient-funds': `❗️ There is not enough balance on sellers account to start this deal. You may request the seller to deposit the funds after which you can start the trade again.`,
+    'show-sell-insufficient-funds': `❗️ There is not enough balance on sellers account to start this deal. You can request the seller to deposit the funds after which you can start the trade again.`,
     'request-buy-deal-deposit-cbbutton': '📲 Contact seller',
 
     'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',

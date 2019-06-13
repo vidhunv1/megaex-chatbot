@@ -20,5 +20,11 @@ export const linkCreator = {
     return `${TELEGRAM_BASE_URL}/${CONFIG.BOT_USERNAME}?start=${
       DeepLink.PAYMENT
     }-${code}`
+  },
+
+  getReferralLink(accountId: string): string {
+    return `${TELEGRAM_BASE_URL}/${CONFIG.BOT_USERNAME}?start=${
+      DeepLink.REFERRAL
+    }-${accountId}`
   }
 }

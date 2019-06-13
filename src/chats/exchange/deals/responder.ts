@@ -332,14 +332,19 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         'confirmation',
         null
       )
-      if (!confirmation) {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_cancelTradeConfirm],
+        'tradeId',
+        null
+      )
+      if (!confirmation || !tradeId) {
         return false
       }
 
       const data = _.get(state[DealsStateKey.cancelTradeConfirm], 'data', null)
       const canceledTradeId = _.get(data, 'canceledTradeId', null)
+      const trade = await Trade.findById(tradeId)
       if (canceledTradeId) {
-        const trade = await Trade.findById(canceledTradeId)
         if (trade) {
           const telegramAccount = await TelegramAccount.findOne({
             where: {
@@ -352,7 +357,21 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
           await sendTradeMessage[trade.status](trade, user, telegramAccount)
         }
       } else {
-        await DealsMessage(msg, user).cancelTradeBadResp(confirmation)
+        if (confirmation === 'no') {
+          if (trade) {
+            const telegramAccount = await TelegramAccount.findOne({
+              where: {
+                userId: user.id
+              }
+            })
+            if (!telegramAccount) {
+              return false
+            }
+            await sendTradeMessage[trade.status](trade, user, telegramAccount)
+          }
+        } else {
+          await DealsMessage(msg, user).cancelTradeBadFail()
+        }
       }
       return true
     },
@@ -382,6 +401,84 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       return false
     },
     [DealsStateKey.paymentSent]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_paymentSent],
+        'tradeId',
+        null
+      )
+      if (tradeId == null) {
+        return false
+      }
+      const trade = await Trade.findById(tradeId)
+      if (!trade) {
+        return false
+      }
+
+      await DealsMessage(msg, user).confirmPaymentSent(
+        tradeId,
+        trade.fiatAmount,
+        trade.fiatCurrencyCode,
+        trade.paymentMethodType
+      )
+      return true
+    },
+    [DealsStateKey.confirmPaymentSent]: async () => {
+      const confirmation = _.get(
+        state[DealsStateKey.cb_confirmPaymentSent],
+        'confirmation',
+        null
+      )
+      const tradeId = _.get(
+        state[DealsStateKey.cb_confirmPaymentSent],
+        'tradeId',
+        null
+      )
+      if (!confirmation || !tradeId) {
+        return false
+      }
+      const data = _.get(
+        state[DealsStateKey.cb_confirmPaymentSent],
+        'data',
+        null
+      )
+      const updatedTradeId = _.get(data, 'updatedTradeId', null)
+      const trade = await Trade.findById(tradeId)
+
+      if (!confirmation || confirmation === 'no') {
+        if (trade) {
+          const u = await User.findById(user.id, {
+            include: [{ model: TelegramAccount }]
+          })
+          if (!u) {
+            return false
+          }
+          await sendTradeMessage[trade.status](trade, u, u.telegramUser)
+          return true
+        }
+        return false
+      }
+
+      if (updatedTradeId) {
+        if (trade) {
+          const u = await User.findById(user.id, {
+            include: [{ model: TelegramAccount }]
+          })
+          if (!u) {
+            return false
+          }
+          await sendTradeMessage[trade.status](trade, u, u.telegramUser)
+          return true
+        }
+      } else {
+        const error = _.get(
+          state[DealsStateKey.cb_confirmPaymentSent],
+          'error',
+          null
+        )
+        if (error) {
+          await DealsMessage(msg, user).showDealsError(error)
+        }
+      }
       return false
     },
     [DealsStateKey.cb_confirmPaymentSent]: async () => {
@@ -390,7 +487,88 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     [DealsStateKey.cb_paymentDispute]: async () => {
       return false
     },
+
     [DealsStateKey.cb_paymentReceived]: async () => {
+      return false
+    },
+    [DealsStateKey.paymentReceived]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_paymentReceived],
+        'tradeId',
+        null
+      )
+      if (!tradeId) {
+        return false
+      }
+
+      const trade = await Trade.findById(tradeId)
+      if (!trade) return false
+      await DealsMessage(msg, user).confirmPaymentReceived(
+        trade.id,
+        trade.fiatAmount,
+        trade.fiatCurrencyCode
+      )
+      return true
+    },
+    [DealsStateKey.cb_confirmPaymentReceived]: async () => {
+      return false
+    },
+    [DealsStateKey.confirmPaymentReceived]: async () => {
+      const confirmation = _.get(
+        state[DealsStateKey.cb_confirmPaymentReceived],
+        'confirmation',
+        null
+      )
+      const tradeId = _.get(
+        state[DealsStateKey.cb_confirmPaymentReceived],
+        'tradeId',
+        null
+      )
+      if (!confirmation || !tradeId) {
+        return false
+      }
+      const data = _.get(
+        state[DealsStateKey.cb_confirmPaymentReceived],
+        'data',
+        null
+      )
+      const updatedTradeId = _.get(data, 'updatedTradeId', null)
+      const trade = await Trade.findById(tradeId)
+
+      if (!confirmation || confirmation === 'no') {
+        if (trade) {
+          const u = await User.findById(user.id, {
+            include: [{ model: TelegramAccount }]
+          })
+          if (!u) {
+            return false
+          }
+          await sendTradeMessage[trade.status](trade, u, u.telegramUser)
+          return true
+        }
+        return false
+      }
+      if (updatedTradeId) {
+        if (trade) {
+          const u = await User.findById(user.id, {
+            include: [{ model: TelegramAccount }]
+          })
+          if (!u) {
+            return false
+          }
+          await sendTradeMessage[trade.status](trade, u, u.telegramUser)
+          return true
+        }
+      } else {
+        const error = _.get(
+          state[DealsStateKey.cb_confirmPaymentReceived],
+          'error',
+          null
+        )
+        if (error) {
+          await DealsMessage(msg, user).showDealsError(error)
+        }
+      }
       return false
     }
   }

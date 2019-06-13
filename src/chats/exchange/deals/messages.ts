@@ -67,14 +67,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     )
   },
-  async cancelTradeBadResp(confirmation: 'yes' | 'no') {
-    let transKey
-    if (confirmation === 'no') {
-      transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-not-canceled`
-    } else {
-      transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-fail`
-    }
-
+  async cancelTradeBadFail() {
+    const transKey = `${Namespace.Exchange}:deals.trade.cancel-trade-fail`
     await telegramHook.getWebhook.sendMessage(msg.chat.id, user.t(transKey), {
       parse_mode: 'Markdown',
       reply_markup: keyboardMainMenu(user)
@@ -88,6 +82,108 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       {
         parse_mode: 'Markdown',
         reply_markup: keyboardMainMenu(user)
+      }
+    )
+  },
+
+  async confirmPaymentSent(
+    tradeId: number,
+    fiatAmount: number,
+    fiatCurrency: FiatCurrency,
+    paymentMethod: PaymentMethodType
+  ) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade.confirm-payment-sent`, {
+        fiatAmount: dataFormatter.formatFiatCurrency(fiatAmount, fiatCurrency),
+        paymentMethodType: user.t(`payment-methods.names.${paymentMethod}`)
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: user.t(
+                  `${
+                    Namespace.Exchange
+                  }:deals.trade.confirm-payment-sent-yes-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  DealsStateKey.cb_confirmPaymentSent,
+                  DealsState[DealsStateKey.cb_confirmPaymentSent]
+                >(DealsStateKey.cb_confirmPaymentSent, {
+                  tradeId: tradeId,
+                  confirmation: 'yes'
+                })
+              },
+              {
+                text: user.t(
+                  `${
+                    Namespace.Exchange
+                  }:deals.trade.confirm-payment-sent-no-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  DealsStateKey.cb_confirmPaymentSent,
+                  DealsState[DealsStateKey.cb_confirmPaymentSent]
+                >(DealsStateKey.cb_confirmPaymentSent, {
+                  tradeId: tradeId,
+                  confirmation: 'no'
+                })
+              }
+            ]
+          ]
+        }
+      }
+    )
+  },
+
+  async confirmPaymentReceived(
+    tradeId: number,
+    fiatAmount: number,
+    fiatCurrency: FiatCurrency
+  ) {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade.confirm-payment-received`, {
+        fiatAmount: dataFormatter.formatFiatCurrency(fiatAmount, fiatCurrency)
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: user.t(
+                  `${
+                    Namespace.Exchange
+                  }:deals.trade.confirm-payment-received-yes-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  DealsStateKey.cb_confirmPaymentReceived,
+                  DealsState[DealsStateKey.cb_confirmPaymentReceived]
+                >(DealsStateKey.cb_confirmPaymentReceived, {
+                  tradeId: tradeId,
+                  confirmation: 'yes'
+                })
+              },
+              {
+                text: user.t(
+                  `${
+                    Namespace.Exchange
+                  }:deals.trade.confirm-payment-received-no-cbbutton`
+                ),
+                callback_data: stringifyCallbackQuery<
+                  DealsStateKey.cb_confirmPaymentReceived,
+                  DealsState[DealsStateKey.cb_confirmPaymentReceived]
+                >(DealsStateKey.cb_confirmPaymentReceived, {
+                  tradeId: tradeId,
+                  confirmation: 'no'
+                })
+              }
+            ]
+          ]
+        }
       }
     )
   },

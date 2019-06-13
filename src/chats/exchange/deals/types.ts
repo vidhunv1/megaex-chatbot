@@ -32,7 +32,11 @@ export enum DealsStateKey {
   cb_paymentSent = 'cb_paymentSent',
   paymentSent = 'paymentSent',
   cb_confirmPaymentSent = 'cb_confirmPaymentSent',
+  confirmPaymentSent = 'confirmPaymentSent',
   cb_paymentReceived = 'cb_paymentReceived',
+  paymentReceived = 'paymentReceived',
+  cb_confirmPaymentReceived = 'cb_confirmPaymentReceived',
+  confirmPaymentReceived = 'confirmPaymentReceived',
   cb_paymentDispute = 'cb_paymentDispute'
 }
 
@@ -121,8 +125,24 @@ export interface DealsState {
   [DealsStateKey.cb_paymentSent]?: {
     tradeId: number
   }
+  [DealsStateKey.cb_paymentDispute]?: {}
+  [DealsStateKey.cb_confirmPaymentSent]?: {
+    tradeId: number
+    confirmation: 'yes' | 'no'
+    data?: {
+      updatedTradeId: number | null
+    } | null
+    error?: TradeErrorTypes | DealsError | null
+  }
   [DealsStateKey.cb_paymentReceived]?: {
     tradeId: number
   }
-  [DealsStateKey.cb_paymentDispute]?: {}
+  [DealsStateKey.cb_confirmPaymentReceived]?: {
+    tradeId: number
+    confirmation: 'yes' | 'no'
+    data?: {
+      updatedTradeId: number | null
+    } | null
+    error?: TradeErrorTypes | DealsError | null
+  }
 }

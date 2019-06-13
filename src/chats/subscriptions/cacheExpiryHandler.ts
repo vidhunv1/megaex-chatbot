@@ -197,8 +197,8 @@ export async function cacheExpiryhandler(msg: string) {
           )
         }
       } else {
-        logger.error(
-          'ALERT: TradeEscrowClosedExpiry could not close escrow for ' + tradeId
+        logger.info(
+          'TradeEscrowClosedExpiry could not close escrow for ' + tradeId
         )
       }
     }

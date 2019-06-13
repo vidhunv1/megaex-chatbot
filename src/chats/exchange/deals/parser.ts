@@ -7,7 +7,7 @@ import {
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
-import { Order, TradeError } from 'models'
+import { Order, TradeError, Trade } from 'models'
 import { dealUtils } from './dealUtils'
 import logger from 'modules/logger'
 
@@ -471,25 +471,129 @@ export const DealsParser: Parser<ExchangeState> = async (
       return state
     },
     [DealsStateKey.cb_paymentSent]: async () => {
-      const tradeId = _.get(
-        state[DealsStateKey.cb_paymentSent],
-        'tradeId',
-        null
-      )
-      if (tradeId == null) {
-        return null
-      }
       return state
     },
     [DealsStateKey.paymentSent]: async () => {
       return null
     },
     [DealsStateKey.cb_confirmPaymentSent]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_confirmPaymentSent],
+        'tradeId',
+        null
+      )
+      const confirmation = _.get(
+        state[DealsStateKey.cb_confirmPaymentSent],
+        'confirmation',
+        null
+      )
+      if (!tradeId) {
+        return null
+      }
+
+      if (confirmation === 'yes') {
+        const trade = await Trade.findById(tradeId)
+        if (!trade) {
+          return null
+        }
+
+        try {
+          const updatedTrade = await dealUtils.paymentSent(tradeId)
+          if (!updatedTrade) {
+            throw new Error('Error updating paymentSent on trade')
+          }
+
+          return {
+            ...state,
+            [DealsStateKey.cb_confirmPaymentSent]: {
+              tradeId,
+              confirmation,
+              data: {
+                updatedTradeId: updatedTrade.id
+              }
+            }
+          }
+        } catch (e) {
+          return {
+            ...state,
+            [DealsStateKey.cb_confirmPaymentSent]: {
+              confirmation: confirmation,
+              tradeId: tradeId,
+              data: null,
+              error: e instanceof TradeError ? e.status : DealsError.DEFAULT
+            }
+          }
+        }
+      } else {
+        return state
+      }
+    },
+    [DealsStateKey.confirmPaymentSent]: async () => {
       return null
     },
+
     [DealsStateKey.cb_paymentReceived]: async () => {
+      return state
+    },
+    [DealsStateKey.paymentReceived]: async () => {
       return null
     },
+    [DealsStateKey.cb_confirmPaymentReceived]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_confirmPaymentReceived],
+        'tradeId',
+        null
+      )
+      const confirmation = _.get(
+        state[DealsStateKey.cb_confirmPaymentReceived],
+        'confirmation',
+        null
+      )
+      if (!tradeId) {
+        return null
+      }
+
+      if (confirmation === 'yes') {
+        const trade = await Trade.findById(tradeId)
+        if (!trade) {
+          return null
+        }
+
+        try {
+          const updatedTrade = await dealUtils.paymentReceived(tradeId)
+          if (!updatedTrade) {
+            throw new Error('Error updating paymentSent on trade')
+          }
+
+          return {
+            ...state,
+            [DealsStateKey.cb_confirmPaymentReceived]: {
+              tradeId,
+              confirmation,
+              data: {
+                updatedTradeId: updatedTrade.id
+              }
+            }
+          }
+        } catch (e) {
+          return {
+            ...state,
+            [DealsStateKey.cb_confirmPaymentReceived]: {
+              confirmation: confirmation,
+              tradeId: tradeId,
+              data: null,
+              error: e instanceof TradeError ? e.status : DealsError.DEFAULT
+            }
+          }
+        }
+      } else {
+        return state
+      }
+    },
+    [DealsStateKey.confirmPaymentReceived]: async () => {
+      return null
+    },
+
     [DealsStateKey.cb_paymentDispute]: async () => {
       return null
     }
@@ -628,7 +732,32 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
 
       return DealsStateKey.respondToTradeInit
     case DealsStateKey.cb_paymentSent:
-      return DealsStateKey.cb_confirmPaymentSent
+      return DealsStateKey.paymentSent
+    case DealsStateKey.cb_confirmPaymentSent: {
+      const dealError = _.get(
+        state[DealsStateKey.cb_confirmPaymentSent],
+        'error',
+        null
+      )
+      if (dealError) {
+        return DealsStateKey.dealError
+      }
+      return DealsStateKey.confirmPaymentSent
+    }
+
+    case DealsStateKey.cb_paymentReceived:
+      return DealsStateKey.paymentReceived
+    case DealsStateKey.cb_confirmPaymentReceived: {
+      const dealError = _.get(
+        state[DealsStateKey.cb_confirmPaymentReceived],
+        'error',
+        null
+      )
+      if (dealError) {
+        return DealsStateKey.dealError
+      }
+      return DealsStateKey.confirmPaymentReceived
+    }
     default:
       return null
   }

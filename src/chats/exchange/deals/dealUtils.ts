@@ -151,5 +151,49 @@ export const dealUtils = {
     }
 
     return trade
+  },
+  paymentSent: async function(tradeId: number): Promise<Trade | null> {
+    const trade = await Trade.paymentSent(tradeId)
+    if (trade) {
+      const sellerUser = await User.findById(trade.sellerUserId, {
+        include: [{ model: TelegramAccount }]
+      })
+
+      if (sellerUser) {
+        sendTradeMessage[trade.status](
+          trade,
+          sellerUser,
+          sellerUser.telegramUser
+        )
+      } else {
+        logger.error(
+          'sendTradeMesage: paymentSent could not find send seller message in payment sent'
+        )
+      }
+
+      return trade
+    }
+
+    return null
+  },
+  paymentReceived: async function(tradeId: number): Promise<Trade | null> {
+    const trade = await Trade.paymentReceived(tradeId)
+    if (trade) {
+      const buyerUser = await User.findById(trade.buyerUserId, {
+        include: [{ model: TelegramAccount }]
+      })
+
+      if (buyerUser) {
+        sendTradeMessage[trade.status](trade, buyerUser, buyerUser.telegramUser)
+      } else {
+        logger.error(
+          'sendTradeMesage: paymentReceived could not find send seller message in payment sent'
+        )
+      }
+
+      return trade
+    }
+
+    return null
   }
 }
