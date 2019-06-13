@@ -235,7 +235,8 @@ export class Trade extends Model<Trade> {
       }
 
       const escrowClosedTimeout = parseInt(CONFIG.TRADE_ESCROW_TIMEOUT_S)
-      const escrowWarnTimeout = escrowClosedTimeout * 0.75
+      const disputeTimeout = parseInt(CONFIG.TRADE_DISPUTE_TIMEOUT_S)
+      const escrowWarnTimeout = disputeTimeout
 
       const escrowClosedExpiryKey = CacheHelper.getKeyForId(
         CacheKey.TradeEscrowClosedExpiry,
@@ -401,6 +402,18 @@ export class Trade extends Model<Trade> {
     return this.tradeType === OrderType.BUY
       ? this.sellerUserId
       : this.buyerUserId
+  }
+
+  getEscrowReleaseSecondsLeft(): number | null {
+    if (this.status === TradeStatus.ACCEPTED) {
+      const tradeAcceptedAt = moment(this.updatedAt)
+      const escrowCloseTime = tradeAcceptedAt.add(
+        parseInt(CONFIG.TRADE_ESCROW_TIMEOUT_S),
+        'seconds'
+      )
+      return moment.duration(escrowCloseTime.diff(moment())).asSeconds()
+    }
+    return null
   }
 }
 

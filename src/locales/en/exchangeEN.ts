@@ -18,6 +18,21 @@ export const exchangeEN = {
 
   deals: {
     trade: {
+      'escrow-warn-seller': `*Info*
+
+The seller is yet to make payment for the trade ${
+        BotCommand.TRADE
+      }{{ tradeId }} You may contact our *legal team* if you think something is wrong, they will take care of this issue for you.
+
+❕_If no confirmation is received in_ *{{ paymentSendTimeout }} mins*, _the blocked amount will be automatically released to you._`,
+      'escrow-warn-buyer': `*Reminder*
+
+You are yet to make the payment for the trade ${
+        BotCommand.TRADE
+      }{{ tradeId }}. Click the button below if you have already made the payment.
+
+⚠️ You have *{{ paymentSendTimeout }} mins* left to make this payment. Please note that any payment made after this time will be invalid.`,
+      'open-dispute-cbbutton': '👩‍🎓 Open Dispute',
       'cancel-trade-confirm': `Are you sure you want to cancel the trade ${
         BotCommand.TRADE
       }{{ tradeId }} on *{{ fiatAmount }}*?
@@ -49,14 +64,16 @@ You will be notified when this payment has been marked as completed.`,
         BotCommand.TRADE
       }{{ tradeId }}
 
-Make a payment of *{{ fiatPayAmount }}* through *{{ paymentMethodName }}*.
+Make a payment of {{ fiatPayAmount }} through {{ paymentMethodName }}, you will receive *{{ cryptoAmount }}* when your payment is confirmed.
 
-*{{ paymentDetails }}*
+*{{ paymentMethodName }}*
+Amount: *{{ fiatPayAmount }}*
+{{ paymentDetails }}
+Payment reference: *T{{ tradeId }}*
+
 Telegram: {{ telegramUsername }}
 
-🔒 _This transaction is secure._ *{{ cryptoAmount }}* _is blocked from seller._
-️
-⚠️ Make this payment within *{{ paymentSendTimeoutS }}* mins.`,
+🔒 _This trade is secured. Payment valid only for_ *{{ paymentSendTimeout }} mins*.`,
       'payment-received-cbbutton': '💵  Payment Received',
       'dispute-payment-cbbutton': 'Open dispute',
       'payment-sent-cbbutton': '💸  I have paid',

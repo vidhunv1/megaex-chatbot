@@ -4,6 +4,19 @@ import { OrderType } from 'models'
 
 export const commonEN = {
   'callback-error-response': '❗️Error',
+  'contact-legal-cbbutton': '👩‍🎓 Contact Legal',
+  'contact-legal': `👩‍🎓 *Legal support*
+
+Contact for issues related to your trade or any disputes with your issue (include your trade id or other information to resolve your issue quickly).
+
+Send message: @{{ legalUsername }}`,
+  'contact-support-cbbutton': '👨‍💼 Contact Support',
+  'contact-support': `👨‍💼 *Customer support*
+
+If you need support related to the service. You can report any issues, bugs or feedback related to the service.
+
+Send message: @{{ supportUsername }}
+`,
   'exchange-source': {
     [ExchangeSource.BINANCE]: 'Binance',
     [ExchangeSource.LBC]: 'LocalBitcoins',

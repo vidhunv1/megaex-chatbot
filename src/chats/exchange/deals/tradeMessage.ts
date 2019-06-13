@@ -167,7 +167,11 @@ export const sendTradeMessage: Record<
               paymentDetails +
               `${contextUser.t(
                 `payment-methods.fields.${pm.paymentMethod}.field${index + 1}`
-              )}: ${field}\n`
+              )}: *${field}*`
+
+            if (index < pm.fields.length - 1) {
+              paymentDetails = paymentDetails + '\n'
+            }
           })
         }
       } else {
@@ -178,6 +182,7 @@ export const sendTradeMessage: Record<
         )
       }
 
+      const paymentSendTimeoutS = trade.getEscrowReleaseSecondsLeft()
       await telegramHook.getWebhook.sendMessage(
         contextTUser.id,
         contextUser.t(
@@ -190,9 +195,9 @@ export const sendTradeMessage: Record<
             ),
             telegramUsername: '@' + sellerTAccount.username || '-',
             paymentDetails: paymentDetails,
-            paymentSendTimeoutS: (
-              parseInt(CONFIG.TRADE_ESCROW_TIMEOUT_S) / 60
-            ).toFixed(0),
+            paymentSendTimeout: paymentSendTimeoutS
+              ? (paymentSendTimeoutS / 60).toFixed(0)
+              : '-',
             cryptoAmount: dataFormatter.formatCryptoCurrency(
               trade.cryptoAmount,
               trade.cryptoCurrencyCode

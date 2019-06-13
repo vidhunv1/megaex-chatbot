@@ -12,6 +12,7 @@ import { DealsMessage } from 'chats/exchange/deals'
 import * as _ from 'lodash'
 import { AccountHomeMessage } from 'chats/account/home'
 import { claimCode } from 'chats/wallet/sendCoin'
+import { CONFIG } from '../../config'
 
 export const CommonChat: ChatHandler = {
   async handleCommand(
@@ -120,18 +121,43 @@ export const CommonChat: ChatHandler = {
 
   async handleCallback(
     msg: TelegramBot.Message,
-    _user: User,
-    _tUser: TelegramAccount,
+    user: User,
+    tUser: TelegramAccount,
     callback: TelegramBot.CallbackQuery
   ) {
     if (callback.data && msg) {
       const { type } = parseCallbackQuery(callback.data)
-
       const callbackName = type as any
       if (callbackName === CommonStateKey.cb_deleteThisMessage) {
         await telegramHook.getWebhook.deleteMessage(
           msg.chat.id,
           msg.message_id + ''
+        )
+        return true
+      } else if (callbackName === CommonStateKey.cb_contactLegal) {
+        const legalUsername = CONFIG.LEGAL_USERNAME
+        await telegramHook.getWebhook.sendMessage(
+          tUser.id,
+          user.t('contact-legal', {
+            legalUsername: legalUsername
+          }),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(user)
+          }
+        )
+        return true
+      } else if (callbackName === CommonStateKey.cb_contactSupport) {
+        const supportUsername = CONFIG.SUPPORT_USERNAME
+        await telegramHook.getWebhook.sendMessage(
+          tUser.id,
+          user.t('contact-support', {
+            supportUsername: supportUsername
+          }),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(user)
+          }
         )
         return true
       }
