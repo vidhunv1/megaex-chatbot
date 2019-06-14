@@ -19,6 +19,7 @@ import { CONFIG } from '../config'
 import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import logger from 'modules/logger'
+import Dispute, { DisputeStatus } from './Dispute'
 
 export enum TradeStatus {
   INITIATED = 'INITIATED',
@@ -131,6 +132,39 @@ export class Trade extends Model<Trade> {
   paymentMethodId!: number | null
 
   public static TradeStatus = TradeStatus
+
+  static async openDispute(
+    tradeId: number,
+    userId: number
+  ): Promise<Trade | null> {
+    const trade = await Trade.findById(tradeId)
+    if (trade) {
+      if (userId !== trade.buyerUserId && userId !== trade.sellerUserId) {
+        logger.error('This user cannot open a dispute')
+        return null
+      }
+      if (
+        trade.status === TradeStatus.PAYMENT_SENT ||
+        trade.status === TradeStatus.ACCEPTED
+      ) {
+        await Dispute.create<Dispute>({
+          openedByUserId: userId,
+          tradeId: tradeId,
+          status: DisputeStatus.PENDING
+        })
+        const tt = await trade.update({
+          status: TradeStatus.PAYMENT_DISPUTE
+        })
+
+        return tt
+      } else {
+        logger.error('Dispute cannot be opened in this trade state')
+        return null
+      }
+    } else {
+      return null
+    }
+  }
 
   static getActiveStatuses(): TradeStatus[] {
     return Object.keys(TradeStatus).filter(

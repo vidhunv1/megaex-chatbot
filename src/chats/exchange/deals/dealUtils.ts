@@ -1,4 +1,4 @@
-import { Order, Trade } from 'models'
+import { Order, Trade, TradeStatus } from 'models'
 import { Namespace } from 'modules/i18n'
 import { User } from 'models'
 import { TelegramAccount } from 'models'
@@ -190,10 +190,48 @@ export const dealUtils = {
           'sendTradeMesage: paymentReceived could not find send seller message in payment sent'
         )
       }
-
       return trade
     }
-
     return null
+  },
+  startDispute: async function(
+    tradeId: number,
+    userId: number
+  ): Promise<Trade | null> {
+    const trade = await Trade.openDispute(tradeId, userId)
+    if (trade) {
+      logger.info('DISPUTE OPENED')
+
+      if (userId === trade.buyerUserId) {
+        const u = await User.findById(trade.sellerUserId, {
+          include: [
+            {
+              model: TelegramAccount
+            }
+          ]
+        })
+        if (u) {
+          await sendTradeMessage[trade.status](trade, u, u.telegramUser)
+        }
+      } else {
+        const u = await User.findById(trade.buyerUserId, {
+          include: [
+            {
+              model: TelegramAccount
+            }
+          ]
+        })
+        if (u) {
+          await sendTradeMessage[trade.status](trade, u, u.telegramUser)
+        }
+      }
+      return trade
+    } else {
+      const trade = await Trade.findById(tradeId)
+      if (!trade || trade.status != TradeStatus.PAYMENT_DISPUTE) {
+        return null
+      }
+      return trade
+    }
   }
 }

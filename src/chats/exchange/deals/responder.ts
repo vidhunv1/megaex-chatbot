@@ -484,8 +484,30 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     [DealsStateKey.cb_confirmPaymentSent]: async () => {
       return false
     },
-    [DealsStateKey.cb_paymentDispute]: async () => {
+    [DealsStateKey.cb_startDispute]: async () => {
       return false
+    },
+    [DealsStateKey.startDispute]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_startDispute],
+        'tradeId',
+        null
+      )
+      const userId = _.get(state[DealsStateKey.cb_startDispute], 'userId', null)
+      if (tradeId === null || userId === null) {
+        return false
+      }
+
+      const trade = await Trade.findById(tradeId)
+      const u = await User.findById(userId, {
+        include: [{ model: TelegramAccount }]
+      })
+      if (!trade || !u) {
+        return false
+      }
+
+      await sendTradeMessage[trade.status](trade, u, u.telegramUser)
+      return true
     },
 
     [DealsStateKey.cb_paymentReceived]: async () => {

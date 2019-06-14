@@ -39,7 +39,7 @@ export default class Jobs {
 
   private getSyncTickersJob() {
     return new CronJob({
-      cronTime: '*/30 * * * *',
+      cronTime: '*/5 * * * *',
       onTick: async function() {
         await Market.syncTickerData()
       },

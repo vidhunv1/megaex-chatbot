@@ -12,7 +12,8 @@ import {
   UserInfo,
   Withdrawal,
   Market,
-  Trade
+  Trade,
+  Dispute
 } from 'models'
 import { CONFIG } from '../config'
 
@@ -47,6 +48,7 @@ export class DB {
         Withdrawal,
         Market,
         Trade,
+        Dispute,
 
         User,
         TelegramAccount,

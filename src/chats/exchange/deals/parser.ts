@@ -594,7 +594,25 @@ export const DealsParser: Parser<ExchangeState> = async (
       return null
     },
 
-    [DealsStateKey.cb_paymentDispute]: async () => {
+    [DealsStateKey.cb_startDispute]: async () => {
+      const tradeId = _.get(
+        state[DealsStateKey.cb_startDispute],
+        'tradeId',
+        null
+      )
+      const userId = _.get(state[DealsStateKey.cb_startDispute], 'userId', null)
+      if (!tradeId || !userId) {
+        return null
+      }
+
+      const trade = await dealUtils.startDispute(tradeId, userId)
+      if (trade) {
+        return state
+      }
+
+      return null
+    },
+    [DealsStateKey.startDispute]: async () => {
       return null
     }
   }
@@ -758,6 +776,9 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
       }
       return DealsStateKey.confirmPaymentReceived
     }
+
+    case DealsStateKey.cb_startDispute:
+      return DealsStateKey.startDispute
     default:
       return null
   }

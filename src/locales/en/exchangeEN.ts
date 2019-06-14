@@ -18,6 +18,15 @@ export const exchangeEN = {
 
   deals: {
     trade: {
+      'open-dispute-cbbutton': '👩‍🎓 Trade support',
+      'dispute-initiator': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
+
+An issue has been raised on this trade, any transaction on this trade is temporarily blocked. Please contact @{{ legalUsername }} to resolve this.`,
+      'dispute-received': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
+
+The user has raised an issue on this trade. 
+
+Please contact @{{ legalUsername }} to resolve this.`,
       'confirm-payment-received': `*Confirm*
 
 Are you sure you have received *{{ fiatAmount }}* from the buyer?`,
@@ -48,14 +57,14 @@ Are you sure you have sent *{{ fiatAmount }}* to the sellers *{{ paymentMethodTy
 
 Seller has been notified. Please wait for the the seller to confirm your payment.
 
-❕If there is no confirmation you should open a dispute.`,
+❕If there is no confirmation you can contact *Trade support*.`,
       'payment-sent-seller': `*🛎 Payment confirmed* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
 The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. Please confirm when you receive this transaction.
 
-❕If you have not received this transaction in some time you should open a dispute.`,
+❕If you have not received this transaction in some time you can contact *Trade support*.`,
       'escrow-warn-seller': `*Info*
 
 The seller is yet to make payment for the trade ${
@@ -84,7 +93,6 @@ Your *{{ cryptoAmount }}* has been returned back to you. For issues related to t
 You did not make any payment to the seller for the trade ${
         BotCommand.TRADE
       }{{ tradeId }}. For issues related to this trade please contact our *support*.`,
-      'open-dispute-cbbutton': '👩‍🎓 Open Dispute',
       'cancel-trade-confirm': `Are you sure you want to cancel the trade ${
         BotCommand.TRADE
       }{{ tradeId }} on *{{ fiatAmount }}*?
@@ -127,7 +135,6 @@ Telegram: {{ telegramUsername }}
 
 🔒 _This trade is secured. Payment valid only for_ *{{ paymentSendTimeout }} mins*.`,
       'payment-received-cbbutton': '💵  Payment Received',
-      'dispute-payment-cbbutton': 'Open dispute',
       'payment-sent-cbbutton': '💸  I have paid',
       'trade-accepted-fail': 'There was an error in opening this trade.',
 

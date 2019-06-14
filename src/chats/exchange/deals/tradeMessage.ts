@@ -1,5 +1,12 @@
 import { CONFIG } from '../../../config'
-import { Trade, User, TelegramAccount, OrderType, PaymentMethod } from 'models'
+import {
+  Trade,
+  User,
+  TelegramAccount,
+  OrderType,
+  PaymentMethod,
+  Dispute
+} from 'models'
 import { TradeStatus } from 'models/Trade'
 import { telegramHook } from 'modules'
 import { Namespace } from 'modules/i18n'
@@ -8,7 +15,6 @@ import { stringifyCallbackQuery } from 'chats/utils'
 import { DealsStateKey, DealsState } from './types'
 import { dataFormatter } from 'utils/dataFormatter'
 import logger from 'modules/logger'
-import { CommonStateKey, CommonState } from 'chats/common/types'
 import { linkCreator } from 'utils/linkCreator'
 
 export const sendTradeMessage: Record<
@@ -363,11 +369,44 @@ export const sendTradeMessage: Record<
     return true
   },
   [TradeStatus.PAYMENT_DISPUTE]: async function(
-    _trade: Trade,
-    _contextUser: User,
-    _contextTUser: TelegramAccount
+    trade: Trade,
+    contextUser: User,
+    contextTUser: TelegramAccount
   ) {
-    return false
+    const dispute = await Dispute.findOne({
+      where: {
+        tradeId: trade.id
+      }
+    })
+
+    if (!dispute) {
+      logger.error('There is no dispute here: tradeMessages paymentDispute')
+      return false
+    }
+    if (contextUser.id === dispute.openedByUserId) {
+      await telegramHook.getWebhook.sendMessage(
+        contextTUser.id,
+        contextUser.t(`${Namespace.Exchange}:deals.trade.dispute-initiator`, {
+          tradeId: trade.id,
+          legalUsername: CONFIG.LEGAL_USERNAME
+        }),
+        {
+          parse_mode: 'Markdown'
+        }
+      )
+    } else {
+      await telegramHook.getWebhook.sendMessage(
+        contextTUser.id,
+        contextUser.t(`${Namespace.Exchange}:deals.trade.dispute-received`, {
+          tradeId: trade.id,
+          legalUsername: CONFIG.LEGAL_USERNAME
+        }),
+        {
+          parse_mode: 'Markdown'
+        }
+      )
+    }
+    return true
   },
   [TradeStatus.PAYMENT_RELEASED]: async function(
     trade: Trade,
@@ -435,9 +474,9 @@ export const sendTradeMessage: Record<
                     `${Namespace.Exchange}:deals.trade.open-dispute-cbbutton`
                   ),
                   callback_data: stringifyCallbackQuery<
-                    CommonStateKey.cb_contactLegal,
-                    CommonState[CommonStateKey.cb_contactLegal]
-                  >(CommonStateKey.cb_contactLegal, {
+                    DealsStateKey.cb_startDispute,
+                    DealsState[DealsStateKey.cb_startDispute]
+                  >(DealsStateKey.cb_startDispute, {
                     tradeId: trade.id,
                     userId: contextUser.id
                   })
@@ -483,9 +522,9 @@ export const sendTradeMessage: Record<
                     `${Namespace.Exchange}:deals.trade.open-dispute-cbbutton`
                   ),
                   callback_data: stringifyCallbackQuery<
-                    CommonStateKey.cb_contactLegal,
-                    CommonState[CommonStateKey.cb_contactLegal]
-                  >(CommonStateKey.cb_contactLegal, {
+                    DealsStateKey.cb_startDispute,
+                    DealsState[DealsStateKey.cb_startDispute]
+                  >(DealsStateKey.cb_startDispute, {
                     tradeId: trade.id,
                     userId: contextUser.id
                   })
@@ -515,11 +554,13 @@ export const sendTradeMessage: Record<
             inline_keyboard: [
               [
                 {
-                  text: contextUser.t('contact-legal-cbbutton'),
+                  text: contextUser.t(
+                    `${Namespace.Exchange}:deals.trade.open-dispute-cbbutton`
+                  ),
                   callback_data: stringifyCallbackQuery<
-                    CommonStateKey.cb_contactLegal,
-                    CommonState[CommonStateKey.cb_contactLegal]
-                  >(CommonStateKey.cb_contactLegal, {
+                    DealsStateKey.cb_startDispute,
+                    DealsState[DealsStateKey.cb_startDispute]
+                  >(DealsStateKey.cb_startDispute, {
                     tradeId: trade.id,
                     userId: contextUser.id
                   })
@@ -548,11 +589,13 @@ export const sendTradeMessage: Record<
             inline_keyboard: [
               [
                 {
-                  text: contextUser.t('contact-legal-cbbutton'),
+                  text: contextUser.t(
+                    `${Namespace.Exchange}:deals.trade.open-dispute-cbbutton`
+                  ),
                   callback_data: stringifyCallbackQuery<
-                    CommonStateKey.cb_contactLegal,
-                    CommonState[CommonStateKey.cb_contactLegal]
-                  >(CommonStateKey.cb_contactLegal, {
+                    DealsStateKey.cb_startDispute,
+                    DealsState[DealsStateKey.cb_startDispute]
+                  >(DealsStateKey.cb_startDispute, {
                     tradeId: trade.id,
                     userId: contextUser.id
                   })
