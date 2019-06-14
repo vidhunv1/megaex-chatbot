@@ -1,5 +1,6 @@
 import { DealsError } from 'chats/exchange/deals'
 import { BotCommand } from 'chats/types'
+import { TradeRating } from 'models/Trade'
 
 export const exchangeEN = {
   home: {
@@ -36,18 +37,31 @@ Are you sure you have received *{{ fiatAmount }}* from the buyer?`,
         BotCommand.TRADE
       }{{ tradeId }}
 
-Your wallet is credited with *{{ cryptoAmount }}* from this trade.
-
-🎉 _Invite your friends and family here so they can also have the best experience to buy/sell bitcoins (Use your referral link so you can earn from their trades)._
-{{ referralLink }}`,
+Your wallet is credited with *{{ cryptoAmount }}* from this trade.`,
       'payment-released-seller': `🚀 *Trade success* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-*{{ cryptoAmount }}* was sent to the buyer.
+*{{ cryptoAmount }}* was sent to the buyer.`,
+      'give-rating': `🏅 *Rate this trade*
 
+Give your rating for this trade.`,
+      'give-review': `🗣 *Trade review*
+
+Write your short review for this trade`,
+      'end-review': `*Added your review!*
+      
 🎉 _Invite your friends and family here so they can also have the best experience to buy/sell bitcoins (Use your referral link so you can earn from their trades)._
+
 {{ referralLink }}`,
+      'skip-review': 'Skip ➡️',
+      rating: {
+        [TradeRating.VERY_NEGATIVE]: '👎',
+        [TradeRating.NEGATIVE]: '2 ⭐',
+        [TradeRating.POSITIVE]: '3 ⭐',
+        [TradeRating.VERY_POSITIVE]: '4 ⭐',
+        [TradeRating.EXCELLENT]: '5 🌟'
+      },
       'confirm-payment-sent': `*Confirm*
 
 Are you sure you have sent *{{ fiatAmount }}* to the sellers *{{ paymentMethodType }}*?`,

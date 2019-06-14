@@ -1,4 +1,4 @@
-import { OrderType, TradeErrorTypes } from 'models'
+import { OrderType, TradeErrorTypes, TradeRating } from 'models'
 import { FiatCurrency } from 'constants/currencies'
 
 export enum DealsStateKey {
@@ -38,7 +38,10 @@ export enum DealsStateKey {
   cb_confirmPaymentReceived = 'cb_confirmPaymentReceived',
   confirmPaymentReceived = 'confirmPaymentReceived',
   cb_startDispute = 'cb_startDispute',
-  startDispute = 'startDispute'
+  startDispute = 'startDispute',
+  cb_giveRating = 'cb_giveRating',
+  getReview = 'getReview',
+  endReview = 'endReview'
 }
 
 export enum DealsError {
@@ -149,4 +152,14 @@ export interface DealsState {
     } | null
     error?: TradeErrorTypes | DealsError | null
   }
+  [DealsStateKey.cb_giveRating]?: {
+    rating: TradeRating
+    userId: number
+    tradeId: number
+  }
+  [DealsStateKey.getReview]?: {
+    userId: number
+    tradeId: number
+  }
+  [DealsStateKey.endReview]?: {}
 }

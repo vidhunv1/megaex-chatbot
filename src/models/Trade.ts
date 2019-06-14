@@ -35,6 +35,14 @@ export enum TradeStatus {
   ESCROW_CLOSED = 'ESCROW_CLOSED'
 }
 
+export enum TradeRating {
+  VERY_NEGATIVE = 1,
+  NEGATIVE = 2,
+  POSITIVE = 3,
+  VERY_POSITIVE = 4,
+  EXCELLENT = 5
+}
+
 export const activeTradeStatus: Record<TradeStatus, boolean> = {
   [TradeStatus.INITIATED]: true,
   [TradeStatus.ACCEPTED]: true,
@@ -131,7 +139,77 @@ export class Trade extends Model<Trade> {
   @Column(DataType.BIGINT)
   paymentMethodId!: number | null
 
+  @AllowNull(true)
+  @Column(DataType.INTEGER)
+  ratingByBuyer!: TradeRating
+
+  @AllowNull(true)
+  @Column(DataType.INTEGER)
+  ratingBySeller!: TradeRating
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  reviewByBuyer!: string
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  reviewBySeller!: string
+
   public static TradeStatus = TradeStatus
+
+  static async giveRating(
+    tradeId: number,
+    fromUserId: number,
+    rating: TradeRating
+  ): Promise<Trade | null> {
+    const trade = await Trade.findById(tradeId)
+    if (!trade || (trade && trade.status != TradeStatus.PAYMENT_RELEASED)) {
+      return null
+    }
+
+    const updates: Partial<Trade> = {}
+    if (fromUserId === trade.sellerUserId) {
+      if (trade.ratingBySeller != null) {
+        return null
+      }
+
+      updates.ratingBySeller = rating
+    } else {
+      if (trade.ratingByBuyer != null) {
+        return null
+      }
+
+      updates.ratingByBuyer = rating
+    }
+
+    return trade.update(updates)
+  }
+
+  static async giveReview(
+    tradeId: number,
+    fromUserId: number,
+    review: string
+  ): Promise<Trade | null> {
+    const trade = await Trade.findById(tradeId)
+    if (!trade || (trade && trade.status != TradeStatus.PAYMENT_RELEASED)) {
+      return null
+    }
+
+    const updates: Partial<Trade> = {}
+    if (fromUserId === trade.sellerUserId) {
+      updates.reviewBySeller = review
+      if (trade.reviewBySeller != null) {
+        return null
+      }
+    } else {
+      updates.reviewByBuyer = review
+      if (trade.reviewByBuyer != null) {
+        return null
+      }
+    }
+
+    return await trade.update(updates)
+  }
 
   static async openDispute(
     tradeId: number,

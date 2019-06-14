@@ -1,4 +1,4 @@
-import { Order, Trade, TradeStatus } from 'models'
+import { Order, Trade, TradeStatus, TradeRating } from 'models'
 import { Namespace } from 'modules/i18n'
 import { User } from 'models'
 import { TelegramAccount } from 'models'
@@ -233,5 +233,19 @@ export const dealUtils = {
       }
       return trade
     }
+  },
+  giveRating: async function(
+    tradeId: number,
+    userId: number,
+    rating: TradeRating
+  ): Promise<Trade | null> {
+    return await Trade.giveRating(tradeId, userId, rating)
+  },
+  giveReview: async function(
+    tradeId: number,
+    userId: number,
+    review: string
+  ): Promise<Trade | null> {
+    return await Trade.giveReview(tradeId, userId, review)
   }
 }

@@ -10,6 +10,7 @@ import { parseCurrencyAmount } from 'chats/utils/currency-utils'
 import { Order, TradeError, Trade } from 'models'
 import { dealUtils } from './dealUtils'
 import logger from 'modules/logger'
+import { Namespace } from 'modules/i18n'
 
 export const DealsParser: Parser<ExchangeState> = async (
   msg,
@@ -614,6 +615,36 @@ export const DealsParser: Parser<ExchangeState> = async (
     },
     [DealsStateKey.startDispute]: async () => {
       return null
+    },
+    [DealsStateKey.cb_giveRating]: async () => {
+      const rating = _.get(state[DealsStateKey.cb_giveRating], 'rating', null)
+      const userId = _.get(state[DealsStateKey.cb_giveRating], 'userId', null)
+      const tradeId = _.get(state[DealsStateKey.cb_giveRating], 'tradeId', null)
+      if (rating === null || userId === null || tradeId === null) {
+        return null
+      }
+      const trade = await dealUtils.giveRating(tradeId, userId, rating)
+      if (trade) {
+        return state
+      }
+
+      return null
+    },
+    [DealsStateKey.getReview]: async () => {
+      const userId = _.get(state[DealsStateKey.cb_giveRating], 'userId', null)
+      const tradeId = _.get(state[DealsStateKey.cb_giveRating], 'tradeId', null)
+      if (
+        msg.text != user.t(`${Namespace.Exchange}:deals.trade.skip-review`) &&
+        userId != null &&
+        tradeId != null &&
+        msg.text
+      ) {
+        await dealUtils.giveReview(tradeId, userId, msg.text)
+      }
+      return state
+    },
+    [DealsStateKey.endReview]: async () => {
+      return null
     }
   }
 
@@ -779,6 +810,11 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
 
     case DealsStateKey.cb_startDispute:
       return DealsStateKey.startDispute
+
+    case DealsStateKey.cb_giveRating:
+      return DealsStateKey.getReview
+    case DealsStateKey.getReview:
+      return DealsStateKey.endReview
     default:
       return null
   }

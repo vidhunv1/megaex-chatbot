@@ -14,6 +14,7 @@ import { LanguageISO } from 'constants/languages'
 import { CommonStateKey, CommonState } from 'chats/common/types'
 import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 import { keyboardMainMenu } from 'chats/common'
+import { linkCreator } from 'utils/linkCreator'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
   async cancelTradeConfirm(
@@ -134,6 +135,36 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
             ]
           ]
         }
+      }
+    )
+  },
+
+  async getReview() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade.give-review`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: [
+            [{ text: user.t(`${Namespace.Exchange}:deals.trade.skip-review`) }]
+          ],
+          one_time_keyboard: false,
+          resize_keyboard: true
+        }
+      }
+    )
+  },
+
+  async endReview() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.trade.end-review`, {
+        referralLink: linkCreator.getReferralLink(user.accountId)
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboardMainMenu(user)
       }
     )
   },

@@ -592,6 +592,17 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         }
       }
       return false
+    },
+    [DealsStateKey.cb_giveRating]: async () => {
+      return false
+    },
+    [DealsStateKey.getReview]: async () => {
+      await DealsMessage(msg, user).getReview()
+      return true
+    },
+    [DealsStateKey.endReview]: async () => {
+      await DealsMessage(msg, user).endReview()
+      return true
     }
   }
 

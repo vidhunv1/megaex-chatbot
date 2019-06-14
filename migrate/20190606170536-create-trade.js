@@ -74,6 +74,22 @@ module.exports = {
         type: Sequelize.INTEGER,
         references: { model: 'PaymentMethods', key: 'id' }
       },
+      ratingByBuyer: {
+        allowNull: true,
+        type: Sequelize.INTEGER,
+      },
+      ratingBySeller: {
+        allowNull: true,
+        type: Sequelize.INTEGER,
+      },
+      reviewByBuyer: {
+        allowNull: true,
+        type: Sequelize.STRING
+      },
+      reviewBySeller: {
+        allowNull: true,
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

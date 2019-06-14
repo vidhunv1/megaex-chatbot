@@ -7,7 +7,7 @@ import {
   PaymentMethod,
   Dispute
 } from 'models'
-import { TradeStatus } from 'models/Trade'
+import { TradeStatus, TradeRating } from 'models/Trade'
 import { telegramHook } from 'modules'
 import { Namespace } from 'modules/i18n'
 import { keyboardMainMenu } from 'chats/common'
@@ -15,7 +15,7 @@ import { stringifyCallbackQuery } from 'chats/utils'
 import { DealsStateKey, DealsState } from './types'
 import { dataFormatter } from 'utils/dataFormatter'
 import logger from 'modules/logger'
-import { linkCreator } from 'utils/linkCreator'
+import { InlineKeyboardButton } from 'node-telegram-bot-api'
 
 export const sendTradeMessage: Record<
   TradeStatus,
@@ -413,6 +413,80 @@ export const sendTradeMessage: Record<
     contextUser: User,
     contextTUser: TelegramAccount
   ) {
+    const ratingInline: InlineKeyboardButton[][] = [
+      [
+        {
+          text: contextUser.t(
+            `${Namespace.Exchange}:deals.trade.rating.${
+              TradeRating.VERY_NEGATIVE
+            }`
+          ),
+          callback_data: stringifyCallbackQuery<
+            DealsStateKey.cb_giveRating,
+            DealsState[DealsStateKey.cb_giveRating]
+          >(DealsStateKey.cb_giveRating, {
+            rating: TradeRating.VERY_NEGATIVE,
+            tradeId: trade.id,
+            userId: contextUser.id
+          })
+        },
+        {
+          text: contextUser.t(
+            `${Namespace.Exchange}:deals.trade.rating.${TradeRating.NEGATIVE}`
+          ),
+          callback_data: stringifyCallbackQuery<
+            DealsStateKey.cb_giveRating,
+            DealsState[DealsStateKey.cb_giveRating]
+          >(DealsStateKey.cb_giveRating, {
+            rating: TradeRating.NEGATIVE,
+            tradeId: trade.id,
+            userId: contextUser.id
+          })
+        },
+        {
+          text: contextUser.t(
+            `${Namespace.Exchange}:deals.trade.rating.${TradeRating.POSITIVE}`
+          ),
+          callback_data: stringifyCallbackQuery<
+            DealsStateKey.cb_giveRating,
+            DealsState[DealsStateKey.cb_giveRating]
+          >(DealsStateKey.cb_giveRating, {
+            rating: TradeRating.POSITIVE,
+            tradeId: trade.id,
+            userId: contextUser.id
+          })
+        },
+        {
+          text: contextUser.t(
+            `${Namespace.Exchange}:deals.trade.rating.${
+              TradeRating.VERY_POSITIVE
+            }`
+          ),
+          callback_data: stringifyCallbackQuery<
+            DealsStateKey.cb_giveRating,
+            DealsState[DealsStateKey.cb_giveRating]
+          >(DealsStateKey.cb_giveRating, {
+            rating: TradeRating.VERY_POSITIVE,
+            tradeId: trade.id,
+            userId: contextUser.id
+          })
+        },
+        {
+          text: contextUser.t(
+            `${Namespace.Exchange}:deals.trade.rating.${TradeRating.EXCELLENT}`
+          ),
+          callback_data: stringifyCallbackQuery<
+            DealsStateKey.cb_giveRating,
+            DealsState[DealsStateKey.cb_giveRating]
+          >(DealsStateKey.cb_giveRating, {
+            rating: TradeRating.EXCELLENT,
+            tradeId: trade.id,
+            userId: contextUser.id
+          })
+        }
+      ]
+    ]
+
     if (contextUser.id === trade.buyerUserId) {
       await telegramHook.getWebhook.sendMessage(
         contextTUser.id,
@@ -424,14 +498,26 @@ export const sendTradeMessage: Record<
             cryptoAmount: dataFormatter.formatCryptoCurrency(
               trade.cryptoAmount,
               trade.cryptoCurrencyCode
-            ),
-            referralLink: linkCreator.getReferralLink(contextUser.accountId)
+            )
           }
         ),
         {
           parse_mode: 'Markdown'
         }
       )
+
+      if (trade.ratingByBuyer === null) {
+        await telegramHook.getWebhook.sendMessage(
+          contextTUser.id,
+          contextUser.t(`${Namespace.Exchange}:deals.trade.give-rating`),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: ratingInline
+            }
+          }
+        )
+      }
     } else {
       await telegramHook.getWebhook.sendMessage(
         contextTUser.id,
@@ -442,16 +528,28 @@ export const sendTradeMessage: Record<
             cryptoAmount: dataFormatter.formatCryptoCurrency(
               trade.cryptoAmount,
               trade.cryptoCurrencyCode
-            ),
-            referralLink: linkCreator.getReferralLink(contextUser.accountId)
+            )
           }
         ),
         {
           parse_mode: 'Markdown'
         }
       )
+
+      if (trade.ratingBySeller === null) {
+        await telegramHook.getWebhook.sendMessage(
+          contextTUser.id,
+          contextUser.t(`${Namespace.Exchange}:deals.trade.give-rating`),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: ratingInline
+            }
+          }
+        )
+      }
     }
-    return false
+    return true
   },
   [TradeStatus.PAYMENT_SENT]: async function(
     trade: Trade,
