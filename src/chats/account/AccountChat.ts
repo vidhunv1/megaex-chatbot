@@ -72,6 +72,8 @@ export const AccountChat: ChatHandler = {
             PaymentMethodStateKey.cb_paymentMethods,
             ReferralStateKey.cb_referralLink,
             PaymentMethodStateKey.cb_editPaymentMethods,
+            PaymentMethodStateKey.paymentMethodInput,
+            PaymentMethodStateKey.cb_addPaymentMethod,
             SettingsStateKey.cb_settings,
             SettingsStateKey.cb_settingsLanguage,
             SettingsStateKey.cb_settingsCurrency,
@@ -82,8 +84,7 @@ export const AccountChat: ChatHandler = {
           ].includes(callbackName)
         ) {
           state = {
-            ..._.clone(initialState),
-            ...state
+            ..._.clone(initialState)
           }
         } else {
           return false

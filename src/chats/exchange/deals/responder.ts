@@ -11,7 +11,8 @@ import {
   Transaction,
   Trade,
   TelegramAccount,
-  TradeStatus
+  TradeStatus,
+  PaymentMethod
 } from 'models'
 import { DealsConfig } from './config'
 import { logger } from 'modules'
@@ -603,6 +604,30 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
     [DealsStateKey.endReview]: async () => {
       await DealsMessage(msg, user).endReview()
       return true
+    },
+    [DealsStateKey.inputPaymentDetails]: async () => {
+      const orderId = _.get(state[DealsStateKey.cb_openDeal], 'orderId', null)
+      if (orderId == null) {
+        return false
+      }
+
+      const order = await Order.findById(orderId)
+      if (!order) {
+        return false
+      }
+
+      const paymentMethodType = order.paymentMethodType
+      const addedPms = (await PaymentMethod.getSavedPaymentMethods(
+        user.id
+      )).filter((pm) => pm.paymentMethod === paymentMethodType)
+      await DealsMessage(msg, user).inputPaymentDetails(
+        paymentMethodType,
+        addedPms
+      )
+      return true
+    },
+    [DealsStateKey.cb_selectPaymentDetail]: async () => {
+      return false
     }
   }
 

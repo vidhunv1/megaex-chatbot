@@ -55,7 +55,8 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
           PaymentMethodStateKey.cb_addPaymentMethod,
           PaymentMethodState[PaymentMethodStateKey.cb_addPaymentMethod]
         >(PaymentMethodStateKey.cb_addPaymentMethod, {
-          data: null
+          data: null,
+          pmSelected: null
         })
       }
     ])
@@ -120,7 +121,8 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
         parse_mode: 'Markdown',
         reply_markup: {
           keyboard,
-          one_time_keyboard: true
+          one_time_keyboard: true,
+          resize_keyboard: true
         }
       }
     )

@@ -10,6 +10,8 @@ export enum DealsStateKey {
   cb_prevDeals = 'cb_prevDeals',
 
   cb_openDeal = 'cb_openDeal',
+  inputPaymentDetails = 'inputPaymentDetails',
+  cb_selectPaymentDetail = 'cb_selectPaymentDetail',
 
   cb_requestDealDeposit = 'cb_requestDealDeposit',
   requestDealDeposit_show = 'requestDealDeposit_show',
@@ -75,6 +77,7 @@ export interface DealsState {
 
   [DealsStateKey.cb_openDeal]?: {
     orderId: number
+    orderType: OrderType
     error?: DealsError | TradeErrorTypes
   }
   [DealsStateKey.cb_requestDealDeposit]?: {
@@ -97,6 +100,9 @@ export interface DealsState {
       fixedRate: number
     } | null
   }
+  [DealsStateKey.cb_selectPaymentDetail]?: {
+    pmId: number | null
+  }
 
   [DealsStateKey.cb_confirmInputDealAmount]?: {
     isConfirmed: boolean
@@ -116,7 +122,8 @@ export interface DealsState {
   [DealsStateKey.cancelTradeConfirm]?: {
     data: {
       canceledTradeId: number | null
-    }
+    } | null
+    error: TradeErrorTypes | DealsError | null
   }
   [DealsStateKey.cb_respondToTradeInit]?: {
     confirmation: 'yes' | 'no'

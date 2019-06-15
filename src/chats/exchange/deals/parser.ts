@@ -7,7 +7,7 @@ import {
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
-import { Order, TradeError, Trade } from 'models'
+import { Order, TradeError, Trade, OrderType } from 'models'
 import { dealUtils } from './dealUtils'
 import logger from 'modules/logger'
 import { Namespace } from 'modules/i18n'
@@ -76,7 +76,12 @@ export const DealsParser: Parser<ExchangeState> = async (
 
     [DealsStateKey.cb_openDeal]: async () => {
       const orderId = _.get(state[DealsStateKey.cb_openDeal], 'orderId', null)
-      if (orderId === null) {
+      const orderType = _.get(
+        state[DealsStateKey.cb_openDeal],
+        'orderType',
+        null
+      )
+      if (orderId === null || orderType === null) {
         return null
       }
       const order = await dealUtils.getOrder(orderId)
@@ -87,7 +92,8 @@ export const DealsParser: Parser<ExchangeState> = async (
           ...state,
           [DealsStateKey.cb_openDeal]: {
             error: DealsError.SELF_OPEN_DEAL_REQUEST,
-            orderId
+            orderId,
+            orderType
           }
         }
       }
@@ -97,6 +103,7 @@ export const DealsParser: Parser<ExchangeState> = async (
         [DealsStateKey.inputDealAmount]: {
           data: null,
           orderId,
+          orderType,
           jumpState: DealsStateKey.cb_openDeal
         }
       }
@@ -208,6 +215,7 @@ export const DealsParser: Parser<ExchangeState> = async (
     [DealsStateKey.confirmInputDealAmount]: async () => {
       return null
     },
+
     [DealsStateKey.cb_confirmInputDealAmount]: async () => {
       const isConfirmed: boolean = JSON.parse(
         _.get(
@@ -265,16 +273,38 @@ export const DealsParser: Parser<ExchangeState> = async (
               )
 
               if (!tradeInfo) {
+                const orderType = _.get(
+                  state[DealsStateKey.cb_openDeal],
+                  'orderType',
+                  null
+                )
+                if (orderType === null) return null
                 return {
                   ...state,
                   [DealsStateKey.cb_openDeal]: {
                     orderId,
+                    orderType,
                     error: DealsError.DEFAULT
                   }
                 }
               }
-
               if (tradeInfo.id) {
+                const orderType = _.get(
+                  state[DealsStateKey.cb_openDeal],
+                  'orderType',
+                  null
+                )
+                const pmId = _.get(
+                  state[DealsStateKey.cb_selectPaymentDetail],
+                  'pmId',
+                  null
+                )
+                // @ts-ignore
+                if (pmId && pmId != 'null' && orderType === OrderType.BUY) {
+                  await tradeInfo.update({
+                    paymentMethodId: pmId
+                  })
+                }
                 return {
                   ...state,
                   [DealsStateKey.showDealInitOpened]: {
@@ -452,12 +482,23 @@ export const DealsParser: Parser<ExchangeState> = async (
           return null
         }
 
-        const canceledTrade = await dealUtils.cancelTrade(tradeId)
-        return {
-          ...state,
-          [DealsStateKey.cancelTradeConfirm]: {
-            data: {
-              canceledTradeId: canceledTrade ? canceledTrade.id : null
+        try {
+          const canceledTrade = await dealUtils.cancelTrade(tradeId, user.id)
+          return {
+            ...state,
+            [DealsStateKey.cancelTradeConfirm]: {
+              data: {
+                canceledTradeId: canceledTrade ? canceledTrade.id : null
+              },
+              error: null
+            }
+          }
+        } catch (e) {
+          return {
+            ...state,
+            [DealsStateKey.cancelTradeConfirm]: {
+              data: null,
+              error: e instanceof TradeError ? e.status : DealsError.DEFAULT
             }
           }
         }
@@ -645,6 +686,12 @@ export const DealsParser: Parser<ExchangeState> = async (
     },
     [DealsStateKey.endReview]: async () => {
       return null
+    },
+    [DealsStateKey.inputPaymentDetails]: async () => {
+      return null
+    },
+    [DealsStateKey.cb_selectPaymentDetail]: async () => {
+      return state
     }
   }
 
@@ -695,9 +742,20 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
       if (dealError) {
         return DealsStateKey.dealError
       }
+      const orderType = _.get(
+        state[DealsStateKey.cb_openDeal],
+        'orderType',
+        null
+      )
+      if (orderType && orderType === OrderType.BUY) {
+        return DealsStateKey.inputPaymentDetails
+      }
 
       return DealsStateKey.inputDealAmount
     }
+
+    case DealsStateKey.cb_selectPaymentDetail:
+      return DealsStateKey.inputDealAmount
 
     case DealsStateKey.inputDealAmount: {
       const amountData = _.get(
@@ -767,8 +825,18 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
 
     case DealsStateKey.cb_cancelTrade:
       return DealsStateKey.cancelTradeGetConfirm
-    case DealsStateKey.cb_cancelTradeConfirm:
+    case DealsStateKey.cb_cancelTradeConfirm: {
+      const dealError = _.get(
+        state[DealsStateKey.cancelTradeConfirm],
+        'error',
+        null
+      )
+      if (dealError) {
+        return DealsStateKey.dealError
+      }
+
       return DealsStateKey.cancelTradeConfirm
+    }
     case DealsStateKey.cb_respondToTradeInit:
       const dealError = _.get(
         state[DealsStateKey.cb_respondToTradeInit],

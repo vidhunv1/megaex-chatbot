@@ -315,7 +315,7 @@ export const sendTradeMessage: Record<
     contextUser: User,
     contextTUser: TelegramAccount
   ) {
-    if (trade && contextUser.id === trade.getOpUserId()) {
+    if (trade && contextUser.id === trade.sellerUserId) {
       await telegramHook.getWebhook.sendMessage(
         contextTUser.id,
         contextUser.t(`${Namespace.Exchange}:deals.trade.cancel-trade-notify`, {

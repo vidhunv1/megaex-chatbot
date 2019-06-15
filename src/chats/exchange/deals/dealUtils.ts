@@ -103,10 +103,13 @@ export const dealUtils = {
     return await Order.getOrder(orderId)
   },
 
-  cancelTrade: async function(tradeId: number): Promise<Trade | null> {
-    const trade = await Trade.setCanceled(tradeId)
+  cancelTrade: async function(
+    tradeId: number,
+    userId: number
+  ): Promise<Trade | null> {
+    const trade = await Trade.setCanceled(tradeId, userId)
     if (trade) {
-      const opUser = await User.findById(trade.getOpUserId(), {
+      const opUser = await User.findById(trade.sellerUserId, {
         include: [{ model: TelegramAccount }]
       })
 

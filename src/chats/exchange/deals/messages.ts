@@ -1,6 +1,12 @@
 import { telegramHook } from 'modules'
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, OrderType, TradeError, TradeErrorTypes } from 'models'
+import {
+  User,
+  OrderType,
+  TradeError,
+  TradeErrorTypes,
+  PaymentMethodFields
+} from 'models'
 import { Namespace } from 'modules/i18n'
 import { PaymentMethodType } from 'models'
 import * as _ from 'lodash'
@@ -15,8 +21,68 @@ import { CommonStateKey, CommonState } from 'chats/common/types'
 import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 import { keyboardMainMenu } from 'chats/common'
 import { linkCreator } from 'utils/linkCreator'
+import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
+import {
+  PaymentMethodState,
+  PaymentMethodStateKey
+} from 'chats/account/paymentMethods'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
+  async inputPaymentDetails(
+    paymentMethodType: PaymentMethodType,
+    pms: PaymentMethodFields[]
+  ) {
+    const inline: TelegramBot.InlineKeyboardButton[][] = pms.map((pm) => [
+      {
+        text:
+          user.t(`payment-methods.names.${pm.paymentMethod}`) +
+          `- ${pm.fields[PaymentMethodPrimaryFieldIndex[pm.paymentMethod]]}`,
+        callback_data: stringifyCallbackQuery<
+          DealsStateKey.cb_selectPaymentDetail,
+          DealsState[DealsStateKey.cb_selectPaymentDetail]
+        >(DealsStateKey.cb_selectPaymentDetail, {
+          pmId: pm.id
+        })
+      }
+    ])
+    inline.push([
+      {
+        text: user.t(`${Namespace.Exchange}:deals.skip-input-payment-details`),
+        callback_data: stringifyCallbackQuery<
+          DealsStateKey.cb_selectPaymentDetail,
+          DealsState[DealsStateKey.cb_selectPaymentDetail]
+        >(DealsStateKey.cb_selectPaymentDetail, {
+          pmId: null
+        })
+      },
+      {
+        text: user.t(`${Namespace.Exchange}:deals.add-payment-details`, {
+          paymentMethodName: user.t(
+            `payment-methods.names.${paymentMethodType}`
+          )
+        }),
+        callback_data: stringifyCallbackQuery<
+          PaymentMethodStateKey.cb_addPaymentMethod,
+          PaymentMethodState[PaymentMethodStateKey.cb_addPaymentMethod]
+        >(PaymentMethodStateKey.cb_addPaymentMethod, {
+          data: null,
+          pmSelected: paymentMethodType
+        })
+      }
+    ])
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Exchange}:deals.input-payment-details`, {
+        paymentMethodType: paymentMethodType
+      }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: inline
+        }
+      }
+    )
+  },
   async cancelTradeConfirm(
     tradeId: number,
     fiatAmount: number,
@@ -232,6 +298,13 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
       case DealsError.ORDER_NOT_FOUND:
         transKey = user.t(
           `${Namespace.Exchange}:deals.errors.${DealsError.ORDER_NOT_FOUND}`
+        )
+        break
+      case TradeError.INSUFFICIENT_BALANCE:
+        transKey = user.t(
+          `${Namespace.Exchange}:deals.trade.errors.${
+            TradeError.INSUFFICIENT_BALANCE
+          }`
         )
         break
       case TradeErrorTypes.TRADE_EXISTS_ON_ORDER:
@@ -575,7 +648,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
           DealsStateKey.cb_openDeal,
           DealsState[DealsStateKey.cb_openDeal]
         >(DealsStateKey.cb_openDeal, {
-          orderId
+          orderId,
+          orderType: orderType
         })
       }
 
@@ -649,7 +723,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
             DealsStateKey.cb_openDeal,
             DealsState[DealsStateKey.cb_openDeal]
           >(DealsStateKey.cb_openDeal, {
-            orderId
+            orderId,
+            orderType: orderType
           })
         }
       }

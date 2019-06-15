@@ -282,6 +282,16 @@ export class Trade extends Model<Trade> {
       )
     }
 
+    if (order.orderType === OrderType.BUY) {
+      const availableBalance = await Transaction.getAvailableBalance(
+        createdByUserId,
+        order.cryptoCurrencyCode
+      )
+      if (availableBalance < cryptoAmount) {
+        throw new TradeError(TradeError.INSUFFICIENT_BALANCE)
+      }
+    }
+
     let sellerUserId, buyerUserId
     if (order.orderType === OrderType.SELL) {
       sellerUserId = order.userId
@@ -426,7 +436,10 @@ export class Trade extends Model<Trade> {
     return null
   }
 
-  static async setCanceled(tradeId: number): Promise<Trade | null> {
+  static async setCanceled(
+    tradeId: number,
+    userId: number
+  ): Promise<Trade | null> {
     const trade = await Trade.findOne({
       where: {
         status: [TradeStatus.INITIATED, TradeStatus.ACCEPTED],
@@ -435,6 +448,13 @@ export class Trade extends Model<Trade> {
     })
 
     if (trade) {
+      if (trade.status === TradeStatus.ACCEPTED) {
+        // Seller cannot cancel an accepted trade
+        if (userId === trade.sellerUserId) {
+          throw new TradeError()
+        }
+      }
+
       if (trade.status === TradeStatus.ACCEPTED) {
         await Transaction.unblockTx(trade.blockedTransactionId)
       }
@@ -575,6 +595,7 @@ export class TradeError extends Error {
   public static TRADE_EXISTS_ON_ORDER = 409
   public static NOT_FOUND = 404
   public static TRADE_EXPIRED = 400
+  public static INSUFFICIENT_BALANCE = 401
 
   constructor(
     status: TradeErrorTypes = 500,

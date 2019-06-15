@@ -1,6 +1,6 @@
 import { DealsError } from 'chats/exchange/deals'
 import { BotCommand } from 'chats/types'
-import { TradeRating } from 'models/Trade'
+import { TradeRating, TradeError } from 'models/Trade'
 
 export const exchangeEN = {
   home: {
@@ -142,8 +142,8 @@ Make a payment of {{ fiatPayAmount }} through {{ paymentMethodName }}, you will 
 
 *{{ paymentMethodName }}*
 Amount: *{{ fiatPayAmount }}*
-{{ paymentDetails }}
 Payment reference: *T{{ tradeId }}*
+{{ paymentDetails }}
 
 Telegram: {{ telegramUsername }}
 
@@ -153,9 +153,12 @@ Telegram: {{ telegramUsername }}
       'trade-accepted-fail': 'There was an error in opening this trade.',
 
       errors: {
-        409: '❌ You already have an existing trade on this order.',
-        404: '❌ Could not find this trade.',
-        400: '❌ This trade is invalid or expired.'
+        [TradeError.TRADE_EXISTS_ON_ORDER]:
+          '❌ You already have an existing trade on this order.',
+        [TradeError.NOT_FOUND]: '❌ Could not find this trade.',
+        [TradeError.TRADE_EXPIRED]: '❌ This trade is invalid or expired.',
+        [TradeError.INSUFFICIENT_BALANCE]:
+          '❌ You have insufficient balance to open this trade'
       },
       'init-get-confirm-buy': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
 
@@ -259,6 +262,11 @@ If you want to specify {{ cryptoCurrencyCode }} value, then add the ticker(*{{ c
 Input the amount between *{{ minFiatValue }}* and *{{ maxFiatValue }}* or from *{{ minCryptoValue }}* to *{{ maxCryptoValue }}* to sell. 
 
 If you want to specify {{ cryptoCurrencyCode }} value, then add the ticker(*{{ cryptoCurrencyCode }}*) (Example: 0.1 {{ cryptoCurrencyCode }})`,
+    'input-payment-details': `*Payment details*
+
+Select or add new payment details for *{{ paymentMethodType }}* for the buyer to send you the money.`,
+    'skip-input-payment-details': 'skip',
+    'add-payment-details': '➕ Add {{ paymentMethodName }}',
     'confirm-input-buy-amount': `*Confirm*
     
 Are you sure you want to buy *{{ cryptoValue }}* for *{{ fiatValue }}* at rate {{ rate }}?

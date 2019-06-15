@@ -40,6 +40,7 @@ export interface PaymentMethodState {
   }
 
   [PaymentMethodStateKey.cb_addPaymentMethod]?: {
+    pmSelected: PaymentMethodType | null
     data: {
       paymentMethodsList: PaymentMethodType[]
     } | null

@@ -76,7 +76,7 @@ export const exchangeSourceInfo: Record<
         return null
       }
       const cur = apiResult[toCurrency]
-      const price = _.get(cur, 'avg_1h', null)
+      const price = _.get(cur, 'avg_6h', null)
       if (price != null) {
         return parseFloat(price)
       }

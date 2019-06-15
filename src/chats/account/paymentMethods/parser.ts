@@ -79,6 +79,14 @@ export const PaymentMethodParser: Parser<AccountState> = async (
       if (cbState == null) {
         return null
       }
+      let pmSelected = _.get(
+        currentState[PaymentMethodStateKey.cb_addPaymentMethod],
+        'pmSelected',
+        null
+      )
+
+      // @ts-ignore
+      pmSelected = pmSelected === 'null' ? null : pmSelected
 
       return {
         ...currentState,
@@ -87,7 +95,20 @@ export const PaymentMethodParser: Parser<AccountState> = async (
           data: {
             paymentMethodsList: getAllPaymentMethods(user.currencyCode)
           }
-        }
+        },
+        [PaymentMethodStateKey.paymentMethodInput]: pmSelected
+          ? {
+              data: {
+                inputs: {
+                  paymentMethod: pmSelected,
+                  editId: null,
+                  fields: []
+                },
+                isSaved: false
+              },
+              error: null
+            }
+          : undefined
       }
     },
 
@@ -101,7 +122,6 @@ export const PaymentMethodParser: Parser<AccountState> = async (
         PaymentMethodStateKey.paymentMethodInput,
         null
       )
-
       // Parse input fields
       if (
         pmInputState &&

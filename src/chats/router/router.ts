@@ -103,7 +103,6 @@ export const Router = {
     callback: TelegramBot.CallbackQuery
   ) {
     const currentState = await CacheHelper.getState<any>(tUser.id)
-
     const isHandled =
       (await CommonChat.handleCallback(
         msg,
