@@ -41,6 +41,14 @@ export class Referral extends Model<Referral> {
       {}
     )
   }
+
+  static async getReferredUsers(userId: number): Promise<Referral[]> {
+    return await Referral.findAll({
+      where: {
+        userId
+      }
+    })
+  }
 }
 
 export default Referral

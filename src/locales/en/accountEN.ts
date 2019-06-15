@@ -22,7 +22,6 @@ Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
     
 💵  *Total Deals:* {{ dealCount }}
 💎  *Volume:*        {{ tradeVolume }} {{ cryptoCurrencyCode }}
-🕒  *Avg speed:*   {{ tradeSpeed }}
 ⭐  *Rating:*           {{ rating }}
     
 🤝 Invited:           {{ referralCount }} users
@@ -36,7 +35,6 @@ Telegram: @{{ telegramUsername }}
 
 💵  *Total Deals:* {{ dealCount }}
 💎  *Volume:*       {{ tradeVolume }} {{ cryptoCurrencyCode }}
-🕒  *Avg speed:*  {{ tradeSpeed }}
 ⭐  *Rating:*         {{ rating }}`,
 
     'send-message-dealer-cbbutton': '📝 Write message',

@@ -5,8 +5,10 @@ import { CryptoCurrency } from 'constants/currencies'
 import { AccountHomeMessage } from './messages'
 import * as _ from 'lodash'
 import { logger } from 'modules'
-import { PaymentMethod } from 'models'
+import { PaymentMethod, Trade, Referral, Transaction } from 'models'
 import { PaymentMethodFields } from 'models'
+
+const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
 
 export const AccountHomeResponder: Responder<AccountState> = (
   msg,
@@ -19,15 +21,15 @@ export const AccountHomeResponder: Responder<AccountState> = (
     },
 
     [AccountHomeStateKey.account]: async () => {
+      const userStats = await getUserStats(user.id, CURRENT_CRYPTOCURRENCY)
       await AccountHomeMessage(msg, user).showAccount(
         user.accountId,
-        getTotalDeals(),
-        getTotalVolume(),
+        userStats.dealCount,
+        userStats.volume,
         CryptoCurrency.BTC,
-        getAvgSpeed(),
-        getRating(),
-        getReferralCount(),
-        getEarnings(),
+        userStats.rating.toFixed(1),
+        await getReferralCount(user.id),
+        await getEarnings(user.id, CURRENT_CRYPTOCURRENCY),
         await getSavedPaymentMethods(user.id)
       )
       return true
@@ -116,34 +118,23 @@ async function getUserReviews(_userId: string): Promise<UserReview[]> {
   ]
 }
 
-const getReferralCount = () => {
-  logger.error('TODO: account/responder Implement referral count')
-  return 0
+const getReferralCount = async (userId: number) => {
+  const referredUsers = await Referral.getReferredUsers(userId)
+  return referredUsers ? referredUsers.length : 0
 }
 
-const getTotalDeals = () => {
-  logger.error('TODO: account/responder Implement getTotalDeals')
-  return 100
+const getEarnings = async (
+  userId: number,
+  cryptoCurrencyCode: CryptoCurrency
+) => {
+  return await Transaction.getEarnedComission(userId, cryptoCurrencyCode)
 }
 
-const getTotalVolume = () => {
-  logger.error('TODO: account/responder Implement getTotalVolume')
-  return 100
-}
-
-const getAvgSpeed = () => {
-  logger.error('TODO: account/responder Implement getAvgSpeed')
-  return 120
-}
-
-const getEarnings = () => {
-  logger.error('TODO: account/responder Implement getEarnings')
-  return 5
-}
-
-const getRating = () => {
-  logger.error('TODO: account/responder Implement getRating')
-  return 4.7
+const getUserStats = async (
+  userId: number,
+  cryptoCurrencyCode: CryptoCurrency
+) => {
+  return await Trade.getUserStats(userId, cryptoCurrencyCode)
 }
 
 async function getSavedPaymentMethods(

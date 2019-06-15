@@ -16,6 +16,7 @@ import { CryptoCurrency, cryptoCurrencyInfo } from 'constants/currencies'
 import TelegramAccount from './TelegramAccount'
 import { dataFormatter } from 'utils/dataFormatter'
 import { Namespace } from 'modules/i18n'
+import * as _ from 'lodash'
 
 export enum TransactionType {
   SEND = 'SEND',
@@ -28,7 +29,8 @@ export enum TransactionSource {
   WITHDRAWAL = 'WITHDRAWAL',
   BLOCK = 'BLOCK',
   RELEASE = 'RELEASE',
-  TRADE = 'TRADE'
+  TRADE = 'TRADE',
+  COMISSION = 'COMISSION'
 }
 
 @Table({ timestamps: true, tableName: 'Transactions', paranoid: true })
@@ -71,6 +73,29 @@ export class Transaction extends Model<Transaction> {
   @AllowNull(false)
   @Column
   currencyCode!: CryptoCurrency
+
+  static async getEarnedComission(
+    userId: number,
+    currencyCode: CryptoCurrency
+  ): Promise<number> {
+    const c = JSON.parse(
+      JSON.stringify(
+        await Transaction.find({
+          attributes: [
+            [Transaction.sequelize.literal(`SUM(amount)`), 'comission']
+          ],
+          where: {
+            userId,
+            currencyCode: currencyCode,
+            transactionType: TransactionType.RECEIVE,
+            transactionSource: TransactionSource.COMISSION
+          }
+        })
+      )
+    )
+
+    return parseFloat(_.get(c, 'comission', 0)) || 0
+  }
 
   // Gets sum of all wallet deposit through core
   static async getCoreDepositAmount(

@@ -7,7 +7,8 @@ import {
   AutoIncrement,
   ForeignKey,
   DataType,
-  BelongsTo
+  BelongsTo,
+  Sequelize
 } from 'sequelize-typescript'
 import * as moment from 'moment'
 import User from './User'
@@ -20,6 +21,7 @@ import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import logger from 'modules/logger'
 import Dispute, { DisputeStatus } from './Dispute'
+import * as _ from 'lodash'
 
 export enum TradeStatus {
   INITIATED = 'INITIATED',
@@ -156,6 +158,79 @@ export class Trade extends Model<Trade> {
   reviewBySeller!: string
 
   public static TradeStatus = TradeStatus
+
+  static async getUserTrades(userId: number) {
+    return await Trade.findAll({
+      where: Sequelize.and(
+        { status: Trade.getActiveStatuses() },
+        Sequelize.or(
+          {
+            buyerUserId: userId
+          },
+          {
+            sellerUserId: userId
+          }
+        )
+      )
+    })
+  }
+
+  static async getUserReviews(userId: number) {
+    return await Trade.findAll({
+      attributes: [
+        [
+          Trade.sequelize.literal(
+            `CASE WHEN "buyerUserId"=${userId} THEN "ratingBySeller" ELSE "ratingByBuyer" END`
+          ),
+          'rating'
+        ],
+        [
+          Trade.sequelize.literal(
+            `CASE WHEN "buyerUserId"=${userId} THEN "reviewBySeller" ELSE "reviewByBuyer" END`
+          ),
+          'reviews'
+        ]
+      ],
+      where: Sequelize.or({ buyerUserId: userId }, { sellerUserId: userId })
+    })
+  }
+
+  static async getUserStats(
+    userId: number,
+    cryptoCurrencyCode: CryptoCurrency
+  ): Promise<{
+    rating: number
+    volume: number
+    dealCount: number
+  }> {
+    const r = JSON.parse(
+      JSON.stringify(
+        await Trade.find({
+          attributes: [
+            [
+              Trade.sequelize.literal(
+                `AVG(CASE WHEN "buyerUserId"=${userId} THEN "ratingBySeller" ELSE "ratingByBuyer" END )`
+              ),
+              'rating'
+            ],
+            [Trade.sequelize.literal(`SUM("cryptoAmount")`), 'volume'],
+            [Trade.sequelize.literal(`count(*)`), 'count']
+          ],
+          where: Sequelize.or(
+            { buyerUserId: userId },
+            { sellerUserId: userId },
+            { cryptoCurrencyCode: cryptoCurrencyCode }
+          )
+        })
+      )
+    )
+
+    return {
+      rating: parseFloat(_.get(r, 'rating', 0)) || TradeRating.POSITIVE,
+      volume: parseFloat(_.get(r, 'volume', 0)),
+      dealCount: parseInt(_.get(r, 'count', 0))
+    }
+  }
 
   static async giveRating(
     tradeId: number,

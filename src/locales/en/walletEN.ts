@@ -8,13 +8,12 @@ export const walletEN = {
 
 *Balance*:      {{ cryptoBalance }}
    (Value:       {{ fiatBalance }})
-*In Order*:      {{ blockedBalance }}
+*Blocked*:       {{ blockedBalance }}
     
-📗  ${BotCommand.TRANSACTIONS}
+📗  Tx: ${BotCommand.TRANSACTIONS}
     
 🤝 Invited:    {{ referralCount }} users
-💰 Earnings: {{ earnings }}
-(_Get your invite link from your account_)`,
+💰 Earnings: {{ earnings }}`,
 
     'send-cryptocurrency-cbbutton': '⚡️  Send {{ cryptoCurrencyName }}',
     'my-address': '📩  Deposit',

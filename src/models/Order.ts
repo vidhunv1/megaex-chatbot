@@ -88,6 +88,14 @@ export class Order extends Model<Order> {
   @Column(DataType.BOOLEAN)
   isActive!: boolean
 
+  static async getOrders(userId: number) {
+    return await Order.findAll({
+      where: {
+        userId: userId
+      }
+    })
+  }
+
   static async createOrder(
     userId: number,
     orderType: OrderType,
@@ -142,9 +150,6 @@ export class Order extends Model<Order> {
   }
 
   static async deleteOrder(orderId: number) {
-    logger.error(
-      'TODO: SHould delete order only when there is no ongoing trade'
-    )
     await Order.destroy({
       where: {
         id: orderId

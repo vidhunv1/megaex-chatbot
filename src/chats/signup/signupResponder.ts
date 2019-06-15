@@ -4,7 +4,14 @@ import { Namespace } from 'modules/i18n'
 import { languageKeyboard, currencyKeyboard } from './utils'
 import { CryptoCurrency } from 'constants/currencies'
 import { keyboardMainMenu } from 'chats/common'
-import { User, Wallet, Order, Transaction } from 'models'
+import {
+  User,
+  Wallet,
+  Order,
+  Transaction,
+  Trade,
+  TelegramAccount
+} from 'models'
 import { SignupState, SignupStateKey } from './SignupState'
 import { DeepLink } from 'chats/types'
 import * as _ from 'lodash'
@@ -12,6 +19,7 @@ import { logger } from 'modules'
 import { DealsMessage } from 'chats/exchange/deals'
 import { AccountHomeMessage } from 'chats/account/home'
 
+const CURRENT_CRYPTOCURRENCYC_CODE = CryptoCurrency.BTC
 export async function signupResponder(
   msg: TelegramBot.Message,
   user: User,
@@ -143,7 +151,6 @@ export async function signupResponder(
                 accountInfo.dealCount,
                 accountInfo.tradeVolume,
                 accountInfo.cryptoCurrencyCode,
-                accountInfo.tradeSpeed,
                 accountInfo.rating,
                 accountInfo.reviewCount
                 // accountInfo.isUserBlocked
@@ -211,8 +218,6 @@ export async function signupResponder(
 }
 
 async function getOrder(orderId: number) {
-  logger.error('TODO: signupresponder Implement getOrder with user details')
-
   const order = await Order.getOrder(orderId)
   if (!order) {
     return {
@@ -229,14 +234,18 @@ async function getOrder(orderId: number) {
     }
   }
 
+  const userStats = await Trade.getUserStats(
+    dealer.id,
+    CURRENT_CRYPTOCURRENCYC_CODE
+  )
   return {
     order: order,
     dealer: {
       ...dealer,
-      rating: 4.7,
+      rating: userStats.rating,
       lastSeen: new Date(),
-      tradeCount: 5,
-      reviewCount: 30
+      tradeCount: userStats.dealCount,
+      reviewCount: (await Trade.getUserReviews(dealer.id)).length
     }
   }
 }
@@ -248,8 +257,6 @@ async function getAvailableBalance(
   return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
-// TODO: -----------
-
 async function getAccount(
   accountId: string
 ): Promise<{
@@ -258,21 +265,32 @@ async function getAccount(
   dealCount: number
   tradeVolume: number
   cryptoCurrencyCode: CryptoCurrency
-  tradeSpeed: number
   reviewCount: number
   // isUserBlocked: boolean,
   rating: number
 } | null> {
-  logger.error('TODO: singupresponder implement getAccount')
+  const user = await User.findOne({
+    where: {
+      accountId: accountId
+    },
+    include: [{ model: TelegramAccount }]
+  })
+  if (!user) {
+    return null
+  }
+
+  const userStats = await Trade.getUserStats(
+    user.id,
+    CURRENT_CRYPTOCURRENCYC_CODE
+  )
   return {
     accountId,
-    telegramUsername: 'satoshi',
-    dealCount: 4,
-    tradeVolume: 100,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    tradeSpeed: 100,
-    reviewCount: 30,
+    telegramUsername: user.telegramUser.username,
+    dealCount: userStats.dealCount,
+    tradeVolume: userStats.volume,
+    rating: userStats.rating,
+    cryptoCurrencyCode: CURRENT_CRYPTOCURRENCYC_CODE,
+    reviewCount: (await Trade.getUserReviews(user.id)).length
     // isUserBlocked: false,
-    rating: 4.5
   }
 }

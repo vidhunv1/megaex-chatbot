@@ -1,4 +1,3 @@
-import { logger } from 'modules'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import { WalletHomeStateKey } from './types'
 import { Parser } from 'chats/types'
@@ -7,7 +6,7 @@ import {
   WalletState,
   updateNextWalletState
 } from '../WalletState'
-import { Transaction, Market, User } from 'models'
+import { Transaction, Market, User, Referral } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
 
 const CURRENT_CURRENCY_CODE = CryptoCurrency.BTC
@@ -42,8 +41,8 @@ export const WalletHomeParser: Parser<WalletState> = async (
               user.id,
               cryptoCurrencyCode
             ),
-            earnings: getEarnings(),
-            referralCount: getReferralCount()
+            earnings: await getEarnings(user.id, CURRENT_CURRENCY_CODE),
+            referralCount: await getReferralCount(user.id)
           }
         }
       }
@@ -84,14 +83,16 @@ const getBlockedBalance = async (
   return await Transaction.getBlockedBalance(userId, cryptoCurrency)
 }
 
-const getEarnings = () => {
-  logger.error('TODO: Not implemented getEarnings WalletChat#25')
-  return 0.1
+const getReferralCount = async (userId: number) => {
+  const referredUsers = await Referral.getReferredUsers(userId)
+  return referredUsers ? referredUsers.length : 0
 }
 
-const getReferralCount = () => {
-  logger.error('TODO: Not implemented getReferralCount WalletChat#25')
-  return 100
+const getEarnings = async (
+  userId: number,
+  cryptoCurrencyCode: CryptoCurrency
+) => {
+  return await Transaction.getEarnedComission(userId, cryptoCurrencyCode)
 }
 
 const getFiatValue = async (

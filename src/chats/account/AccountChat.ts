@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount } from 'models'
+import { User, TelegramAccount, Trade } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
 import { ACCOUNT_STATE_LABEL, AccountState, initialState } from './AccountState'
 import { parseCallbackQuery } from 'chats/utils'
@@ -19,8 +19,8 @@ import {
   AccountHomeError
 } from './home'
 import { CryptoCurrency } from 'constants/currencies'
-import logger from 'modules/logger'
 
+const CURRENT_CRYPTOCURRENCYC_CODE = CryptoCurrency.BTC
 export const AccountChat: ChatHandler = {
   async handleCommand(
     msg: TelegramBot.Message,
@@ -38,7 +38,6 @@ export const AccountChat: ChatHandler = {
           accountInfo.dealCount,
           accountInfo.tradeVolume,
           accountInfo.cryptoCurrencyCode,
-          accountInfo.tradeSpeed,
           accountInfo.rating,
           accountInfo.reviewCount
           // accountInfo.isUserBlocked
@@ -175,21 +174,32 @@ async function getAccount(
   dealCount: number
   tradeVolume: number
   cryptoCurrencyCode: CryptoCurrency
-  tradeSpeed: number
   reviewCount: number
   // isUserBlocked: boolean,
   rating: number
 } | null> {
-  logger.error('TODO: Accountchat getAccount')
+  const user = await User.findOne({
+    where: {
+      accountId: accountId
+    },
+    include: [{ model: TelegramAccount }]
+  })
+  if (!user) {
+    return null
+  }
+
+  const userStats = await Trade.getUserStats(
+    user.id,
+    CURRENT_CRYPTOCURRENCYC_CODE
+  )
   return {
     accountId,
-    telegramUsername: 'satoshi',
-    dealCount: 4,
-    tradeVolume: 100,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    tradeSpeed: 100,
-    reviewCount: 30,
+    telegramUsername: user.telegramUser.username,
+    dealCount: userStats.dealCount,
+    tradeVolume: userStats.volume,
+    rating: userStats.rating,
+    cryptoCurrencyCode: CURRENT_CRYPTOCURRENCYC_CODE,
+    reviewCount: (await Trade.getUserReviews(user.id)).length
     // isUserBlocked: false,
-    rating: 4.5
   }
 }

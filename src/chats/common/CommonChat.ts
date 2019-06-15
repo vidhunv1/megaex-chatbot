@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount, Order, Transaction } from 'models'
+import { User, TelegramAccount, Order, Transaction, Trade } from 'models'
 import { ChatHandler, BotCommand, DeepLink } from 'chats/types'
 import { telegramHook } from 'modules'
 import { keyboardMainMenu } from './utils'
@@ -14,6 +14,7 @@ import { AccountHomeMessage } from 'chats/account/home'
 import { claimCode } from 'chats/wallet/sendCoin'
 import { CONFIG } from '../../config'
 
+const CURRENT_CRYPTOCURRENCYC_CODE = CryptoCurrency.BTC
 export const CommonChat: ChatHandler = {
   async handleCommand(
     msg: TelegramBot.Message,
@@ -100,7 +101,6 @@ export const CommonChat: ChatHandler = {
               accountInfo.dealCount,
               accountInfo.tradeVolume,
               accountInfo.cryptoCurrencyCode,
-              accountInfo.tradeSpeed,
               accountInfo.rating,
               accountInfo.reviewCount
               // accountInfo.isUserBlocked
@@ -228,7 +228,6 @@ async function getAvailableBalance(
   return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
-// TODO: -----------
 async function getAccount(
   accountId: string
 ): Promise<{
@@ -237,21 +236,32 @@ async function getAccount(
   dealCount: number
   tradeVolume: number
   cryptoCurrencyCode: CryptoCurrency
-  tradeSpeed: number
   reviewCount: number
   // isUserBlocked: boolean,
   rating: number
 } | null> {
-  logger.error('TODO: CommonChat implement getAccount')
+  const user = await User.findOne({
+    where: {
+      accountId: accountId
+    },
+    include: [{ model: TelegramAccount }]
+  })
+  if (!user) {
+    return null
+  }
+
+  const userStats = await Trade.getUserStats(
+    user.id,
+    CURRENT_CRYPTOCURRENCYC_CODE
+  )
   return {
     accountId,
-    telegramUsername: 'satoshi',
-    dealCount: 4,
-    tradeVolume: 100,
-    cryptoCurrencyCode: CryptoCurrency.BTC,
-    tradeSpeed: 100,
-    reviewCount: 30,
+    telegramUsername: user.telegramUser.username,
+    dealCount: userStats.dealCount,
+    tradeVolume: userStats.volume,
+    rating: userStats.rating,
+    cryptoCurrencyCode: CURRENT_CRYPTOCURRENCYC_CODE,
+    reviewCount: (await Trade.getUserReviews(user.id)).length
     // isUserBlocked: false,
-    rating: 4.5
   }
 }

@@ -15,6 +15,7 @@ import {
 } from './types'
 import { CommonStateKey, CommonState } from 'chats/common/types'
 import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
+import { dataFormatter } from 'utils/dataFormatter'
 
 export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
   async noReviewsAvailable() {
@@ -103,7 +104,6 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
     dealCount: number,
     tradeVolume: number,
     cryptoCurrencyCode: CryptoCurrency,
-    tradeSpeedSec: number,
     rating: number,
     reviewCount: number
     // isUserBlocked: boolean
@@ -117,7 +117,6 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
         dealCount: dealCount,
         tradeVolume: tradeVolume,
         cryptoCurrencyCode: cryptoCurrencyCode,
-        tradeSpeed: tradeSpeedSec,
         rating: rating
       }),
       {
@@ -166,8 +165,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
     totalDeals: number,
     tradeVolume: number,
     cryptoCode: CryptoCurrency,
-    avgSpeedSec: number,
-    rating: number,
+    rating: string,
     referralCount: number,
     earnings: number,
     addedPaymentMethods: PaymentMethodFields[]
@@ -220,9 +218,8 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       user.t(`${Namespace.Account}:home.account`, {
         accountID: accountId,
         dealCount: totalDeals,
-        tradeVolume: tradeVolume,
+        tradeVolume: dataFormatter.formatCryptoCurrency(tradeVolume),
         cryptoCurrencyCode: cryptoCode,
-        tradeSpeed: parseInt(avgSpeedSec / 60 + ''),
         rating: rating,
         referralCount: referralCount,
         earnings: earnings,
