@@ -18,6 +18,14 @@ export const exchangeEN = {
   },
 
   deals: {
+    'no-quick-sell': `📉 *Quick Buy*
+
+There are no active buy orders. Click to create a new buy order.`,
+    'new-quick-sell-cbbutton': '📗 New buy order',
+    'no-quick-buy': `📉 *Quick Sell*
+
+There are no active sell orders. Click to create a new sell order.`,
+    'new-quick-buy-cbbutton': '📕 New sell order',
     trade: {
       'referral-comission': `🚀 *Comission Received*
 

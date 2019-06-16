@@ -168,7 +168,9 @@ You received *{{ cryptoCurrencyValue }}*.`,
       withdrawal: 'withdraw',
       release: 'release',
       block: 'block',
-      trade: 'trade'
+      trade: 'trade',
+      comission: 'comission',
+      fees: 'fees'
     }
   }
 }

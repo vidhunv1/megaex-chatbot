@@ -26,6 +26,7 @@ import {
   PaymentMethodState,
   PaymentMethodStateKey
 } from 'chats/account/paymentMethods'
+import { CreateOrderStateKey, CreateOrderState } from '../createOrder'
 
 export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
   async inputPaymentDetails(
@@ -491,7 +492,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     currentCursor: number,
     shouldEdit: boolean
   ) {
-    const inline: TelegramBot.InlineKeyboardButton[][] = ordersList.map(
+    let inline: TelegramBot.InlineKeyboardButton[][] = ordersList.map(
       (order) => {
         const formattedFiatRateRate = dataFormatter.formatFiatCurrency(
           order.fixedRate,
@@ -564,18 +565,63 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     }
 
     let text
+    const totalPages = Math.ceil(totalOrders / DealsConfig.LIST_LIMIT)
+    const currentPage = Math.ceil((currentCursor + 1) / DealsConfig.LIST_LIMIT)
+
     if (orderType === OrderType.SELL) {
-      text = user.t(`${Namespace.Exchange}:deals.show-buy-deals`, {
-        cryptoCurrencyCode,
-        currentPage: Math.ceil((currentCursor + 1) / DealsConfig.LIST_LIMIT),
-        totalPages: Math.ceil(totalOrders / DealsConfig.LIST_LIMIT)
-      })
+      if (totalPages === 0) {
+        text = user.t(`${Namespace.Exchange}:deals.no-quick-sell`)
+
+        inline = [
+          [
+            {
+              text: user.t(
+                `${Namespace.Exchange}:deals.new-quick-sell-cbbutton`
+              ),
+              callback_data: stringifyCallbackQuery<
+                CreateOrderStateKey.cb_createNewOrder,
+                CreateOrderState[CreateOrderStateKey.cb_createNewOrder]
+              >(CreateOrderStateKey.cb_createNewOrder, {
+                orderType: OrderType.BUY,
+                data: null
+              })
+            }
+          ]
+        ]
+      } else {
+        text = user.t(`${Namespace.Exchange}:deals.show-sell-deals`, {
+          cryptoCurrencyCode,
+          currentPage: currentPage,
+          totalPages: totalPages
+        })
+      }
     } else {
-      text = user.t(`${Namespace.Exchange}:deals.show-sell-deals`, {
-        cryptoCurrencyCode,
-        currentPage: Math.ceil((currentCursor + 1) / DealsConfig.LIST_LIMIT),
-        totalPages: Math.ceil(totalOrders / DealsConfig.LIST_LIMIT)
-      })
+      if (totalPages === 0) {
+        text = user.t(`${Namespace.Exchange}:deals.no-quick-buy`)
+
+        inline = [
+          [
+            {
+              text: user.t(
+                `${Namespace.Exchange}:deals.new-quick-buy-cbbutton`
+              ),
+              callback_data: stringifyCallbackQuery<
+                CreateOrderStateKey.cb_createNewOrder,
+                CreateOrderState[CreateOrderStateKey.cb_createNewOrder]
+              >(CreateOrderStateKey.cb_createNewOrder, {
+                orderType: OrderType.BUY,
+                data: null
+              })
+            }
+          ]
+        ]
+      } else {
+        text = user.t(`${Namespace.Exchange}:deals.show-sell-deals`, {
+          cryptoCurrencyCode,
+          currentPage: currentPage,
+          totalPages: totalPages
+        })
+      }
     }
 
     if (shouldEdit) {

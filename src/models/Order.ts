@@ -161,7 +161,8 @@ export class Order extends Model<Order> {
     const orders = await Order.findAll({
       where: {
         orderType,
-        fiatCurrencyCode: fiatCode
+        fiatCurrencyCode: fiatCode,
+        isActive: true
       },
       include: [{ model: User }]
     })

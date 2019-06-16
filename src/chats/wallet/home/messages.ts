@@ -138,6 +138,18 @@ export const WalletHomeMessage = (msg: TelegramBot.Message, user: User) => ({
           )
           break
         }
+        case TransactionSource.COMISSION: {
+          txSourceString = user.t(
+            `${Namespace.Wallet}:transaction.source-name.comission`
+          )
+          break
+        }
+        case TransactionSource.FEES: {
+          txSourceString = user.t(
+            `${Namespace.Wallet}:transaction.source-name.fees`
+          )
+          break
+        }
         default: {
           logger.error('Unhandled locale key for ' + current.transactionSource)
         }
