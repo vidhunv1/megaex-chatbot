@@ -15,7 +15,7 @@ import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { logger } from 'modules'
 import * as _ from 'lodash'
-import { Transaction, Market } from 'models'
+import { Transaction, Market, Trade } from 'models'
 
 export enum OrderType {
   BUY = 'BUY',
@@ -183,11 +183,15 @@ export class Order extends Model<Order> {
       // TODO: Getting balance for buy orders might be unnecessary
       ordersList.push({
         id: iOrder.id,
+        userId: iOrder.userId,
         minFiatAmount: iOrder.minFiatAmount,
         paymentMethodType: iOrder.paymentMethodType,
         fiatCurrencyCode: iOrder.fiatCurrencyCode,
         orderType: iOrder.orderType,
-        rating: 4.5,
+        rating: (await Trade.getUserStats(
+          iOrder.userId,
+          iOrder.cryptoCurrencyCode
+        )).rating,
         availableFiatBalance:
           (await Transaction.getAvailableBalance(
             iOrder.userId,

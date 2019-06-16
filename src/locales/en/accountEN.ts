@@ -11,8 +11,9 @@ export const accountEN = {
     }{{ opAccountId }}
 
 {{ rating }}
+_{{ review }}_
 
-*{{ reviewerName }}* had completed a deal for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`,
+By *{{ reviewerName }}*, traded for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`,
     errors: {
       [AccountHomeError.ACCOUNT_NOT_FOUND]: 'Could not find this account.'
     },

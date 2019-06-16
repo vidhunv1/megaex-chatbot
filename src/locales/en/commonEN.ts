@@ -1,6 +1,6 @@
 import { PaymentMethodType } from 'models/PaymentMethod'
 import { ExchangeSource } from 'constants/exchangeSource'
-import { OrderType } from 'models'
+import { OrderType } from 'models/Order'
 
 export const commonEN = {
   'callback-error-response': '❗️Error',

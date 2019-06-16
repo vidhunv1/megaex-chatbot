@@ -739,6 +739,7 @@ async function getOrdersList(
       paymentMethodType: o.paymentMethodType,
       fiatCurrencyCode: o.fiatCurrencyCode,
       rating: o.rating,
+      userId: o.userId,
       availableBalance: o.availableFiatBalance,
       minFiatAmount: o.minFiatAmount
     }

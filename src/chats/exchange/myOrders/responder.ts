@@ -11,11 +11,15 @@ import {
   PaymentMethod,
   PaymentMethodFields,
   Transaction,
-  Market
+  Market,
+  Trade,
+  TelegramAccount
 } from 'models'
 import { OrderType } from 'models'
 import { logger } from 'modules'
 import { ExchangeSource } from 'constants/exchangeSource'
+import { Sequelize } from 'sequelize-typescript'
+import { sendTradeMessage } from '../deals/tradeMessage'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 export const MyOrdersResponder: Responder<ExchangeState> = (
@@ -28,9 +32,8 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
       return false
     },
     [MyOrdersStateKey.showActiveOrders]: async () => {
-      await MyOrdersMessage(msg, user).showActiveOrders(
-        await getActiveOrders(user.id)
-      )
+      const d = await getActive(user.id)
+      await MyOrdersMessage(msg, user).showActiveOrders(d.orders, d.trades)
       return true
     },
     [MyOrdersStateKey.cb_deleteOrder]: async () => {
@@ -232,6 +235,31 @@ export const MyOrdersResponder: Responder<ExchangeState> = (
       }
 
       return true
+    },
+    [MyOrdersStateKey.cb_showTradeById]: async () => {
+      return false
+    },
+    [MyOrdersStateKey.showTradeById]: async () => {
+      const tradeId = _.get(
+        state[MyOrdersStateKey.cb_showTradeById],
+        'tradeId',
+        null
+      )
+      if (!tradeId) {
+        return false
+      }
+      const trade = await Trade.findById(tradeId)
+      const telegramAccount = await TelegramAccount.findOne({
+        where: {
+          userId: user.id
+        }
+      })
+
+      if (!trade || !telegramAccount) {
+        return false
+      }
+      await sendTradeMessage[trade.status](trade, user, telegramAccount)
+      return true
     }
   }
 
@@ -259,34 +287,29 @@ async function getAddedPaymentMethods(
   return await PaymentMethod.getSavedPaymentMethods(userId)
 }
 
-async function getActiveOrders(userId: number) {
-  logger.error('myorders/responder getActiveOrders')
-  return [
-    {
-      createdBy: userId,
-      orderType: OrderType.SELL,
-      paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
-      rate: 430000,
-      fiatCurrencyCode: FiatCurrency.INR,
-      orderId: 1
-    },
-    {
-      createdBy: 219038,
-      paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
-      orderType: OrderType.SELL,
-      rate: 430000,
-      fiatCurrencyCode: FiatCurrency.INR,
-      orderId: 3
-    },
-    {
-      createdBy: 219038,
-      paymentMethod: PaymentMethodType.BANK_TRANSFER_IMPS_INR,
-      orderType: OrderType.BUY,
-      rate: 420000,
-      fiatCurrencyCode: FiatCurrency.INR,
-      orderId: 3
+async function getActive(
+  userId: number
+): Promise<{
+  orders: Order[]
+  trades: Trade[]
+}> {
+  const orders = await Order.findAll({
+    where: {
+      userId: userId
     }
-  ]
+  })
+  const trades = await Trade.findAll({
+    where: Sequelize.and(
+      { status: Trade.getActiveStatuses() },
+      Sequelize.or({ buyerUserId: userId }, { sellerUserId: userId })
+    ),
+    include: [{ model: Order }]
+  })
+
+  return {
+    orders,
+    trades
+  }
 }
 
 async function getMarketRate(

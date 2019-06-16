@@ -32,8 +32,8 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
     totalReviews: number,
     opAccountId: string,
     reviewerName: string,
-    review: string,
-    isUpvote: boolean,
+    review: string | null,
+    rating: number,
     dealVolume: number,
     cryptoCurrencyCode: CryptoCurrency,
     shouldEdit: boolean
@@ -45,7 +45,9 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       reviewerName: reviewerName,
       tradeVolume: dealVolume,
       cryptoCurrencyCode: cryptoCurrencyCode,
-      rating: (isUpvote ? '(👍)' : '(👎)') + (review && `  _"${review}"_`)
+      rating: '⭐'.repeat(rating),
+      review: review == null ? '' : `"${review}"`
+      // (rating + '🌟' + (review && `  _"${review || '-'}"_`))
     })
 
     const hasMoreReviews: boolean = currentCursor + 1 < totalReviews
@@ -115,9 +117,9 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
         accountId: accountID,
         telegramUsername: telegramUsername,
         dealCount: dealCount,
-        tradeVolume: tradeVolume,
+        tradeVolume: dataFormatter.formatCryptoCurrency(tradeVolume),
         cryptoCurrencyCode: cryptoCurrencyCode,
-        rating: rating
+        rating: rating.toFixed(1)
       }),
       {
         parse_mode: 'Markdown',

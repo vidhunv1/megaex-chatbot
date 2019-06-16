@@ -447,6 +447,21 @@ export const MyOrdersParser: Parser<ExchangeState> = async (
     },
     [MyOrdersStateKey.showEditSuccess]: async () => {
       return null
+    },
+    [MyOrdersStateKey.cb_showTradeById]: async () => {
+      const tradeId = _.get(
+        state[MyOrdersStateKey.cb_showTradeById],
+        'tradeId',
+        null
+      )
+      if (!tradeId) {
+        return null
+      }
+
+      return state
+    },
+    [MyOrdersStateKey.showTradeById]: async () => {
+      return null
     }
   }
 
@@ -554,6 +569,8 @@ function nextMyOrdersState(
     }
     case MyOrdersStateKey.cb_showOrder_back:
       return MyOrdersStateKey.cb_showOrder_back
+    case MyOrdersStateKey.cb_showTradeById:
+      return MyOrdersStateKey.showTradeById
     default:
       return null
   }
@@ -672,10 +689,7 @@ async function getAvailableBalance(
   return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
-// TODO -------------
 async function deleteOrder(orderId: number): Promise<boolean> {
-  // TODO: Check if there are any active trades
-  logger.error('TODO: implement checks for delete order ' + orderId)
   await Order.deleteOrder(orderId)
   return true
 }

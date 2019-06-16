@@ -479,6 +479,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     orderType: OrderType,
     ordersList: {
       id: number
+      userId: number
       fixedRate: number
       paymentMethodType: PaymentMethodType
       fiatCurrencyCode: FiatCurrency
@@ -500,6 +501,10 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         let text = `${formattedFiatRateRate} - ${user.t(
           `payment-methods.short-names.${order.paymentMethodType}`
         )} | ${order.rating.toFixed(1)} ⭐️`
+
+        if (order.userId === user.id) {
+          text = '*' + text
+        }
 
         if (
           order.availableBalance < order.minFiatAmount &&
@@ -744,9 +749,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
 
     if (reviewCount > 0) {
       inline[inline.length - 1].push({
-        text: user.t(`${Namespace.Exchange}:deals.user-reviews`, {
-          reviewCount
-        }),
+        text: user.t(`${Namespace.Exchange}:deals.user-reviews`),
         callback_data: stringifyCallbackQuery<
           AccountHomeStateKey.cb_showReviews,
           AccountHomeState[AccountHomeStateKey.cb_showReviews]

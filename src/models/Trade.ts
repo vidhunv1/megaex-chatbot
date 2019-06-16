@@ -175,24 +175,28 @@ export class Trade extends Model<Trade> {
     })
   }
 
-  static async getUserReviews(userId: number) {
-    return await Trade.findAll({
-      attributes: [
-        [
-          Trade.sequelize.literal(
-            `CASE WHEN "buyerUserId"=${userId} THEN "ratingBySeller" ELSE "ratingByBuyer" END`
-          ),
-          'rating'
-        ],
-        [
-          Trade.sequelize.literal(
-            `CASE WHEN "buyerUserId"=${userId} THEN "reviewBySeller" ELSE "reviewByBuyer" END`
-          ),
-          'reviews'
-        ]
-      ],
-      where: Sequelize.or({ buyerUserId: userId }, { sellerUserId: userId })
-    })
+  static async getUserReviews(
+    userId: number
+  ): Promise<
+    {
+      rating: number
+      reviews: string | null
+      cryptoAmount: number
+      cryptoCurrencyCode: CryptoCurrency
+      ratingbyuserid: number
+      firstName: string
+    }[]
+  > {
+    const a = await Trade.sequelize.query(
+      `SELECT "t"."rating", "t"."reviews", "t"."cryptoAmount", "t"."cryptoCurrencyCode", "t"."ratingbyuserid", "TelegramAccount"."firstName" FROM (SELECT (CASE WHEN "buyerUserId"=(:userId) THEN "ratingBySeller" ELSE "ratingByBuyer" END) as rating, (CASE WHEN "buyerUserId"=(:userId) THEN "reviewBySeller" ELSE "reviewByBuyer" END) as reviews, "cryptoAmount", "cryptoCurrencyCode", (CASE WHEN "buyerUserId"=(:userId) THEN "sellerUserId" ELSE "buyerUserId" END) as ratingbyuserid FROM "Trades" where "buyerUserId"=(:userId) OR "sellerUserId" = (:userId)) AS t INNER JOIN "TelegramAccount" ON "TelegramAccount"."userId" = ratingbyuserid where t.rating IS NOT NULL OR t.reviews IS NOT NULL`,
+      {
+        replacements: {
+          userId: userId
+        },
+        type: Trade.sequelize.QueryTypes.SELECT
+      }
+    )
+    return a
   }
 
   static async getUserStats(

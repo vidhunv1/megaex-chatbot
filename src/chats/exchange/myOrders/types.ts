@@ -32,7 +32,9 @@ export enum MyOrdersStateKey {
   cb_showActiveOrders = 'cb_showActiveOrders',
   showActiveOrders = 'showActiveOrders',
   cb_showOrderById = 'cb_showOrderById',
-  showOrderById = 'showOrderById'
+  showOrderById = 'showOrderById',
+  cb_showTradeById = 'cb_showTradeById',
+  showTradeById = 'showTradeById'
 }
 
 export interface MyOrdersState {
@@ -103,5 +105,8 @@ export interface MyOrdersState {
 
   [MyOrdersStateKey.cb_showOrderById]?: {
     orderId: number
+  }
+  [MyOrdersStateKey.cb_showTradeById]?: {
+    tradeId: number
   }
 }

@@ -4,8 +4,7 @@ import { AccountState } from '../AccountState'
 import { CryptoCurrency } from 'constants/currencies'
 import { AccountHomeMessage } from './messages'
 import * as _ from 'lodash'
-import { logger } from 'modules'
-import { PaymentMethod, Trade, Referral, Transaction } from 'models'
+import { PaymentMethod, Trade, Referral, Transaction, User } from 'models'
 import { PaymentMethodFields } from 'models'
 
 const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
@@ -52,7 +51,16 @@ export const AccountHomeResponder: Responder<AccountState> = (
       )
 
       if (accountId && stateData) {
-        const userReviews = await getUserReviews(accountId)
+        const user = await User.findOne({
+          where: {
+            accountId
+          }
+        })
+        if (!user) {
+          return false
+        }
+
+        const userReviews = await getUserReviews(user.id)
         const cursor = parseInt(stateData.cursor + '')
 
         if (userReviews.length > 0) {
@@ -61,10 +69,10 @@ export const AccountHomeResponder: Responder<AccountState> = (
             cursor,
             userReviews.length,
             accountId,
-            review.reviewerName,
-            review.review,
-            review.isUpvote,
-            review.dealVolume,
+            review.firstName,
+            review.reviews,
+            review.rating,
+            review.cryptoAmount,
             review.cryptoCurrencyCode,
             stateData.shouldEdit
           )
@@ -83,39 +91,8 @@ export const AccountHomeResponder: Responder<AccountState> = (
   return resp[state.currentStateKey as AccountHomeStateKey]()
 }
 
-interface UserReview {
-  reviewerName: string
-  review: string
-  isUpvote: boolean
-  dealVolume: number
-  cryptoCurrencyCode: CryptoCurrency
-}
-
-async function getUserReviews(_userId: string): Promise<UserReview[]> {
-  logger.error('TODO: account/responder getUserRevews')
-  return [
-    {
-      reviewerName: 'Vitalik buterin',
-      review: 'Best seller - highly recommened',
-      isUpvote: true,
-      dealVolume: 0.3,
-      cryptoCurrencyCode: CryptoCurrency.BTC
-    },
-    {
-      reviewerName: 'buterin',
-      review: 'Best sadd seller - highly recommened',
-      isUpvote: false,
-      dealVolume: 0.3,
-      cryptoCurrencyCode: CryptoCurrency.BTC
-    },
-    {
-      reviewerName: 'Max',
-      review: 'Worst seller - highly recommened',
-      isUpvote: false,
-      dealVolume: 0.3,
-      cryptoCurrencyCode: CryptoCurrency.BTC
-    }
-  ]
+async function getUserReviews(userId: number) {
+  return await Trade.getUserReviews(userId)
 }
 
 const getReferralCount = async (userId: number) => {

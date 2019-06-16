@@ -251,7 +251,7 @@ Rating:  {{ rating }} ⭐️
     'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',
     'open-sell-deal-cbbutton': '🛎  Sell {{ cryptoCurrencyCode }} here',
     'back-cbbutton': '⬅️  Back',
-    'user-reviews': '🗣 reviews ({{ reviewCount }})',
+    'user-reviews': '🗣 reviews',
     'input-buy-amount': `💵 *Input buy amount*
 
 Input the amount between *{{ minFiatValue }}* and *{{ maxFiatValue }}* or from *{{ minCryptoValue }}* to *{{ maxCryptoValue }}* to buy. 
@@ -304,14 +304,14 @@ You can cancel the deal any time. Keep in mind that the money you have sent will
   },
 
   'my-orders': {
-    'my-sell-order-cbbutton': 'My Sell order on {{ paymentMethod }}',
-    'my-buy-order-cbbutton': 'My Buy on {{ paymentMethod }}',
-    'buy-deal-cbbutton': '🛎 Buy trade @ {{ fiatRate }}',
-    'sell-deal-cbbutton': '🛎 Sell Deal @ {{ fiatRate }}',
+    'my-sell-order-cbbutton': 'Sell order @ {{ rate }}',
+    'my-buy-order-cbbutton': 'Buy order @ {{ rate }}',
+    'buy-deal-cbbutton': '🛎 Buy trade - {{ cryptoAmount }}',
+    'sell-deal-cbbutton': '🛎 Sell trade - {{ cryptoAmount }}',
     'deposit-cryptocurrency': '📩 Deposit {{ cryptoCurrencyCode }}',
     'show-active-orders': `*Active Orders*
 
-Your ongoing deals and orders created by you are listed.
+Your ongoing trades and orders created by you are listed.
 `,
     'order-enabled': 'Active',
     'input-payment-details-field': `Write your *{{ fieldName }}* for *{{ paymentMethod}}*`,
