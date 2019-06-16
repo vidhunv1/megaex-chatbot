@@ -230,9 +230,9 @@ export class Trade extends Model<Trade> {
     )
 
     return {
-      rating: parseFloat(_.get(r, 'rating', 0)) || TradeRating.POSITIVE,
-      volume: parseFloat(_.get(r, 'volume', 0)),
-      dealCount: parseInt(_.get(r, 'count', 0))
+      rating: parseFloat(_.get(r, 'rating', 0)) || TradeRating.EXCELLENT,
+      volume: parseFloat(_.get(r, 'volume', 0)) || 0,
+      dealCount: parseInt(_.get(r, 'count', 0)) || 0
     }
   }
 
@@ -581,7 +581,8 @@ export class Trade extends Model<Trade> {
       where: {
         status: TradeStatus.PAYMENT_SENT,
         id: tradeId
-      }
+      },
+      include: [{ model: Order }]
     })
 
     if (!trade) {
@@ -597,6 +598,18 @@ export class Trade extends Model<Trade> {
         trade.blockedTransactionId,
         trade.buyerUserId
       )
+    }
+
+    try {
+      await Transaction.collectFees(
+        trade.order.userId,
+        trade.createdByUserId,
+        trade.id,
+        trade.cryptoAmount,
+        trade.cryptoCurrencyCode
+      )
+    } catch (e) {
+      logger.error('Trade: Error in handling fees')
     }
 
     return tt

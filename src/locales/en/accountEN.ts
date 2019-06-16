@@ -6,7 +6,7 @@ export const accountEN = {
     'back-cbbutton': '⬅️ back',
     'more-cbbutton': 'more »',
     'no-reviews-available': 'No reviews yet',
-    'user-review': `({{ currentPage }}/{{ totalPages }}) Review for ${
+    'user-review': `({{ currentPage }}/{{ totalPages }}) *Review for* ${
       BotCommand.ACCOUNT
     }{{ opAccountId }}
 
@@ -22,11 +22,11 @@ By *{{ reviewerName }}*, traded for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`
 Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
     
 💵  *Total Deals:* {{ dealCount }}
-💎  *Volume:*        {{ tradeVolume }} {{ cryptoCurrencyCode }}
+💎  *Volume:*        {{ tradeVolume }}
 ⭐  *Rating:*           {{ rating }}
     
 🤝 Invited:           {{ referralCount }} users
-💰 Earnings:        {{ earnings }} {{ cryptoCurrencyCode }}
+💰 Earnings:        {{ earnings }}
     
 💳  *Payment Methods:* {{ paymentMethods }}`,
 
@@ -96,8 +96,8 @@ Your payment method was updated.
 * Referral fees*: {{ referralFeesPercentage }}% 
 _(from the fees we take from your referral)_
     
-💰Invite your friends using your referral link to earn bitcoins from their transactions.
-Payouts are processed *every day*, credited directly to your wallet.`
+💰Invite your friends using your referral link to earn bitcoins for every trade they make forever.
+Payouts are processed *instantly*, credited directly to your wallet.`
   },
 
   settings: {

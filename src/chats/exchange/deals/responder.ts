@@ -653,14 +653,19 @@ async function getOrder(orderId: number) {
     }
   }
 
+  const userStats = await Trade.getUserStats(
+    order.userId,
+    order.cryptoCurrencyCode
+  )
+
   return {
     order: order,
     dealer: {
       ...dealer,
-      rating: 4.7,
+      rating: userStats.rating,
       lastSeen: new Date(),
-      tradeCount: 5,
-      reviewCount: 30
+      tradeCount: userStats.dealCount,
+      reviewCount: await Trade.getUserReviews(order.userId)
     }
   }
 }

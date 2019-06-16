@@ -19,6 +19,9 @@ export const exchangeEN = {
 
   deals: {
     trade: {
+      'referral-comission': `🚀 *Comission Received*
+
+You received {{ cryptoAmount }} referral comission from your referrals trade.`,
       'open-dispute-cbbutton': '👩‍🎓 Trade support',
       'dispute-initiator': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
 
@@ -131,7 +134,7 @@ The user has been notified to deposit *{{ fiatPayAmount }}* in your *{{ paymentM
 
 Telegram: {{ buyerUsername }}
 
-You will be notified when this payment has been marked as completed.`,
+❕You will be notified when this payment has been marked as completed.`,
       'trade-accepted-buyer-no-payment-info':
         'Send a message to seller for the payment details.',
       'trade-accepted-buyer': `🛎 *Trade Accepted* ${
@@ -221,7 +224,6 @@ Please select the order you want to sell from.
 _This deal is by_ *{{ realName }}*.
 
 Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
-Last seen: {{ lastSeenValue }}
 Rating:  {{ rating }} ⭐️
 
 *Payment Method*: {{ paymentMethodName }}

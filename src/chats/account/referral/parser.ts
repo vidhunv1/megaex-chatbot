@@ -6,11 +6,13 @@ import {
   AccountState
 } from '../AccountState'
 import * as _ from 'lodash'
-import logger from 'modules/logger'
+import { linkCreator } from 'utils/linkCreator'
+import { Referral } from 'models'
+import { CONFIG } from '../../../config'
 
 export const ReferralParser: Parser<AccountState> = async (
   _msg,
-  _user,
+  user,
   tUser,
   currentState
 ) => {
@@ -30,8 +32,8 @@ export const ReferralParser: Parser<AccountState> = async (
         [ReferralStateKey.cb_referralLink]: {
           ...cbState,
           data: {
-            referralLink: getReferralLink(),
-            referralCount: getReferralCount(),
+            referralLink: await getReferralLink(user.accountId),
+            referralCount: await getReferralCount(user.id),
             referralFeesPercentage: getReferralFees()
           }
         }
@@ -69,17 +71,19 @@ export function nextReferralState(
   }
 }
 
-const getReferralLink = () => {
-  logger.error('referral/parser getReferralLink')
-  return 'https://t.me/megadealsbot?start=ref-fqwkjqel'
+const getReferralLink = (accountId: string) => {
+  return linkCreator.getReferralLink(accountId)
 }
 
-const getReferralCount = () => {
-  logger.error('referral/parser getReferralCount')
-  return 0
+const getReferralCount = async (userId: number): Promise<number> => {
+  const a = await Referral.count({
+    where: {
+      userId
+    }
+  })
+  return a
 }
 
 const getReferralFees = () => {
-  logger.error('referral/parser getReferralFees')
-  return 90
+  return parseFloat(CONFIG.REFERRAL_COMISSION_PERCENTAGE)
 }

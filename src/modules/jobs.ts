@@ -51,7 +51,7 @@ export default class Jobs {
     return new CronJob({
       cronTime: '0 */12 * * *',
       onTick: async function() {
-        await Market.syncTickerData()
+        await Market.syncFiatExchangeRates()
       },
       onComplete: function() {},
       start: false

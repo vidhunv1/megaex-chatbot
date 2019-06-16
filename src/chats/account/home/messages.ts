@@ -220,11 +220,14 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       user.t(`${Namespace.Account}:home.account`, {
         accountID: accountId,
         dealCount: totalDeals,
-        tradeVolume: dataFormatter.formatCryptoCurrency(tradeVolume),
+        tradeVolume: dataFormatter.formatCryptoCurrency(
+          tradeVolume,
+          cryptoCode
+        ),
         cryptoCurrencyCode: cryptoCode,
         rating: rating,
         referralCount: referralCount,
-        earnings: earnings,
+        earnings: dataFormatter.formatCryptoCurrency(earnings, cryptoCode),
         paymentMethods: stringifyPaymentMethods(addedPaymentMethods, user)
       }),
       {

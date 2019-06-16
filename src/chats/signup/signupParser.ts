@@ -1,7 +1,7 @@
 import * as TelegramBot from 'node-telegram-bot-api'
 import { parseDeepLink } from 'chats/utils'
 import { SignupState, SignupStateKey, SignupError } from './SignupState'
-import { logger } from 'modules'
+import { logger, telegramHook } from 'modules'
 import { LanguageView, Language } from 'constants/languages'
 import { Account } from 'lib/Account'
 import { FiatCurrency } from 'constants/currencies'
@@ -11,6 +11,7 @@ import * as _ from 'lodash'
 import { DeepLink } from 'chats/types'
 import Referral from 'models/Referral'
 import { claimCode } from 'chats/wallet/sendCoin'
+import { keyboardMainMenu } from 'chats/common'
 
 export async function signupParser(
   msg: TelegramBot.Message,
@@ -22,14 +23,49 @@ export async function signupParser(
   switch (stateKey) {
     case SignupStateKey.start: {
       const deepLinks = parseDeepLink(msg)
+      const data = {
+        deeplink: _.get(deepLinks, 'key', null),
+        value: _.get(deepLinks, 'value', null)
+      }
+
+      if (data.deeplink != null && data.value != null) {
+        switch (data.deeplink) {
+          case DeepLink.REFERRAL:
+            const referredByUser = await User.findOne({
+              where: { accountId: data.value },
+              include: [{ model: TelegramAccount }]
+            })
+            if (referredByUser) {
+              await Referral.createReferral(referredByUser.id, user.id)
+              await telegramHook.getWebhook.sendMessage(
+                referredByUser.telegramUser.id,
+                user.t('new-referral', {
+                  accountId: user.accountId
+                }),
+                {
+                  parse_mode: 'Markdown',
+                  reply_markup: keyboardMainMenu(user)
+                }
+              )
+            }
+            break
+
+          case DeepLink.TRACK:
+            await UserInfo.create<UserInfo>({
+              userId: user.id,
+              tracking: data.value
+            })
+            break
+
+          case DeepLink.PAYMENT:
+            await claimCode(user, tUser, data.value)
+        }
+      }
 
       return {
         ...currentState,
         [SignupStateKey.start]: {
-          data: {
-            deeplink: _.get(deepLinks, 'key', null),
-            value: _.get(deepLinks, 'value', null)
-          }
+          data
         }
       }
     }
@@ -164,29 +200,6 @@ export async function signupParser(
     }
 
     case SignupStateKey.accountReady:
-      const data = _.get(currentState[SignupStateKey.start], 'data', null)
-      if (data != null && data.deeplink != null && data.value != null) {
-        switch (data.deeplink) {
-          case DeepLink.REFERRAL:
-            const referredByUser = await User.findOne({
-              where: { accountId: data.value }
-            })
-            if (referredByUser) {
-              await Referral.createReferral(referredByUser.id, user.id)
-            }
-            break
-
-          case DeepLink.TRACK:
-            await UserInfo.create<UserInfo>({
-              userId: user.id,
-              tracking: data.value
-            })
-            break
-
-          case DeepLink.PAYMENT:
-            await claimCode(user, tUser, data.value)
-        }
-      }
       return currentState
 
     case SignupStateKey.homeScreen:

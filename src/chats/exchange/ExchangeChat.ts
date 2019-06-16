@@ -232,8 +232,6 @@ async function processMessage(
 }
 
 async function getOrderDetails(orderId: number) {
-  logger.error('TODO: Implement getOrder with user details')
-
   const order = await Order.getOrder(orderId)
   if (order == null) {
     return {
@@ -250,14 +248,18 @@ async function getOrderDetails(orderId: number) {
     }
   }
 
+  const userStats = await Trade.getUserStats(
+    order.userId,
+    order.cryptoCurrencyCode
+  )
   return {
     order: order,
     dealer: {
       ...dealer,
-      rating: 4.7,
+      rating: userStats.rating,
       lastSeen: new Date(),
-      tradeCount: 5,
-      reviewCount: 30
+      tradeCount: userStats.dealCount,
+      reviewCount: (await Trade.getUserReviews(order.userId)).length
     }
   }
 }

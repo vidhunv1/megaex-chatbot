@@ -1,8 +1,14 @@
 import { PaymentMethodType } from 'models/PaymentMethod'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { OrderType } from 'models/Order'
+import { BotCommand } from 'chats/types'
 
 export const commonEN = {
+  'new-referral': `🤝 *New Referral*
+
+${BotCommand.ACCOUNT}{{ accountId }} joined through your referral link. 
+
+You will now receive comissions from all their trades.`,
   'callback-error-response': '❗️Error',
   'contact-legal-cbbutton': '👩‍🎓 Contact Support',
   'contact-legal': `👩‍🎓 *Customer support*

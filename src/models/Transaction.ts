@@ -17,6 +17,9 @@ import TelegramAccount from './TelegramAccount'
 import { dataFormatter } from 'utils/dataFormatter'
 import { Namespace } from 'modules/i18n'
 import * as _ from 'lodash'
+import { CONFIG } from '../config'
+import Referral from './Referral'
+import { keyboardMainMenu } from 'chats/common'
 
 export enum TransactionType {
   SEND = 'SEND',
@@ -30,6 +33,7 @@ export enum TransactionSource {
   BLOCK = 'BLOCK',
   RELEASE = 'RELEASE',
   TRADE = 'TRADE',
+  FEES = 'FEES',
   COMISSION = 'COMISSION'
 }
 
@@ -95,6 +99,130 @@ export class Transaction extends Model<Transaction> {
     )
 
     return parseFloat(_.get(c, 'comission', 0)) || 0
+  }
+
+  static async collectFees(
+    makerUserId: number,
+    takerUserId: number,
+    tradeId: number,
+    tradeAmount: number,
+    currencyCode: CryptoCurrency
+  ) {
+    const makerFeePc = parseFloat(CONFIG.MAKER_FEES_PERCENTAGE)
+    const totalFees = tradeAmount * (makerFeePc / 100)
+    let feesToCollect = totalFees
+    const refComissionPc = parseFloat(CONFIG.REFERRAL_COMISSION_PERCENTAGE)
+
+    const refMaker = await Referral.findOne({
+      where: {
+        referredUser: makerUserId
+      }
+    })
+    const refTaker = await Referral.findOne({
+      where: {
+        referredUser: takerUserId
+      }
+    })
+
+    if (refMaker) {
+      const refMakerComission = totalFees * (refComissionPc / 100)
+      feesToCollect = feesToCollect - refMakerComission
+
+      await Transaction.create<Transaction>({
+        userId: refMaker.userId,
+        currencyCode: currencyCode,
+        amount: refMakerComission,
+        txid: tradeId + '-comission-' + makerUserId,
+        confirmations: 10,
+        transactionType: TransactionType.RECEIVE,
+        transactionSource: TransactionSource.COMISSION
+      })
+
+      const mu = await User.findById(refMaker.userId, {
+        include: [{ model: TelegramAccount }]
+      })
+      if (mu) {
+        telegramHook.getWebhook.sendMessage(
+          mu.telegramUser.id,
+          mu.t(`${Namespace.Exchange}:deals.trade.referral-comission`, {
+            cryptoAmount: dataFormatter.formatCryptoCurrency(
+              refMakerComission,
+              currencyCode
+            )
+          }),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(mu)
+          }
+        )
+      }
+
+      logger.info(
+        'Sent referral comission to ' +
+          refMaker.userId +
+          ' ' +
+          tradeAmount +
+          ' ' +
+          currencyCode
+      )
+    }
+
+    if (refTaker) {
+      const refTakerComission = totalFees * (refComissionPc / 100)
+      feesToCollect = feesToCollect - refTakerComission
+
+      await Transaction.create<Transaction>({
+        userId: refTaker.userId,
+        currencyCode: currencyCode,
+        amount: refTakerComission,
+        txid: tradeId + '-comission-' + takerUserId,
+        confirmations: 10,
+        transactionType: TransactionType.RECEIVE,
+        transactionSource: TransactionSource.COMISSION
+      })
+
+      const ru = await User.findById(refTaker.userId, {
+        include: [{ model: TelegramAccount }]
+      })
+      if (ru) {
+        telegramHook.getWebhook.sendMessage(
+          ru.telegramUser.id,
+          ru.t(`${Namespace.Exchange}:deals.trade.referral-comission`, {
+            cryptoAmount: dataFormatter.formatCryptoCurrency(
+              refTakerComission,
+              currencyCode
+            )
+          }),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(ru)
+          }
+        )
+      }
+
+      logger.info(
+        'Sent referral comission to ' +
+          refTaker.userId +
+          ' ' +
+          tradeAmount +
+          ' ' +
+          currencyCode
+      )
+    }
+
+    if (feesToCollect > 0) {
+      await Transaction.create<Transaction>({
+        userId: 1,
+        currencyCode: currencyCode,
+        amount: feesToCollect,
+        txid: tradeId + '-fees',
+        confirmations: 10,
+        transactionType: TransactionType.RECEIVE,
+        transactionSource: TransactionSource.FEES
+      })
+
+      logger.info('Collected fees: ' + feesToCollect)
+    }
   }
 
   // Gets sum of all wallet deposit through core
