@@ -124,6 +124,16 @@ export class Transaction extends Model<Transaction> {
       }
     })
 
+    await Transaction.create<Transaction>({
+      userId: makerUserId,
+      currencyCode: currencyCode,
+      amount: Math.abs(feesToCollect) * -1,
+      txid: tradeId + '-collect-fees',
+      confirmations: 10,
+      transactionType: TransactionType.SEND,
+      transactionSource: TransactionSource.FEES
+    })
+
     if (refMaker) {
       const refMakerComission = totalFees * (refComissionPc / 100)
       feesToCollect = feesToCollect - refMakerComission
