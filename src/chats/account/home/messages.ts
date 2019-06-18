@@ -6,7 +6,7 @@ import { stringifyCallbackQuery } from 'chats/utils'
 import { PaymentMethodStateKey, PaymentMethodState } from '../paymentMethods'
 import { ReferralStateKey, ReferralState } from '../referral'
 import { SettingsStateKey, SettingsState } from '../settings'
-import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
+// import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
 import { CryptoCurrency } from 'constants/currencies'
 import {
   AccountHomeError,
@@ -209,11 +209,11 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       ]
     ]
 
-    !user.isVerified &&
-      inline[0].push({
-        text: user.t(`${Namespace.Account}:home.verify-account-cbbutton`),
-        url: VERIFY_ACCOUNT_PATH
-      })
+    // !user.isVerified &&
+    //   inline[0].push({
+    //     text: user.t(`${Namespace.Account}:home.verify-account-cbbutton`),
+    //     url: VERIFY_ACCOUNT_PATH
+    //   })
 
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,

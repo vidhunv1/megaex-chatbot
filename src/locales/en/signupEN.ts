@@ -7,7 +7,7 @@ export const signupEN = {
  
  To get started, choose the language for the app from the options listed below:`,
 
-  'terms-and-conditions': `Great! By clicking on *✅ I Agree*; you agree to our [Terms of Service](https://google.com) and [Privacy Policy](https://google.com).`,
+  'terms-and-conditions': `Great! To continue click on *✅ I Agree* to accept the [Terms of Service](https://telegra.ph/Terms-of-Service-06-18).`,
 
   'terms-agree-button': '✅ I Agree',
 

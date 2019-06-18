@@ -7,7 +7,7 @@ export const signupHI = {
  
  To get started, choose the language for the app from the options listed below:`,
 
-  'terms-and-conditions': `Aapne language 'Hindi' select kiya hai. Ab *✅ I Accept* pe click kare. *✅ I Accept* pe click karne se aap humare [Terms of Service](https://google.com) and [Privacy Policy](https://google.com) ko accept kar rahe hai.`,
+  'terms-and-conditions': `Aapne language 'Hindi' select kiya hai. Ab *✅ I Accept* pe click kare. *✅ I Accept* pe click karne se aap humare [Terms of Service](https://telegra.ph/Terms-of-Service-06-18) ko accept kar rahe hai.`,
 
   'terms-agree-button': '✅ I Agree',
 
