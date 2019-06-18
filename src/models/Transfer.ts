@@ -13,7 +13,7 @@ import {
 import * as moment from 'moment'
 import { User, Transaction } from '.'
 import RandomGenerator from '../lib/RandomGenerator'
-import logger from '../modules/Logger'
+import { logger } from 'modules'
 import { cacheConnection } from '../modules'
 import { CONFIG } from '../config'
 import { CryptoCurrency } from '../constants/currencies'

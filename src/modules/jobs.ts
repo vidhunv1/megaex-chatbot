@@ -1,5 +1,5 @@
 import { CronJob } from 'cron'
-import logger from '../modules/Logger'
+import { logger } from 'modules'
 import { Market } from 'models'
 
 export default class Jobs {

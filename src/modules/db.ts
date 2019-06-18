@@ -32,9 +32,18 @@ export class DB {
 
   init() {
     try {
+      let dialectOptions = {}
+      if (CONFIG.NODE_ENV === 'production') {
+        dialectOptions = {
+          ssl: {
+            require: true
+          }
+        }
+      }
       const sequelize = new Sequelize({
         url: CONFIG.DB_URL,
         dialect: 'postgres',
+        dialectOptions,
         logging: function(sql: any, _sequelizeObject: any) {
           logger.info(sql)
         }
