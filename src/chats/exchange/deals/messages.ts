@@ -441,7 +441,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         maxFiatValue: maxFiatValue,
         minCryptoValue: minCryptoValue,
         maxCryptoValue: maxCryptoValue,
-        cryptoCurrencyCode: cryptoCurrencyCode
+        cryptoCurrencyCode: cryptoCurrencyCode,
+        fiatCurrencyCode: fiatCurrencyCode
       })
     } else {
       message = user.t(`${Namespace.Exchange}:deals.input-buy-amount`, {
@@ -449,7 +450,8 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         maxFiatValue: maxFiatValue,
         minCryptoValue: minCryptoValue,
         maxCryptoValue: maxCryptoValue,
-        cryptoCurrencyCode: cryptoCurrencyCode
+        cryptoCurrencyCode: cryptoCurrencyCode,
+        fiatCurrencyCode: fiatCurrencyCode
       })
     }
     await telegramHook.getWebhook.sendMessage(msg.chat.id, message, {
@@ -589,7 +591,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
           ]
         ]
       } else {
-        text = user.t(`${Namespace.Exchange}:deals.show-sell-deals`, {
+        text = user.t(`${Namespace.Exchange}:deals.show-buy-deals`, {
           cryptoCurrencyCode,
           currentPage: currentPage,
           totalPages: totalPages

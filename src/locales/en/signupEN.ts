@@ -3,40 +3,34 @@ import { BotCommand } from 'chats/types'
 export const signupEN = {
   'choose-language': `Hello, *{{ name }}*!
 
-Please select your language from the options below`,
+ Mega Deals is a telegram bot that allows you to buy and sell bitcoins with your local currency privately and securely. 
+ 
+ To get started, choose the language for the app from the options listed below:`,
 
-  'terms-and-conditions': `
-
-By continuing you agree to our [terms & conditions](https://google.com) and [privacy policy](https://google.com)
-`,
+  'terms-and-conditions': `Great! By clicking on *✅ I Agree*; you agree to our [Terms of Service](https://google.com) and [Privacy Policy](https://google.com).`,
 
   'terms-agree-button': '✅ I Agree',
 
   'select-currency': 'Select your local currency',
 
-  'account-ready': `*Account Created*
+  'account-ready': `*Your account on MegaDeals is created!*
 
-Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
-Bitcoin address: *{{ bitcoinAddress }}*
+*Account ID*: ${BotCommand.ACCOUNT}{{ accountID }}
+Your BTC address is {{ bitcoinAddress }}
 
-_Security Tip_
-🔒 _Enable Telegram password_ security settings -> 2 step verification -> Password
-🔒 _Always terminate all inactive sessions from_ security settings -> Active sessions`,
+🔐 For your *security* please enable two-step verification on Telegram: Go to Settings > Privacy & Security > Two-step verification`,
 
-  'account-ready-generating-address': `*Account Created*
+  'account-ready-generating-address': `*Your account on MegaDeals is created!*
 
-Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
-
-_Security Tip_
-🔒 _Enable Telegram password_ security settings -> 2 step verification -> Password
-🔒 _Always terminate all inactive sessions from_ security settings -> Active sessions`,
+  *Account ID*: ${BotCommand.ACCOUNT}{{ accountID }}
+  
+🔐*Security Tip:*
+Enable two-step verification on Telegram: Go to Settings > Privacy & Security > Two-step verification`,
   'account-ready-continue-button': '🚀 Start trading',
-  'home-screen': `[Join our group](https://t.me/megadealsenglish)
+  'home-screen': `*Mega Deals*
 
-_Earn bitcoins using our referral program. Get your referral link inside_ *Account* _below_
-
-Use the *main menu* below to *exchange* or use your *wallet*
-`,
+1. 💵Exchange: Buy and Sell bitcoins. Track your orders.
+2. 💼wallet: Check your account balance and payment methods. `,
   'signup-error':
-    'An error occurred while registering. Please try again later or contact support if this problem persists.'
+    'Oops! We are sorry. An error has occurred while registering. Please try again later or contact our support @{{ supportBotUsername }}. We are happy to help 24/7.'
 }

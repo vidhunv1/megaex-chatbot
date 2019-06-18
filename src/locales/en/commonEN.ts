@@ -42,20 +42,16 @@ Send message: @{{ supportUsername }}
   'action-canceled': 'This action was canceled.',
   error: {
     unknown:
-      'An error occurred, we are working on fixing this. Please try again later.',
-    'bad-message': `👮‍ *Support*
+      '❗️❗️ Oops! An error occurred. We are working on this. Please try again later.',
+    'bad-message': `👮‍ *MegaDeals Support Team:*
 
-If you are having any trouble please contact our support @{{ supportBotUsername }}
+If you are having any trouble, we are there to help you 24/7. Contact our team @{{ supportBotUsername }}
 
-⚠️ _Caution: Never do any deals outside this bot, we will not be able to protect and recover your funds_
+⚠️ IMPORTANT: Never do any deals outside this bot, we will not be able to protect and recover your funds.
 
-*Info*
+ℹ️ *About MegaDeals:*
 
-Here you can find best deals to exchange bitcoins with your local currency here
-
-⚡️ Instant exchange with escrow protection
-🔒 Secure wallet
-`
+MegaDeals is a secure bot to best deals to buy/sell bitcoins with your local currency.`
   },
   bot: {
     name: 'BTC Deals',
@@ -74,7 +70,7 @@ Here you can find best deals to exchange bitcoins with your local currency here
     account: '👤 My Account',
     wallet: '💼 Wallet'
   },
-  'unhandled-callback': `Session on this button expired. Please create a new request.`,
+  'unhandled-callback': `Sorry! Your session on this request has expired. Please make a new request again.`,
   'payment-methods': {
     names: {
       [PaymentMethodType.PAYTM]: 'PayTM',

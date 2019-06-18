@@ -21,22 +21,22 @@ By *{{ reviewerName }}*, traded for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`
     
 Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
     
-💵  *Total Deals:* {{ dealCount }}
-💎  *Volume:*        {{ tradeVolume }}
-⭐  *Rating:*           {{ rating }}
+💵 *Total Deals:* {{ dealCount }}
+💎 *Volume:* {{ tradeVolume }}
+⭐ *Rating:* {{ rating }}
     
-🤝 Invited:           {{ referralCount }} users
-💰 Earnings:        {{ earnings }}
+🤝 Referrals Invited: {{ referralCount }} users
+💰 Referral Earnings: {{ earnings }}
     
-💳  *Payment Methods:* {{ paymentMethods }}`,
+💳 *Payment Methods:* {{ paymentMethods }}`,
 
     'dealer-account': `*Account* (${BotCommand.ACCOUNT}{{ accountId }})
 
 Telegram: @{{ telegramUsername }}
 
-💵  *Total Deals:* {{ dealCount }}
-💎  *Volume:*       {{ tradeVolume }} {{ cryptoCurrencyCode }}
-⭐  *Rating:*         {{ rating }}`,
+💵 *Trade Deals:* {{ dealCount }}
+💎 *Trade volume:* {{ tradeVolume }} {{ cryptoCurrencyCode }}
+⭐ *Rating:* {{ rating }}`,
 
     'send-message-dealer-cbbutton': '📝 Write message',
     'user-reviews-cbbutton': '🗣 Reviews ({{ reviewCount }})',
@@ -45,65 +45,66 @@ Telegram: @{{ telegramUsername }}
     'verify-account-cbbutton': '✅  Verify identity',
     'manage-payment-methods-cbbutton': '💳  Payment Methods',
     'referral-link-cbbutton': '🤝  Referral',
-    'settings-cbbutton': '⚙ Settings',
+    'settings-cbbutton': '️⚙️ Settings',
     'no-payment-method': `None`
   },
 
   'payment-method': {
     'does-not-exist': `❌ *Error*
 
-    This payment method does not exist.
+This payment method does not exist.
     
-    You can request @{{ supportBotUsername }} to get a valid payment method added.`,
+You can request @{{ supportBotUsername }} to get a valid payment method added.`,
 
     'create-error':
-      'Could not create this payment method. Please try again later.',
-    'edit-cbbutton': '🖋  Edit payment Methods',
-    'add-cbbutton': '➕  Add payment Method',
+      'Sorry. We could not create this payment method. Please try again later.',
+    'edit-cbbutton': '🖋  Edit payment methods',
+    'add-cbbutton': '➕  Add payment method',
     'show-all': `💳 *Payment Methods*
 
 {{ paymentMethodsList }}`,
-    'show-edit': `
-*Edit Payment Method*
+    'show-edit': `*Edit Payment Method*
 
-Click on the payment method you want to edit.
-`,
+Click on the payment method you want to edit.`,
     'select-to-add': `*Select*
 
-Select your payment method to add from the options below.
-`,
+Select your payment method to add from the options below.`,
     'edit-enter-field': 'Enter the *{{ fieldName }}*',
-    created: `✅ *Created*
+    created: `✅ Payment method *added*
 
-Your payment method was created.
+Your payment method is added.
 
 {{ paymentMethodInfo }}
 
 ❕You can now use this to receive money when selling cryptocurrency.`,
-    updated: `✅ *Updated*
+    updated: `✅ Payment method *updated*.
 
-Your payment method was updated.
+Your payment method is updated.
 
-{{ paymentMethodInfo }}
-`,
+{{ paymentMethodInfo }}`,
     'none-added': `❕ You dont have any payment methods added. This will be used to transfer money to you when you are selling.`
   },
 
   referral: {
-    'show-info': `🤝 *Referral*
+    'show-info': `🤝 *Refer your friends*
 
-* Invited*: {{ referralCount }} users
-* Referral fees*: {{ referralFeesPercentage }}% 
-_(from the fees we take from your referral)_
-    
-💰Invite your friends using your referral link to earn bitcoins for every trade they make forever.
-Payouts are processed *instantly*, credited directly to your wallet.`
+*Your referral count*: {{ referralCount }} users
+*Referral fees*: {{ referralFeesPercentage }}%
+_(% commission you receive from the fees we take from your referral)_
+
+Invite new users using your referral link and earn bitcoins. For every trade your referral makes, you will get {{ referralFeesPercentage }}% of the trade fee. 
+
+For example: If your referral trades 1 BTC you will make 0.004 BTC of the 0.008 BTC we take as fee. 
+
+💰 Your referral payouts are processed instantly credited directly to your wallet. The referral program has no expiry date, and no limits of invitations.
+
+Copy the message below and share it. 👇`
   },
 
   settings: {
     'invalid-username': `❌ *Error*
   
-Invalid Account ID. Please try again later.`,
+This Account ID is invalid. Please check the ID you've entered and try again.`,
 
     'update-success': 'changed',
     'username-show': `👤 *Enter Account ID*
@@ -113,35 +114,35 @@ Only english letters and numbers between 3 and 15 characters.
 NOTE: This action is final, you wont be able to change your Account ID again.
 `,
     'back-to-settings-cbbutton': '⬅️  Back',
-    'settings-currency-updated': `✅ *Updated*
-  
-Your currency was updated to *{{ updatedCurrencyCode }}*`,
+    'settings-currency-updated': `✅ Your currency is updated to *{{ updatedCurrencyCode }}*`,
     'show-rate-source': `📊 *Rate source*
 
 Select the exchange rate source you want to use.
-Active «*{{ exchangeSource }}*»
+The exchange source active is: *{{ exchangeSource }}*.
 
-⚠️ Changing this will affect your active orders if a margin pricing was used.
+⚠️ Note: Changing this will affect your active orders if you had used *margin pricing*.
 `,
     'show-more': 'more »',
     'show-currency': `💵 *Currency*
   
 Click to change your currency.
 
-Active «*{{ fiatCurrencyCode }}*»`,
+You are currently using *{{ fiatCurrencyCode }}*. Select a currency from the list below. Click on "more" to see other available currencies.`,
     'show-language': `🌎 *Language*
 
-Choose your language.
+Choose the language for the app. 
 
-Active «*{{ language }}*»
-`,
-    'currency-cbbutton': '💵  Currency',
-    'language-cbbutton': '🌎  Language',
-    'rate-source-cbbutton': '📊  Rate source',
-    'show-settings': `*⚙ Settings*
+Tip:
+1. Use a language you can understand and read well.
+2. The previous messages (sent and received) will not be changed to your new language.
+    
+Active «*{{ language }}*»`,
+    'currency-cbbutton': '💵 Currency',
+    'language-cbbutton': '🌎 Language',
+    'rate-source-cbbutton': '📊 Rate source',
+    'show-settings': `⚙️ *Settings*
 
-Select the option you want to edit
-`,
+What do you want to edit?`,
     'username-cbbutton': '👤  Change Acc ID'
   }
 }
