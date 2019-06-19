@@ -220,9 +220,8 @@ export class Trade extends Model<Trade> {
             [Trade.sequelize.literal(`SUM("cryptoAmount")`), 'volume'],
             [Trade.sequelize.literal(`count(*)`), 'count']
           ],
-          where: Sequelize.or(
-            { buyerUserId: userId },
-            { sellerUserId: userId },
+          where: Sequelize.and(
+            Sequelize.or({ buyerUserId: userId }, { sellerUserId: userId }),
             { cryptoCurrencyCode: cryptoCurrencyCode }
           )
         })
