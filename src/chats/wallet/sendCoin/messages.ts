@@ -139,7 +139,7 @@ export const SendCoinMessage = (msg: TelegramBot.Message, user: User) => ({
       msg.chat.id,
       user.t(`${Namespace.Wallet}:send-coin.show-created-link`, {
         paymentLink: paymentLink,
-        expiryTime: (expiryTimeS / 3600).toPrecision(1)
+        expiryTime: (expiryTimeS / 3600).toFixed(0)
       }),
       {
         parse_mode: 'Markdown',
