@@ -29,8 +29,8 @@ Enable two-step verification on Telegram: Go to Settings > Privacy & Security > 
   'account-ready-continue-button': '🚀 Start trading',
   'home-screen': `*Mega Deals*
 
-1. 💵Exchange: Buy and Sell bitcoins. Track your orders.
-2. 💼wallet: Check your account balance and payment methods. `,
+💵 Exchange: Buy and Sell bitcoins, track your orders.
+💼 wallet: Check your account balance and payment methods.`,
   'signup-error':
     'Oops! We are sorry. An error has occurred while registering. Please try again later or contact our support @{{ supportBotUsername }}. We are happy to help 24/7.'
 }

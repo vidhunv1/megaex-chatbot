@@ -487,7 +487,10 @@ export class Transaction extends Model<Transaction> {
   static async listTransactions(userId: number): Promise<Transaction[]> {
     return Transaction.findAll({
       where: {
-        userId: userId
+        userId: userId,
+        confirmations: {
+          $gte: 1
+        }
       }
     })
   }

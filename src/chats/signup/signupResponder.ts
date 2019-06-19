@@ -43,7 +43,7 @@ export async function signupResponder(
     case SignupStateKey.language:
       await telegramHook.getWebhook.sendSticker(
         msg.chat.id,
-        'CAADAgADKgMAAs-71A4f8rUYf2WfMAI'
+        'CAADAgAD9gMAAjtKAgABcF8OlmAYAmwC'
       )
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,

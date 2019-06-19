@@ -51,7 +51,7 @@ If you are having any trouble, we are there to help you 24/7. Contact our team @
 
 ℹ️ *About MegaDeals:*
 
-MegaDeals is a secure bot to best deals to buy/sell bitcoins with your local currency.`
+MegaDeals is a secure bot to buy / sell bitcoins with your local currency.`
   },
   bot: {
     name: 'BTC Deals',
