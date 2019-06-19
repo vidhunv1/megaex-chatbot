@@ -242,7 +242,9 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
                 text: user.t('actions.cancel-keyboard-button')
               }
             ]
-          ]
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: true
         }
       }
     )
@@ -266,7 +268,9 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
                 text: user.t('actions.cancel-keyboard-button')
               }
             ]
-          ]
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: true
         }
       }
     )
@@ -285,7 +289,9 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
                 text: user.t('actions.cancel-keyboard-button')
               }
             ]
-          ]
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: true
         }
       }
     )
