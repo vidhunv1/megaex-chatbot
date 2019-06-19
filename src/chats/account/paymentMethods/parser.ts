@@ -8,10 +8,9 @@ import {
 import * as _ from 'lodash'
 import {
   PaymentMethodsFieldsLocale,
-  PaymentMethodAvailability
+  getAllPaymentMethods
 } from 'constants/paymentMethods'
 import { logger } from 'modules'
-import { FiatCurrency } from 'constants/currencies'
 import {
   PaymentMethodType,
   PaymentMethod,
@@ -378,15 +377,6 @@ async function editPaymentMethod(
   }
   return true
 }
-
-const getAllPaymentMethods = (
-  currencyCode: FiatCurrency
-): PaymentMethodType[] =>
-  // @ts-ignore
-  Object.keys(PaymentMethodAvailability).filter(
-    // @ts-ignore
-    (key) => PaymentMethodAvailability[key] === currencyCode || 'ALL'
-  )
 
 async function getSavedPaymentMethods(
   userId: number

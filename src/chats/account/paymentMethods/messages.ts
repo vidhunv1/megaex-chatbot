@@ -7,7 +7,10 @@ import { keyboardMainMenu } from 'chats/common'
 import { stringifyCallbackQuery } from 'chats/utils'
 import { PaymentMethodStateKey, PaymentMethodState } from './types'
 import { PaymentMethodType, PaymentMethodFields } from 'models/PaymentMethod'
-import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
+import {
+  PaymentMethodPrimaryFieldIndex,
+  getAllPaymentMethods
+} from 'constants/paymentMethods'
 
 export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
   async pmDoesNotExist() {
@@ -110,8 +113,8 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
   },
 
   async selectPaymentMethodInput() {
-    const keyboard: TelegramBot.KeyboardButton[][] = Object.values(
-      PaymentMethodType
+    const keyboard: TelegramBot.KeyboardButton[][] = getAllPaymentMethods(
+      user.currencyCode
     ).map((pm) => [{ text: user.t(`payment-methods.names.${pm}`) }])
     keyboard.push([{ text: user.t('actions.cancel-keyboard-button') }])
     await telegramHook.getWebhook.sendMessage(

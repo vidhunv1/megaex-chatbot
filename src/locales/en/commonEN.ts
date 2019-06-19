@@ -75,12 +75,64 @@ MegaDeals is a secure bot to buy / sell bitcoins with your local currency.`
     names: {
       [PaymentMethodType.PAYTM]: 'PayTM',
       [PaymentMethodType.UPI]: 'UPI',
-      [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 'IMPS bank transfer'
+      [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 'IMPS bank transfer',
+      // RUB
+      [PaymentMethodType.SBERBANK]: 'SberBank',
+      [PaymentMethodType.QIWI]: 'QIWI',
+      [PaymentMethodType.YANDEX_MONEY]: 'Yandex Money',
+
+      // CNY
+      [PaymentMethodType.ALIPAY]: 'AliPay',
+      [PaymentMethodType.WECHAT]: 'WeChay',
+
+      // ALL
+      [PaymentMethodType.NATIONAL_BANK_TRANSFER]: 'National Bank Transfer',
+      [PaymentMethodType.PAYPAL]: 'PayPal',
+      [PaymentMethodType.CASH_TRADE]: 'Cash trade',
+      [PaymentMethodType.CASH_DEPOSIT]: 'Cash deposit',
+      [PaymentMethodType.CREDIT_CARD]: 'Credit card',
+      [PaymentMethodType.SKRILL]: 'Skrill',
+      [PaymentMethodType.OKPAY]: 'OkPay',
+      [PaymentMethodType.WESTERN_UNION]: 'Western Union',
+      [PaymentMethodType.WEBMONEY]: 'WebMoney',
+      [PaymentMethodType.NETTELLER]: 'Netteller',
+      [PaymentMethodType.INTERNATIONAL_WIRE]: 'International Wire',
+      [PaymentMethodType.AMAZON_GIFT_CARD]: 'Amazon Gift card',
+      [PaymentMethodType.PAXUM]: 'Paxum',
+      [PaymentMethodType.PAYONEER]: 'Payoneer',
+      [PaymentMethodType.OTHER_CRYPTOCURRENCY]: 'Cryptocurrency altcoin',
+      [PaymentMethodType.OTHER]: 'Other'
     },
     'short-names': {
       [PaymentMethodType.PAYTM]: 'PayTM',
       [PaymentMethodType.UPI]: 'UPI',
-      [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 'IMPS'
+      [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: 'IMPS',
+      // RUB
+      [PaymentMethodType.SBERBANK]: 'SberBank',
+      [PaymentMethodType.QIWI]: 'QIWI',
+      [PaymentMethodType.YANDEX_MONEY]: 'Yandex Money',
+
+      // CNY
+      [PaymentMethodType.ALIPAY]: 'AliPay',
+      [PaymentMethodType.WECHAT]: 'WeChay',
+
+      // ALL
+      [PaymentMethodType.NATIONAL_BANK_TRANSFER]: 'National Bank Transfer',
+      [PaymentMethodType.PAYPAL]: 'PayPal',
+      [PaymentMethodType.CASH_TRADE]: 'Cash trade',
+      [PaymentMethodType.CASH_DEPOSIT]: 'Cash deposit',
+      [PaymentMethodType.CREDIT_CARD]: 'Credit card',
+      [PaymentMethodType.SKRILL]: 'Skrill',
+      [PaymentMethodType.OKPAY]: 'OkPay',
+      [PaymentMethodType.WESTERN_UNION]: 'Western Union',
+      [PaymentMethodType.WEBMONEY]: 'WebMoney',
+      [PaymentMethodType.NETTELLER]: 'Netteller',
+      [PaymentMethodType.INTERNATIONAL_WIRE]: 'International Wire',
+      [PaymentMethodType.AMAZON_GIFT_CARD]: 'Amazon Gift card',
+      [PaymentMethodType.PAXUM]: 'Paxum',
+      [PaymentMethodType.PAYONEER]: 'Payoneer',
+      [PaymentMethodType.OTHER_CRYPTOCURRENCY]: 'Cryptocurrency altcoin',
+      [PaymentMethodType.OTHER]: 'Other'
     },
     fields: {
       [PaymentMethodType.PAYTM]: {
@@ -93,6 +145,72 @@ MegaDeals is a secure bot to buy / sell bitcoins with your local currency.`
         field1: 'Bank name',
         field2: 'Account Number',
         field3: 'IFSC Code'
+      },
+
+      [PaymentMethodType.SBERBANK]: {
+        field1: 'full payment details'
+      },
+      [PaymentMethodType.QIWI]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.YANDEX_MONEY]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.ALIPAY]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.WECHAT]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.NATIONAL_BANK_TRANSFER]: {
+        field1: 'Bank name',
+        field2: 'account details'
+      },
+      [PaymentMethodType.PAYPAL]: {
+        field1: 'email'
+      },
+      [PaymentMethodType.CASH_TRADE]: {
+        field1: 'location / city'
+      },
+      [PaymentMethodType.CASH_DEPOSIT]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.CREDIT_CARD]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.SKRILL]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.OKPAY]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.WESTERN_UNION]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.WEBMONEY]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.NETTELLER]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.INTERNATIONAL_WIRE]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.AMAZON_GIFT_CARD]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.PAXUM]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.PAYONEER]: {
+        field1: 'payment details'
+      },
+      [PaymentMethodType.OTHER_CRYPTOCURRENCY]: {
+        field1: 'alercoin ticker name',
+        field2: 'altcoin address'
+      },
+      [PaymentMethodType.OTHER]: {
+        field1: 'full payment details'
       }
     }
   },
