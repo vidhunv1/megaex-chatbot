@@ -222,7 +222,8 @@ export class Trade extends Model<Trade> {
           ],
           where: Sequelize.and(
             Sequelize.or({ buyerUserId: userId }, { sellerUserId: userId }),
-            { cryptoCurrencyCode: cryptoCurrencyCode }
+            { cryptoCurrencyCode: cryptoCurrencyCode },
+            { status: Trade.getActiveStatuses() }
           )
         })
       )
