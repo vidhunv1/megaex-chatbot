@@ -27,10 +27,34 @@ There are no active buy orders. Click to create a new buy order.`,
 There are no active sell orders. Click to create a new sell order.`,
     'new-quick-buy-cbbutton': '📕 New sell order',
     trade: {
+      'dispute-resolved-seller-win': `👩‍🎓 *Dispute resolved*
+
+After careful review based on proofs, our legal team has confirmed that there was no issue on your side.
+
+Appropriate action has been taken against the buyer, we are sorry for any inconvinience caused, .
+
+*The locked funds has been released back to you.*`,
+      'dispute-resolved-buyer-win': `👩‍🎓 *Dispute resolved*
+
+After careful review based on proofs, our legal team has confirmed that there was no issue on your side.
+      
+Appropriate action has been taken against the seller, we are sorry for any inconvinience caused, a.
+
+*{{ cryptoAmount }} has been credited to your wallet*`,
+      'dispute-resolved-seller-lose': `👩‍🎓 *Dispute resolved*
+
+After careful review based on proofs, our legal team has confirmed that there was a fault on your side.
+
+*NOTE: Repeated offence will result in a permanent ban.*`,
+      'dispute-resolved-buyer-lose': `‍🎓 *Dispute resolved*
+
+After careful review based on proofs, our legal team has confirmed that there was a fault on your side.
+      
+*NOTE: Repeated offence will result in a permanent ban.*`,
       'referral-comission': `🚀 *Comission Received*
 
 You received {{ cryptoAmount }} referral comission from your referrals trade.`,
-      'open-dispute-cbbutton': '👩‍🎓 Trade support',
+      'open-dispute-cbbutton': '👩‍🎓 Open Issue',
       'dispute-initiator': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
 
 An issue has been raised on this trade, any transaction on this trade is temporarily blocked. Please contact @{{ legalUsername }} to resolve this.`,
@@ -82,14 +106,14 @@ Are you sure you have sent *{{ fiatAmount }}* to the sellers *{{ paymentMethodTy
 
 Seller has been notified. Please wait for the the seller to confirm your payment.
 
-❕If there is no confirmation you can contact *Trade support*.`,
+❕Please wait for sometime, If there is no confirmation you can contact *Open Issue*.`,
       'payment-sent-seller': `*🛎 Payment confirmed* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
 The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. Please confirm when you receive this transaction.
 
-❕If you have not received this transaction in some time you can contact *Trade support*.`,
+❕If you have not received this transaction in some time you can contact *Open Issue*.`,
       'escrow-warn-seller': `*Info*
 
 The seller is yet to make payment for the trade ${
@@ -347,7 +371,7 @@ click on *'Active'* button to enable this order.`,
 Terms: _{{ terms }}_
 
 *Link for your order*: {{ orderLink }}
-Anyone who clicks on this link can directly open a trade with you.
+Share this link, anyone who clicks on this link can directly open a trade with you.
 `,
     'payment-info-not-added': 'Not added',
     'insufficient-sell-order-balance':
@@ -364,7 +388,7 @@ Anyone who clicks on this link can directly open a trade with you.
 Terms: _{{ terms }}_
 
 *Link for your order*: {{ orderLink }}
-Anyone who clicks on this link can directly open a deal with you.
+Share this link, anyone who clicks on this link can directly open a deal with you.
 `,
     'edit-amount-cbbutton': '⚖️ Amount',
     'edit-rate-cbbutton': '💸 Rate BTC',

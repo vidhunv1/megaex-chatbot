@@ -35,7 +35,7 @@ export class Dispute extends Model<Dispute> {
   @Column(DataType.BIGINT)
   tradeId!: number
 
-  @BelongsTo(() => User)
+  @BelongsTo(() => Trade)
   trade!: Trade
 
   @AllowNull(false)

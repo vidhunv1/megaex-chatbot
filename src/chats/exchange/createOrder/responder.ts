@@ -14,6 +14,7 @@ import {
 } from 'models'
 import { ExchangeSource } from 'constants/exchangeSource'
 import { PaymentMethodType } from 'models'
+import { getAllPaymentMethods } from 'constants/paymentMethods'
 
 const CURRENT_CRYPTOCURRENCY = CryptoCurrency.BTC
 
@@ -113,11 +114,11 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
 
       if (orderType === OrderType.BUY) {
         await CreateOrderMessage(msg, user).selectBuyPaymentMethod(Object.keys(
-          PaymentMethodType
+          getAllPaymentMethods(user.currencyCode)
         ) as PaymentMethodType[])
       } else {
         await CreateOrderMessage(msg, user).selectSellPaymentMethod(
-          Object.keys(PaymentMethodType) as PaymentMethodType[],
+          getAllPaymentMethods(user.currencyCode) as PaymentMethodType[],
           await getAddedPaymentMethods(user.id)
         )
       }

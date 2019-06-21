@@ -14,6 +14,9 @@ import User from './User'
 import { CryptoCurrency, cryptoCurrencyInfo } from 'constants/currencies'
 import Transaction from './Transaction'
 import logger from 'modules/logger'
+import { telegramHook } from 'modules'
+import { CONFIG } from '../config'
+import TelegramAccount from './TelegramAccount'
 
 export enum WithdrawalStatus {
   PENDING = 'PENDING',
@@ -108,6 +111,29 @@ export class Withdrawal extends Model<Withdrawal> {
         withdrawal.id + '',
         t
       )
+
+      // Notify admin about the withdrawal
+      try {
+        const adminUser = await User.findById(CONFIG.ADMIN_USERID, {
+          include: [{ model: TelegramAccount }]
+        })
+
+        if (adminUser) {
+          telegramHook.getWebhook.sendMessage(
+            adminUser.telegramUser.id,
+            `*🤖 System Notification*
+          
+New withdrawal request: Id: ${withdrawal.id}, userId: ${
+              withdrawal.userId
+            }, amount: ${withdrawal.amount} ${withdrawal.cryptoCurrencyCode}`,
+            {
+              parse_mode: 'Markdown'
+            }
+          )
+        }
+      } catch (e) {
+        logger.error('Error notifying admin')
+      }
     })
 
     return withdrawal

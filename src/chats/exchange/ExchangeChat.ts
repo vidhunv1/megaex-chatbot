@@ -143,7 +143,15 @@ export const ExchangeChat: ChatHandler = {
             MyOrdersStateKey.cb_deleteOrder,
             MyOrdersStateKey.cb_editOrder,
             CreateOrderStateKey.cb_showCreateOrder,
-            CreateOrderStateKey.cb_createNewOrder
+            CreateOrderStateKey.cb_createNewOrder,
+
+            DealsStateKey.cb_cancelTradeConfirm,
+            DealsStateKey.cb_respondToTradeInit,
+            DealsStateKey.cb_confirmPaymentSent,
+            DealsStateKey.cb_confirmPaymentReceived,
+            DealsStateKey.cb_confirmInputDealAmount,
+            DealsStateKey.cb_selectPaymentDetail,
+            DealsStateKey.cb_openDeal
           ].includes(callbackName)
         ) {
           state = _.clone(initialState)

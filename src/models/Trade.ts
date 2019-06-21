@@ -15,13 +15,17 @@ import User from './User'
 import { OrderType, Order } from './Order'
 import Transaction from './Transaction'
 import { CacheHelper, CacheKey } from 'lib/CacheHelper'
-import { cacheConnection } from 'modules'
+import { cacheConnection, telegramHook } from 'modules'
 import { CONFIG } from '../config'
 import PaymentMethod, { PaymentMethodType } from './PaymentMethod'
 import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
 import logger from 'modules/logger'
 import Dispute, { DisputeStatus } from './Dispute'
 import * as _ from 'lodash'
+import TelegramAccount from './TelegramAccount'
+import { Namespace } from 'modules/i18n'
+import { dataFormatter } from 'utils/dataFormatter'
+import { keyboardMainMenu } from 'chats/common'
 
 export enum TradeStatus {
   INITIATED = 'INITIATED',
@@ -304,7 +308,7 @@ export class Trade extends Model<Trade> {
         trade.status === TradeStatus.PAYMENT_SENT ||
         trade.status === TradeStatus.ACCEPTED
       ) {
-        await Dispute.create<Dispute>({
+        const dispute = await Dispute.create<Dispute>({
           openedByUserId: userId,
           tradeId: tradeId,
           status: DisputeStatus.PENDING
@@ -313,6 +317,28 @@ export class Trade extends Model<Trade> {
           status: TradeStatus.PAYMENT_DISPUTE
         })
 
+        try {
+          const adminUser = await User.findById(CONFIG.ADMIN_USERID, {
+            include: [{ model: TelegramAccount }]
+          })
+
+          if (adminUser) {
+            telegramHook.getWebhook.sendMessage(
+              adminUser.telegramUser.id,
+              `*🤖 System Notification*
+              
+New Dispute Id: ${dispute.id}, openedByUser: ${
+                dispute.openedByUserId
+              }, tradeId: ${trade.cryptoAmount} ${trade.cryptoCurrencyCode}`,
+              {
+                parse_mode: 'Markdown'
+              }
+            )
+          }
+        } catch (e) {
+          logger.error('Error notifying admin')
+        }
+
         return tt
       } else {
         logger.error('Dispute cannot be opened in this trade state')
@@ -320,6 +346,153 @@ export class Trade extends Model<Trade> {
       }
     } else {
       return null
+    }
+  }
+
+  static async resolveDispute(
+    disputeId: number,
+    winnerUserId: number
+  ): Promise<Trade | null> {
+    const dispute = await Dispute.findById(disputeId, {
+      include: [{ model: Trade }]
+    })
+
+    if (
+      !dispute ||
+      (dispute &&
+        dispute.status != DisputeStatus.PENDING &&
+        dispute.trade.status != TradeStatus.PAYMENT_DISPUTE)
+    ) {
+      return null
+    }
+
+    if (
+      winnerUserId != dispute.trade.sellerUserId &&
+      winnerUserId != dispute.trade.buyerUserId
+    ) {
+      return null
+    }
+
+    if (winnerUserId == dispute.trade.sellerUserId) {
+      // Cancel trade and release bitcoins to seller
+      await Transaction.unblockTx(dispute.trade.blockedTransactionId)
+
+      const tt = await dispute.trade.update({
+        status: TradeStatus.CANCELED
+      })
+
+      await dispute.update({
+        status: DisputeStatus.RESOLVED
+      })
+      if (tt) {
+        Trade.deleteTradeExpiration(dispute.trade.id)
+        Trade.deleteEscrowExpiration(dispute.trade.id)
+      }
+
+      const buyerUser = await User.findById(dispute.trade.buyerUserId, {
+        include: [{ model: TelegramAccount }]
+      })
+      const sellerUser = await User.findById(dispute.trade.sellerUserId, {
+        include: [{ model: TelegramAccount }]
+      })
+      if (buyerUser) {
+        telegramHook.getWebhook.sendMessage(
+          buyerUser.telegramUser.id,
+          buyerUser.t(
+            `${Namespace.Exchange}:deals.trade.dispute-resolved-buyer-lose`
+          ),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(buyerUser)
+          }
+        )
+      }
+      if (sellerUser) {
+        telegramHook.getWebhook.sendMessage(
+          sellerUser.telegramUser.id,
+          sellerUser.t(
+            `${Namespace.Exchange}:deals.trade.dispute-resolved-seller-win`
+          ),
+          {
+            parse_mode: 'Markdown',
+            reply_markup: keyboardMainMenu(sellerUser)
+          }
+        )
+      }
+
+      return tt
+    } else {
+      // Complete trade and release to buyer
+      const tt = dispute.trade.update({
+        status: TradeStatus.PAYMENT_RELEASED
+      })
+
+      await Transaction.releaseTradeToBuyer(
+        dispute.trade.blockedTransactionId,
+        dispute.trade.buyerUserId
+      )
+
+      try {
+        try {
+          const ord = await Order.findById(dispute.trade.orderId)
+          if (ord) {
+            await Transaction.collectFees(
+              dispute.trade.order.userId,
+              dispute.trade.createdByUserId,
+              dispute.trade.id,
+              dispute.trade.cryptoAmount,
+              dispute.trade.cryptoCurrencyCode
+            )
+          }
+          await dispute.update({
+            status: DisputeStatus.RESOLVED
+          })
+        } catch (e) {
+          logger.error('Trade - resolve dispute / error collecting fees')
+        }
+
+        const buyerUser = await User.findById(dispute.trade.buyerUserId, {
+          include: [{ model: TelegramAccount }]
+        })
+        const sellerUser = await User.findById(dispute.trade.sellerUserId, {
+          include: [{ model: TelegramAccount }]
+        })
+        if (buyerUser) {
+          telegramHook.getWebhook.sendMessage(
+            buyerUser.telegramUser.id,
+            buyerUser.t(
+              `${Namespace.Exchange}:deals.trade.dispute-resolved-buyer-win`,
+              {
+                cryptoAmount: dataFormatter.formatCryptoCurrency(
+                  dispute.trade.cryptoAmount,
+                  dispute.trade.cryptoCurrencyCode
+                )
+              }
+            ),
+            {
+              parse_mode: 'Markdown',
+              reply_markup: keyboardMainMenu(buyerUser)
+            }
+          )
+        }
+        if (sellerUser) {
+          telegramHook.getWebhook.sendMessage(
+            sellerUser.telegramUser.id,
+            sellerUser.t(
+              `${Namespace.Exchange}:deals.trade.dispute-resolved-seller-lose`
+            ),
+            {
+              parse_mode: 'Markdown',
+              reply_markup: keyboardMainMenu(sellerUser)
+            }
+          )
+        }
+        return tt
+      } catch (e) {
+        logger.error('Trade: Error in handling fees')
+        throw e
+        // return tt
+      }
     }
   }
 

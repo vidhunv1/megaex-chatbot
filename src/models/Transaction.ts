@@ -148,6 +148,7 @@ export class Transaction extends Model<Transaction> {
         transactionSource: TransactionSource.COMISSION
       })
 
+      // Referral commission notification
       const mu = await User.findById(refMaker.userId, {
         include: [{ model: TelegramAccount }]
       })
@@ -191,6 +192,7 @@ export class Transaction extends Model<Transaction> {
         transactionSource: TransactionSource.COMISSION
       })
 
+      // Referral comission notification
       const ru = await User.findById(refTaker.userId, {
         include: [{ model: TelegramAccount }]
       })
@@ -222,7 +224,7 @@ export class Transaction extends Model<Transaction> {
 
     if (feesToCollect > 0) {
       await Transaction.create<Transaction>({
-        userId: 1,
+        userId: parseInt(CONFIG.ADMIN_USERID),
         currencyCode: currencyCode,
         amount: feesToCollect,
         txid: tradeId + '-fees',
