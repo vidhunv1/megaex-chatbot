@@ -213,7 +213,7 @@ export class Trade extends Model<Trade> {
   }> {
     const r = JSON.parse(
       JSON.stringify(
-        await Trade.findAll({
+        await Trade.find({
           attributes: [
             [
               Trade.sequelize.literal(
