@@ -113,9 +113,7 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
       }
 
       if (orderType === OrderType.BUY) {
-        await CreateOrderMessage(msg, user).selectBuyPaymentMethod(Object.keys(
-          getAllPaymentMethods(user.currencyCode)
-        ) as PaymentMethodType[])
+        await CreateOrderMessage(msg, user).selectBuyPaymentMethod(getAllPaymentMethods(user.currencyCode) as PaymentMethodType[])
       } else {
         await CreateOrderMessage(msg, user).selectSellPaymentMethod(
           getAllPaymentMethods(user.currencyCode) as PaymentMethodType[],

@@ -67,7 +67,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
     const text = user.t(`${Namespace.Exchange}:create-order.input-fixed-rate`, {
       fiatCurrencyCode: user.currencyCode,
       cryptoCurrencyCode,
-      marketRate: fiatMarketRate
+      marketRate: fiatMarketRate.toFixed(0)
     })
     const options = {
       parse_mode: 'Markdown',
@@ -119,7 +119,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
         fiatCurrencyCode: user.currencyCode,
         cryptoCurrencyCode,
         marketRate: formattedMarketRate,
-        marketRateSource
+        marketRateSource: user.t(`exchange-source.${marketRateSource}`)
       }
     )
     const options = {
@@ -320,7 +320,7 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   async selectBuyPaymentMethod(pmList: PaymentMethodType[]) {
     const inline: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
       {
-        text: user.t(`payment-methods.names.${pm}`),
+        text: user.t(`payment-methods.short-names.${pm}`),
         callback_data: stringifyCallbackQuery<
           CreateOrderStateKey.cb_selectPaymentMethod,
           CreateOrderState[CreateOrderStateKey.cb_selectPaymentMethod]

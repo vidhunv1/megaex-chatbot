@@ -147,6 +147,7 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
         parse_mode: 'Markdown',
         reply_markup: {
           keyboard: [[{ text: user.t('actions.cancel-keyboard-button') }]],
+          one_time_keyboard: true,
           resize_keyboard: true
         }
       }

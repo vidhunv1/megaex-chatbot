@@ -419,19 +419,18 @@ Select the order type.`,
     'new-sell-order-cbbutton': '📕  New sell order',
     'input-fixed-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
 
-Enter the fixed rate of {{ cryptoCurrencyCode }} for this order (in {{ fiatCurrencyCode }}).
+Enter the fixed rate of {{ cryptoCurrencyCode }} for this order in *{{ fiatCurrencyCode }}* or enter in *percents* to set a margin price.
 
-Example: *{{ marketRate }}*`,
+Example: *{{ marketRate }}* or *2%*`,
     'input-margin-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
 
-Enter the margin in percentage you want over the bitcoin market price. 
+Margin price lets you set a dynamic rate for your order based on market rates. Use a positive or negative percentage to sell above or below the current market rate.
 
 *Current Market rate*: {{ marketRate }} ({{ marketRateSource }})
-_Use a negative value for buying or selling under the market price to attract more contacts._
 
-Example: *2%*`,
-    'use-margin-price-cbbutton': 'Use margin pricing (%) ➡️',
-    'use-fixed-price-cbbutton': '⬅️ Use fixed pricing',
+Example: *3%* or *-2%*`,
+    'use-margin-price-cbbutton': 'ℹ️ Margin pricing',
+    'use-fixed-price-cbbutton': '⬅️ Rate',
     'back-cbbutton': '⬅️  Back',
     'input-amount-limits': `⚖️ *Order amount*
 
