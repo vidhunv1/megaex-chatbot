@@ -179,19 +179,26 @@ export const ExchangeChat: ChatHandler = {
     tUser: TelegramAccount,
     state: ExchangeState | null
   ) {
-    let currentState = state
+    if (state && state.key === EXCHANGE_STATE_LABEL) {
+      return await processMessage(msg, user, tUser, state)
+    } else {
+      return false
+    }
+  },
+
+  async handleRoot(
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount
+  ) {
     if (
       msg.text ===
       user.t('main-menu.exchange', { fiatCurrency: user.currencyCode })
     ) {
-      currentState = _.clone(initialState)
+      return await this.handleContext(msg, user, tUser, _.clone(initialState))
     }
 
-    if (currentState && currentState.key === EXCHANGE_STATE_LABEL) {
-      return await processMessage(msg, user, tUser, currentState)
-    } else {
-      return false
-    }
+    return false
   }
 }
 

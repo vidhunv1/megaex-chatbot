@@ -15,7 +15,7 @@ export const walletEN = {
 🤝 Invited: {{ referralCount }} users
 💰 Earnings: {{ earnings }}`,
 
-    'send-cryptocurrency-cbbutton': '⚡️  Send {{ cryptoCurrencyName }}',
+    'send-cryptocurrency-cbbutton': '⚡️  Send {{ cryptoCurrencyName }} cheque',
     'my-address': '📩  Deposit',
     withdraw: '📤  Withdraw',
     'transaction-credit': 'Credit',
@@ -35,12 +35,12 @@ Funds will be available in your wallet after {{ confirmations }} network confirm
 
   /* Send Coin */
   'send-coin': {
-    'input-amount': `⚡️ *Send {{ cryptoCurrencyName }}*:
+    'input-amount': `⚡️ *Input amount*
 
-How much do you want to send? (in *{{ cryptoCurrencyCode }} or {{ fiatCurrencyCode }}*) 
+Input your amount in  *{{ cryptoCurrencyCode }}* or *{{ fiatCurrencyCode }}*
 
-A one-time link for this amount will be generated to share with the person you want to send the {{ cryptoCurrencyCode }} to.
-Input your amount in  *{{ cryptoCurrencyCode }}* or *{{ fiatCurrencyCode }}* _(A private OTP link for this amount will be generated to share with the recipient)_
+A cheque for this amount will be generated to share with the person you want to send the {{ cryptoCurrencyCode }} to.
+
 Example: {{ cryptoCurrencyBalance }}
     
 *Available*: {{ cryptoCurrencyBalance }}

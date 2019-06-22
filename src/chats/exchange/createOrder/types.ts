@@ -15,6 +15,7 @@ export enum CreateOrderStateKey {
   inputRate = 'inputRate',
   inputAmountLimit = 'inputAmountLimit',
   selectPaymentMethod = 'selectPaymentMethod',
+  cb_morePaymentMethods = 'cb_morePaymentMethods',
   createdOrder = 'createdOrder',
 
   cb_selectPaymentMethod = 'cb_selectPaymentMethod'
@@ -67,9 +68,11 @@ export interface CreateOrderState {
   }
 
   [CreateOrderStateKey.selectPaymentMethod]?: {
-    data: {
-      paymentMethod: PaymentMethodType
-    }
+    cursor?: number
+  }
+
+  [CreateOrderStateKey.cb_morePaymentMethods]?: {
+    cursor: number
   }
 
   [CreateOrderStateKey.cb_selectPaymentMethod]?: {

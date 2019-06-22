@@ -119,6 +119,18 @@ export const AccountChat: ChatHandler = {
     } else {
       return false
     }
+  },
+
+  async handleRoot(
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount
+  ) {
+    if (msg.text === user.t('main-menu.account')) {
+      return await this.handleContext(msg, user, tUser, _.clone(initialState))
+    }
+
+    return false
   }
 }
 

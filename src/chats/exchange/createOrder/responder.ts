@@ -108,16 +108,27 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
         'orderType',
         null
       )
+      const cursor = _.get(
+        state[CreateOrderStateKey.selectPaymentMethod],
+        'cursor',
+        null
+      )
       if (orderType === null) {
         return false
       }
 
       if (orderType === OrderType.BUY) {
-        await CreateOrderMessage(msg, user).selectBuyPaymentMethod(getAllPaymentMethods(user.currencyCode) as PaymentMethodType[])
+        await CreateOrderMessage(msg, user).selectBuyPaymentMethod(
+          getAllPaymentMethods(user.currencyCode) as PaymentMethodType[],
+          cursor || 0,
+          cursor != null
+        )
       } else {
         await CreateOrderMessage(msg, user).selectSellPaymentMethod(
           getAllPaymentMethods(user.currencyCode) as PaymentMethodType[],
-          await getAddedPaymentMethods(user.id)
+          await getAddedPaymentMethods(user.id),
+          cursor || 0,
+          cursor != null
         )
       }
       return true
@@ -191,6 +202,9 @@ export const CreateOrderResponder: Responder<ExchangeState> = (
         )
       }
       return true
+    },
+    [CreateOrderStateKey.cb_morePaymentMethods]: async () => {
+      return false
     }
   }
 

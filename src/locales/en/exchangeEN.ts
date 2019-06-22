@@ -415,8 +415,8 @@ Write your terms for the trade. This will be shown on your order.`,
     show: `📊 *Create Order*
 
 Select the order type.`,
-    'new-buy-order-cbbutton': '📗  New buy order',
-    'new-sell-order-cbbutton': '📕  New sell order',
+    'new-buy-order-cbbutton': '📗  I want to Buy',
+    'new-sell-order-cbbutton': '📕  I want to Sell',
     'input-fixed-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
 
 Enter the fixed rate of {{ cryptoCurrencyCode }} for this order in *{{ fiatCurrencyCode }}* or enter in *percents* to set a margin price.
@@ -443,7 +443,9 @@ For Example: Either *1000* or *500-1000* (set min-max limit)
     'create-error': '❌ Could not create this order. Please try again later.',
     'select-payment-method': `💳 *Payment Method*
 
-Select the payment method`
+Select the payment method`,
+    'my-pm-cbbutton': 'My {{ paymentMethodName }} - {{ paymentDetails }}',
+    'more-pm-cbbutton': 'show more »'
   },
 
   'active-orders': {}

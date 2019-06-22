@@ -76,4 +76,9 @@ export interface ChatHandler {
     tUser: TelegramAccount,
     state: any | null
   ) => Promise<boolean>
+  handleRoot: (
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount
+  ) => Promise<boolean>
 }

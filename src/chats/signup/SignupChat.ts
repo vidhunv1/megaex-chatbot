@@ -93,5 +93,13 @@ export const SignupChat: ChatHandler = {
     } else {
       return false
     }
+  },
+
+  async handleRoot(
+    _msg: TelegramBot.Message,
+    _user: User,
+    _tUser: TelegramAccount
+  ) {
+    return false
   }
 }

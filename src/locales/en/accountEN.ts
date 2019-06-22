@@ -75,7 +75,6 @@ Select your payment method to add from the options below.`,
 Your payment method is added.
 
 {{ paymentMethodInfo }}
-
 ❕You can now use this to receive money when selling cryptocurrency.`,
     updated: `✅ Payment method *updated*.
 

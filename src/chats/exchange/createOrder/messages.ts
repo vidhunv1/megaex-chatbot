@@ -14,6 +14,9 @@ import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
 import { PaymentMethodType } from 'models'
 import { MyOrdersMessage } from '../myOrders'
 import { dataFormatter } from 'utils/dataFormatter'
+import * as _ from 'lodash'
+
+const SELECT_PM_LIST_LIMIT = 5
 
 export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
   async showCreateOrderMessage() {
@@ -274,9 +277,11 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
 
   async selectSellPaymentMethod(
     pmList: PaymentMethodType[],
-    addedPM: PaymentMethodFields[]
+    addedPM: PaymentMethodFields[],
+    cursor: number,
+    shouldEdit: boolean
   ) {
-    const inline1: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
+    const inline2: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
       {
         text: user.t(`payment-methods.names.${pm}`),
         callback_data: stringifyCallbackQuery<
@@ -288,13 +293,15 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     ])
 
-    const inline2: TelegramBot.InlineKeyboardButton[][] = addedPM.map((pm) => [
+    const inline1: TelegramBot.InlineKeyboardButton[][] = addedPM.map((pm) => [
       {
-        text: `${user.t(
-          `payment-methods.short-names.${pm.paymentMethod}`
-        )}-${pm.fields[
-          PaymentMethodPrimaryFieldIndex[pm.paymentMethod]
-        ].substring(0, 4)}***`,
+        text: user.t(`${Namespace.Exchange}:create-order.my-pm-cbbutton`, {
+          paymentMethodName: user.t(
+            `payment-methods.short-names.${pm.paymentMethod}`
+          ),
+          paymentDetails:
+            pm.fields[PaymentMethodPrimaryFieldIndex[pm.paymentMethod]]
+        }),
         callback_data: stringifyCallbackQuery<
           CreateOrderStateKey.cb_selectPaymentMethod,
           CreateOrderState[CreateOrderStateKey.cb_selectPaymentMethod]
@@ -305,19 +312,57 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     ])
 
-    await telegramHook.getWebhook.sendMessage(
-      msg.chat.id,
-      user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+    const allInline = [...inline1, ...inline2]
+    const initialList = _.take(_.drop(allInline, cursor), SELECT_PM_LIST_LIMIT)
+    const finalInline = [
+      ...initialList,
+      ..._.take(allInline, SELECT_PM_LIST_LIMIT - initialList.length)
+    ]
+    finalInline.push([
       {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: [...inline2, ...inline1]
-        }
+        text: user.t(`${Namespace.Exchange}:create-order.more-pm-cbbutton`),
+        callback_data: stringifyCallbackQuery<
+          CreateOrderStateKey.cb_morePaymentMethods,
+          CreateOrderState[CreateOrderStateKey.cb_morePaymentMethods]
+        >(CreateOrderStateKey.cb_morePaymentMethods, {
+          cursor:
+            initialList.length < SELECT_PM_LIST_LIMIT
+              ? SELECT_PM_LIST_LIMIT - initialList.length
+              : cursor + SELECT_PM_LIST_LIMIT
+        })
       }
-    )
+    ])
+
+    const options = {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: finalInline
+      }
+    }
+
+    if (shouldEdit) {
+      await telegramHook.getWebhook.editMessageText(
+        user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+        {
+          ...options,
+          chat_id: msg.chat.id,
+          message_id: msg.message_id
+        }
+      )
+    } else {
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+        options
+      )
+    }
   },
 
-  async selectBuyPaymentMethod(pmList: PaymentMethodType[]) {
+  async selectBuyPaymentMethod(
+    pmList: PaymentMethodType[],
+    cursor: number,
+    shouldEdit: boolean
+  ) {
     const inline: TelegramBot.InlineKeyboardButton[][] = pmList.map((pm) => [
       {
         text: user.t(`payment-methods.short-names.${pm}`),
@@ -330,15 +375,48 @@ export const CreateOrderMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     ])
 
-    await telegramHook.getWebhook.sendMessage(
-      msg.chat.id,
-      user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+    const initialList = _.take(_.drop(inline, cursor), SELECT_PM_LIST_LIMIT)
+    const finalInline = [
+      ...initialList,
+      ..._.take(inline, SELECT_PM_LIST_LIMIT - initialList.length)
+    ]
+    finalInline.push([
       {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: inline
-        }
+        text: user.t(`${Namespace.Exchange}:create-order.more-pm-cbbutton`),
+        callback_data: stringifyCallbackQuery<
+          CreateOrderStateKey.cb_morePaymentMethods,
+          CreateOrderState[CreateOrderStateKey.cb_morePaymentMethods]
+        >(CreateOrderStateKey.cb_morePaymentMethods, {
+          cursor:
+            initialList.length < SELECT_PM_LIST_LIMIT
+              ? SELECT_PM_LIST_LIMIT - initialList.length
+              : cursor + SELECT_PM_LIST_LIMIT
+        })
       }
-    )
+    ])
+
+    const options = {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: finalInline
+      }
+    }
+
+    if (shouldEdit) {
+      await telegramHook.getWebhook.editMessageText(
+        user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+        {
+          ...options,
+          chat_id: msg.chat.id,
+          message_id: msg.message_id
+        }
+      )
+    } else {
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t(`${Namespace.Exchange}:create-order.select-payment-method`),
+        options
+      )
+    }
   }
 })

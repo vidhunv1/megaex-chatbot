@@ -74,7 +74,17 @@ export const Router = {
         )
       }
     } else {
-      const isHandled =
+      let isHandled = false
+
+      isHandled =
+        (await SignupChat.handleRoot(msg, user, tUser)) ||
+        (await CommonChat.handleRoot(msg, user, tUser)) ||
+        (await ExchangeChat.handleRoot(msg, user, tUser)) ||
+        (await WalletChat.handleRoot(msg, user, tUser)) ||
+        (await AccountChat.handleRoot(msg, user, tUser))
+
+      isHandled =
+        isHandled ||
         (await SignupChat.handleContext(msg, user, tUser, currentState)) ||
         (await CommonChat.handleContext(msg, user, tUser, currentState)) ||
         (await ExchangeChat.handleContext(msg, user, tUser, currentState)) ||

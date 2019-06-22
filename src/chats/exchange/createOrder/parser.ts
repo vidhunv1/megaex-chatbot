@@ -173,6 +173,18 @@ export const CreateOrderParser: Parser<ExchangeState> = async (
     },
     [CreateOrderStateKey.selectPaymentMethod]: async () => {
       return state
+    },
+    [CreateOrderStateKey.cb_morePaymentMethods]: async () => {
+      const cursor = parseInt(
+        _.get(state[CreateOrderStateKey.cb_morePaymentMethods], 'cursor', 0) +
+          ''
+      )
+      return {
+        ...state,
+        [CreateOrderStateKey.selectPaymentMethod]: {
+          cursor
+        }
+      }
     }
   }
 
@@ -203,6 +215,10 @@ function nextCreateOrderState(
       } else {
         return CreateOrderStateKey.inputRate
       }
+    }
+
+    case CreateOrderStateKey.cb_morePaymentMethods: {
+      return CreateOrderStateKey.selectPaymentMethod
     }
 
     case CreateOrderStateKey.cb_selectPaymentMethod: {

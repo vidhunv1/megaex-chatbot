@@ -85,11 +85,9 @@ export const PaymentMethodMessage = (msg: TelegramBot.Message, user: User) => ({
     const inline: TelegramBot.InlineKeyboardButton[][] = addedPaymentMethods.map(
       (pm) => [
         {
-          text: `${user.t(
-            `payment-methods.short-names.${pm.paymentMethod}`
-          )}-${pm.fields[
-            PaymentMethodPrimaryFieldIndex[pm.paymentMethod]
-          ].substring(0, 4)}***`,
+          text: `${user.t(`payment-methods.short-names.${pm.paymentMethod}`)}-${
+            pm.fields[PaymentMethodPrimaryFieldIndex[pm.paymentMethod]]
+          }`,
           callback_data: stringifyCallbackQuery<
             PaymentMethodStateKey.cb_editPaymentMethodId,
             PaymentMethodState[PaymentMethodStateKey.cb_editPaymentMethodId]
@@ -222,7 +220,7 @@ const stringifyPaymentMethodsFields = (
         )}: ${field}`
     })
 
-    pmStringified = pmStringified + '\n\n'
+    pmStringified = pmStringified + '\n'
   })
   return pmStringified
 }

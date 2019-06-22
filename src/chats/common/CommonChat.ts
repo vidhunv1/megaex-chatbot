@@ -166,10 +166,18 @@ export const CommonChat: ChatHandler = {
   },
 
   async handleContext(
+    _msg: TelegramBot.Message,
+    _user: User,
+    _tUser: TelegramAccount,
+    _state: any
+  ) {
+    return false
+  },
+
+  async handleRoot(
     msg: TelegramBot.Message,
     user: User,
-    tUser: TelegramAccount,
-    _state: any
+    tUser: TelegramAccount
   ) {
     if (
       msg.text === user.t('actions.cancel-keyboard-button') ||
@@ -186,6 +194,7 @@ export const CommonChat: ChatHandler = {
       await CacheHelper.clearState(tUser.id)
       return true
     }
+
     return false
   }
 }

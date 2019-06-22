@@ -76,17 +76,23 @@ export const WalletChat: ChatHandler = {
     tUser: TelegramAccount,
     state: WalletState | null
   ) {
-    let currentState: WalletState | null = state
-
-    if (msg.text === user.t('main-menu.wallet')) {
-      currentState = initialState
-    }
-
-    if (currentState && currentState.key === WALLET_STATE_LABEL) {
-      return await processMessage(msg, user, tUser, currentState)
+    if (state && state.key === WALLET_STATE_LABEL) {
+      return await processMessage(msg, user, tUser, state)
     } else {
       return false
     }
+  },
+
+  async handleRoot(
+    msg: TelegramBot.Message,
+    user: User,
+    tUser: TelegramAccount
+  ) {
+    if (msg.text === user.t('main-menu.wallet')) {
+      return await this.handleContext(msg, user, tUser, _.clone(initialState))
+    }
+
+    return false
   }
 }
 
