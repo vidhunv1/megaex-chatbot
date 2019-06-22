@@ -3,23 +3,25 @@ import { BotCommand } from 'chats/types'
 export const signupEN = {
   'choose-language': `Hello, *{{ name }}*!
 
- Mega Deals is a telegram bot that allows you to buy and sell bitcoins with your local currency privately and securely. 
- 
- To get started, choose the language for the app from the options listed below:`,
+You can buy / sell bitcoins in your local currency here privately and securely.
 
-  'terms-and-conditions': `Great! To continue click on *✅ I Agree* to accept the [Terms of Service](https://telegra.ph/Terms-of-Service-06-18).`,
+To get started, choose the language for the app from the options listed below.`,
 
-  'terms-agree-button': '✅ I Agree',
+  'terms-and-conditions': `[Terms of Service](https://telegra.ph/Terms-of-Service-06-18)
+  
+Click on *Agree* to continue.`,
+
+  'terms-agree-button': '✔️ Agree',
 
   'select-currency': 'Select your local currency',
 
-  'account-ready': `*Your account on MegaDeals is created!*
+  'account-ready': `*Account created!*
 
-*Account ID*: ${BotCommand.ACCOUNT}{{ accountID }}
-Your BTC address is {{ bitcoinAddress }}
+Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 
-🔐 For your *security* please enable two-step verification on Telegram: Go to Settings > Privacy & Security > Two-step verification`,
-
+*Checklist*:
+🔐 For your *security* please enable two-step verification on Telegram privacy & security settings.
+✔️ Set your username in Telegram so it's easy for users to contact when you are trading.`,
   'account-ready-generating-address': `*Your account on MegaDeals is created!*
 
   *Account ID*: ${BotCommand.ACCOUNT}{{ accountID }}

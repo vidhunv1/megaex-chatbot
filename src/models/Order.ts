@@ -108,6 +108,14 @@ export class Order extends Model<Order> {
     paymentMethodType: PaymentMethodType,
     paymentMethodId: number | null
   ): Promise<Order> {
+    if (
+      rateType === RateType.FIXED &&
+      cryptoCurrencyCode === CryptoCurrency.BTC &&
+      rate <= 100
+    ) {
+      rateType = RateType.MARGIN
+      logger.warn('Converting rateType to MARGIN since rate < 100')
+    }
     return await Order.create<Order>({
       userId,
       orderType,

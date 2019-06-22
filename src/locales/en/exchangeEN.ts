@@ -415,8 +415,8 @@ Write your terms for the trade. This will be shown on your order.`,
     show: `📊 *Create Order*
 
 Select the order type.`,
-    'new-buy-order-cbbutton': '📗  I want to Buy',
-    'new-sell-order-cbbutton': '📕  I want to Sell',
+    'new-buy-order-cbbutton': '📗  I want to buy',
+    'new-sell-order-cbbutton': '📕  I want to sell',
     'input-fixed-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
 
 Enter the fixed rate of {{ cryptoCurrencyCode }} for this order in *{{ fiatCurrencyCode }}* or enter in *percents* to set a margin price.

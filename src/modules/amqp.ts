@@ -4,6 +4,7 @@ import amqp = require('amqplib')
 import { CONFIG } from '../config'
 import { WalletQueue } from './queue/wallet/walletQueue'
 import { TradeQueue } from './queue/trade/tradeQueue'
+import { CommonQueue } from './queue/common/commonQueue'
 
 export class AMQP {
   static instance?: AMQP = undefined
@@ -13,6 +14,7 @@ export class AMQP {
   // Queues
   public walletQ!: WalletQueue
   public tradeQ!: TradeQueue
+  public commonQ!: CommonQueue
 
   constructor() {
     if (AMQP.instance) {
@@ -31,8 +33,10 @@ export class AMQP {
 
     this.walletQ = new WalletQueue()
     this.tradeQ = new TradeQueue()
+    this.commonQ = new CommonQueue()
     await this.walletQ.init(this.channel)
     await this.tradeQ.init(this.channel)
+    await this.commonQ.init(this.channel)
   }
 
   async close() {

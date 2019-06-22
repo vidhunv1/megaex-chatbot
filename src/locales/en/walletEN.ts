@@ -44,7 +44,7 @@ A cheque for this amount will be generated to share with the person you want to 
 Example: {{ cryptoCurrencyBalance }}
     
 *Available*: {{ cryptoCurrencyBalance }}
-*Value*: {{ fiatValue }})`,
+*Value*: {{ fiatValue }}`,
     confirm: `👁‍🗨*Confirm*
 
 Is this correct? If yes, click on *"Confirm"*.:

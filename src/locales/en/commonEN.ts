@@ -4,6 +4,11 @@ import { OrderType } from 'models/Order'
 import { BotCommand } from 'chats/types'
 
 export const commonEN = {
+  notifications: {
+    'admin-message-title': '👨‍🚀 *Message from admin*',
+    'support-message-title': '👩‍💼 *Message from support*',
+    'system-message-title': '🤖 *System message*'
+  },
   'new-referral': `🤝 *New Referral*
 
 ${BotCommand.ACCOUNT}{{ accountId }} joined through your referral link. 

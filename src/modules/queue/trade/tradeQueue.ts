@@ -56,7 +56,7 @@ export class TradeQueue {
           }
         } catch (e) {
           logger.error(
-            '[Q] Error parsing new deposit parasms: ' +
+            '[Q] Error resolving trade duspute: ' +
               JSON.stringify(msg.content.toString())
           )
           channel.ack(msg)
