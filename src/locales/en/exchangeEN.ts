@@ -7,45 +7,45 @@ export const exchangeEN = {
     exchange: `💵  *Exchange BTC-{{ fiatCurrency }}*
 
 ✅  24/7 support via {{ supportBotUsername }}
-🔒  All trades are secured with the bot as guarantor
+🔒  All trades are secured with escrow guaranteed.
 
-*Market rate*: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
+Market rate: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
 
     'my-orders-cbbutton': 'My Active ({{ orderCount }})',
-    'create-order-cbbutton': '📊 Create Order',
+    'create-order-cbbutton': '📝 Create Order',
     'buy-cbbutton': '📉 Quick Buy',
     'sell-cbbutton': '📈 Quick Sell'
   },
 
   deals: {
-    'no-quick-sell': `📉 *Quick Buy*
+    'no-quick-sell': `📉  *Quick Buy*
 
-There are no active buy orders. Click to create a new buy order.`,
+No active buy orders. Create a new buy order.`,
     'new-quick-sell-cbbutton': '📗 New buy order',
-    'no-quick-buy': `📉 *Quick Sell*
+    'no-quick-buy': `📉  *Quick Sell*
 
-There are no active sell orders. Click to create a new sell order.`,
+No active sell orders. Create a new sell order.`,
     'new-quick-buy-cbbutton': '📕 New sell order',
     trade: {
-      'dispute-resolved-seller-win': `👩‍🎓 *Dispute resolved*
+      'dispute-resolved-seller-win': `👩‍🎓  *Dispute resolved*
 
-After careful review based on proofs, our legal team has confirmed that there was no issue on your side.
+After careful review based on proof submitted by both parties, we confirm that you are genuine on your part with the trade.
 
-Appropriate action has been taken against the buyer, we are sorry for any inconvinience caused, .
+Appropriate action has been taken against the buyer. We are sorry for any inconvenience caused.
 
-*The locked funds has been released back to you.*`,
-      'dispute-resolved-buyer-win': `👩‍🎓 *Dispute resolved*
+The locked funds has been *released*. Check your wallet.`,
+      'dispute-resolved-buyer-win': `👩‍🎓  *Dispute resolved*
 
-After careful review based on proofs, our legal team has confirmed that there was no issue on your side.
+After careful review based on proof submitted by both parties, we confirm that you are genuine on your part with the trade.
       
-Appropriate action has been taken against the seller, we are sorry for any inconvinience caused, a.
+Appropriate action has been taken against the seller. We are sorry for any inconvenience caused.
 
-*{{ cryptoAmount }} has been credited to your wallet*`,
+{{ cryptoAmount }} has been *credited*. Check your wallet.`,
       'dispute-resolved-seller-lose': `👩‍🎓 *Dispute resolved*
 
-After careful review based on proofs, our legal team has confirmed that there was a fault on your side.
+After careful review based on proof submitted by both parties, we confirm that you are at fault with your t.
 
-*NOTE: Repeated offence will result in a permanent ban.*`,
+NOTE: Repeated offence will result in a permanent ban.`,
       'dispute-resolved-buyer-lose': `‍🎓 *Dispute resolved*
 
 After careful review based on proofs, our legal team has confirmed that there was a fault on your side.
@@ -430,21 +430,21 @@ Margin price lets you set a dynamic rate for your order based on market rates. U
 
 Example: *3%* or *-2%*`,
     'use-margin-price-cbbutton': 'ℹ️ Margin pricing',
-    'use-fixed-price-cbbutton': '⬅️ Rate',
-    'back-cbbutton': '⬅️  Back',
+    'use-fixed-price-cbbutton': '⬅️  Rate',
+    'back-cbbutton': '⬅️ back',
     'input-amount-limits': `⚖️ *Order amount*
 
 Enter the order amount in *{{ fiatCurrencyCode }}*.
 
 For Example: Either *1000* or *500-1000* (set min-max limit)
 `,
-    'buy-order-created': '✅ Your *Buy order created*',
-    'sell-order-created': '✅ Your *Sell order created*',
-    'create-error': '❌ Could not create this order. Please try again later.',
-    'select-payment-method': `💳 *Payment Method*
+    'buy-order-created': '✅  Your buy order is created.',
+    'sell-order-created': '✅  Your sell order is created.',
+    'create-error': '❗️  Could not create this order. Please try again later.',
+    'select-payment-method': `💳  *Payment Method*
 
-Select the payment method`,
-    'my-pm-cbbutton': 'My {{ paymentMethodName }} - {{ paymentDetails }}',
+Select a payment method.`,
+    'my-pm-cbbutton': '{{ paymentMethodName }} - {{ paymentDetails }}',
     'more-pm-cbbutton': 'show more »'
   },
 
