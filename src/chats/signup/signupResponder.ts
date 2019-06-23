@@ -4,15 +4,14 @@ import { Namespace } from 'modules/i18n'
 import { languageKeyboard, currencyKeyboard } from './utils'
 import { CryptoCurrency } from 'constants/currencies'
 import { keyboardMainMenu } from 'chats/common'
-import { User, Wallet, Order, Transaction, Trade } from 'models'
+import { User, Wallet } from 'models'
 import { SignupState, SignupStateKey } from './SignupState'
 import { DeepLink } from 'chats/types'
 import * as _ from 'lodash'
 import { logger } from 'modules'
-import { DealsMessage } from 'chats/exchange/deals'
 import { showUserAccount } from 'chats/account/utils'
+import { showOrder } from 'chats/exchange/deals/utils'
 
-const CURRENT_CRYPTOCURRENCYC_CODE = CryptoCurrency.BTC
 export async function signupResponder(
   msg: TelegramBot.Message,
   user: User,
@@ -142,48 +141,7 @@ export async function signupResponder(
 
           case DeepLink.ORDER: {
             try {
-              const { order, dealer } = await getOrder(parseInt(data.value))
-              if (order && dealer) {
-                const availableBalance = await getAvailableBalance(
-                  order.userId,
-                  order.cryptoCurrencyCode
-                )
-                const availableBalanceInFiat =
-                  (await Order.convertToFixedRate(
-                    order.rate,
-                    order.rateType,
-                    order.cryptoCurrencyCode,
-                    order.fiatCurrencyCode,
-                    order.user.exchangeRateSource
-                  )) * availableBalance
-
-                await DealsMessage(msg, user).showDeal(
-                  order.orderType,
-                  order.id,
-                  order.cryptoCurrencyCode,
-                  dealer.telegramUser.firstName,
-                  dealer.accountId,
-                  dealer.lastSeen,
-                  dealer.rating,
-                  dealer.tradeCount,
-                  order.terms,
-                  order.paymentMethodType,
-                  await Order.convertToFixedRate(
-                    order.rate,
-                    order.rateType,
-                    order.cryptoCurrencyCode,
-                    order.fiatCurrencyCode,
-                    order.user.exchangeRateSource
-                  ),
-                  {
-                    min: order.minFiatAmount,
-                    max: order.maxFiatAmount
-                  },
-                  availableBalanceInFiat,
-                  order.fiatCurrencyCode,
-                  dealer.reviewCount
-                )
-              }
+              await showOrder(msg, user, parseInt(data.value))
             } catch (e) {
               logger.warn('Invalid order id in start ' + data.value)
             }
@@ -196,44 +154,4 @@ export async function signupResponder(
   }
 
   return false
-}
-
-async function getOrder(orderId: number) {
-  const order = await Order.getOrder(orderId)
-  if (!order) {
-    return {
-      order: null,
-      dealer: null
-    }
-  }
-
-  const dealer = await User.getUser(order.userId)
-  if (!dealer) {
-    return {
-      order: null,
-      dealer: null
-    }
-  }
-
-  const userStats = await Trade.getUserStats(
-    dealer.id,
-    CURRENT_CRYPTOCURRENCYC_CODE
-  )
-  return {
-    order: order,
-    dealer: {
-      ...dealer,
-      rating: userStats.rating,
-      lastSeen: new Date(),
-      tradeCount: userStats.dealCount,
-      reviewCount: (await Trade.getUserReviews(dealer.id)).length
-    }
-  }
-}
-
-async function getAvailableBalance(
-  userId: number,
-  currencyCode: CryptoCurrency
-) {
-  return await Transaction.getAvailableBalance(userId, currencyCode)
 }

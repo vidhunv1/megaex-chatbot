@@ -660,7 +660,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
 
-  async showDeal(
+  async showOrderDeal(
     orderType: OrderType,
     orderId: number,
     cryptoCurrencyCode: CryptoCurrency,

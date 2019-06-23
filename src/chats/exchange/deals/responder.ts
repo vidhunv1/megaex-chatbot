@@ -8,7 +8,6 @@ import {
   OrderType,
   Order,
   User,
-  Transaction,
   Trade,
   TelegramAccount,
   TradeStatus,
@@ -17,6 +16,7 @@ import {
 import { DealsConfig } from './config'
 import { logger } from 'modules'
 import { sendTradeMessage } from './tradeMessage'
+import { showOrder, getOrderInfo } from './utils'
 
 const CURRENT_CRYPTOCURRENCY_CODE = CryptoCurrency.BTC
 
@@ -73,49 +73,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         return false
       }
 
-      const { order, dealer } = await getOrder(orderId)
-      if (order != null && dealer != null) {
-        const trueRate: number = await Order.convertToFixedRate(
-          order.rate,
-          order.rateType,
-          order.cryptoCurrencyCode,
-          order.fiatCurrencyCode,
-          order.user.exchangeRateSource
-        )
-
-        const availableBalance = await getAvailableBalance(
-          order.userId,
-          order.cryptoCurrencyCode
-        )
-        const availableBalanceInFiat =
-          (await Order.convertToFixedRate(
-            order.rate,
-            order.rateType,
-            order.cryptoCurrencyCode,
-            order.fiatCurrencyCode,
-            order.user.exchangeRateSource
-          )) * availableBalance
-        await DealsMessage(msg, user).showDeal(
-          order.orderType,
-          order.id,
-          order.cryptoCurrencyCode,
-          dealer.telegramUser.firstName,
-          dealer.accountId,
-          dealer.lastSeen,
-          dealer.rating,
-          dealer.tradeCount,
-          order.terms,
-          order.paymentMethodType,
-          trueRate,
-          {
-            min: order.minFiatAmount,
-            max: order.maxFiatAmount
-          },
-          availableBalanceInFiat,
-          order.fiatCurrencyCode,
-          dealer.reviewCount
-        )
-      }
+      await showOrder(msg, user, orderId)
 
       return true
     },
@@ -135,7 +93,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         return false
       }
 
-      const order = await getOrder(orderId)
+      const order = await getOrderInfo(orderId)
       if (order.dealer) {
         await DealsMessage(msg, user).showOpenDealRequest(
           order.dealer.telegramUser.username
@@ -160,7 +118,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       if (orderId == null) {
         return false
       }
-      const orderInfo = await getOrder(orderId)
+      const orderInfo = await getOrderInfo(orderId)
       if (orderInfo.dealer == null || orderInfo.order == null) {
         return false
       }
@@ -197,7 +155,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       if (orderId == null || inputData == null) {
         return false
       }
-      const order = (await getOrder(orderId)).order
+      const order = (await getOrderInfo(orderId)).order
       if (order == null) {
         return false
       }
@@ -632,49 +590,6 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
   }
 
   return resp[state.currentStateKey as DealsStateKey]()
-}
-
-async function getOrder(orderId: number) {
-  logger.error('TODO: Implement getOrder with user details')
-
-  const order = await Order.getOrder(orderId)
-  if (!order) {
-    return {
-      order: null,
-      dealer: null
-    }
-  }
-
-  const dealer = await User.getUser(order.userId)
-  if (!dealer) {
-    return {
-      order: null,
-      dealer: null
-    }
-  }
-
-  const userStats = await Trade.getUserStats(
-    order.userId,
-    order.cryptoCurrencyCode
-  )
-
-  return {
-    order: order,
-    dealer: {
-      ...dealer,
-      rating: userStats.rating,
-      lastSeen: new Date(),
-      tradeCount: userStats.dealCount,
-      reviewCount: await Trade.getUserReviews(order.userId)
-    }
-  }
-}
-
-async function getAvailableBalance(
-  userId: number,
-  currencyCode: CryptoCurrency
-) {
-  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
 
 async function getTrade(

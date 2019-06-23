@@ -1,18 +1,17 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount, Order, Transaction } from 'models'
+import { User, TelegramAccount } from 'models'
 import { ChatHandler, BotCommand, DeepLink } from 'chats/types'
 import { telegramHook } from 'modules'
 import { keyboardMainMenu } from './utils'
 import { CacheHelper } from 'lib/CacheHelper'
 import { parseCallbackQuery, parseDeepLink } from 'chats/utils'
 import { CommonStateKey } from './types'
-import { CryptoCurrency } from 'constants/currencies'
 import { logger } from 'modules'
-import { DealsMessage } from 'chats/exchange/deals'
 import * as _ from 'lodash'
 import { claimCode } from 'chats/wallet/sendCoin'
 import { CONFIG } from '../../config'
 import { showUserAccount } from 'chats/account/utils'
+import { showOrder } from 'chats/exchange/deals/utils'
 
 export const CommonChat: ChatHandler = {
   async handleCommand(
@@ -45,48 +44,7 @@ export const CommonChat: ChatHandler = {
         if (deeplink === DeepLink.ORDER) {
           const orderId = value
           try {
-            const { order, dealer } = await getOrder(parseInt(orderId))
-            if (order && dealer) {
-              const availableBalance = await getAvailableBalance(
-                order.userId,
-                order.cryptoCurrencyCode
-              )
-              const availableBalanceInFiat =
-                (await Order.convertToFixedRate(
-                  order.rate,
-                  order.rateType,
-                  order.cryptoCurrencyCode,
-                  order.fiatCurrencyCode,
-                  order.user.exchangeRateSource
-                )) * availableBalance
-
-              await DealsMessage(msg, user).showDeal(
-                order.orderType,
-                order.id,
-                order.cryptoCurrencyCode,
-                dealer.telegramUser.firstName,
-                dealer.accountId,
-                dealer.lastSeen,
-                dealer.rating,
-                dealer.tradeCount,
-                order.terms,
-                order.paymentMethodType,
-                await Order.convertToFixedRate(
-                  order.rate,
-                  order.rateType,
-                  order.cryptoCurrencyCode,
-                  order.fiatCurrencyCode,
-                  order.user.exchangeRateSource
-                ),
-                {
-                  min: order.minFiatAmount,
-                  max: order.maxFiatAmount
-                },
-                availableBalanceInFiat,
-                order.fiatCurrencyCode,
-                dealer.reviewCount
-              )
-            }
+            await showOrder(msg, user, parseInt(orderId))
           } catch (e) {
             logger.warn('Invalid order id ' + orderId)
           }
@@ -183,42 +141,4 @@ export const CommonChat: ChatHandler = {
 
     return false
   }
-}
-
-async function getOrder(orderId: number) {
-  logger.error('TODO: CommonChat: Implement user details on getOrder')
-
-  const order = await Order.getOrder(orderId)
-  if (!order) {
-    return {
-      order: null,
-      dealer: null
-    }
-  }
-
-  const dealer = await User.getUser(order.userId)
-  if (!dealer) {
-    return {
-      order: null,
-      dealer: null
-    }
-  }
-
-  return {
-    order: order,
-    dealer: {
-      ...dealer,
-      rating: 4.7,
-      lastSeen: new Date(),
-      tradeCount: 5,
-      reviewCount: 30
-    }
-  }
-}
-
-async function getAvailableBalance(
-  userId: number,
-  currencyCode: CryptoCurrency
-) {
-  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
