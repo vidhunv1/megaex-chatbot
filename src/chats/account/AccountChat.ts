@@ -1,5 +1,5 @@
 import * as TelegramBot from 'node-telegram-bot-api'
-import { User, TelegramAccount, Trade } from 'models'
+import { User, TelegramAccount } from 'models'
 import { ChatHandler, BotCommand } from 'chats/types'
 import { ACCOUNT_STATE_LABEL, AccountState, initialState } from './AccountState'
 import { parseCallbackQuery } from 'chats/utils'
@@ -14,13 +14,10 @@ import {
 import {
   AccountHomeStateKey,
   AccountHomeParser,
-  AccountHomeResponder,
-  AccountHomeMessage,
-  AccountHomeError
+  AccountHomeResponder
 } from './home'
-import { CryptoCurrency } from 'constants/currencies'
+import { showUserAccount } from './utils'
 
-const CURRENT_CRYPTOCURRENCYC_CODE = CryptoCurrency.BTC
 export const AccountChat: ChatHandler = {
   async handleCommand(
     msg: TelegramBot.Message,
@@ -30,23 +27,7 @@ export const AccountChat: ChatHandler = {
   ) {
     if (command === BotCommand.ACCOUNT && msg.text) {
       const accountId = msg.text.replace(BotCommand.ACCOUNT, '')
-      const accountInfo = await getAccount(accountId)
-      if (accountInfo != null) {
-        await AccountHomeMessage(msg, user).showDealerAccount(
-          accountInfo.accountId,
-          accountInfo.telegramUsername,
-          accountInfo.dealCount,
-          accountInfo.tradeVolume,
-          accountInfo.cryptoCurrencyCode,
-          accountInfo.rating,
-          accountInfo.reviewCount
-          // accountInfo.isUserBlocked
-        )
-      } else {
-        await AccountHomeMessage(msg, user).showError(
-          AccountHomeError.ACCOUNT_NOT_FOUND
-        )
-      }
+      await showUserAccount(msg, user, accountId)
       return true
     }
 
@@ -79,7 +60,8 @@ export const AccountChat: ChatHandler = {
             SettingsStateKey.cb_settingsRate,
             SettingsStateKey.cb_settingsUsername,
             AccountHomeStateKey.cb_showReviews,
-            AccountHomeStateKey.cb_reviewShowMore
+            AccountHomeStateKey.cb_reviewShowMore,
+            AccountHomeStateKey.cb_sendMessage
           ].includes(callbackName)
         ) {
           state = {
@@ -176,42 +158,4 @@ async function processMessage(
   }
 
   return false
-}
-
-async function getAccount(
-  accountId: string
-): Promise<{
-  accountId: string
-  telegramUsername: string
-  dealCount: number
-  tradeVolume: number
-  cryptoCurrencyCode: CryptoCurrency
-  reviewCount: number
-  // isUserBlocked: boolean,
-  rating: number
-} | null> {
-  const user = await User.findOne({
-    where: {
-      accountId: accountId
-    },
-    include: [{ model: TelegramAccount }]
-  })
-  if (!user) {
-    return null
-  }
-
-  const userStats = await Trade.getUserStats(
-    user.id,
-    CURRENT_CRYPTOCURRENCYC_CODE
-  )
-  return {
-    accountId,
-    telegramUsername: user.telegramUser.username,
-    dealCount: userStats.dealCount,
-    tradeVolume: userStats.volume,
-    rating: userStats.rating,
-    cryptoCurrencyCode: CURRENT_CRYPTOCURRENCYC_CODE,
-    reviewCount: (await Trade.getUserReviews(user.id)).length
-    // isUserBlocked: false,
-  }
 }

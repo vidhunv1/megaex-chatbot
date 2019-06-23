@@ -16,6 +16,7 @@ import {
 import { CommonStateKey, CommonState } from 'chats/common/types'
 import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
 import { dataFormatter } from 'utils/dataFormatter'
+import { keyboardMainMenu } from 'chats/common'
 
 export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
   async noReviewsAvailable() {
@@ -27,6 +28,35 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       }
     )
   },
+  async inputSendMessage() {
+    await telegramHook.getWebhook.sendMessage(
+      msg.chat.id,
+      user.t(`${Namespace.Account}:home.enter-message`),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          keyboard: [[{ text: user.t('actions.cancel-keyboard-button') }]],
+          one_time_keyboard: true,
+          resize_keyboard: true
+        }
+      }
+    )
+  },
+
+  async messageSent(message: string | null) {
+    let text
+    if (message) {
+      text = user.t(`${Namespace.Account}:home.message-sent`)
+    } else {
+      text = user.t(`${Namespace.Account}:home.message-not-sent`)
+    }
+
+    await telegramHook.getWebhook.sendMessage(msg.chat.id, text, {
+      parse_mode: 'Markdown',
+      reply_markup: keyboardMainMenu(user)
+    })
+  },
+
   async showReview(
     currentCursor: number,
     totalReviews: number,
@@ -101,6 +131,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
     )
   },
   async showDealerAccount(
+    userId: number,
     accountID: string,
     telegramUsername: string,
     dealCount: number,
@@ -138,6 +169,17 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   AccountHomeState[AccountHomeStateKey.cb_showReviews]
                 >(AccountHomeStateKey.cb_showReviews, {
                   accountId: accountID
+                })
+              }
+            ],
+            [
+              {
+                text: user.t(`${Namespace.Account}:home.send-message-cbbutton`),
+                callback_data: stringifyCallbackQuery<
+                  AccountHomeStateKey.cb_sendMessage,
+                  AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                >(AccountHomeStateKey.cb_sendMessage, {
+                  toUserId: userId
                 })
               }
             ]

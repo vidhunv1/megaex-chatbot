@@ -4,7 +4,11 @@ export enum AccountHomeStateKey {
 
   cb_showReviews = 'cb_showReviews',
   showReviews = 'showReviews',
-  cb_reviewShowMore = 'cb_reviewShowMore'
+  cb_reviewShowMore = 'cb_reviewShowMore',
+
+  cb_sendMessage = 'cb_sendMessage',
+  sendMessage = 'sendMessage',
+  messageSent = 'messageSent'
 }
 
 export interface AccountHomeState {
@@ -21,6 +25,14 @@ export interface AccountHomeState {
 
   [AccountHomeStateKey.cb_reviewShowMore]?: {
     cursor: number
+  }
+
+  [AccountHomeStateKey.cb_sendMessage]?: {
+    toUserId: number
+  }
+
+  [AccountHomeStateKey.sendMessage]?: {
+    sentMessage: string | null
   }
 }
 

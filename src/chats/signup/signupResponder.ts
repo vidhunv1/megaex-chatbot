@@ -4,20 +4,13 @@ import { Namespace } from 'modules/i18n'
 import { languageKeyboard, currencyKeyboard } from './utils'
 import { CryptoCurrency } from 'constants/currencies'
 import { keyboardMainMenu } from 'chats/common'
-import {
-  User,
-  Wallet,
-  Order,
-  Transaction,
-  Trade,
-  TelegramAccount
-} from 'models'
+import { User, Wallet, Order, Transaction, Trade } from 'models'
 import { SignupState, SignupStateKey } from './SignupState'
 import { DeepLink } from 'chats/types'
 import * as _ from 'lodash'
 import { logger } from 'modules'
 import { DealsMessage } from 'chats/exchange/deals'
-import { AccountHomeMessage } from 'chats/account/home'
+import { showUserAccount } from 'chats/account/utils'
 
 const CURRENT_CRYPTOCURRENCYC_CODE = CryptoCurrency.BTC
 export async function signupResponder(
@@ -143,19 +136,7 @@ export async function signupResponder(
       if (data != null && data.deeplink != null && data.value != null) {
         switch (data.deeplink) {
           case DeepLink.ACCOUNT: {
-            const accountInfo = await getAccount(data.value)
-            if (accountInfo != null) {
-              await AccountHomeMessage(msg, user).showDealerAccount(
-                accountInfo.accountId,
-                accountInfo.telegramUsername,
-                accountInfo.dealCount,
-                accountInfo.tradeVolume,
-                accountInfo.cryptoCurrencyCode,
-                accountInfo.rating,
-                accountInfo.reviewCount
-                // accountInfo.isUserBlocked
-              )
-            }
+            await showUserAccount(msg, user, data.value)
             break
           }
 
@@ -255,42 +236,4 @@ async function getAvailableBalance(
   currencyCode: CryptoCurrency
 ) {
   return await Transaction.getAvailableBalance(userId, currencyCode)
-}
-
-async function getAccount(
-  accountId: string
-): Promise<{
-  accountId: string
-  telegramUsername: string
-  dealCount: number
-  tradeVolume: number
-  cryptoCurrencyCode: CryptoCurrency
-  reviewCount: number
-  // isUserBlocked: boolean,
-  rating: number
-} | null> {
-  const user = await User.findOne({
-    where: {
-      accountId: accountId
-    },
-    include: [{ model: TelegramAccount }]
-  })
-  if (!user) {
-    return null
-  }
-
-  const userStats = await Trade.getUserStats(
-    user.id,
-    CURRENT_CRYPTOCURRENCYC_CODE
-  )
-  return {
-    accountId,
-    telegramUsername: user.telegramUser.username,
-    dealCount: userStats.dealCount,
-    tradeVolume: userStats.volume,
-    rating: userStats.rating,
-    cryptoCurrencyCode: CURRENT_CRYPTOCURRENCYC_CODE,
-    reviewCount: (await Trade.getUserReviews(user.id)).length
-    // isUserBlocked: false,
-  }
 }

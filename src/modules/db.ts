@@ -13,7 +13,8 @@ import {
   Withdrawal,
   Market,
   Trade,
-  Dispute
+  Dispute,
+  Message
 } from 'models'
 import { CONFIG } from '../config'
 
@@ -58,6 +59,7 @@ export class DB {
         Market,
         Trade,
         Dispute,
+        Message,
 
         User,
         TelegramAccount,

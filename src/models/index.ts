@@ -6,6 +6,7 @@ export * from './Wallet'
 export * from './Withdrawal'
 export * from './Trade'
 export * from './Dispute'
+export * from './Message'
 
 export * from './User'
 export * from './TelegramAccount'

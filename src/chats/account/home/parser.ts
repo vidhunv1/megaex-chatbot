@@ -1,4 +1,4 @@
-import { AccountHomeStateKey } from './types'
+import { AccountHomeStateKey, AccountHomeState } from './types'
 import { Parser } from 'chats/types'
 import {
   updateNextAccountState,
@@ -6,10 +6,15 @@ import {
   AccountState
 } from '../AccountState'
 import * as _ from 'lodash'
+import Message from 'models/Message'
+import { User, TelegramAccount } from 'models'
+import { telegramHook } from 'modules'
+import { Namespace } from 'modules/i18n'
+import { stringifyCallbackQuery } from 'chats/utils'
 
 export const AccountHomeParser: Parser<AccountState> = async (
-  _msg,
-  _user,
+  msg,
+  user,
   tUser,
   state
 ) => {
@@ -56,6 +61,157 @@ export const AccountHomeParser: Parser<AccountState> = async (
           }
         }
       }
+    },
+
+    [AccountHomeStateKey.cb_sendMessage]: async () => {
+      return state
+    },
+
+    [AccountHomeStateKey.sendMessage]: async () => {
+      const userId = _.get(
+        state[AccountHomeStateKey.cb_sendMessage],
+        'toUserId',
+        null
+      )
+      if (userId) {
+        const u = await User.findById(userId, {
+          include: [{ model: TelegramAccount }]
+        })
+        if (!u) {
+          return null
+        }
+        if (msg.document) {
+          const message = await Message.createMessage(
+            u.id,
+            userId,
+            msg.document.file_id
+          )
+          await telegramHook.getWebhook.sendMessage(
+            u.telegramUser.id,
+            u.t(`${Namespace.Account}:home.new-message`, {
+              accountId: user.accountId,
+              messageContent: msg.document.file_name
+            }),
+            {
+              parse_mode: 'HTML'
+            }
+          )
+          await telegramHook.getWebhook.sendDocument(
+            u.telegramUser.id,
+            msg.document.file_id,
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: user.t(
+                        `${Namespace.Account}:home.send-response-cbbutton`
+                      ),
+                      callback_data: stringifyCallbackQuery<
+                        AccountHomeStateKey.cb_sendMessage,
+                        AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                      >(AccountHomeStateKey.cb_sendMessage, {
+                        toUserId: user.id
+                      })
+                    }
+                  ]
+                ]
+              }
+            }
+          )
+          return {
+            ...state,
+            [AccountHomeStateKey.sendMessage]: {
+              sentMessage: message.message
+            }
+          }
+        } else if (msg.photo) {
+          const photo = msg.photo[msg.photo.length - 1]
+          const message = await Message.createMessage(
+            u.id,
+            userId,
+            photo.file_id
+          )
+          await telegramHook.getWebhook.sendMessage(
+            u.telegramUser.id,
+            u.t(`${Namespace.Account}:home.new-photo-message`, {
+              accountId: user.accountId
+            }),
+            {
+              parse_mode: 'HTML'
+            }
+          )
+          await telegramHook.getWebhook.sendPhoto(
+            u.telegramUser.id,
+            photo.file_id,
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: user.t(
+                        `${Namespace.Account}:home.send-response-cbbutton`
+                      ),
+                      callback_data: stringifyCallbackQuery<
+                        AccountHomeStateKey.cb_sendMessage,
+                        AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                      >(AccountHomeStateKey.cb_sendMessage, {
+                        toUserId: user.id
+                      })
+                    }
+                  ]
+                ]
+              }
+            }
+          )
+          return {
+            ...state,
+            [AccountHomeStateKey.sendMessage]: {
+              sentMessage: message.message
+            }
+          }
+        } else if (msg.text) {
+          const message = await Message.createMessage(u.id, userId, msg.text)
+          await telegramHook.getWebhook.sendMessage(
+            u.telegramUser.id,
+            u.t(`${Namespace.Account}:home.new-message`, {
+              accountId: user.accountId,
+              messageContent: message.message.substring(0, 400)
+            }),
+            {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: user.t(
+                        `${Namespace.Account}:home.send-response-cbbutton`
+                      ),
+                      callback_data: stringifyCallbackQuery<
+                        AccountHomeStateKey.cb_sendMessage,
+                        AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                      >(AccountHomeStateKey.cb_sendMessage, {
+                        toUserId: user.id
+                      })
+                    }
+                  ]
+                ]
+              }
+            }
+          )
+          return {
+            ...state,
+            [AccountHomeStateKey.sendMessage]: {
+              sentMessage: message.message
+            }
+          }
+        }
+      }
+      return state
+    },
+
+    [AccountHomeStateKey.messageSent]: async () => {
+      return null
     }
   }
 
@@ -84,6 +240,10 @@ export function nextAccountHomeState(
       return AccountHomeStateKey.showReviews
     case AccountHomeStateKey.cb_reviewShowMore:
       return AccountHomeStateKey.showReviews
+    case AccountHomeStateKey.cb_sendMessage:
+      return AccountHomeStateKey.sendMessage
+    case AccountHomeStateKey.sendMessage:
+      return AccountHomeStateKey.messageSent
     default:
       return null
   }

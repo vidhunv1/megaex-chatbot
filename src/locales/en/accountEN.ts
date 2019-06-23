@@ -3,6 +3,24 @@ import { BotCommand } from 'chats/types'
 
 export const accountEN = {
   home: {
+    'send-message-cbbutton': '📝 Write message',
+    'send-response-cbbutton': '📝 Write response',
+    'message-sent': 'message sent!',
+    'new-photo-message': `📨 <b>Message from</b> ${
+      BotCommand.ACCOUNT
+    }{{ accountId }}
+
+Received photo`,
+    'message-not-sent': '❌ Could not send this message',
+    'enter-message':
+      'input your message to send the user (text should be less than 400 characters)',
+    'new-message': `📨 <b>Message from</b> ${BotCommand.ACCOUNT}{{ accountId }}
+
+----------------
+
+{{ messageContent }}
+
+----------------`,
     'back-cbbutton': '⬅️ back',
     'more-cbbutton': 'more »',
     'no-reviews-available': 'No reviews yet',
@@ -38,7 +56,6 @@ Telegram: @{{ telegramUsername }}
 💎 *Trade volume:* {{ tradeVolume }} {{ cryptoCurrencyCode }}
 ⭐ *Rating:* {{ rating }}`,
 
-    'send-message-dealer-cbbutton': '📝 Write message',
     'user-reviews-cbbutton': '🗣 Reviews ({{ reviewCount }})',
     'block-dealer-cbbutton': '⛔️  Block user',
     'unblock-dealer-cbbutton': 'Unblock user',

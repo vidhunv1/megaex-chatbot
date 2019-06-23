@@ -85,6 +85,25 @@ export const AccountHomeResponder: Responder<AccountState> = (
 
     [AccountHomeStateKey.cb_reviewShowMore]: async () => {
       return false
+    },
+
+    [AccountHomeStateKey.cb_sendMessage]: async () => {
+      return false
+    },
+
+    [AccountHomeStateKey.sendMessage]: async () => {
+      await AccountHomeMessage(msg, user).inputSendMessage()
+      return true
+    },
+
+    [AccountHomeStateKey.messageSent]: async () => {
+      const sentMessage = _.get(
+        state[AccountHomeStateKey.sendMessage],
+        'sentMessage',
+        null
+      )
+      await AccountHomeMessage(msg, user).messageSent(sentMessage)
+      return true
     }
   }
 
