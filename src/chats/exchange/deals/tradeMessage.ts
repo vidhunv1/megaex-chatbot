@@ -16,6 +16,7 @@ import { DealsStateKey, DealsState } from './types'
 import { dataFormatter } from 'utils/dataFormatter'
 import logger from 'modules/logger'
 import { InlineKeyboardButton } from 'node-telegram-bot-api'
+import { AccountHomeStateKey, AccountHomeState } from 'chats/account/home'
 
 export const sendTradeMessage: Record<
   TradeStatus,
@@ -60,6 +61,20 @@ export const sendTradeMessage: Record<
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
+              [
+                {
+                  text: contextUser.t(
+                    `${Namespace.Account}:home.send-message-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    AccountHomeStateKey.cb_sendMessage,
+                    AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                  >(AccountHomeStateKey.cb_sendMessage, {
+                    toUserId: opUser.id,
+                    tradeId: trade.id
+                  })
+                }
+              ],
               [
                 {
                   text: contextUser.t(
@@ -219,6 +234,20 @@ export const sendTradeMessage: Record<
               [
                 {
                   text: contextUser.t(
+                    `${Namespace.Account}:home.send-message-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    AccountHomeStateKey.cb_sendMessage,
+                    AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                  >(AccountHomeStateKey.cb_sendMessage, {
+                    toUserId: trade.sellerUserId,
+                    tradeId: trade.id
+                  })
+                }
+              ],
+              [
+                {
+                  text: contextUser.t(
                     `${Namespace.Exchange}:deals.trade.payment-sent-cbbutton`
                   ),
                   callback_data: stringifyCallbackQuery<
@@ -271,7 +300,25 @@ export const sendTradeMessage: Record<
           }
         ),
         {
-          parse_mode: 'Markdown'
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: contextUser.t(
+                    `${Namespace.Account}:home.send-message-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    AccountHomeStateKey.cb_sendMessage,
+                    AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                  >(AccountHomeStateKey.cb_sendMessage, {
+                    toUserId: buyerAccount.id,
+                    tradeId: trade.id
+                  })
+                }
+              ]
+            ]
+          }
         }
       )
     }
@@ -569,6 +616,18 @@ export const sendTradeMessage: Record<
               [
                 {
                   text: contextUser.t(
+                    `${Namespace.Account}:home.send-message-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    AccountHomeStateKey.cb_sendMessage,
+                    AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                  >(AccountHomeStateKey.cb_sendMessage, {
+                    toUserId: trade.sellerUserId,
+                    tradeId: trade.id
+                  })
+                },
+                {
+                  text: contextUser.t(
                     `${Namespace.Exchange}:deals.trade.open-dispute-cbbutton`
                   ),
                   callback_data: stringifyCallbackQuery<
@@ -604,14 +663,13 @@ export const sendTradeMessage: Record<
               [
                 {
                   text: contextUser.t(
-                    `${
-                      Namespace.Exchange
-                    }:deals.trade.payment-received-cbbutton`
+                    `${Namespace.Account}:home.send-message-cbbutton`
                   ),
                   callback_data: stringifyCallbackQuery<
-                    DealsStateKey.cb_paymentReceived,
-                    DealsState[DealsStateKey.cb_paymentReceived]
-                  >(DealsStateKey.cb_paymentReceived, {
+                    AccountHomeStateKey.cb_sendMessage,
+                    AccountHomeState[AccountHomeStateKey.cb_sendMessage]
+                  >(AccountHomeStateKey.cb_sendMessage, {
+                    toUserId: trade.buyerUserId,
                     tradeId: trade.id
                   })
                 },
@@ -625,6 +683,21 @@ export const sendTradeMessage: Record<
                   >(DealsStateKey.cb_startDispute, {
                     tradeId: trade.id,
                     userId: contextUser.id
+                  })
+                }
+              ],
+              [
+                {
+                  text: contextUser.t(
+                    `${
+                      Namespace.Exchange
+                    }:deals.trade.payment-received-cbbutton`
+                  ),
+                  callback_data: stringifyCallbackQuery<
+                    DealsStateKey.cb_paymentReceived,
+                    DealsState[DealsStateKey.cb_paymentReceived]
+                  >(DealsStateKey.cb_paymentReceived, {
+                    tradeId: trade.id
                   })
                 }
               ]

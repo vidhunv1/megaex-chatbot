@@ -3,13 +3,14 @@ import { BotCommand } from 'chats/types'
 
 export const accountEN = {
   home: {
+    'trade-message': `View trade ${BotCommand.TRADE}{{ tradeId }}`,
     'send-message-cbbutton': '📝 Write message',
     'send-response-cbbutton': '📝 Write response',
     'message-sent': 'message sent!',
     'new-photo-message': `📨 <b>Message from</b> ${
       BotCommand.ACCOUNT
     }{{ accountId }}
-
+{{ tradeInfo }}
 Received photo`,
     'message-not-sent': '❌ Could not send this message',
     'enter-message':
@@ -20,7 +21,8 @@ Received photo`,
 
 {{ messageContent }}
 
-----------------`,
+----------------
+{{ tradeInfo }}`,
     'back-cbbutton': '⬅️ back',
     'more-cbbutton': 'more »',
     'no-reviews-available': 'No reviews yet',

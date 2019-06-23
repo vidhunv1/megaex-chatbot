@@ -73,6 +73,17 @@ export const AccountHomeParser: Parser<AccountState> = async (
         'toUserId',
         null
       )
+      const tradeId = parseInt(
+        _.get(state[AccountHomeStateKey.cb_sendMessage], 'tradeId', null) + ''
+      )
+      const tradeInfo =
+        tradeId >= 0
+          ? '\n' +
+            user.t(`${Namespace.Account}:home.trade-message`, {
+              tradeId: tradeId
+            })
+          : ''
+
       if (userId) {
         const u = await User.findById(userId, {
           include: [{ model: TelegramAccount }]
@@ -90,7 +101,8 @@ export const AccountHomeParser: Parser<AccountState> = async (
             u.telegramUser.id,
             u.t(`${Namespace.Account}:home.new-message`, {
               accountId: user.accountId,
-              messageContent: msg.document.file_name
+              messageContent: msg.document.file_name,
+              tradeInfo: tradeInfo
             }),
             {
               parse_mode: 'HTML'
@@ -111,7 +123,8 @@ export const AccountHomeParser: Parser<AccountState> = async (
                         AccountHomeStateKey.cb_sendMessage,
                         AccountHomeState[AccountHomeStateKey.cb_sendMessage]
                       >(AccountHomeStateKey.cb_sendMessage, {
-                        toUserId: user.id
+                        toUserId: user.id,
+                        tradeId: null
                       })
                     }
                   ]
@@ -135,7 +148,8 @@ export const AccountHomeParser: Parser<AccountState> = async (
           await telegramHook.getWebhook.sendMessage(
             u.telegramUser.id,
             u.t(`${Namespace.Account}:home.new-photo-message`, {
-              accountId: user.accountId
+              accountId: user.accountId,
+              tradeInfo: tradeInfo
             }),
             {
               parse_mode: 'HTML'
@@ -156,7 +170,8 @@ export const AccountHomeParser: Parser<AccountState> = async (
                         AccountHomeStateKey.cb_sendMessage,
                         AccountHomeState[AccountHomeStateKey.cb_sendMessage]
                       >(AccountHomeStateKey.cb_sendMessage, {
-                        toUserId: user.id
+                        toUserId: user.id,
+                        tradeId: null
                       })
                     }
                   ]
@@ -176,7 +191,8 @@ export const AccountHomeParser: Parser<AccountState> = async (
             u.telegramUser.id,
             u.t(`${Namespace.Account}:home.new-message`, {
               accountId: user.accountId,
-              messageContent: message.message.substring(0, 400)
+              messageContent: message.message.substring(0, 400),
+              tradeInfo: tradeInfo
             }),
             {
               parse_mode: 'HTML',
@@ -191,7 +207,8 @@ export const AccountHomeParser: Parser<AccountState> = async (
                         AccountHomeStateKey.cb_sendMessage,
                         AccountHomeState[AccountHomeStateKey.cb_sendMessage]
                       >(AccountHomeStateKey.cb_sendMessage, {
-                        toUserId: user.id
+                        toUserId: user.id,
+                        tradeId: null
                       })
                     }
                   ]

@@ -528,10 +528,9 @@ New Dispute Id: ${dispute.id}, openedByUser: ${
     }
 
     const order = await Order.findById(orderId)
-    if (!order || (order && cryptoAmount * fixedRate < order.minFiatAmount)) {
-      throw new Error(
-        'Invalid trade params: (cryptoAmount * fixedRate) < order.minFiatAmount)'
-      )
+    if (!order) {
+      logger.error('INITIATE trade: Invalid trade params: no order')
+      throw new Error('Invalid trade no order found')
     }
 
     if (order.orderType === OrderType.BUY) {

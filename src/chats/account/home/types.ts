@@ -29,6 +29,7 @@ export interface AccountHomeState {
 
   [AccountHomeStateKey.cb_sendMessage]?: {
     toUserId: number
+    tradeId: number | null
   }
 
   [AccountHomeStateKey.sendMessage]?: {

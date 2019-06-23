@@ -179,7 +179,8 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
                   AccountHomeStateKey.cb_sendMessage,
                   AccountHomeState[AccountHomeStateKey.cb_sendMessage]
                 >(AccountHomeStateKey.cb_sendMessage, {
-                  toUserId: userId
+                  toUserId: userId,
+                  tradeId: null
                 })
               }
             ]
