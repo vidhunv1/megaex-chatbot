@@ -41,29 +41,29 @@ After careful review based on proof submitted by both parties, we confirm that y
 Appropriate action has been taken against the seller. We are sorry for any inconvenience caused.
 
 {{ cryptoAmount }} has been *credited*. Check your wallet.`,
-      'dispute-resolved-seller-lose': `👩‍🎓 *Dispute resolved*
+      'dispute-resolved-seller-lose': `👩‍🎓  *Dispute resolved*
 
-After careful review based on proof submitted by both parties, we confirm that you are at fault with your t.
+After careful review based on proof submitted by both parties, we confirm that you have attempted to fraud / scam .
 
 NOTE: Repeated offence will result in a permanent ban.`,
-      'dispute-resolved-buyer-lose': `‍🎓 *Dispute resolved*
+      'dispute-resolved-buyer-lose': `‍🎓  *Dispute resolved*
 
-After careful review based on proofs, our legal team has confirmed that there was a fault on your side.
+After careful review based on proof submitted by both parties, we confirm that you have attempted to fraud / scam. 
       
-*NOTE: Repeated offence will result in a permanent ban.*`,
-      'referral-comission': `🚀 *Comission Received*
+NOTE: Repeated offence will result in a permanent ban.`,
+      'referral-comission': `🚀  *Commission Received*
 
-You received {{ cryptoAmount }} referral comission from your referrals trade.`,
+Congratulations! You received {{ cryptoAmount }} commission from your referrals trade. Keep inviting.`,
       'open-dispute-cbbutton': '👩‍🎓 Open Issue',
       'dispute-initiator': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
 
-An issue has been raised on this trade, any transaction on this trade is temporarily blocked. Please contact @{{ legalUsername }} to resolve this.`,
+An issue has been raised on this trade. Trade is temporarily blocked. Please contact @{{ legalUsername }} to resolve this.`,
       'dispute-received': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
 
 The user has raised an issue on this trade. 
 
 Please contact @{{ legalUsername }} to resolve this.`,
-      'confirm-payment-received': `*Confirm*
+      'confirm-payment-received': `*Payment Confirmation*
 
 Are you sure you have received *{{ fiatAmount }}* from the buyer?`,
       'confirm-payment-received-yes-cbbutton': 'Yes',
@@ -72,21 +72,21 @@ Are you sure you have received *{{ fiatAmount }}* from the buyer?`,
         BotCommand.TRADE
       }{{ tradeId }}
 
-Your wallet is credited with *{{ cryptoAmount }}* from this trade.`,
-      'payment-released-seller': `🚀 *Trade success* ${
+Your wallet is credited with *{{ cryptoAmount }}* from last trade.`,
+      'payment-released-seller': `🚀 *Successful Trade* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-*{{ cryptoAmount }}* was sent to the buyer.`,
-      'give-rating': `🏅 *Rate this trade*
+*{{ cryptoAmount }}* debited from your wallet and sent to the buyer.`,
+      'give-rating': `🏅  *Rate this trade*
 
 Give your rating for this trade.`,
-      'give-review': `🗣 *Trade review*
+      'give-review': `🗣  *Trade review*
 
-Write your short review for this trade`,
-      'end-review': `*Added your review!*
+Write a short review for this trade`,
+      'end-review': `Review added.
       
-🎉 _Invite your friends and family here so they can also have the best experience to buy/sell bitcoins (Use your referral link so you can earn from their trades)._
+🎉 Invite your friends to earn bitcoins from every referral. Find your referral link under 'My Account'.
 
 {{ referralLink }}`,
       'skip-review': 'Skip ➡️',
@@ -97,51 +97,51 @@ Write your short review for this trade`,
         [TradeRating.VERY_POSITIVE]: '4 ⭐',
         [TradeRating.EXCELLENT]: '5 🌟'
       },
-      'confirm-payment-sent': `*Confirm*
+      'confirm-payment-sent': `*Confirm Payment*
 
-Are you sure you have sent *{{ fiatAmount }}* to the sellers *{{ paymentMethodType }}*?`,
+Have you sent *{{ fiatAmount }}* to the sellers *{{ paymentMethodType }}*?`,
       'confirm-payment-sent-yes-cbbutton': 'Yes',
       'confirm-payment-sent-no-cbbutton': 'No',
       'payment-sent-buyer': `*🛎 Trade* ${BotCommand.TRADE}{{ tradeId }}
 
 Seller has been notified. Please wait for the the seller to confirm your payment.
 
-❕Please wait for sometime, If there is no confirmation you can contact *Open Issue*.`,
-      'payment-sent-seller': `*🛎 Payment confirmed* ${
+In case, there is no confirmation; you can 'Raise issue'.`,
+      'payment-sent-seller': `🛎  *Payment confirmed* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. Please confirm when you receive this transaction.
+The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. You may receive the payment in sometime.
 
-❕If you have not received this transaction in some time you can contact *Open Issue*.`,
+In case you don't receive the payment, you can *Raise Issue*.`,
       'escrow-warn-seller': `*Info*
 
-The seller is yet to make payment for the trade ${
+The buyer is yet to make payment for the trade. ${
         BotCommand.TRADE
       }{{ tradeId }}.
       
-You can contact our *support* if you think something is wrong, they will take care of this issue for you.
+You can contact our *support* if you think something is wrong, they will assist you.
 
-❕_If no confirmation is received in_ *{{ paymentSendTimeout }} mins*, _the blocked amount will be automatically released to you._`,
-      'escrow-warn-buyer': `*Reminder*
+If no confirmation is received in *{{ paymentSendTimeout }} mins*, the blocked amount will be automatically released to you.`,
+      'escrow-warn-buyer': `*Trade Payment Reminder*
 
 You are yet to make the payment for the trade ${
         BotCommand.TRADE
-      }{{ tradeId }}. Click the button below if you have already made the payment.
+      }{{ tradeId }}. Click 'I have paid' if you have already made the payment.
 
-⚠️ You have *{{ paymentSendTimeout }} mins* left to make this payment. Please note that any payment made after this time will be invalid.`,
-      'escrow-closed-seller': `*Trade closed*
+⚠️ You have *{{ paymentSendTimeout }} mins* left to make this payment. Any payment made after that will be invalid.`,
+      'escrow-closed-seller': `🤷‍♂️  *Trade closed*
 
-The buyer did not confirm any payment made to you for trade ${
+The buyer did not pay and confirm payment for the trade. ${
         BotCommand.TRADE
       }{{ tradeId }}.
 
 Your *{{ cryptoAmount }}* has been returned back to you. For issues related to this trade please contact our *support*.`,
-      'escrow-closed-buyer': `*Trade closed*
+      'escrow-closed-buyer': `🤷‍♂️  *Trade Closed*
 
-You did not make any payment to the seller for the trade ${
+You did not make any payment to the seller for the trade. ${
         BotCommand.TRADE
-      }{{ tradeId }}. For issues related to this trade please contact our *support*.`,
+      }{{ tradeId }}. For issues related to this trade, please contact our *support*.`,
       'cancel-trade-confirm': `Are you sure you want to cancel the trade ${
         BotCommand.TRADE
       }{{ tradeId }} on *{{ fiatAmount }}*?
@@ -149,14 +149,14 @@ You did not make any payment to the seller for the trade ${
 ⚠️ Never cancel if you have already paid the seller.`,
       'cancel-trade-confirm-yes-cbbutton': 'yes',
       'cancel-trade-confirm-no-cbbutton': 'no',
-      'cancel-trade-success': 'This trade was canceled by you.',
+      'cancel-trade-success': 'This trade was cancelled by you.',
       'cancel-trade-not-canceled': '-',
-      'cancel-trade-fail': 'The trade was already canceled or expired.',
+      'cancel-trade-fail': 'The trade is cancelled already or has expired.',
       'cancel-trade-notify': `❗️The trade ${
         BotCommand.TRADE
-      }{{ tradeId }} was canceled by the user.`,
+      }{{ tradeId }} was cancelled by the user.`,
       'trade-rejected-notify':
-        '❗ The user cancelled this trade. You can choose other good deals under Quick Buy / Sell.',
+        'The user cancelled this trade. You can choose other good deals under Quick Buy / Sell.',
       'trade-rejected-success': 'You rejected this trade.',
       'trade-accepted-seller-success': `🛎 *Trade Open* ${
         BotCommand.TRADE
@@ -164,50 +164,50 @@ You did not make any payment to the seller for the trade ${
 
 The user has been notified to deposit *{{ fiatPayAmount }}* in your *{{ paymentMethodName }}*.
 
-Telegram: {{ buyerUsername }}
+Chat with trader: {{ buyerUsername }}
 
-❕You will be notified when this payment has been marked as completed.`,
+You will be notified when this payment has been marked as completed.`,
       'trade-accepted-buyer-no-payment-info':
         'Send a message to seller for the payment details.',
-      'trade-accepted-buyer': `🛎 *Trade Accepted* ${
+      'trade-accepted-buyer': `🛎  *Trade Accepted* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
 Make a payment of {{ fiatPayAmount }} through {{ paymentMethodName }}, you will receive *{{ cryptoAmount }}* when your payment is confirmed.
 
 *{{ paymentMethodName }}*
-Amount: *{{ fiatPayAmount }}*
+           Amount: *{{ fiatPayAmount }}*
 Payment reference: *T{{ tradeId }}*
 {{ paymentDetails }}
 
-Telegram: {{ telegramUsername }}
+Chat with trader: {{ telegramUsername }}
 
-🔒 _This trade is secured. Payment valid only for_ *{{ paymentSendTimeout }} mins*.`,
-      'payment-received-cbbutton': '💵  Payment Received',
+🔒 This trade is secured. Payment valid only for *{{ paymentSendTimeout }} mins*.`,
+      'payment-received-cbbutton': '💵  Payment received',
       'payment-sent-cbbutton': '💸  I have paid',
       'trade-accepted-fail':
-        '️❗️ Sorry. There was an error in opening this trade.',
+        '️Sorry. There was an error in opening this trade.',
 
       errors: {
         [TradeError.TRADE_EXISTS_ON_ORDER]:
-          '❌ You already have an existing trade on this order. You cannot place multiple trades for the same order.',
-        [TradeError.NOT_FOUND]: '❌ We could not find this trade.',
-        [TradeError.TRADE_EXPIRED]: '❌ This trade is invalid or expired.',
+          '❗️ You already have an existing trade on this order. You cannot place multiple trades for the same order.',
+        [TradeError.NOT_FOUND]: '❗️ We could not find this trade.',
+        [TradeError.TRADE_EXPIRED]: '❗️ This trade is invalid or expired.',
         [TradeError.INSUFFICIENT_BALANCE]:
-          '❌ You have insufficient balance to open this trade'
+          '❗️ You have insufficient balance to open this trade'
       },
       'init-get-confirm-buy': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
 
 ${
         BotCommand.ACCOUNT
-      }{{ requestorAccountId }} wants to buy *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}* at rate {{ fixedRate }}.
+      }{{ requestorAccountId }} wants to buy *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}* at price {{ fixedRate }}.
 
 Do you want to accept this trade?`,
       'init-get-confirm-sell': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
 
 ${
         BotCommand.ACCOUNT
-      }{{ requestorAccountId }} wants to sell *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}* at rate {{ fixedRate }}.
+      }{{ requestorAccountId }} wants to sell *{{ cryptoCurrencyAmount }}* for *{{ fiatValue }}* at price {{ fixedRate }}.
 
 Do you want to accept this trade?`,
       'trade-init-yes-cbbutton': 'Yes',
@@ -217,13 +217,13 @@ Do you want to accept this trade?`,
 This user is currently away. Please try other trades.`,
       'trade-init-expired': `⏳ *Trade expired*
 
-The trade request ${
+Since you did not respond, the trade request ${
         BotCommand.TRADE
-      }{{ tradeId }} has expired and canceled since you did not respond.
+      }{{ tradeId }} has expired and cancelled.
 
-❕You can pause your order easily if you are away. This ensures a good experience for everyone.`
+You can pause your order easily if you are away. This ensures a good experience for other traders.`
     },
-    'request-deposit-notify': `🛎 *New Match*
+    'request-deposit-notify': `🛎  *New buy request*
 
 You have a new buy request on your order ${BotCommand.ORDER}{{ orderId }}.
 
@@ -234,7 +234,7 @@ You have a new buy request on your order ${BotCommand.ORDER}{{ orderId }}.
       [DealsError.ORDER_NOT_FOUND]: 'Order not found.',
       [DealsError.SELF_OPEN_DEAL_REQUEST]:
         'You cannot open deal on your own order!',
-      default: '❗️ Sorry. An error occured. Please try again later.'
+      default: 'Sorry. An error occured. Please try again later.'
     },
     'next-cbbutton': 'next',
     'prev-cbbutton': 'prev',
@@ -242,11 +242,11 @@ You have a new buy request on your order ${BotCommand.ORDER}{{ orderId }}.
 
 Please select the order you want to buy from. 
 
-*Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Seller Rating* are shown.
+Price / {{ cryptoCurrencyCode }}, payment method, and trader rating are shown.
 `,
     'show-sell-deals': `📈 *Quick Sell* ({{ currentPage}}/{{ totalPages }})
 
-Please select the order you want to sell to. 
+Select the order you want to sell to. 
 
 *Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
 `,
@@ -256,16 +256,16 @@ Please select the order you want to sell to.
 
 This deal is by *{{ realName }}*.
 Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
-Rating:  {{ rating }} ⭐️
+    Rating:  {{ rating }} ⭐️
 
-*Payment Details*:
+Payment Details:
 -----------------
 Payment Method: {{ paymentMethodName }}
-Terms: _{{ terms }}_
+         Terms: _{{ terms }}_
 
-*Trade Details*:
+Trade Details:
 ----------------
-Price: {{ rate }} / {{ cryptoCurrencyCode }}
+     Price: {{ rate }} / {{ cryptoCurrencyCode }}
 Buy Amount: {{ formattedAmount }}`,
     'show-sell-deal': `📈 *Sell {{ cryptoCurrencyCode }}* (${
       BotCommand.ORDER
@@ -273,31 +273,31 @@ Buy Amount: {{ formattedAmount }}`,
 
 This sell order is by *{{ realName }}*.
 Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
-Rating:  {{ rating }} ⭐️
+    Rating:  {{ rating }} ⭐️
 
-*Payment Details*:
+Payment Details:
 -----------------
 Payment Method: {{ paymentMethodName }}
-Terms: _{{ terms }}_
+         Terms: _{{ terms }}_
 
-*Trade Details*:
+Trade Details:
 ----------------
-Price: {{ rate }} / {{ cryptoCurrencyCode }}
+      Price: {{ rate }} / {{ cryptoCurrencyCode }}
 Sell Amount: {{ formattedAmount }}`,
 
-    'show-sell-insufficient-funds': `❗️ There is not enough balance on sellers account to start this deal. You can request the seller to deposit the funds after which you can start the trade again.`,
+    'show-sell-insufficient-funds': `Insufficient funds on traders account to start deal. Request the seller to deposit the funds after which the deal can begin.`,
     'request-buy-deal-deposit-cbbutton': '📲 Contact seller',
 
-    'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',
-    'open-sell-deal-cbbutton': '🛎  Sell {{ cryptoCurrencyCode }} here',
-    'back-cbbutton': '⬅️  Back',
-    'user-reviews': '💬 user reviews',
-    'input-buy-amount': `💵 *Input buy amount*
+    'open-buy-deal-cbbutton': '🛎 Buy {{ cryptoCurrencyCode }} from here',
+    'open-sell-deal-cbbutton': '🛎 Sell {{ cryptoCurrencyCode }} from here',
+    'back-cbbutton': '⬅️ Back',
+    'user-reviews': '💬 User reviews',
+    'input-buy-amount': `💵  *Enter buy amount*
 
 Enter {{ fiatCurrencyCode }} amount between *{{ minFiatValue }}* and *{{ maxFiatValue }}*.
     
 For example: 1000 {{ fiatCurrencyCode }}.`,
-    'input-sell-amount': `💵 *Input sell amount*
+    'input-sell-amount': `💵  *Enter sell amount*
 
 Enter {{ fiatCurrencyCode }} amount between *{{ minFiatValue }}* and *{{ maxFiatValue }}*.
 
@@ -309,22 +309,22 @@ Select or add new payment details for *{{ paymentMethodType }}* for the buyer to
     'add-payment-details': '➕ Add {{ paymentMethodName }}',
     'confirm-input-buy-amount': `*Open this trade?*
     
-Are you sure you want to buy *{{ cryptoValue }}* for *{{ fiatValue }}* at rate {{ rate }}?
+Are you sure you want to buy *{{ cryptoValue }}* for *{{ fiatValue }}* at price {{ rate }}?
 
-❕By continuing you agree to the deal terms.`,
+ℹ️ On clicking *'Yes'*, you agree to trade terms.`,
 
     'confirm-input-sell-amount': `*Open this trade?*
     
-Are you sure you want to sell *{{ cryptoValue }}* for *{{ fiatValue }}* at rate *{{ rate }}*?
+Are you sure you want to sell *{{ cryptoValue }}* for *{{ fiatValue }}* at price *{{ rate }}*?
 
-❕By continuing you agree to the deal terms.`,
+ℹ️ On clicking *'Yes'*, you agree to trade terms.`,
     'confirm-input-amount-yes-cbbutton': 'Yes',
     'confirm-input-amount-no-cbbutton': 'No',
     'show-open-deal-request': `📲 *Request sent!*
 
 Your request has been sent, this deal will only start after the seller has deposited the required funds.
 
-⚠️ *IMPORTANT*: Never make any payment before the deposit has been confirmed here. Do not make any deals outside this bot, you risk losing your money.
+⚠️ IMPORTANT: Never make any payment before the deposit has been confirmed here. Do not make any deals outside this MegaDeals, you risk losing your money.
 
 *Seller's telegram*: @{{ telegramUsername}}`,
     'show-open-deal-cancel': 'Deal canceled.',
@@ -333,11 +333,11 @@ Your request has been sent, this deal will only start after the seller has depos
 
 Waiting for ${
       BotCommand.ACCOUNT
-    }{{ traderAccountId }}. If user does not confirm the start of trade within {{ timeoutMinutes }} minutes, the deal will automatically cancel.
+    }{{ traderAccountId }}. If the user does not confirm the start of trade within {{ timeoutMinutes }} minutes, the deal will automatically cancel.
 
-⚠️️⚠️️ *NOTE*: For your security do not make any trades outside this bot.
+⚠️ IMPORTANT: For security reasons, do not make any trades outside MegaDeals. 
 
-You can cancel the deal any time. Keep in mind that the money you have sent will not return if you cancel the transaction.
+If you cancel the transaction, the money you have sent to the seller will not return.
 
 *Auto cancel in {{ timeoutMinutes }} minutes*`,
     'cancel-trade-cbbutton': '🚫 Cancel trade'
@@ -353,82 +353,82 @@ You can cancel the deal any time. Keep in mind that the money you have sent will
 
 Your ongoing trades and orders created by you are listed.
 `,
-    'order-enabled': 'Your order is *active* now.',
+    'order-enabled': 'Your order is active now.',
     'input-payment-details-field': `Write your *{{ fieldName }}* for *{{ paymentMethod}}*`,
-    'order-disabled': `Your order is *inactive* now.
-click on *'Active'* button to enable this order.`,
+    'order-disabled': `Your order is set as inactive now.
+Click on *'Active'* button to enable this order.`,
     'show-orders': 'TODO: Show my orders',
 
     'terms-not-added': 'None',
-    'my-buy-order-info': `*📗 My Buy Order* - ${BotCommand.ORDER}{{orderId}}
+    'my-buy-order-info': `📗  *My buy order* - ${BotCommand.ORDER}{{orderId}}
 
-*Status*: {{ status }}
-*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Min. amount*: {{ minAmount }}
-*Max. amount*: {{ maxAmount }}
+        *Status*: {{ status }}
+     *{{ cryptoCurrencyCode }} Price*: {{ rate }}
+   *Min. amount*: {{ minAmount }}
+   *Max. amount*: {{ maxAmount }}
 *Payment method*: {{ paymentMethod }}
 
 Terms: _{{ terms }}_
 
-*Link for your order*: {{ orderLink }}
-Share this link, anyone who clicks on this link can directly open a trade with you.
+*Order link*: {{ orderLink }}
+Share this link. Whoever clicks on this link can open a trade with you.
 `,
     'payment-info-not-added': 'Not added',
     'insufficient-sell-order-balance':
-      '⚠️ Infufficient balance. You need to deposit the equivalent minimum amount to start deals on this order.',
+      '⚠️ Insufficient balance. Deposit the minimum amount to start deals on this order.',
     'my-sell-order-info': `*📕 My Sell Order* - ${BotCommand.ORDER}{{orderId}}
 
-*Status*: {{ status }}
-*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Min. amount*: {{ minAmount }}
-*Max. amount*: {{ maxAmount }}
+        *Status*: {{ status }}
+     *{{ cryptoCurrencyCode }} price*: {{ rate }}
+   *Min. amount*: {{ minAmount }}
+   *Max. amount*: {{ maxAmount }}
 *Payment method*: {{ paymentMethod }}
-*Payment Info*: {{ paymentInfo }}
+  *Payment Info*: {{ paymentInfo }}
 
-Terms: _{{ terms }}_
+Terms: _"{{ terms }}"_
 
-*Link for your order*: {{ orderLink }}
-Share this link, anyone who clicks on this link can directly open a deal with you.
+*Order link*: {{ orderLink }}
+Share this link and open a deal directly with other traders.
 `,
     'edit-amount-cbbutton': '⚖️ Amount',
-    'edit-rate-cbbutton': '💸 Rate BTC',
+    'edit-rate-cbbutton': '💸 Set BTC price',
     'edit-terms-cbbutton': '📝 Terms',
     'edit-payment-method-cbbutton': '💳 Payment method',
     'toggle-active-cbbutton': 'Active',
     'delete-order-cbbutton': '🗑️ Delete!',
-    'edit-order': '✏️  Edit order',
-    'go-back-cbbutton': '⬅️  Back',
+    'edit-order': '✏️ Edit order',
+    'go-back-cbbutton': '⬅️ back',
     'order-edit-success': '✅ Your order is updated.',
     'edit-payment-details': '📃 Update payment info',
-    'order-edit-rate': `*Rate {{ cryptoCurrencyCode }}*
+    'order-edit-rate': `*Set {{ cryptoCurrencyCode }} price*
 
-Set the rate for {{ cryptoCurrencyCode }} for this order. Write your margin in percentage(%) or set up a fixed price.
+Enter the fixed price for {{ cryptoCurrencyCode }} in *{{ fiatCurrencyCode }}* or enter in percentage (%) to set a margin price.
 
-Example: *2%* or *{{ marketRate }}*`,
-    'order-edit-terms': `📝 *Terms*
+Example: *{{ marketRate }}* or *2%*`,
+    'order-edit-terms': `📋 *Terms*
 
 Write your terms for the trade. This will be shown on your order.`,
     'order-delete-success': 'Order deleted'
   },
 
   'create-order': {
-    show: `📊 *Create Order*
+    show: `📝 *Create Order*
 
 Select the order type.`,
     'new-buy-order-cbbutton': '📗  I want to buy',
     'new-sell-order-cbbutton': '📕  I want to sell',
-    'input-fixed-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
+    'input-fixed-rate': `💸  Set {{ cryptoCurrencyCode }} price*
 
-Enter the fixed rate of {{ cryptoCurrencyCode }} for this order in *{{ fiatCurrencyCode }}* or enter in *percents* to set a margin price.
+Enter a fixed price for {{ cryptoCurrencyCode }} in *{{ fiatCurrencyCode }}* or enter in percentage (%) to set a margin price.
 
 Example: *{{ marketRate }}* or *2%*`,
-    'input-margin-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
+    'input-margin-rate': `*💸 Set {{ cryptoCurrencyCode }} price*
 
-Margin price lets you set a dynamic rate for your order based on market rates. Use a positive or negative percentage to sell above or below the current market rate.
+Use margin price to set a dynamic price based on market rates. Use + / - percentage(%) to sell above or below the current market rate.
 
-*Current Market rate*: {{ marketRate }} ({{ marketRateSource }})
+Current Market rate: {{ marketRate }} ({{ marketRateSource }})
 
-Example: *3%* or *-2%*`,
+Example: 3% or -2%`,
     'use-margin-price-cbbutton': 'ℹ️ Margin pricing',
     'use-fixed-price-cbbutton': '⬅️  Rate',
     'back-cbbutton': '⬅️ back',
@@ -436,7 +436,7 @@ Example: *3%* or *-2%*`,
 
 Enter the order amount in *{{ fiatCurrencyCode }}*.
 
-For Example: Either *1000* or *500-1000* (set min-max limit)
+Example: Either 1000 (absolute) or 500-1000 (min-max limit)
 `,
     'buy-order-created': '✅  Your buy order is created.',
     'sell-order-created': '✅  Your sell order is created.',
