@@ -43,12 +43,12 @@ Appropriate action has been taken against the seller. We are sorry for any incon
 {{ cryptoAmount }} has been *credited*. Check your wallet.`,
       'dispute-resolved-seller-lose': `👩‍🎓  *Dispute resolved*
 
-After careful review based on proof submitted by both parties, we confirm that you have attempted to fraud / scam .
+After careful review based on proof submitted by both parties, we confirm that there is fault on your part of the trade.
 
 NOTE: Repeated offence will result in a permanent ban.`,
       'dispute-resolved-buyer-lose': `‍🎓  *Dispute resolved*
 
-After careful review based on proof submitted by both parties, we confirm that you have attempted to fraud / scam. 
+After careful review based on proof submitted by both parties, we confirm that there is fault on your part of the trade. 
       
 NOTE: Repeated offence will result in a permanent ban.`,
       'referral-comission': `🚀  *Commission Received*
@@ -72,12 +72,12 @@ Are you sure you have received *{{ fiatAmount }}* from the buyer?`,
         BotCommand.TRADE
       }{{ tradeId }}
 
-Your wallet is credited with *{{ cryptoAmount }}* from last trade.`,
+Your wallet is credited with *{{ cryptoAmount }}* for this trade.`,
       'payment-released-seller': `🚀 *Successful Trade* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-*{{ cryptoAmount }}* debited from your wallet and sent to the buyer.`,
+*{{ cryptoAmount }}* debited from your wallet and released to the buyer.`,
       'give-rating': `🏅  *Rate this trade*
 
 Give your rating for this trade.`,
@@ -86,7 +86,7 @@ Give your rating for this trade.`,
 Write a short review for this trade`,
       'end-review': `Review added.
       
-🎉 Invite your friends to earn bitcoins from every referral. Find your referral link under 'My Account'.
+🎉 Invite your friends to earn bitcoins from every referral. Earn 50% commission on our fees on every referral trade.
 
 {{ referralLink }}`,
       'skip-review': 'Skip ➡️',
@@ -111,7 +111,7 @@ In case, there is no confirmation; you can 'Raise issue'.`,
         BotCommand.TRADE
       }{{ tradeId }}
 
-The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. You may receive the payment in sometime.
+The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. Please confirm when you receive the payment.
 
 In case you don't receive the payment, you can *Raise Issue*.`,
       'escrow-warn-seller': `*Info*
@@ -324,7 +324,7 @@ Are you sure you want to sell *{{ cryptoValue }}* for *{{ fiatValue }}* at price
 
 Your request has been sent, this deal will only start after the seller has deposited the required funds.
 
-⚠️ IMPORTANT: Never make any payment before the deposit has been confirmed here. Do not make any deals outside this MegaDeals, you risk losing your money.
+⚠️ IMPORTANT: Never make any payment before the deposit has been confirmed here. Do not make any deals outside MegaDeals, you risk losing your money.
 
 *Seller's telegram*: @{{ telegramUsername}}`,
     'show-open-deal-cancel': 'Deal canceled.',
@@ -337,7 +337,7 @@ Waiting for ${
 
 ⚠️ IMPORTANT: For security reasons, do not make any trades outside MegaDeals. 
 
-If you cancel the transaction, the money you have sent to the seller will not return.
+Never cancel the transaction if you have already made the payment.
 
 *Auto cancel in {{ timeoutMinutes }} minutes*`,
     'cancel-trade-cbbutton': '🚫 Cancel trade'
@@ -355,7 +355,7 @@ Your ongoing trades and orders created by you are listed.
 `,
     'order-enabled': 'Your order is active now.',
     'input-payment-details-field': `Write your *{{ fieldName }}* for *{{ paymentMethod}}*`,
-    'order-disabled': `Your order is set as inactive now.
+    'order-disabled': `Your order is set as inactive.
 Click on *'Active'* button to enable this order.`,
     'show-orders': 'TODO: Show my orders',
 
@@ -391,7 +391,7 @@ Terms: _"{{ terms }}"_
 Share this link and open a deal directly with other traders.
 `,
     'edit-amount-cbbutton': '⚖️ Amount',
-    'edit-rate-cbbutton': '💸 Set BTC price',
+    'edit-rate-cbbutton': '💸 BTC price',
     'edit-terms-cbbutton': '📝 Terms',
     'edit-payment-method-cbbutton': '💳 Payment method',
     'toggle-active-cbbutton': 'Active',
@@ -430,7 +430,7 @@ Current Market rate: {{ marketRate }} ({{ marketRateSource }})
 
 Example: 3% or -2%`,
     'use-margin-price-cbbutton': 'ℹ️ Margin pricing',
-    'use-fixed-price-cbbutton': '⬅️  Rate',
+    'use-fixed-price-cbbutton': '⬅️ Price',
     'back-cbbutton': '⬅️ back',
     'input-amount-limits': `⚖️ *Order amount*
 
