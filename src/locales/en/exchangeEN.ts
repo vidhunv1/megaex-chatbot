@@ -12,7 +12,7 @@ export const exchangeEN = {
 Market rate: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
 
     'my-orders-cbbutton': 'My Active ({{ orderCount }})',
-    'create-order-cbbutton': '📝 Create Order',
+    'create-order-cbbutton': '📊 Create Order',
     'buy-cbbutton': '📉 Quick Buy',
     'sell-cbbutton': '📈 Quick Sell'
   },
