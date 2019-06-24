@@ -7,7 +7,7 @@ export const exchangeEN = {
     exchange: `💵  *Exchange BTC-{{ fiatCurrency }}*
 
 ✅  24/7 support via {{ supportBotUsername }}
-🔒  All trades are secured with escrow guaranteed.
+🔒  All trades are secured with escrow guarantee.
 
 Market rate: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
 
