@@ -139,6 +139,7 @@ export class Account {
       }
     }
 
+    User.incrementMessageCount(tAccount.userId)
     return tAccount
   }
 }

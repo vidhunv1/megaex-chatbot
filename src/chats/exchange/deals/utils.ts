@@ -36,6 +36,7 @@ export async function showOrder(
       order.cryptoCurrencyCode,
       dealer.telegramUser.firstName,
       dealer.accountId,
+      dealer.isVerified,
       dealer.lastSeen,
       dealer.rating,
       dealer.tradeCount,

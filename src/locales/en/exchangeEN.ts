@@ -250,11 +250,13 @@ Please select the order you want to sell to.
 
 *Price / {{ cryptoCurrencyCode }}*, *Payment Method* and *Buyer Rating* are shown.
 `,
+    'id-verified': 'Verification: ✅ KYC verified',
     'show-buy-deal': `📉 *Buy {{ cryptoCurrencyCode }}* (${
       BotCommand.ORDER
     }{{ orderId }})
 
 This deal is by *{{ realName }}*.
+{{ verificationText }}
 Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
 Rating:  {{ rating }} ⭐️
 
@@ -272,6 +274,7 @@ Buy Amount: {{ formattedAmount }}`,
     }{{ orderId }})
 
 This sell order is by *{{ realName }}*.
+{{ verificationText }}
 Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
 Rating:  {{ rating }} ⭐️
 

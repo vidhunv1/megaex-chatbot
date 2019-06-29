@@ -666,6 +666,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     cryptoCurrencyCode: CryptoCurrency,
     realName: string,
     accountId: string,
+    isVerfied: boolean,
     lastSeen: Date,
     rating: number,
     tradeCount: number,
@@ -688,10 +689,13 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     const formattedTerms = terms != null ? terms : '-'
 
     let openDealInline: TelegramBot.InlineKeyboardButton, showDealText
+    const verificationText = isVerfied
+      ? '\n' + user.t(`${Namespace.Exchange}:deals.id-verified`)
+      : ''
     if (orderType === OrderType.BUY) {
-      const formattedAmount = `${
+      const formattedAmount = `${dataFormatter.formatFiatCurrency(
         amount.min
-      } - ${dataFormatter.formatFiatCurrency(amount.max, fiatCurrencyCode)}`
+      )} - ${dataFormatter.formatFiatCurrency(amount.max, fiatCurrencyCode)}`
 
       openDealInline = {
         text: user.t(`${Namespace.Exchange}:deals.open-sell-deal-cbbutton`, {
@@ -711,6 +715,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         cryptoCurrencyCode,
         realName,
         accountId,
+        verificationText: verificationText,
         lastSeenValue,
         rating: rating.toFixed(1),
         tradeCount,
@@ -726,9 +731,9 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
           ? availableBalanceInFiat
           : amount.max
 
-      const formattedAmount = `${
+      const formattedAmount = `${dataFormatter.formatFiatCurrency(
         amount.min
-      } - ${dataFormatter.formatFiatCurrency(
+      )} - ${dataFormatter.formatFiatCurrency(
         actualMaxAmount,
         fiatCurrencyCode
       )}`
@@ -738,6 +743,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
         cryptoCurrencyCode,
         realName,
         accountId,
+        verificationText: verificationText,
         lastSeenValue,
         rating: rating.toFixed(1),
         tradeCount,
@@ -811,6 +817,7 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
 
     await telegramHook.getWebhook.sendMessage(msg.chat.id, showDealText, {
       parse_mode: 'Markdown',
+      disable_web_page_preview: true,
       reply_markup: {
         inline_keyboard: inline
       }

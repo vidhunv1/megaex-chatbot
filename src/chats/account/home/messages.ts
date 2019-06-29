@@ -6,7 +6,6 @@ import { stringifyCallbackQuery } from 'chats/utils'
 import { PaymentMethodStateKey, PaymentMethodState } from '../paymentMethods'
 import { ReferralStateKey, ReferralState } from '../referral'
 import { SettingsStateKey, SettingsState } from '../settings'
-// import { VERIFY_ACCOUNT_PATH } from 'constants/paths'
 import { CryptoCurrency } from 'constants/currencies'
 import {
   AccountHomeError,
@@ -17,6 +16,7 @@ import { CommonStateKey, CommonState } from 'chats/common/types'
 import { PaymentMethodPrimaryFieldIndex } from 'constants/paymentMethods'
 import { dataFormatter } from 'utils/dataFormatter'
 import { keyboardMainMenu } from 'chats/common'
+import { CONFIG } from '../../../config'
 
 export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
   async noReviewsAvailable() {
@@ -252,11 +252,11 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       ]
     ]
 
-    // !user.isVerified &&
-    //   inline[0].push({
-    //     text: user.t(`${Namespace.Account}:home.verify-account-cbbutton`),
-    //     url: VERIFY_ACCOUNT_PATH
-    //   })
+    !user.isVerified &&
+      inline[0].push({
+        text: user.t(`${Namespace.Account}:home.verify-account-cbbutton`),
+        url: CONFIG.VERIFY_IDENTITY_URL
+      })
 
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,

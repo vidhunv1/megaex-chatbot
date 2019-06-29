@@ -92,6 +92,13 @@ export class User extends Model<User> {
         })
       : null
   }
+
+  static async incrementMessageCount(userId: number) {
+    return User.update(
+      { messageCount: User.sequelize.literal('"messageCount" + 1') },
+      { where: { id: userId } }
+    )
+  }
 }
 
 export default User

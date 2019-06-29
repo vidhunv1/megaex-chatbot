@@ -38,16 +38,16 @@ By *{{ reviewerName }}*, traded for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`
       [AccountHomeError.ACCOUNT_NOT_FOUND]: 'Could not find this account.'
     },
     account: `👤  *My Account*
-    
+
 Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
-    
+
 💵 *Total Deals:* {{ dealCount }}
 💎 *Volume:* {{ tradeVolume }}
 ⭐ *Rating:* {{ rating }}
-    
+
 🤝 Referrals Invited: {{ referralCount }} users
 💰 Referral Earnings: {{ earnings }}
-    
+
 💳 *Payment Methods:* {{ paymentMethods }}`,
 
     'dealer-account': `*Account* (${BotCommand.ACCOUNT}{{ accountId }})
@@ -61,7 +61,7 @@ Telegram: @{{ telegramUsername }}
     'user-reviews-cbbutton': '🗣 Reviews ({{ reviewCount }})',
     'block-dealer-cbbutton': '⛔️  Block user',
     'unblock-dealer-cbbutton': 'Unblock user',
-    'verify-account-cbbutton': '✅  Verify identity',
+    'verify-account-cbbutton': '🆔 Verify identity',
     'manage-payment-methods-cbbutton': '💳  Payment Methods',
     'referral-link-cbbutton': '🤝  Referral',
     'settings-cbbutton': '️⚙️ Settings',
@@ -72,7 +72,7 @@ Telegram: @{{ telegramUsername }}
     'does-not-exist': `❌ *Error*
 
 This payment method does not exist.
-    
+
 You can request @{{ supportBotUsername }} to get a valid payment method added.`,
 
     'create-error':
@@ -110,9 +110,9 @@ Your payment method is updated.
 *Referral fees*: {{ referralFeesPercentage }}%
 _(% commission you receive from the fees we take from your referral)_
 
-Invite new users using your referral link and earn bitcoins. For every trade your referral makes, you will get {{ referralFeesPercentage }}% of the trade fee. 
+Invite new users using your referral link and earn bitcoins. For every trade your referral makes, you will get {{ referralFeesPercentage }}% of the trade fee.
 
-For example: If your referral trades 1 BTC you will make 0.004 BTC of the 0.008 BTC we take as fee. 
+For example: If your referral trades 1 BTC you will make 0.004 BTC of the 0.008 BTC we take as fee.
 
 💰 Your referral payouts are processed instantly credited directly to your wallet. The referral program has no expiry date, and no limits of invitations.
 
@@ -121,7 +121,7 @@ Copy the message below and share it. 👇`
 
   settings: {
     'invalid-username': `❌ *Error*
-  
+
 This Account ID is invalid. Please check the ID you've entered and try again.`,
 
     'update-success': 'changed',
@@ -142,18 +142,18 @@ The exchange source active is: *{{ exchangeSource }}*.
 `,
     'show-more': 'more »',
     'show-currency': `💵 *Currency*
-  
+
 Click to change your currency.
 
 You are currently using *{{ fiatCurrencyCode }}*. Select a currency from the list below. Click on "more" to see other available currencies.`,
     'show-language': `🌎 *Language*
 
-Choose the language for the app. 
+Choose the language for the app.
 
 Tip:
 1. Use a language you can understand and read well.
 2. The previous messages (sent and received) will not be changed to your new language.
-    
+
 Active «*{{ language }}*»`,
     'currency-cbbutton': '💵 Currency',
     'language-cbbutton': '🌎 Language',
