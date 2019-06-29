@@ -33,10 +33,10 @@ export async function signupResponder(
       )
       return true
     case SignupStateKey.language:
-      await telegramHook.getWebhook.sendSticker(
-        msg.chat.id,
-        'CAADAgAD9gMAAjtKAgABcF8OlmAYAmwC'
-      )
+      // await telegramHook.getWebhook.sendSticker(
+      //   msg.chat.id,
+      //   'CAADAgAD9gMAAjtKAgABcF8OlmAYAmwC'
+      // )
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t(`${Namespace.Signup}:choose-language`, {
