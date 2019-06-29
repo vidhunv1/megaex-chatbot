@@ -15,6 +15,9 @@ import { Router } from 'chats/router'
 import { logger } from 'modules'
 
 import Jobs from 'modules/jobs'
+import { UserInfo } from './models'
+import { Namespace } from 'modules/i18n'
+import { keyboardMainMenu } from 'chats/common'
 ;(async () => {
   telegramHook.getWebhook.on('message', async function onMessage(
     msg: TelegramBot.Message
@@ -30,7 +33,37 @@ import Jobs from 'modules/jobs'
 
         try {
           const telegramAccount = await account.createOrGetAccount()
-          Router.routeMessage(msg, telegramAccount.user, telegramAccount)
+          // @ts-ignore
+          if (msg.passport_data) {
+            const uinfo = await UserInfo.findOne({
+              where: {
+                userId: telegramAccount.userId
+              }
+            })
+            if (!uinfo) {
+              UserInfo.create<UserInfo>({
+                passportData: JSON.stringify(msg),
+                userId: telegramAccount.userId
+              })
+            } else {
+              uinfo.update({
+                passportData: JSON.stringify(msg)
+              })
+            }
+
+            telegramHook.getWebhook.sendMessage(
+              msg.chat.id,
+              telegramAccount.user.t(
+                `${Namespace.Account}:home.passport-data-received`
+              ),
+              {
+                parse_mode: 'Markdown',
+                reply_markup: keyboardMainMenu(telegramAccount.user)
+              }
+            )
+          } else {
+            Router.routeMessage(msg, telegramAccount.user, telegramAccount)
+          }
         } catch (e) {
           logger.error('index.ts#44 Unable to create account')
           telegramHook.getWebhook.sendMessage(

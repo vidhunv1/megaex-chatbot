@@ -29,6 +29,9 @@ export class UserInfo extends Model<UserInfo> {
 
   @Column
   tracking!: string
+
+  @Column
+  passportData!: string
 }
 
 export default UserInfo
