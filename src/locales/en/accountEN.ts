@@ -3,7 +3,7 @@ import { BotCommand } from 'chats/types'
 
 export const accountEN = {
   home: {
-    'passport-data-received': `🆔 *Identity received*
+    'passport-data-received': `✅ *Identity received*
 
 Your verification documents has been received. This should be processed in 3 working hours. We will inform you when it's processed.`,
     'trade-message': `View trade ${BotCommand.TRADE}{{ tradeId }}`,
