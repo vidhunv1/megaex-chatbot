@@ -9,15 +9,14 @@ Your verification documents has been received. This should be processed in 3 wor
     'trade-message': `View trade ${BotCommand.TRADE}{{ tradeId }}`,
     'send-message-cbbutton': '📝 Write message',
     'send-response-cbbutton': '📝 Write response',
-    'message-sent': 'message sent!',
+    'message-sent': 'Message sent!',
     'new-photo-message': `📨 <b>Message from</b> ${
       BotCommand.ACCOUNT
     }{{ accountId }}
 {{ tradeInfo }}
 Received photo`,
-    'message-not-sent': '❌ Could not send this message',
-    'enter-message':
-      'input your message to send the user (text should be less than 400 characters)',
+    'message-not-sent': '❗️ Failed to send.',
+    'enter-message': 'Enter the message for the user. (max. 400 chars)',
     'new-message': `📨 <b>Message from</b> ${BotCommand.ACCOUNT}{{ accountId }}
 
 ----------------
@@ -27,8 +26,8 @@ Received photo`,
 ----------------
 {{ tradeInfo }}`,
     'back-cbbutton': '⬅️ back',
-    'more-cbbutton': 'more »',
-    'no-reviews-available': 'No reviews yet',
+    'more-cbbutton': 'more ➡️',
+    'no-reviews-available': 'No reviews yet.',
     'user-review': `({{ currentPage }}/{{ totalPages }}) *Review for* ${
       BotCommand.ACCOUNT
     }{{ opAccountId }}
@@ -36,7 +35,7 @@ Received photo`,
 {{ rating }}
 _{{ review }}_
 
-By *{{ reviewerName }}*, traded for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`,
+By *{{ reviewerName }}*. Traded for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`,
     errors: {
       [AccountHomeError.ACCOUNT_NOT_FOUND]: 'Could not find this account.'
     },
@@ -45,34 +44,34 @@ By *{{ reviewerName }}*, traded for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`
 Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 
 💵 *Total Deals:* {{ dealCount }}
-💎 *Volume:* {{ tradeVolume }}
-⭐ *Rating:* {{ rating }}
+      💎 Volume: {{ tradeVolume }}
+      ⭐ Rating: {{ rating }}
 
 🤝 Referrals Invited: {{ referralCount }} users
 💰 Referral Earnings: {{ earnings }}
 
 💳 *Payment Methods:* {{ paymentMethods }}`,
 
-    'dealer-account': `*Account* (${BotCommand.ACCOUNT}{{ accountId }})
+    'dealer-account': `*Account details* (${BotCommand.ACCOUNT}{{ accountId }})
 
 [Telegram contact](tg://user?id={{ telegramUserId }})
 
-💵 *Trade Deals:* {{ dealCount }}
-💎 *Trade volume:* {{ tradeVolume }} {{ cryptoCurrencyCode }}
-⭐ *Rating:* {{ rating }}`,
+ 💵 Trade Deals: {{ dealCount }}
+💎 Trade volume: {{ tradeVolume }} {{ cryptoCurrencyCode }}
+      ⭐ Rating: {{ rating }}`,
 
     'user-reviews-cbbutton': '🗣 Reviews ({{ reviewCount }})',
-    'block-dealer-cbbutton': '⛔️  Block user',
+    'block-dealer-cbbutton': '⛔️ Block user',
     'unblock-dealer-cbbutton': 'Unblock user',
-    'verify-account-cbbutton': '🆔 Verify identity',
-    'manage-payment-methods-cbbutton': '💳  Payment Methods',
-    'referral-link-cbbutton': '🤝  Referral',
+    'verify-account-cbbutton': '✅ Verify identity',
+    'manage-payment-methods-cbbutton': '💳 Payment Methods',
+    'referral-link-cbbutton': '🤝 Referral',
     'settings-cbbutton': '️⚙️ Settings',
     'no-payment-method': `None`
   },
 
   'payment-method': {
-    'does-not-exist': `❌ *Error*
+    'does-not-exist': `❗️  *Invalid payment method*
 
 This payment method does not exist.
 
@@ -97,27 +96,26 @@ Select your payment method to add from the options below.`,
 Your payment method is added.
 
 {{ paymentMethodInfo }}
-❕You can now use this to receive money when selling cryptocurrency.`,
-    updated: `✅ Payment method *updated*.
+You can now use this to receive money when selling {{ cryptoCurrencyCode }}.`,
+    updated: `✅ *Payment method updated*
 
 Your payment method is updated.
 
 {{ paymentMethodInfo }}`,
-    'none-added': `❕ You dont have any payment methods added. This will be used to transfer money to you when you are selling.`
+    'none-added': `No payment methods added. They are used to transfer money to you when you are selling.`
   },
 
   referral: {
-    'show-info': `🤝 *Refer your friends*
+    'show-info': `🤝  *Refer and Earn*
 
-*Your referral count*: {{ referralCount }} users
-*Referral fees*: {{ referralFeesPercentage }}%
-_(% commission you receive from the fees we take from your referral)_
+Your referral count: {{ referralCount }} users
+      Referral fees: {{ referralFeesPercentage }}%
 
-Invite new users using your referral link and earn bitcoins. For every trade your referral makes, you will get {{ referralFeesPercentage }}% of the trade fee.
+Earn bitcoins with every trade your referral makes. You will get {{ referralFeesPercentage }}% of the trade fee.
 
 For example: If your referral trades 1 BTC you will make 0.004 BTC of the 0.008 BTC we take as fee.
 
-💰 Your referral payouts are processed instantly credited directly to your wallet. The referral program has no expiry date, and no limits of invitations.
+Processed and credited instantly to your wallet. No limitations and no expiry date.
 
 Copy the message below and share it. 👇`
   },
@@ -132,38 +130,36 @@ This Account ID is invalid. Please check the ID you've entered and try again.`,
 
 Only english letters and numbers between 3 and 15 characters.
 
-NOTE: This action is final, you wont be able to change your Account ID again.
+NOTE: This action is final, you won't be able to change your Account ID again.
 `,
-    'back-to-settings-cbbutton': '⬅️  Back',
-    'settings-currency-updated': `✅ Your currency is updated to *{{ updatedCurrencyCode }}*`,
+    'back-to-settings-cbbutton': '⬅️ back',
+    'settings-currency-updated': `Your currency is updated to *{{ updatedCurrencyCode }}*.`,
     'show-rate-source': `📊 *Rate source*
 
 Select the exchange rate source you want to use.
-The exchange source active is: *{{ exchangeSource }}*.
+Currently active: *{{ exchangeSource }}*.
 
-⚠️ Note: Changing this will affect your active orders if you had used *margin pricing*.
+Note: Changing this will affect your active orders if you have used margin pricing.
 `,
     'show-more': 'more »',
     'show-currency': `💵 *Currency*
 
 Click to change your currency.
 
-You are currently using *{{ fiatCurrencyCode }}*. Select a currency from the list below. Click on "more" to see other available currencies.`,
+You are currently using *{{ fiatCurrencyCode }}*. Select a currency. Click on "more" to see other available currencies.`,
     'show-language': `🌎 *Language*
 
 Choose the language for the app.
 
-Tip:
-1. Use a language you can understand and read well.
-2. The previous messages (sent and received) will not be changed to your new language.
+Note: Old messages (sent and received) will not be changed to new language.
 
-Active «*{{ language }}*»`,
+Currently active: *{{ language }}*`,
     'currency-cbbutton': '💵 Currency',
     'language-cbbutton': '🌎 Language',
     'rate-source-cbbutton': '📊 Rate source',
-    'show-settings': `⚙️ *Settings*
+    'show-settings': `⚙️ Settings
 
 What do you want to edit?`,
-    'username-cbbutton': '👤  Change Acc ID'
+    'username-cbbutton': '👤  Change Account ID'
   }
 }
