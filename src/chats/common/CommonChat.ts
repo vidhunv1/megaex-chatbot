@@ -4,7 +4,11 @@ import { ChatHandler, BotCommand, DeepLink } from 'chats/types'
 import { telegramHook } from 'modules'
 import { keyboardMainMenu } from './utils'
 import { CacheHelper } from 'lib/CacheHelper'
-import { parseCallbackQuery, parseDeepLink } from 'chats/utils'
+import {
+  parseCallbackQuery,
+  parseDeepLink,
+  stringifyCallbackQuery
+} from 'chats/utils'
 import { CommonStateKey } from './types'
 import { logger } from 'modules'
 import * as _ from 'lodash'
@@ -12,6 +16,9 @@ import { claimCode } from 'chats/wallet/sendCoin'
 import { CONFIG } from '../../config'
 import { showUserAccount } from 'chats/account/utils'
 import { showOrder } from 'chats/exchange/deals/utils'
+import { dataFormatter } from 'utils/dataFormatter'
+import { CryptoCurrency } from 'constants/currencies'
+import { ReferralStateKey, ReferralState } from 'chats/account/referral'
 
 export const CommonChat: ChatHandler = {
   async handleCommand(
@@ -110,11 +117,73 @@ export const CommonChat: ChatHandler = {
   },
 
   async handleContext(
-    _msg: TelegramBot.Message,
-    _user: User,
+    msg: TelegramBot.Message,
+    user: User,
     _tUser: TelegramAccount,
     _state: any
   ) {
+    if (msg.text == user.t('main-menu.info')) {
+      const inline2: TelegramBot.InlineKeyboardButton[] = [
+        {
+          text: user.t(`info.support-cbbutton`),
+          url: `https://t.me/${CONFIG.SUPPORT_USERNAME}`
+        },
+        {
+          text: user.t('info.referral-cbbutton'),
+          callback_data: stringifyCallbackQuery<
+            ReferralStateKey.cb_referralLink,
+            ReferralState[ReferralStateKey.cb_referralLink]
+          >(ReferralStateKey.cb_referralLink, {
+            data: null
+          })
+        }
+      ]
+      // if (!user.isVerified) {
+      //   inline2.push(
+      //     {
+      //       text: user.t(
+      //         `info.verify-account-cbbutton`
+      //       ),
+      //       url: CONFIG.VERIFY_IDENTITY_URL
+      //     }
+      //   )
+      // }
+
+      await telegramHook.getWebhook.sendMessage(
+        msg.chat.id,
+        user.t('info.home', {
+          btcWithdrawalFee: dataFormatter.formatCryptoCurrency(
+            parseFloat(CONFIG.BTC_FEES),
+            CryptoCurrency.BTC
+          ),
+          takerFeePercentage: 0,
+          makerFeePercentage: CONFIG.MAKER_FEES_PERCENTAGE,
+          referralComission: CONFIG.REFERRAL_COMISSION_PERCENTAGE
+        }),
+        {
+          parse_mode: 'Markdown',
+          disable_web_page_preview: true,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: user.t(`info.guide-cbbutton`),
+                  url: CONFIG.HOW_TO_GUIDE
+                }
+              ],
+              [
+                {
+                  text: user.t(`info.join-group-cbbutton`),
+                  url: CONFIG.TELEGRAM_COMMUNITY
+                }
+              ],
+              [...inline2]
+            ]
+          }
+        }
+      )
+      return true
+    }
     return false
   },
 

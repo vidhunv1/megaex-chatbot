@@ -29,7 +29,8 @@ export async function claimCode(
           payment.amount,
           payment.currencyCode
         ),
-        senderUsername: senderUser ? senderUser.telegramUser.username : '-'
+        senderTelgramId: senderUser ? senderUser.telegramUser.id : '-',
+        senderName: senderUser ? senderUser.telegramUser.firstName : '-'
       }),
       {
         parse_mode: 'Markdown'
@@ -44,7 +45,8 @@ export async function claimCode(
             payment.amount,
             payment.currencyCode
           ),
-          receiverUsername: tUser.username
+          receiverTelegramId: tUser.id,
+          receiverName: tUser.firstName
         }),
         {
           parse_mode: 'Markdown'

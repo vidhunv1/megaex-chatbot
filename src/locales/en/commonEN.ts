@@ -4,14 +4,31 @@ import { OrderType } from 'models/Order'
 import { BotCommand } from 'chats/types'
 
 export const commonEN = {
+  info: {
+    home: `🔶 *Megadeals*
+
+_The fast and simple way to exchange bitcoins locally in your currency._
+https://megadeals.io
+
+*Status*: Online
+*BTC withdrawal*: {{ btcWithdrawalFee }}
+*Taker fee*: {{ takerFeePercentage }}% (Fee for quick buy / quick sell trades)
+*Maker fee*: {{ makerFeePercentage }}%
+*Referral comission*: {{ referralComission }}% of the total trade fee.`,
+    'join-group-cbbutton': '👥 Join our community',
+    'referral-cbbutton': '🤝 Invite referral',
+    'verify-account-cbbutton': '🆔 Verify KYC',
+    'guide-cbbutton': '📖 How to use?',
+    'support-cbbutton': '👨‍💼 Support'
+  },
   notifications: {
     'admin-message-title': '👨‍🚀 *Message from admin*',
     'support-message-title': '👩‍💼 *Message from support*',
     'system-message-title': '🤖 *System message*'
   },
-  'new-referral': `🤝 *New Referral*
+  'new-referral': `🤝 *New Referral*,
 
-${BotCommand.ACCOUNT}{{ accountId }} joined through your referral link. 
+${BotCommand.ACCOUNT}{{ accountId }} joined through your referral link.
 
 You will now receive commissions from all their trades.`,
   'callback-error-response': '❗️ Error',
@@ -73,7 +90,8 @@ MegaDeals is a secure p2p exchange bot to buy / sell bitcoins with your local cu
   'main-menu': {
     exchange: '💵 Exchange BTC-{{ fiatCurrency }}',
     account: '👤 My Account',
-    wallet: '💼 Wallet'
+    wallet: '💼 Wallet',
+    info: '🔶 Info'
   },
   'unhandled-callback': `Sorry! Your session on this request has expired. Please make a new request again.`,
   'payment-methods': {

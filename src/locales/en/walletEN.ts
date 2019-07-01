@@ -7,15 +7,15 @@ export const walletEN = {
     wallet: `💼  *Bitcoin Wallet*
 
  Balance:    {{ cryptoBalance }}
-   Value:    {{ fiatBalance }}
+     Value:    {{ fiatBalance }}
  Blocked:    {{ blockedBalance }}
-        
- Invited:    {{ referralCount }} users
+
+   Invited:    {{ referralCount }} users
 Earnings:    {{ earnings }}
 
-My ${BotCommand.TRANSACTIONS}`,
+📒 ${BotCommand.TRANSACTIONS}`,
 
-    'send-cryptocurrency-cbbutton': '⚡️  Send {{ cryptoCurrencyName }} cheque',
+    'send-cryptocurrency-cbbutton': '⚡️ Send',
     'my-address': '📩  Deposit',
     withdraw: '📤  Withdraw',
     'transaction-credit': 'Credit',
@@ -26,9 +26,9 @@ My ${BotCommand.TRANSACTIONS}`,
   deposit: {
     'show-address': `
 📩  *Deposit {{ cryptoCurrencyCode }}*
-    
+
 Funds will be available in your wallet after {{ confirmations }} network confirmation. Use the {{ cryptoCurrencyCode }} address below to deposit funds into your wallet.
-    
+
 NOTE: *Deposit only {{ cryptoCurrencyCode }} funds* to this address.`
   },
 
@@ -39,7 +39,7 @@ NOTE: *Deposit only {{ cryptoCurrencyCode }} funds* to this address.`
 Enter the amount in *{{ cryptoCurrencyCode }}* or *{{ fiatCurrencyCode }}*.
 
 Example: {{ cryptoCurrencyBalance }}
-    
+
 Available: {{ cryptoCurrencyBalance }}
     Value: {{ fiatValue }}`,
     confirm: `👁‍🗨*Confirm*
@@ -51,7 +51,7 @@ Amount: {{ cryptoCurrencyAmount }}
 `,
     'confirm-button': '✔️  Confirm',
     'insufficient-balance': `❗️  *Insufficient funds*
-  
+
 Add {{ cryptoCurrencyCode }} to your wallet to send this payment.
 
 *Available balance*: {{ cryptoCurrencyBalance}}`,
@@ -87,10 +87,10 @@ Share the link privately to send the funds. Anyone with access to this link will
     'payment-success': {
       receiver: `✅ *New Credit*
 
-You received *{{ cryptoValueReceived }}* from @{{ senderUsername }}.`,
+You received *{{ cryptoValueReceived }}* from [{{ senderName }}](tg://user?id={{ senderTelgramId }}).`,
       sender: `✅ *New Debit*
 
-@{{ receiverUsername }} received *{{ cryptoValueSent }}* from your payment link.`
+[{{ receiverName }}](tg://user?id={{ receiverTelegramId }}) received *{{ cryptoValueSent }}* from your payment link.`
     }
   },
 
@@ -100,28 +100,26 @@ You received *{{ cryptoValueReceived }}* from @{{ senderUsername }}.`,
 
 Enter amount in  *{{ cryptoCurrencyCode }}* to withdraw.
 Example: 0.018291 BTC
-    
+
 Available: {{ cryptoCurrencyBalance }}
-        Value: {{ fiatValue }}`,
+Value: {{ fiatValue }}`,
     'input-address': `*BTC address*
 
 Enter the address of the {{ cryptoCurrencyName }} wallet you want to withdraw to.
 `,
-    'insufficient-balance': `❗️  *Insufficient Funds*
-  
+    'insufficient-balance': `❗️ *Insufficient Funds*
+
 Funds in wallet are too low. Add funds & try again.
-  
+
 *Available balance*: {{ cryptoCurrencyBalance}}`,
-    'invalid-address': `❗️  *Invalid Address*
+    'invalid-address': `❗️ *Invalid Address*
 
 Check the *{{ cryptoCurrencyName }}* address & try again.
 `,
-    'less-than-min-error': `❗️  *Amount too low*
-
-The minimum withdrawal amount is *{{ minWithdrawAmount }}*.
+    'less-than-min-error': `❗️ The minimum withdrawal amount is *{{ minWithdrawAmount }}*.
 `,
-    'create-error': `An error occurred. 
-  
+    'create-error': `An error occurred.
+
 Please try again later. If you are still facing an issue, contact support @{{ supportUsername}}`,
     confirm: `👁‍🗨  *Verify details*
 

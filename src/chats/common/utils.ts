@@ -7,6 +7,7 @@ export const keyboardMainMenu = (
   return {
     keyboard: [
       [
+        { text: user.t('main-menu.wallet') },
         {
           text: user.t('main-menu.exchange', {
             fiatCurrency: user.currencyCode
@@ -14,7 +15,7 @@ export const keyboardMainMenu = (
         }
       ],
       [
-        { text: user.t('main-menu.wallet') },
+        { text: user.t('main-menu.info') },
         { text: user.t('main-menu.account') }
       ]
     ],

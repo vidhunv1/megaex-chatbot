@@ -1,15 +1,13 @@
 import { BotCommand } from 'chats/types'
 
 export const signupEN = {
-  'choose-language': `Hello, *{{ name }}*!
+  'choose-language': `Hello *{{ name }}*!
 
-You can buy / sell bitcoins with your local currency from other traders (p2p) with escrow. Every trade is instant, secure, and private.
+You can use this bot to exchange bitcoins locally in your currency.
 
-Choose your *language*.`,
+To get started, choose your *language* from options below.`,
 
-  'terms-and-conditions': `[Terms of Services](https://telegra.ph/Terms-of-Service-06-18)
-  
-To continue, click on ✔️ *I agree* .`,
+  'terms-and-conditions': `Read our [Terms of Services](https://telegra.ph/Terms-of-Service-06-18), to continue click on ✔️ *I agree* .`,
 
   'terms-agree-button': '✔️ I agree',
 
@@ -17,26 +15,21 @@ To continue, click on ✔️ *I agree* .`,
 
   'account-ready': `✅  *Account created!*
 
- Account ID: ${BotCommand.ACCOUNT}{{ accountID }} 
+Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 BTC Address: *{{ bitcoinAddress }}*
 
-Note:
-
-🔐 Enable 2-step verification in settings > privacy & security.`,
+🔐 For your security please enable 2-step verification in settings > privacy & security.`,
 
   'account-ready-generating-address': `✅  *Account created!*
 
- Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
+Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 BTC Address: *{{ bitcoinAddress }}*
-  
-Note:
 
-🔐 Enable 2-step verification in settings > privacy & security.`,
+🔐 For your security please enable 2-step verification in settings > privacy & security.`,
   'account-ready-continue-button': '🚀 Start trading',
-  'home-screen': `🔶  *Mega Deals*
+  'home-screen': `🔶  *Megadeals*
 
-Exchange: Buy and sell bitcoins. 
-  Wallet: BTC balance and payment methods.`,
+Use *exchange* to find trades or *wallet* to withdraw or desposit BTC.`,
   'signup-error':
     'Sorry! An error occurred while registering. Contact us @{{ supportBotUsername }}. 24/7 support.'
 }

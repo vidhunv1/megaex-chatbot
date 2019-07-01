@@ -26,7 +26,7 @@ Received photo`,
 ----------------
 {{ tradeInfo }}`,
     'back-cbbutton': '⬅️ back',
-    'more-cbbutton': 'more ➡️',
+    'more-cbbutton': 'more »',
     'no-reviews-available': 'No reviews yet.',
     'user-review': `({{ currentPage }}/{{ totalPages }}) *Review for* ${
       BotCommand.ACCOUNT
@@ -44,8 +44,8 @@ By *{{ reviewerName }}*. Traded for {{ tradeVolume }} {{ cryptoCurrencyCode }}.`
 Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 
 💵 *Total Deals:* {{ dealCount }}
-      💎 Volume: {{ tradeVolume }}
-      ⭐ Rating: {{ rating }}
+💎 Volume: {{ tradeVolume }}
+⭐ Rating: {{ rating }}
 
 🤝 Referrals Invited: {{ referralCount }} users
 💰 Referral Earnings: {{ earnings }}
@@ -56,14 +56,14 @@ Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 
 [Telegram contact](tg://user?id={{ telegramUserId }})
 
- 💵 Trade Deals: {{ dealCount }}
+💵 Trade Deals: {{ dealCount }}
 💎 Trade volume: {{ tradeVolume }} {{ cryptoCurrencyCode }}
-      ⭐ Rating: {{ rating }}`,
+⭐ Rating: {{ rating }}`,
 
     'user-reviews-cbbutton': '🗣 Reviews ({{ reviewCount }})',
     'block-dealer-cbbutton': '⛔️ Block user',
     'unblock-dealer-cbbutton': 'Unblock user',
-    'verify-account-cbbutton': '✅ Verify identity',
+    'verify-account-cbbutton': '🆔 Verify KYC',
     'manage-payment-methods-cbbutton': '💳 Payment Methods',
     'referral-link-cbbutton': '🤝 Referral',
     'settings-cbbutton': '️⚙️ Settings',
@@ -109,7 +109,7 @@ Your payment method is updated.
     'show-info': `🤝  *Refer and Earn*
 
 Your referral count: {{ referralCount }} users
-      Referral fees: {{ referralFeesPercentage }}%
+Referral fees: {{ referralFeesPercentage }}%
 
 Earn bitcoins with every trade your referral makes. You will get {{ referralFeesPercentage }}% of the trade fee.
 

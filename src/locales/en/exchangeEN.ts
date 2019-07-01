@@ -176,7 +176,7 @@ You will be notified when this payment has been marked as completed.`,
 Make a payment of {{ fiatPayAmount }} through {{ paymentMethodName }}, you will receive *{{ cryptoAmount }}* when your payment is confirmed.
 
 *{{ paymentMethodName }}*
-           Amount: *{{ fiatPayAmount }}*
+Amount: *{{ fiatPayAmount }}*
 Payment reference: *T{{ tradeId }}*
 {{ paymentDetails }}
 
@@ -260,16 +260,16 @@ Select the order you want to sell to.
 This deal is by *{{ realName }}*.
 {{ verificationText }}
 Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
-    Rating:  {{ rating }} ⭐️
+Rating:  {{ rating }} ⭐️
 
-Payment Details:
+*Payment Details*:
 -----------------
 Payment Method: {{ paymentMethodName }}
-         Terms: _{{ terms }}_
+Terms: _{{ terms }}_
 
-Trade Details:
+*Trade Details*:
 ----------------
-     Price: {{ rate }} / {{ cryptoCurrencyCode }}
+Price: {{ rate }} / {{ cryptoCurrencyCode }}
 Buy Amount: {{ formattedAmount }}`,
     'show-sell-deal': `📈 *Sell {{ cryptoCurrencyCode }}* (${
       BotCommand.ORDER
@@ -278,16 +278,16 @@ Buy Amount: {{ formattedAmount }}`,
 This sell order is by *{{ realName }}*.
 {{ verificationText }}
 Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
-    Rating:  {{ rating }} ⭐️
+Rating:  {{ rating }} ⭐️
 
-Payment Details:
+*Payment Details*:
 -----------------
 Payment Method: {{ paymentMethodName }}
-         Terms: _{{ terms }}_
+Terms: _{{ terms }}_
 
-Trade Details:
+*Trade Details*:
 ----------------
-      Price: {{ rate }} / {{ cryptoCurrencyCode }}
+Price: {{ rate }} / {{ cryptoCurrencyCode }}
 Sell Amount: {{ formattedAmount }}`,
 
     'show-sell-insufficient-funds': `Insufficient funds on traders account to start deal. Request the seller to deposit the funds after which the deal can begin.`,
@@ -316,13 +316,13 @@ Select or add new payment details for *{{ paymentMethodType }}* for the buyer to
 
 Are you sure you want to buy *{{ cryptoValue }}* for *{{ fiatValue }}* at price {{ rate }}?
 
-ℹ️ On clicking *'Yes'*, you agree to trade terms.`,
+❕ On clicking *'Yes'*, you agree to trade terms.`,
 
     'confirm-input-sell-amount': `*Open this trade?*
 
 Are you sure you want to sell *{{ cryptoValue }}* for *{{ fiatValue }}* at price *{{ rate }}*?
 
-ℹ️ On clicking *'Yes'*, you agree to trade terms.`,
+❕ On clicking *'Yes'*, you agree to trade terms.`,
     'confirm-input-amount-yes-cbbutton': 'Yes',
     'confirm-input-amount-no-cbbutton': 'No',
     'show-open-deal-request': `📲 *Request sent!*
@@ -367,10 +367,10 @@ Click on *'Active'* button to enable this order.`,
     'terms-not-added': 'None',
     'my-buy-order-info': `📗  *My buy order* - ${BotCommand.ORDER}{{orderId}}
 
-        *Status*: {{ status }}
-     *{{ cryptoCurrencyCode }} Price*: {{ rate }}
-   *Min. amount*: {{ minAmount }}
-   *Max. amount*: {{ maxAmount }}
+*Status*: {{ status }}
+*{{ cryptoCurrencyCode }} Price*: {{ rate }}
+*Min. amount*: {{ minAmount }}
+*Max. amount*: {{ maxAmount }}
 *Payment method*: {{ paymentMethod }}
 
 Terms: _{{ terms }}_
@@ -383,12 +383,12 @@ Share this link. Whoever clicks on this link can open a trade with you.
       '⚠️ Insufficient balance. Deposit the minimum amount to start deals on this order.',
     'my-sell-order-info': `*📕 My Sell Order* - ${BotCommand.ORDER}{{orderId}}
 
-        *Status*: {{ status }}
-     *{{ cryptoCurrencyCode }} price*: {{ rate }}
-   *Min. amount*: {{ minAmount }}
-   *Max. amount*: {{ maxAmount }}
+*Status*: {{ status }}
+*{{ cryptoCurrencyCode }} price*: {{ rate }}
+*Min. amount*: {{ minAmount }}
+*Max. amount*: {{ maxAmount }}
 *Payment method*: {{ paymentMethod }}
-  *Payment Info*: {{ paymentInfo }}
+*Payment Info*: {{ paymentInfo }}
 
 Terms: _"{{ terms }}"_
 
@@ -422,7 +422,7 @@ Write your terms for the trade. This will be shown on your order.`,
 Select the order type.`,
     'new-buy-order-cbbutton': '📗  I want to buy',
     'new-sell-order-cbbutton': '📕  I want to sell',
-    'input-fixed-rate': `💸  Set {{ cryptoCurrencyCode }} price*
+    'input-fixed-rate': `*💸 Set {{ cryptoCurrencyCode }} price*
 
 Enter a fixed price for {{ cryptoCurrencyCode }} in *{{ fiatCurrencyCode }}* or enter in percentage (%) to set a margin price.
 
@@ -441,8 +441,7 @@ Example: 3% or -2%`,
 
 Enter the order amount in *{{ fiatCurrencyCode }}*.
 
-Example: Either 1000 (absolute) or 500-1000 (min-max limit)
-`,
+Example: Either 1000 or 500-1000 (min-max limit)`,
     'buy-order-created': '✅  Your buy order is created.',
     'sell-order-created': '✅  Your sell order is created.',
     'create-error': '❗️  Could not create this order. Please try again later.',
