@@ -133,7 +133,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
   async showDealerAccount(
     userId: number,
     accountID: string,
-    telegramUsername: string,
+    telegramId: number,
     dealCount: number,
     tradeVolume: number,
     cryptoCurrencyCode: CryptoCurrency,
@@ -146,7 +146,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       msg.chat.id,
       user.t(`${Namespace.Account}:home.dealer-account`, {
         accountId: accountID,
-        telegramUsername: telegramUsername,
+        telegramUserId: telegramId,
         dealCount: dealCount,
         tradeVolume: dataFormatter.formatCryptoCurrency(tradeVolume),
         cryptoCurrencyCode: cryptoCurrencyCode,

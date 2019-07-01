@@ -7,7 +7,7 @@ export const exchangeHI = {
     exchange: `💵  *Exchange BTC-{{ fiatCurrency }}*
 
 ✅  Aapko 24/7 support  milega {{ supportBotUsername }}
-🔒  Saare trade MegaDeals bot pe secure hai aur bot guarantor hoga trade poora hone tak. 
+🔒  Saare trade MegaDeals bot pe secure hai aur bot guarantor hoga trade poora hone tak.
 
 *Market rate*: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
 
@@ -36,7 +36,7 @@ You received {{ cryptoAmount }} referral comission from your referrals trade.`,
 An issue has been raised on this trade, any transaction on this trade is temporarily blocked. Please contact @{{ legalUsername }} to resolve this.`,
       'dispute-received': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
 
-The user has raised an issue on this trade. 
+The user has raised an issue on this trade.
 
 Please contact @{{ legalUsername }} to resolve this.`,
       'confirm-payment-received': `*Confirm*
@@ -61,7 +61,7 @@ Give your rating for this trade.`,
 
 Write your short review for this trade`,
       'end-review': `*Added your review!*
-      
+
 🎉 _Invite your friends and family here so they can also have the best experience to buy/sell bitcoins (Use your referral link so you can earn from their trades)._
 
 {{ referralLink }}`,
@@ -95,7 +95,7 @@ The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. Please conf
 The seller is yet to make payment for the trade ${
         BotCommand.TRADE
       }{{ tradeId }}.
-      
+
 You can contact our *support* if you think something is wrong, they will take care of this issue for you.
 
 ❕_If no confirmation is received in_ *{{ paymentSendTimeout }} mins*, _the blocked amount will be automatically released to you._`,
@@ -140,7 +140,7 @@ You did not make any payment to the seller for the trade ${
 
       User ko humne soochna de di hai ki aapko *{{ fiatPayAmount }}* de di jaaye *{{ paymentMethodName }} ke dwara*.
 
-Telegram: {{ buyerUsername }}
+[Telegram contact](tg://user?id={{ buyerUserId }})
 
 ❕Jab payment poora ho jaayega hum aapko soochit kar denge.`,
       'trade-accepted-buyer-no-payment-info':
@@ -155,7 +155,7 @@ Amount: *{{ fiatPayAmount }}*
 Payment reference: *T{{ tradeId }}*
 {{ paymentDetails }}
 
-Telegram: {{ telegramUsername }}
+[Telegram contact](tg://user?id={{ buyerUserId }})
 
 🔒 Humne yeh trade secure kar diya hai aapke liye. Aapko payment *{{ paymentSendTimeout }} mins* ke andar karna hoga.`,
       'payment-received-cbbutton': '💵  Payment Received',
@@ -203,7 +203,10 @@ Yeh trade request ${
 
 Aapke order ${BotCommand.ORDER}{{ orderId }} pe ek new buy request hai.
 
-*{{ requesterName }}* (@{{ requesterUsername }}) ne *{{ formattedCryptoValue }}* buy request daala hai*{{ formattedFiatValue }}*.
+*{{ requesterName }}* ne *{{ formattedCryptoValue }}* buy request daala hai*{{ formattedFiatValue }}*.
+
+[Telegram contact](tg://user?id={{ requesterUserId }})
+
 ⚠️ Trade shuru karne se pehle apne wallet mein {{ cryptoCurrencyCode }} funds daale.`,
     errors: {
       [DealsError.ORDER_NOT_FOUND]: 'Order active nahi hai.',
@@ -215,12 +218,12 @@ Aapke order ${BotCommand.ORDER}{{ orderId }} pe ek new buy request hai.
     'prev-cbbutton': 'prev',
     'show-buy-deals': `📉 *Quick Buy* ({{ currentPage}}/{{ totalPages }})
 
-Jo trade order ka price sahi lag rha hai, *buy* karne ke liye select karein, 
+Jo trade order ka price sahi lag rha hai, *buy* karne ke liye select karein,
 
 Har trade mein; *price / {{ cryptoCurrencyCode }}*, *payment method*, and *trader rating* display kiya jaa rha hai.`,
     'show-sell-deals': `📈 *Quick Sell* ({{ currentPage}}/{{ totalPages }})
 
-Jo trade order ka price sahi lag rha hai, *sell* karne ke liye select karein, 
+Jo trade order ka price sahi lag rha hai, *sell* karne ke liye select karein,
 
 Har trade mein; *price / {{ cryptoCurrencyCode }}*, *payment method*, and *trader rating* display kiya jaa rha hai.
 `,
@@ -272,7 +275,7 @@ Buy Amount enter karein ({{ fiatCurrencyCode }} or {{ cryptoCurrencyCode }}):
 
 {{ fiatCurrencyCode }} amount ka limit: minimum: *{{ minFiatValue }}* aur maximum: *{{ maxFiatValue }}*.
 
-{{ cryptoCurrencyCode }} amount ka limit: minimum: *{{ minCryptoValue }}* aur *{{ maxCryptoValue }}*. 
+{{ cryptoCurrencyCode }} amount ka limit: minimum: *{{ minCryptoValue }}* aur *{{ maxCryptoValue }}*.
 
 Amount enter karke last mein {{ cryptoCurrencyCode }} / {{ fiatCurrencyCode }} add karein.
 
@@ -283,7 +286,7 @@ Sell Amount enter karein ({{ fiatCurrencyCode }} or {{ cryptoCurrencyCode }}):
 
 {{ fiatCurrencyCode }} amount ka limit: minimum: *{{ minFiatValue }}* aur maximum: *{{ maxFiatValue }}*.
 
-{{ cryptoCurrencyCode }} amount ka limit: minimum: *{{ minCryptoValue }}* aur *{{ maxCryptoValue }}*. 
+{{ cryptoCurrencyCode }} amount ka limit: minimum: *{{ minCryptoValue }}* aur *{{ maxCryptoValue }}*.
 
 Amount enter karke last mein {{ cryptoCurrencyCode }} / {{ fiatCurrencyCode }} add karein.
 
@@ -294,13 +297,13 @@ Select or add new payment details for *{{ paymentMethodType }}* for the buyer to
     'skip-input-payment-details': 'skip',
     'add-payment-details': '➕ Add {{ paymentMethodName }}',
     'confirm-input-buy-amount': `*Buy Trade open karna hai?*
-    
+
 Kya aap yeh *buy trade confirm* karna chahenge? Buy Trade: *{{ fiatValue }}* mein *{{ cryptoValue }}* at the rate {{ rate }}?
 
 ❕*'Yes'* select karne par, aap trade terms ko agree kar rahe hain`,
 
     'confirm-input-sell-amount': `*Sell Trade open karna hai?*
-    
+
 Kya aap yeh *sell trade confirm* karna chahenge? Sell Trade: *{{ cryptoValue }}* for *{{ fiatValue }}* at the rate *{{ rate }}*?
 
 ❕*'Yes'* select karne par, aap trade terms ko agree kar rahe hain`,
@@ -312,7 +315,7 @@ Kya aap yeh *sell trade confirm* karna chahenge? Sell Trade: *{{ cryptoValue }}*
 
 ⚠️ *IMPORTANT*: Jab tak hum seller se {{ cryptoCurrencyCode }} funds deposit ka confirmation aapko nhi bhejte hain tab tak aap payment nhi start karna. MegaDeals app ke bahar trade and deals mat karna. Agar bot ke bahar trade karoge toh MegaDeals koi guarantee nhi dega. Aise cases mein, aapka money risk mein hoga.
 
-*Seller's telegram*: @{{ telegramUsername}}`,
+*Seller's telegram contact*: [Telegram contact](tg://user?id={{ telegramUserId }})`,
     'show-open-deal-cancel': 'Deal canceled.',
     'trade-opened-message': 'Trade is active now!',
     'show-opened-trade': `*Trade* ${BotCommand.TRADE}{{ tradeId }}
@@ -411,12 +414,12 @@ Example: *{{ marketRate }}*
 Margin pricing set karne niche diye button pe click karein:`,
     'input-margin-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
 
-Margin price pe buy / sell karne ke liye, enter your price (in %). 
+Margin price pe buy / sell karne ke liye, enter your price (in %).
 
-Agar aap market price ke niche buy / sell karna chahte hai, toh negative (*-2%*) symbol use karein. 
-    
+Agar aap market price ke niche buy / sell karna chahte hai, toh negative (*-2%*) symbol use karein.
+
 *Current BTC market rate*: {{ marketRate }} ({{ marketRateSource }})
-    
+
 Example: *2%*`,
     'use-margin-price-cbbutton': 'Use margin pricing (%) ➡️',
     'use-fixed-price-cbbutton': '⬅️ Use fixed pricing',

@@ -398,6 +398,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
     )
     const options = {
       parse_mode: 'Markdown',
+      disable_web_page_preview: true,
       reply_markup: {
         inline_keyboard: inline
       }
@@ -567,6 +568,7 @@ export const MyOrdersMessage = (msg: TelegramBot.Message, user: User) => ({
 
     const options = {
       parse_mode: 'Markdown',
+      disable_web_page_preview: true,
       reply_markup: {
         inline_keyboard: inline
       }

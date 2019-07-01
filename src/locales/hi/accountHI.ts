@@ -19,21 +19,21 @@ _{{ review }}_
         'Iss Account ID pe koi user nahi hai.🤷‍♂️ Please try again.'
     },
     account: `👤  *My Account*
-    
+
 Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
-    
+
 💵 *Trade cound:* {{ dealCount }}
 💎 *Volume:* {{ tradeVolume }}
 ⭐ *Rating:* {{ rating }}
-    
+
 🤝 Referrals: {{ referralCount }} users
 💰 Referral Earnings: {{ earnings }}
-    
+
 💳 *Payment Methods:* {{ paymentMethods }}`,
 
     'dealer-account': `*Account* (${BotCommand.ACCOUNT}{{ accountId }})
 
-Telegram: @{{ telegramUsername }}
+[Telegram contact](tg://user?id={{ telegramUserId }})
 
 💵 *Trade Deals:* {{ dealCount }}
 💎 *Trade volume:* {{ tradeVolume }} {{ cryptoCurrencyCode }}
@@ -54,7 +54,7 @@ Telegram: @{{ telegramUsername }}
     'does-not-exist': `❌ *Error*
 
 Ye payment method complete nahi ho paaya.
-    
+
 Aap humare support chat @{{ supportBotUsername }} se chat karke payment add karwa sakte hain.`,
 
     'create-error':
@@ -94,18 +94,18 @@ Aapka payment method update kar diya hai.
 (apke referral se jo fees hum lenge trade karne par uska % bhaag aapke account mein credit ho jayega)
 
 Apne friends or jaan pehchaan walon ko invite bhejo aur bitcoins earn karo. Aapke friends/referral jo bhi BTC trade karenge uska ek bhaag aapko diya jayega.
-Jab aapke friends trading shuru karenge tab har ek trade pe aapko transaction fee mein se 90% aapke account mein credit kar diya jayega. 
+Jab aapke friends trading shuru karenge tab har ek trade pe aapko transaction fee mein se 90% aapke account mein credit kar diya jayega.
 
-Example: Jab aapka referral 5 BTC trade Megadeals app pe karenge toh aapko 0.045 BTC milega aur hum 0.005 BTC service fee lenge. 
+Example: Jab aapka referral 5 BTC trade Megadeals app pe karenge toh aapko 0.045 BTC milega aur hum 0.005 BTC service fee lenge.
 
-Aapka referral amount har din aapke wallet mein credit ho jayega. Yeh referral program kabhi end nhi hoga aur aap isee jitne chahe utne friends and relatives ke saath share kar sakte hai. 
+Aapka referral amount har din aapke wallet mein credit ho jayega. Yeh referral program kabhi end nhi hoga aur aap isee jitne chahe utne friends and relatives ke saath share kar sakte hai.
 
 Niche diye hue message ko copy karein aur share karein apne friends ke saath. 👇`
   },
 
   settings: {
     'invalid-username': `❌ *Error*
-  
+
 This Account ID is invalid. Please check the ID you've entered and try again.`,
 
     'update-success': 'changed',
@@ -126,11 +126,11 @@ Active exchange rate source: {{ exchangeSource }}.
 `,
     'show-more': 'more »',
     'show-currency': `💵 *Currency*
-  
+
 Aapka active currency abhi {{ fiatCurrencyCode }} hai. List mein diye gaye *currency* mein se ek *select* karein. Baaki ke currency list ke liye "More" button dabayein.`,
     'show-language': `🌎 *Language*
 
-App use karne ka *language choose* kariye. 
+App use karne ka *language choose* kariye.
 
 Dhyaan mein rakhein:
 

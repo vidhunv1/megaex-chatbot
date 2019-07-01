@@ -96,7 +96,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
       const order = await getOrderInfo(orderId)
       if (order.dealer) {
         await DealsMessage(msg, user).showOpenDealRequest(
-          order.dealer.telegramUser.username
+          order.dealer.telegramUser.id
         )
         return true
       }

@@ -55,7 +55,7 @@ Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
 
     'dealer-account': `*Account* (${BotCommand.ACCOUNT}{{ accountId }})
 
-Telegram: @{{ telegramUsername }}
+[Telegram contact](tg://user?id={{ telegramUserId }})
 
 💵 *Trade Deals:* {{ dealCount }}
 💎 *Trade volume:* {{ tradeVolume }} {{ cryptoCurrencyCode }}

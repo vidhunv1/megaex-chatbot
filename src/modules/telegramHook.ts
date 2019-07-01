@@ -18,6 +18,7 @@ export class TelegramHook {
     //   })
     // } else {
     //   logger.info(`Using WebBook ${CONFIG.WEBHOOK_URL} for telegram bot`)
+    //   // @ts-ignore
     //   this.bot = new NodeTelegramBot(CONFIG.TELEGRAM_ACCESS_TOKEN, {
     //     webHook: {
     //       // @ts-ignore
@@ -26,16 +27,15 @@ export class TelegramHook {
     //     }
     //   })
 
-    // this.bot.setWebHook(
-    //   `${CONFIG.WEBHOOK_URL + ':' + CONFIG.WEBHOOK_PORT}/bot${
-    //     CONFIG.TELEGRAM_ACCESS_TOKEN
-    //   }`
-    // )
+    //   this.bot.setWebHook(
+    //     `${CONFIG.WEBHOOK_URL}/bot${CONFIG.TELEGRAM_ACCESS_TOKEN}`
+    //   )
     // }
 
     logger.error(
       'TODO: Enable WebHooks. Currently using polling for telegram bot'
     )
+    logger.error('Using polling for telegram bot')
     this.bot = new NodeTelegramBot(CONFIG.TELEGRAM_ACCESS_TOKEN, {
       polling: true
     })

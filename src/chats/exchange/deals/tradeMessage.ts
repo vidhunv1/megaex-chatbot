@@ -216,7 +216,7 @@ export const sendTradeMessage: Record<
             paymentMethodName: contextUser.t(
               `payment-methods.names.${trade.paymentMethodType}`
             ),
-            telegramUsername: '@' + sellerTAccount.username || '-',
+            buyerUserId: sellerTAccount.id,
             paymentDetails: paymentDetails,
             paymentSendTimeout: paymentSendTimeoutS
               ? (paymentSendTimeoutS / 60).toFixed(0)
@@ -294,9 +294,7 @@ export const sendTradeMessage: Record<
             ),
             fiatPayAmount: formattedFiat,
             tradeId: trade.id,
-            buyerUsername: buyerAccount.telegramUser.username
-              ? '@' + buyerAccount.telegramUser.username
-              : ''
+            buyerUserId: buyerAccount.telegramUser.id
           }
         ),
         {

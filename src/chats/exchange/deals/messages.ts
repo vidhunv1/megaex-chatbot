@@ -324,11 +324,11 @@ export const DealsMessage = (msg: TelegramBot.Message, user: User) => ({
     })
   },
 
-  async showOpenDealRequest(sellerTelegramUsername: string) {
+  async showOpenDealRequest(sellertTelegramUserId: number) {
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Exchange}:deals.show-open-deal-request`, {
-        telegramUsername: sellerTelegramUsername
+        telegramUserId: sellertTelegramUserId
       }),
       {
         parse_mode: 'Markdown',

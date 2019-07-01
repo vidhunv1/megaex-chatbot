@@ -52,7 +52,7 @@ export const dealUtils = {
       op.t(`${Namespace.Exchange}:deals.request-deposit-notify`, {
         orderId: order.id,
         requesterName: requestorTelegram.firstName,
-        requesterUsername: requestorTelegram.username,
+        requesterUserId: requestorTelegram.id,
         formattedFiatValue: dataFormatter.formatFiatCurrency(
           dealFiatAmount,
           order.fiatCurrencyCode

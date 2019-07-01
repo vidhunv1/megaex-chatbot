@@ -15,7 +15,7 @@ export async function showUserAccount(
     await AccountHomeMessage(msg, user).showDealerAccount(
       accountInfo.userId,
       accountInfo.accountId,
-      accountInfo.telegramUsername,
+      accountInfo.telegramId,
       accountInfo.dealCount,
       accountInfo.tradeVolume,
       accountInfo.cryptoCurrencyCode,
@@ -36,6 +36,7 @@ async function getAccount(
   userId: number
   accountId: string
   telegramUsername: string
+  telegramId: number
   dealCount: number
   tradeVolume: number
   cryptoCurrencyCode: CryptoCurrency
@@ -61,6 +62,7 @@ async function getAccount(
     userId: user.id,
     accountId,
     telegramUsername: user.telegramUser.username,
+    telegramId: user.telegramUser.id,
     dealCount: userStats.dealCount,
     tradeVolume: userStats.volume,
     rating: userStats.rating,
