@@ -13,8 +13,8 @@ export const commonEN = {
 
 ${BotCommand.ACCOUNT}{{ accountId }} joined through your referral link. 
 
-You will now receive comissions from all their trades.`,
-  'callback-error-response': '❗️Error',
+You will now receive commissions from all their trades.`,
+  'callback-error-response': '❗️ Error',
   'contact-legal-cbbutton': '👩‍🎓 Contact Support',
   'contact-legal': `👩‍🎓 *Customer support*
 
@@ -54,9 +54,9 @@ If you are having any trouble, we are there to help you 24/7. Contact our team @
 
 ⚠️ IMPORTANT: Never do any deals outside this bot, we will not be able to protect and recover your funds.
 
-ℹ️ *About MegaDeals:*
+ℹ️  *About MegaDeals:*
 
-MegaDeals is a secure bot to buy / sell bitcoins with your local currency.`
+MegaDeals is a secure p2p exchange bot to buy / sell bitcoins with your local currency. `
   },
   bot: {
     name: 'BTC Deals',
@@ -148,74 +148,74 @@ MegaDeals is a secure bot to buy / sell bitcoins with your local currency.`
       },
       [PaymentMethodType.BANK_TRANSFER_IMPS_INR]: {
         field1: 'Bank name',
-        field2: 'Account Number',
-        field3: 'IFSC Code'
+        field2: 'Account number',
+        field3: 'IFSC code'
       },
 
       [PaymentMethodType.SBERBANK]: {
-        field1: 'full payment details'
+        field1: 'Complete payment details'
       },
       [PaymentMethodType.QIWI]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.YANDEX_MONEY]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.ALIPAY]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.WECHAT]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.NATIONAL_BANK_TRANSFER]: {
         field1: 'Bank name',
-        field2: 'account details'
+        field2: 'Account details'
       },
       [PaymentMethodType.PAYPAL]: {
-        field1: 'email'
+        field1: 'Email'
       },
       [PaymentMethodType.CASH_TRADE]: {
-        field1: 'location / city'
+        field1: 'Location / city'
       },
       [PaymentMethodType.CASH_DEPOSIT]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.CREDIT_CARD]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.SKRILL]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.OKPAY]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.WESTERN_UNION]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.WEBMONEY]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.NETTELLER]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.INTERNATIONAL_WIRE]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.AMAZON_GIFT_CARD]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.PAXUM]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.PAYONEER]: {
-        field1: 'payment details'
+        field1: 'Payment details'
       },
       [PaymentMethodType.OTHER_CRYPTOCURRENCY]: {
-        field1: 'alercoin ticker name',
-        field2: 'altcoin address'
+        field1: 'Altcoin ticker name',
+        field2: 'Altcoin address'
       },
       [PaymentMethodType.OTHER]: {
-        field1: 'full payment details'
+        field1: 'Full payment details'
       }
     }
   },
