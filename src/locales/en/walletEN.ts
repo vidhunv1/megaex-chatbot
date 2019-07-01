@@ -6,14 +6,14 @@ export const walletEN = {
   home: {
     wallet: `💼  *Bitcoin Wallet*
 
-*Balance*:      {{ cryptoBalance }}
-   (Value:       {{ fiatBalance }})
-*Blocked*:       {{ blockedBalance }}
-    
-📗  Tx: ${BotCommand.TRANSACTIONS}
-    
-🤝 Invited: {{ referralCount }} users
-💰 Earnings: {{ earnings }}`,
+ Balance:    {{ cryptoBalance }}
+   Value:    {{ fiatBalance }}
+ Blocked:    {{ blockedBalance }}
+        
+ Invited:    {{ referralCount }} users
+Earnings:    {{ earnings }}
+
+My ${BotCommand.TRANSACTIONS}`,
 
     'send-cryptocurrency-cbbutton': '⚡️  Send {{ cryptoCurrencyName }} cheque',
     'my-address': '📩  Deposit',
@@ -27,48 +27,45 @@ export const walletEN = {
     'show-address': `
 📩  *Deposit {{ cryptoCurrencyCode }}*
     
-Use the {{ cryptoCurrencyCode }} address below to deposit funds into your wallet.
-Funds will be available in your wallet after {{ confirmations }} network confirmation.
+Funds will be available in your wallet after {{ confirmations }} network confirmation. Use the {{ cryptoCurrencyCode }} address below to deposit funds into your wallet.
     
-❕NOTE: Deposit only {{ cryptoCurrencyCode }} funds to this address`
+NOTE: *Deposit only {{ cryptoCurrencyCode }} funds* to this address.`
   },
 
   /* Send Coin */
   'send-coin': {
-    'input-amount': `⚡️ *Input amount*
+    'input-amount': `⚡️ *Amount to send*
 
-Input your amount in  *{{ cryptoCurrencyCode }}* or *{{ fiatCurrencyCode }}*
-
-A cheque for this amount will be generated to share with the person you want to send the {{ cryptoCurrencyCode }} to.
+Enter the amount in *{{ cryptoCurrencyCode }}* or *{{ fiatCurrencyCode }}*.
 
 Example: {{ cryptoCurrencyBalance }}
     
-*Available*: {{ cryptoCurrencyBalance }}
-*Value*: {{ fiatValue }}`,
+Available: {{ cryptoCurrencyBalance }}
+    Value: {{ fiatValue }}`,
     confirm: `👁‍🗨*Confirm*
 
 Is this correct? If yes, click on *"Confirm"*.:
 
-*Amount: {{ cryptoCurrencyAmount }}*
-(Value:   {{ fiatValue }})
+Amount: {{ cryptoCurrencyAmount }}
+ Value:  {{ fiatValue }})
 `,
-    'confirm-button': '✅ Confirm',
-    'insufficient-balance': `❌ *Error*
+    'confirm-button': '✔️  Confirm',
+    'insufficient-balance': `❗️  *Insufficient funds*
   
-Insufficient funds. You need to add {{ cryptoCurrencyCode }} to your wallet to send this payment
+Add {{ cryptoCurrencyCode }} to your wallet to send this payment.
 
 *Available balance*: {{ cryptoCurrencyBalance}}`,
-    'invalid-amount': `❌ *Error*
+    'invalid-amount': `❗️  *Amount Invalid*
 
-Please enter a valid amount:`,
+Enter a valid amount.`,
     'error-creating-payment':
       'There was an error creating this payment, please try again later.',
-    'show-created-link': `✅ *Generated Link*
+    'show-created-link': `✅  *Cheque created*
 
 {{ paymentLink }}
-Share this link privately to send the funds to open in Telegram. Anyone with access to this link will get the funds.
+Share this link privately. Anyone with access to this link will get the funds.
 
-This one-time link will expire in *{{ expiryTime }} hours*`,
+This link will expire in *{{ expiryTime }} hours*.`,
     'payment-link-expired':
       'The payment link you created of *{{ cryptoValue }}* has expired.',
     'transfer-errors': {
@@ -79,19 +76,19 @@ This one-time link will expire in *{{ expiryTime }} hours*`,
 
 *Contact*: @{{ linkCreatorUsername }}`,
       [TransferErrorType.INVALID_CODE]: 'This payment link is invalid.',
-      [TransferErrorType.SELF_CLAIM]: `*Payment Link*
+      [TransferErrorType.SELF_CLAIM]: `✅  *Payment Link*
 
 Amount: *{{ cryptoValue }}*
-(_Share the link privately to send the funds. Anyone with access to this link will get the funds_)
+Share the link privately to send the funds. Anyone with access to this link will get the funds.
 `,
       [TransferErrorType.TRANSACTION_ERROR]:
         'An error occurred. Please try again later.'
     },
     'payment-success': {
-      receiver: `🔔 *Credit*
+      receiver: `✅ *New Credit*
 
 You received *{{ cryptoValueReceived }}* from @{{ senderUsername }}.`,
-      sender: `🔔 *Debit*
+      sender: `✅ *New Debit*
 
 @{{ receiverUsername }} received *{{ cryptoValueSent }}* from your payment link.`
     }
@@ -99,67 +96,61 @@ You received *{{ cryptoValueReceived }}* from @{{ senderUsername }}.`,
 
   /* Withdraw */
   withdraw: {
-    'input-amount': `*Enter amount*
+    'input-amount': `*Withdraw BTC*
 
-Input your amount in  *{{ cryptoCurrencyCode }}* to withdraw.
-Example: {{ cryptoCurrencyBalance }}
+Enter amount in  *{{ cryptoCurrencyCode }}* to withdraw.
+Example: 0.018291 BTC
     
-*Available*: {{ cryptoCurrencyBalance }}
-     (Value:  {{ fiatValue }})`,
-    'input-address': `*Enter address*
+Available: {{ cryptoCurrencyBalance }}
+        Value: {{ fiatValue }}`,
+    'input-address': `*BTC address*
 
 Enter the address of the {{ cryptoCurrencyName }} wallet you want to withdraw to.
 `,
-    'insufficient-balance': `❌ *Error*
+    'insufficient-balance': `❗️  *Insufficient Funds*
   
-Insufficient funds.
+Funds in wallet are too low. Add funds & try again.
   
-*Available balance*: {{ cryptoCurrencyBalance}}
+*Available balance*: {{ cryptoCurrencyBalance}}`,
+    'invalid-address': `❗️  *Invalid Address*
+
+Check the *{{ cryptoCurrencyName }}* address & try again.
 `,
-    'invalid-address': `❌ *Error*
+    'less-than-min-error': `❗️  *Amount too low*
 
-The address you entered is not a valid *{{ cryptoCurrencyName }}* address.
-
-Please try again with a valid address.
-`,
-    'less-than-min-error': `❌ *Error*
-
-The minimum withdrawal amount is *{{ minWithdrawAmount }}*
+The minimum withdrawal amount is *{{ minWithdrawAmount }}*.
 `,
     'create-error': `An error occurred. 
   
 Please try again later. If you are still facing an issue, contact support @{{ supportUsername}}`,
-    confirm: `*Verify*
+    confirm: `👁‍🗨  *Verify details*
 
-Check and confirm your transaction:
-
-*To Address*: {{ toAddress }}
-*Amount: {{ cryptoCurrencyAmount }}*
-(Value:   {{ fiatValue }})
+To Address: {{ toAddress }}
+    Amount: {{ cryptoCurrencyAmount }}
+     Value: {{ fiatValue }})
 `,
-    'confirm-button': '✅ Confirm',
-    'create-success': `✅ *Withdrawal added*
+    'confirm-button': '✔️ Confirm',
+    'create-success': `⏳ *Withdrawal Processing...*
 
-Your withdraw request was added to the queue. You will receive a notification when processed.
+Your withdrawal request is in queue. You will receive a notification when it's processed.
 
-❕Network fee of *{{ feeValue }}* will be used for this withdrawal.
-`,
-    'withdraw-processed': `🔔 *Withdrawal Processed*
+Network fee of *{{ feeValue }}* will be used.`,
+    'withdraw-processed': `✅ *Withdrawal Completed*
 
-Your withdrawal of *{{ cryptoCurrencyAmount }}* has been processed.
+Your withdrawal of *{{ cryptoCurrencyAmount }}* is completed.
 
 {{ withdrawalLink }}`
   },
 
   transaction: {
-    'new-incoming-tx': `🕘 *Incoming {{ cryptoCurrencyCode }}*
+    'new-incoming-tx': `🕘  *Incoming {{ cryptoCurrencyCode }}*
 
-You have a new deposit of *{{ cryptoCurrencyValue }}*. This will be available after {{ requiredConfirmation }} network confirmation.
+You have a new deposit of *{{ cryptoCurrencyValue }}*. Will be added after {{ requiredConfirmation }} confirmation on the network.
 
 txid: [{{ txid }}]({{ txUrl }})`,
-    'new-tx-confirmed': `📩 *{{ cryptoCurrencyCode }} received*
+    'new-tx-confirmed': `📩  *{{ cryptoCurrencyCode }} received*
 
-You received *{{ cryptoCurrencyValue }}*.`,
+*{{ cryptoCurrencyValue }}* added to wallet.`,
     'source-name': {
       core: 'deposit',
       payment: 'payment',
