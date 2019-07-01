@@ -5,9 +5,9 @@ import { BotCommand } from 'chats/types'
 
 export const commonEN = {
   notifications: {
-    'admin-message-title': '👨‍🚀 *New Message from Admin!*',
-    'support-message-title': '👩‍💼 *New Message from Support!*',
-    'system-message-title': '🤖 *New System Message!*'
+    'admin-message-title': '👨‍🚀 *Message from admin*',
+    'support-message-title': '👩‍💼 *Message from support*',
+    'system-message-title': '🤖 *System message*'
   },
   'new-referral': `🤝 *New Referral*
 
@@ -56,7 +56,7 @@ If you are having any trouble, we are there to help you 24/7. Contact our team @
 
 ℹ️  *About MegaDeals:*
 
-MegaDeals is a secure p2p escrow bot to buy / sell bitcoins with your local currency. `
+MegaDeals is a secure p2p exchange bot to buy / sell bitcoins with your local currency. `
   },
   bot: {
     name: 'BTC Deals',
