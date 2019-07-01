@@ -12,6 +12,7 @@ export const walletEN = {
         
  Invited:    {{ referralCount }} users
 Earnings:    {{ earnings }}
+
 My ${BotCommand.TRANSACTIONS}`,
 
     'send-cryptocurrency-cbbutton': '⚡️  Send {{ cryptoCurrencyName }} cheque',
@@ -37,8 +38,6 @@ NOTE: *Deposit only {{ cryptoCurrencyCode }} funds* to this address.`
 
 Enter the amount in *{{ cryptoCurrencyCode }}* or *{{ fiatCurrencyCode }}*.
 
-Share the cheque with the person you want to send the {{ cryptoCurrencyCode }} to.
-
 Example: {{ cryptoCurrencyBalance }}
     
 Available: {{ cryptoCurrencyBalance }}
@@ -61,10 +60,10 @@ Add {{ cryptoCurrencyCode }} to your wallet to send this payment.
 Enter a valid amount.`,
     'error-creating-payment':
       'There was an error creating this payment, please try again later.',
-    'show-created-link': `✅  *Send funds*
+    'show-created-link': `✅  *Cheque created*
 
 {{ paymentLink }}
-Share this link privately in Telegram. Anyone with access to this link will get the funds.
+Share this link privately. Anyone with access to this link will get the funds.
 
 This link will expire in *{{ expiryTime }} hours*.`,
     'payment-link-expired':
@@ -86,10 +85,10 @@ Share the link privately to send the funds. Anyone with access to this link will
         'An error occurred. Please try again later.'
     },
     'payment-success': {
-      receiver: `✅ *BTC Credited*
+      receiver: `✅ *New Credit*
 
 You received *{{ cryptoValueReceived }}* from @{{ senderUsername }}.`,
-      sender: `✅ *BTC Debited*
+      sender: `✅ *New Debit*
 
 @{{ receiverUsername }} received *{{ cryptoValueSent }}* from your payment link.`
     }
@@ -102,7 +101,7 @@ You received *{{ cryptoValueReceived }}* from @{{ senderUsername }}.`,
 Enter amount in  *{{ cryptoCurrencyCode }}* to withdraw.
 Example: 0.018291 BTC
     
-Available *{{ cryptoCurrencyCode }}*: {{ cryptoCurrencyBalance }}
+Available: {{ cryptoCurrencyBalance }}
         Value: {{ fiatValue }}`,
     'input-address': `*BTC address*
 
@@ -112,8 +111,7 @@ Enter the address of the {{ cryptoCurrencyName }} wallet you want to withdraw to
   
 Funds in wallet are too low. Add funds & try again.
   
-*Available balance*: {{ cryptoCurrencyBalance}}
-`,
+*Available balance*: {{ cryptoCurrencyBalance}}`,
     'invalid-address': `❗️  *Invalid Address*
 
 Check the *{{ cryptoCurrencyName }}* address & try again.
@@ -134,10 +132,9 @@ To Address: {{ toAddress }}
     'confirm-button': '✔️ Confirm',
     'create-success': `⏳ *Withdrawal Processing...*
 
-Your withdrawal request is in queue. You will receive a notification once it's done.
+Your withdrawal request is in queue. You will receive a notification when it's processed.
 
-Network fee of *{{ feeValue }}* (in BTC) is applicable.
-`,
+Network fee of *{{ feeValue }}* will be used.`,
     'withdraw-processed': `✅ *Withdrawal Completed*
 
 Your withdrawal of *{{ cryptoCurrencyAmount }}* is completed.
