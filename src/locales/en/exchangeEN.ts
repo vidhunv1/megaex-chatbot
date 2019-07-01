@@ -180,7 +180,7 @@ Amount: *{{ fiatPayAmount }}*
 Payment reference: *T{{ tradeId }}*
 {{ paymentDetails }}
 
-[Telegram contact](tg://user?id={{ telegramUserId }})
+[Telegram contact](tg://user?id={{ buyerUserId }})
 
 🔒 _This trade is secured. Payment valid only for_ *{{ paymentSendTimeout }} mins*.`,
       'payment-received-cbbutton': '💵  Payment Received',
