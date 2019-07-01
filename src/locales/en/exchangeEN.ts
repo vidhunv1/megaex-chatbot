@@ -43,12 +43,12 @@ Appropriate action has been taken against the seller. We are sorry for any incon
 {{ cryptoAmount }} has been *credited*. Check your wallet.`,
       'dispute-resolved-seller-lose': `👩‍🎓  *Dispute resolved*
 
-After careful review based on proof submitted by both parties, we confirm that there is fault on your part of the trade.
+After careful review based on proof submitted by both parties, we confirm that there is fault on your part in thsi trade.
 
 NOTE: Repeated offence will result in a permanent ban.`,
       'dispute-resolved-buyer-lose': `‍🎓  *Dispute resolved*
 
-After careful review based on proof submitted by both parties, we confirm that there is fault on your part of the trade. 
+After careful review based on proof submitted by both parties, we confirm that there is fault on your part in this22 trade. 
       
 NOTE: Repeated offence will result in a permanent ban.`,
       'referral-comission': `🚀  *Commission Received*
@@ -72,7 +72,7 @@ Are you sure you have received *{{ fiatAmount }}* from the buyer?`,
         BotCommand.TRADE
       }{{ tradeId }}
 
-Your wallet is credited with *{{ cryptoAmount }}* for this trade.`,
+Your wallet is credited with *{{ cryptoAmount }}* from this trade.`,
       'payment-released-seller': `🚀 *Successful Trade* ${
         BotCommand.TRADE
       }{{ tradeId }}
@@ -86,7 +86,7 @@ Give your rating for this trade.`,
 Write a short review for this trade`,
       'end-review': `Review added.
       
-🎉 Invite your friends to earn bitcoins from every referral. Earn 50% commission on our fees on every referral trade.
+🎉 Invite your friends to earn bitcoins from every referral. Earn 50% commission from fees on every referral trade.
 
 {{ referralLink }}`,
       'skip-review': 'Skip ➡️',
