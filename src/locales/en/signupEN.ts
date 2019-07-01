@@ -5,7 +5,7 @@ export const signupEN = {
 
 You can buy / sell bitcoins with your local currency from other traders (p2p) with escrow. Every trade is instant, secure, and private.
 
-First, *choose a language* for the app.`,
+Choose your *language*.`,
 
   'terms-and-conditions': `[Terms of Services](https://telegra.ph/Terms-of-Service-06-18)
   
@@ -22,8 +22,7 @@ BTC Address: *{{ bitcoinAddress }}*
 
 Note:
 
-🔐 Enable 2-step verification in settings > privacy & security.
-🆔 Set your Telegram username so traders can chat with you.`,
+🔐 Enable 2-step verification in settings > privacy & security.`,
   
   'account-ready-generating-address': `✅  *Account created!*
 
@@ -32,8 +31,7 @@ BTC Address: *{{ bitcoinAddress }}*
   
 Note:
 
-🔐 Enable 2-step verification in settings > privacy & security.
-🆔 Set your Telegram username so traders can chat with you.`,
+🔐 Enable 2-step verification in settings > privacy & security.`,
   'account-ready-continue-button': '🚀 Start trading',
   'home-screen': `🔶  *Mega Deals*
 
