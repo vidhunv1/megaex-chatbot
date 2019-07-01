@@ -3,36 +3,40 @@ import { BotCommand } from 'chats/types'
 export const signupEN = {
   'choose-language': `Hello, *{{ name }}*!
 
-You can buy / sell bitcoins in your local currency here privately and securely.
+You can buy / sell bitcoins with your local currency from other traders (p2p) with escrow. Every trade is instant, secure, and private.
 
-To get started, choose the language for the app from the options listed below.`,
+Choose your *language*.`,
 
-  'terms-and-conditions': `[Terms of Service](https://telegra.ph/Terms-of-Service-06-18)
+  'terms-and-conditions': `[Terms of Services](https://telegra.ph/Terms-of-Service-06-18)
   
-Click on *Agree* to continue.`,
+To continue, click on ✔️ *I agree* .`,
 
-  'terms-agree-button': '✔️ Agree',
+  'terms-agree-button': '✔️ I agree',
 
-  'select-currency': 'Select your local currency',
+  'select-currency': 'Select your local currency.',
 
-  'account-ready': `*Account created!*
+  'account-ready': `✅  *Account created!*
 
-Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
+ Account ID: ${BotCommand.ACCOUNT}{{ accountID }} 
+BTC Address: *{{ bitcoinAddress }}*
 
-*Checklist*:
-🔐 For your *security* please enable two-step verification on Telegram privacy & security settings.
-✔️ Set your username in Telegram so it's easy for users to contact when you are trading.`,
-  'account-ready-generating-address': `*Your account on MegaDeals is created!*
+Note:
 
-  *Account ID*: ${BotCommand.ACCOUNT}{{ accountID }}
+🔐 Enable 2-step verification in settings > privacy & security.`,
   
-🔐*Security Tip:*
-Enable two-step verification on Telegram: Go to Settings > Privacy & Security > Two-step verification`,
+  'account-ready-generating-address': `✅  *Account created!*
+
+ Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
+BTC Address: *{{ bitcoinAddress }}*
+  
+Note:
+
+🔐 Enable 2-step verification in settings > privacy & security.`,
   'account-ready-continue-button': '🚀 Start trading',
-  'home-screen': `*Mega Deals*
+  'home-screen': `🔶  *Mega Deals*
 
-💵 Exchange: Buy and Sell bitcoins, track your orders.
-💼 wallet: Check your account balance and payment methods.`,
+Exchange: Buy and sell bitcoins. 
+  Wallet: BTC balance and payment methods.`,
   'signup-error':
-    'Oops! We are sorry. An error has occurred while registering. Please try again later or contact our support @{{ supportBotUsername }}. We are happy to help 24/7.'
+    'Sorry! An error occurred while registering. Contact us @{{ supportBotUsername }}. 24/7 support.'
 }
