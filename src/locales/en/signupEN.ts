@@ -23,7 +23,7 @@ BTC Address: *{{ bitcoinAddress }}*
 Note:
 
 🔐 Enable 2-step verification in settings > privacy & security.`,
-  
+
   'account-ready-generating-address': `✅  *Account created!*
 
  Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
