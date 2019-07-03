@@ -9,7 +9,7 @@ export const commonEN = {
     unauthorized: 'Only chat admins can use this command.',
     'invalid-limit-number':
       'The value for setDailyLimit should be between 0-24.',
-    'special-message': `❕ You can add this bot to your groups or channels and earn bitcoins now.
+    'special-message': `❕ You can add this bot to your groups or channels and earn BTC now.
 [Click here to read more](https://telegra.ph/Megadeals-crypto-alerts-07-03).`,
     welcome: `*Hello*
 

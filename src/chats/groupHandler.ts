@@ -245,8 +245,7 @@ export async function sendRate(group: TelegramGroup) {
 
       formattedVolume24h: dataFormatter.formatFiatCurrency(
         rate.volume24h,
-        // @ts-ignore
-        'BTC'
+        FiatCurrency.USD
       ),
       change7d: rate.change7d
     }
