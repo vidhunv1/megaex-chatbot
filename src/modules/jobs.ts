@@ -1,6 +1,8 @@
 import { CronJob } from 'cron'
 import { logger } from 'modules'
-import { Market } from 'models'
+import { Market, TelegramGroup } from 'models'
+import { sendRate } from 'chats/groupHandler'
+import * as moment from 'moment'
 
 export default class Jobs {
   jobs: CronJob[]
@@ -9,6 +11,7 @@ export default class Jobs {
     // this.jobs.push(this.getSyncTransactionsJob())
     this.jobs.push(this.getSyncTickersJob())
     this.jobs.push(this.getSyncFiatRatesJob())
+    this.jobs.push(this.getGroupAlertJob())
   }
 
   start() {
@@ -52,6 +55,27 @@ export default class Jobs {
       cronTime: '0 */12 * * *',
       onTick: async function() {
         await Market.syncFiatExchangeRates()
+      },
+      onComplete: function() {},
+      start: false
+    })
+  }
+
+  private getGroupAlertJob() {
+    return new CronJob({
+      cronTime: '0 */1 * * *',
+      onTick: async function() {
+        const groups = await TelegramGroup.findAll()
+        groups.forEach((g) => {
+          try {
+            const now = moment()
+            if (!g.deletedAt && now.hours() % g.dailyAlertLimit === 0) {
+              sendRate(g)
+            }
+          } catch (e) {
+            logger.error('Erro sending notify to group: ' + g.telegramGroupId)
+          }
+        })
       },
       onComplete: function() {},
       start: false

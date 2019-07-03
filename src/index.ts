@@ -18,7 +18,13 @@ import Jobs from 'modules/jobs'
 import { UserInfo } from './models'
 import { Namespace } from 'modules/i18n'
 import { keyboardMainMenu } from 'chats/common'
+import { handleGroupMessage, handleChannel } from 'chats/groupHandler'
 ;(async () => {
+  telegramHook.getWebhook.on('channel_post', async function(
+    msg: TelegramBot.Message
+  ) {
+    handleChannel(msg)
+  })
   telegramHook.getWebhook.on('message', async function onMessage(
     msg: TelegramBot.Message
   ) {
@@ -72,17 +78,15 @@ import { keyboardMainMenu } from 'chats/common'
           )
           throw e
         }
-      } else if (msg.chat.type === 'group') {
-        telegramHook.getWebhook.sendMessage(
-          msg.chat.id,
-          'Group conversations are temporarily disabled.'
-        )
+      } else if (
+        (msg.chat.type === 'group' ||
+          msg.chat.type === 'channel' ||
+          msg.chat.type === 'supergroup') &&
+        msg.from
+      ) {
+        handleGroupMessage(msg)
       } else {
         logger.error('Unhandled telegram message action')
-        telegramHook.getWebhook.sendMessage(
-          msg.chat.id,
-          'ERROR: Unhandled telegram message action'
-        )
       }
     } catch (e) {
       logger.error('FATAL: An unknown error occurred: ')

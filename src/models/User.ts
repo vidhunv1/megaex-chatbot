@@ -74,7 +74,7 @@ export class User extends Model<User> {
   t(key: string, values?: any): string {
     return i18n.getI18n.t(key, {
       ...values,
-      lng: LanguageISO[this.locale]
+      lng: LanguageISO[this.locale || Language.ENGLISH]
     })
   }
 

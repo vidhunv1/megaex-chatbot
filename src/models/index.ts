@@ -7,7 +7,7 @@ export * from './Withdrawal'
 export * from './Trade'
 export * from './Dispute'
 export * from './Message'
-
+export * from './TelegramGroup'
 export * from './User'
 export * from './TelegramAccount'
 export * from './Referral'

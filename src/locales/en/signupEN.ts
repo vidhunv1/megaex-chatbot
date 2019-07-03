@@ -27,7 +27,7 @@ BTC Address: *{{ bitcoinAddress }}*
 
 🔐 For your security please enable 2-step verification in settings > privacy & security.`,
   'account-ready-continue-button': '🚀 Start trading',
-  'home-screen': `🔶  *Megadeals*
+  'home-screen': `🔷  *Megadeals*
 
 Use *exchange* to find trades or *wallet* to withdraw or desposit BTC.`,
   'signup-error':

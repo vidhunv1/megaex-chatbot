@@ -14,7 +14,8 @@ import {
   Market,
   Trade,
   Dispute,
-  Message
+  Message,
+  TelegramGroup
 } from 'models'
 import { CONFIG } from '../config'
 
@@ -60,7 +61,7 @@ export class DB {
         Trade,
         Dispute,
         Message,
-
+        TelegramGroup,
         User,
         TelegramAccount,
         Referral,

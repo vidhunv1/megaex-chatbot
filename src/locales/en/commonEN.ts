@@ -4,8 +4,45 @@ import { OrderType } from 'models/Order'
 import { BotCommand } from 'chats/types'
 
 export const commonEN = {
+  group: {
+    'limit-updated': 'updated limit!',
+    unauthorized: 'Only chat admins can use this command.',
+    'invalid-limit-number':
+      'The value for setDailyLimit should be between 0-24.',
+    'special-message': `❕ You can add this bot to your groups or channels and earn bitcoins now.
+[Click here to read more](https://telegra.ph/Megadeals-crypto-alerts-07-03).`,
+    welcome: `*Hello*
+
+I will start sending BTC rate alerts here.
+
+*Commands*
+[/rate - Get current market rate for BTC]
+[/setDailyLimit 6] - Set the number of rate alerts to send per day. Value should be 0 - 24. (Only available to admins)`,
+    'account-linked': `❕This bot is linked to [{{ telegramName }}](tg://user?id={{ telegramUserId }})'s account on @{{ botUsername }}.`,
+    'account-not-linked':
+      '❕There is no account linked to this group. [{{ telegramName }}](tg://user?id={{ telegramUserId }}) can PM me at @{{ botUsername }} or click button below to create and link account.',
+    'exchange-btc': '📊 Buy / Sell BTC',
+    'rate-alert-up': `*Rate alert*
+
+🚀 BTC is up *{{ change1h }}%* in the last hour at *{{ formattedRate }}*.
+
+----------------
+24h Volume: {{ formattedVolume24h }}
+24h change: {{ change24h }}%
+7d change: {{ change7d }}%
+----------------`,
+    'rate-alert-down': `*Rate alert*
+
+🎢 BTC is down *{{ change1h }}%* in the last hour at *{{ formattedRate }}*.
+
+----------------
+24h Volume: {{ formattedVolume24h }}
+24h change: {{ change24h }}%
+7d change: {{ change7d }}%
+----------------`
+  },
   info: {
-    home: `🔶 *Megadeals*
+    home: `🔷 *Megadeals*
 
 _The fast and simple way to exchange bitcoins locally in your currency._
 https://megadeals.io
@@ -91,7 +128,7 @@ MegaDeals is a secure p2p exchange bot to buy / sell bitcoins with your local cu
     exchange: '💵 Exchange BTC-{{ fiatCurrency }}',
     account: '👤 My Account',
     wallet: '💼 Wallet',
-    info: '🔶 Info'
+    info: '🔷 Info'
   },
   'unhandled-callback': `Sorry! Your session on this request has expired. Please make a new request again.`,
   'payment-methods': {
