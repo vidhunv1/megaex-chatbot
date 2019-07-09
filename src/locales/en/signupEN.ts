@@ -1,7 +1,7 @@
 import { BotCommand } from 'chats/types'
 
 export const signupEN = {
-  'choose-language': `Hello *{{ name }}*!
+  'choose-language': `Hello!
 
 You can use this bot to exchange bitcoins locally in your currency.
 
