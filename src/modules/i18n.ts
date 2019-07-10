@@ -14,6 +14,27 @@ import {
   walletHI,
   accountHI
 } from '../locales/hi'
+import {
+  commonRU,
+  signupRU,
+  exchangeRU,
+  walletRU,
+  accountRU
+} from '../locales/ru'
+import {
+  commonAR,
+  signupAR,
+  exchangeAR,
+  walletAR,
+  accountAR
+} from '../locales/ar'
+import {
+  commonES,
+  signupES,
+  exchangeES,
+  walletES,
+  accountES
+} from '../locales/es'
 import { CONFIG } from '../config'
 
 export enum Namespace {
@@ -62,6 +83,27 @@ export class I18n {
             [Namespace.Exchange]: exchangeHI,
             [Namespace.Wallet]: walletHI,
             [Namespace.Account]: accountHI
+          },
+          [LanguageISO[Language.RUSSIAN]]: {
+            [Namespace.Common]: commonRU,
+            [Namespace.Signup]: signupRU,
+            [Namespace.Exchange]: exchangeRU,
+            [Namespace.Wallet]: walletRU,
+            [Namespace.Account]: accountRU
+          },
+          [LanguageISO[Language.ARABIC]]: {
+            [Namespace.Common]: commonAR,
+            [Namespace.Signup]: signupAR,
+            [Namespace.Exchange]: exchangeAR,
+            [Namespace.Wallet]: walletAR,
+            [Namespace.Account]: accountAR
+          },
+          [LanguageISO[Language.SPANISH]]: {
+            [Namespace.Common]: commonES,
+            [Namespace.Signup]: signupES,
+            [Namespace.Exchange]: exchangeES,
+            [Namespace.Wallet]: walletES,
+            [Namespace.Account]: accountES
           }
         }
       })
