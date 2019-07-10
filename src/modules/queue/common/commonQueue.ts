@@ -47,40 +47,46 @@ export class CommonQueue {
           }
 
           for await (const userId of params.userIdList) {
-            const user = await User.findById(userId, {
-              include: [{ model: TelegramAccount }]
-            })
+            try {
+              const user = await User.findById(userId, {
+                include: [{ model: TelegramAccount }]
+              })
 
-            if (!user) {
-              logger.error(
-                '[Q] SEND_MESSAGE: error sending message to ' +
-                  userId +
-                  '. NOT_FOUND'
-              )
-            } else {
-              // Send the message
-              let title, message
-              if (params.title.isTransKey == true) {
-                title = user.t(params.title.text)
+              if (!user) {
+                logger.error(
+                  '[Q] SEND_MESSAGE: error sending message to ' +
+                    userId +
+                    '. NOT_FOUND'
+                )
               } else {
-                title = params.title.text
-              }
-              if (params.message.isTransKey == true) {
-                message = user.t(params.message.text)
-              } else {
-                message = params.message.text
-              }
-
-              await telegramHook.getWebhook.sendMessage(
-                user.telegramUser.id,
-                `${title}\n\n${message}`,
-                {
-                  parse_mode: 'Markdown',
-                  reply_markup: keyboardMainMenu(user)
+                // Send the message
+                let title, message
+                if (params.title.isTransKey == true) {
+                  title = user.t(params.title.text)
+                } else {
+                  title = params.title.text
                 }
-              )
+                if (params.message.isTransKey == true) {
+                  message = user.t(params.message.text)
+                } else {
+                  message = params.message.text
+                }
 
-              logger.info('Sent message to: ' + userId)
+                await telegramHook.getWebhook.sendMessage(
+                  user.telegramUser.id,
+                  `${title}\n\n${message}`,
+                  {
+                    parse_mode: 'Markdown',
+                    reply_markup: keyboardMainMenu(user)
+                  }
+                )
+
+                logger.info('Sent message to: ' + userId)
+              }
+            } catch (e) {
+              logger.error(
+                '[Q] SEND_MESSAGE Error sending message to user ' + userId
+              )
             }
           }
 

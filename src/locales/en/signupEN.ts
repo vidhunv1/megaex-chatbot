@@ -7,9 +7,9 @@ You can use this bot to exchange bitcoins locally in your currency.
 
 To get started, choose your *language* from options below.`,
 
-  'terms-and-conditions': `Read our [Terms of Services](https://telegra.ph/Terms-of-Service-06-18), to continue click on ✔️ *I agree* .`,
+  'terms-and-conditions': `Read our [Terms of Services](https://telegra.ph/Terms-of-Service-06-18), to continue click on ✔️ *Accept* .`,
 
-  'terms-agree-button': '✔️ I agree',
+  'terms-agree-button': '✔️ Accept',
 
   'select-currency': 'Select your local currency.',
 
