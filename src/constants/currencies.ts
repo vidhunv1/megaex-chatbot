@@ -17,7 +17,7 @@ export const cryptoCurrencyInfo: Record<
   [CryptoCurrency.BTC]: {
     confirmations: 1,
     fee: parseFloat(CONFIG.BTC_FEES),
-    minWithdrawalAmount: 0.002,
+    minWithdrawalAmount: 0.001,
     minBuyAmount: 0.00025,
     getTxUrl: (txid: string) => `https://live.blockcypher.com/btc/tx/${txid}/`
   }
