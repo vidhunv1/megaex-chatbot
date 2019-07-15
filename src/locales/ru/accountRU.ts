@@ -56,7 +56,7 @@ Account ID: ${BotCommand.ACCOUNT}{{ accountID }}
       BotCommand.ACCOUNT
     }{{ accountId }})
 
-[Телеграмма контакт](tg://user?id={{ telegramUserId }})
+[контакт {{ firstName }}](tg://user?id={{ telegramUserId }})
 
 💵 Торговые предложения: {{ dealCount }}
 💎 Объем торгов: {{ tradeVolume }} {{ cryptoCurrencyCode }}

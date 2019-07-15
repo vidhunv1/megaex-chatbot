@@ -4,68 +4,92 @@ import { TradeRating, TradeError } from 'models/Trade'
 
 export const exchangeHI = {
   home: {
-    exchange: `💵  *Exchange BTC-{{ fiatCurrency }}*
+    exchange: `💵  *एक्सचेंज BTC-{{ fiatCurrency }}*
 
-✅  Aapko 24/7 support  milega {{ supportBotUsername }}
-🔒  Saare trade MegaDeals bot pe secure hai aur bot guarantor hoga trade poora hone tak.
+✅  {{ supportBotUsername }} के माध्यम से 24/7 समर्थन
+🔒  सभी ट्रेडों को एस्क्रो गारंटी के साथ सुरक्षित किया जाता है.
 
-*Market rate*: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
+बाज़ार दर: {{ formattedMarketRate }} ({{ exchangeSourceName }})`,
 
-    'my-orders-cbbutton': 'My Active ({{ orderCount }})',
-    'create-order-cbbutton': '📊 Create Order',
-    'buy-cbbutton': '📉 Quick Buy',
-    'sell-cbbutton': '📈 Quick Sell'
+    'my-orders-cbbutton': 'मेरा ऐक्टिव आरडर({{ orderCount }})',
+    'create-order-cbbutton': '📊 आरडर बनाएँ',
+    'buy-cbbutton': '📉 BTC खरीदें',
+    'sell-cbbutton': '📈 BTC बेचें'
   },
 
   deals: {
-    'no-quick-sell': `📉 *Quick Buy*
+    'no-quick-sell': `📈  *BTC बेचें*
 
-There are no active buy orders. Click to create a new buy order.`,
-    'new-quick-sell-cbbutton': '📗 New buy order',
-    'no-quick-buy': `📉 *Quick Sell*
+कोई BTC बेचने का ऐक्टिव आरडर नहीं है। एक नया आरडर बनाएं।`,
+    'new-quick-sell-cbbutton': '📗 नया खरीदने का आरडर',
+    'no-quick-buy': `📉  *BTC खरीदें*
 
-There are no active sell orders. Click to create a new sell order.`,
-    'new-quick-buy-cbbutton': '📕 New sell order',
+कोई BTC खरीदने का ऐक्टिव आरडर नहीं है। नया विक्रय आदेश बनाएँ।`,
+    'new-quick-buy-cbbutton': '📕 नया बेचने का आरडर',
     trade: {
-      'referral-comission': `🚀 *Comission Received*
+      'dispute-resolved-seller-win': `👩‍🎓  *विवाद सुलझ गया*
 
-You received {{ cryptoAmount }} referral comission from your referrals trade.`,
-      'open-dispute-cbbutton': '👩‍🎓 Trade support',
-      'dispute-initiator': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
+दोनों पक्षों द्वारा प्रस्तुत सबूत के आधार पर सावधानीपूर्वक समीक्षा के बाद, हम पुष्टि करते हैं कि आप व्यापार के साथ अपने हिस्से पर वास्तविक हैं।
 
-An issue has been raised on this trade, any transaction on this trade is temporarily blocked. Please contact @{{ legalUsername }} to resolve this.`,
-      'dispute-received': `*Trade support* ${BotCommand.TRADE}{{ tradeId }}
+खरीदार के खिलाफ उचित कार्रवाई की गई है। किसी भी असुविधा के लिए हमें खेद है।
 
-The user has raised an issue on this trade.
+लॉक किए गए BTC फंड्स को * जारी किया गया है। अपने वॉलेट की जाँच करें।`,
+      'dispute-resolved-buyer-win': `👩‍🎓  *विवाद सुलझ गया*
 
-Please contact @{{ legalUsername }} to resolve this.`,
-      'confirm-payment-received': `*Confirm*
+दोनों पक्षों द्वारा प्रस्तुत सबूत के आधार पर सावधानीपूर्वक समीक्षा के बाद, हम पुष्टि करते हैं कि आप व्यापार के साथ अपने हिस्से पर वास्तविक हैं।
 
-Are you sure you have received *{{ fiatAmount }}* from the buyer?`,
-      'confirm-payment-received-yes-cbbutton': 'Yes',
-      'confirm-payment-received-no-cbbutton': 'No',
-      'payment-released-buyer': `🚀 *{{ cryptoCurrency }} credited* ${
+विक्रेता के खिलाफ उचित कार्रवाई की गई है। किसी भी असुविधा के लिए हमें खेद है।
+
+{{ cryptoAmount }} को *क्रेडिट* कर दिया गया है। अपने वॉलेट की जाँच करें।`,
+      'dispute-resolved-seller-lose': `👩‍🎓  *विवाद सुलझ गया*
+
+दोनों पक्षों द्वारा प्रस्तुत सबूत के आधार पर सावधानीपूर्वक समीक्षा के बाद, हम पुष्टि करते हैं कि इस व्यापार में आपकी ओर से गलती है।
+
+नोट: बार-बार किए गए अपराध का परिणाम स्थायी प्रतिबंध होगा।`,
+      'dispute-resolved-buyer-lose': `‍🎓  *विवाद सुलझ गया*
+
+दोनों पक्षों द्वारा प्रस्तुत सबूत के आधार पर सावधानीपूर्वक समीक्षा के बाद, हम पुष्टि करते हैं कि इस व्यापार में आपकी ओर से गलती है।
+
+नोट: बार-बार किए गए अपराध का परिणाम स्थायी प्रतिबंध होगा।`,
+      'referral-comission': `🚀  *कमीशन प्राप्त हुआ*
+
+बधाई हो! आपको अपने रेफरल व्यापार से {{ cryptoAmount }} कमीशन प्राप्त हुआ। कई और लोगों को आमंत्रित करते रहें।`,
+      'open-dispute-cbbutton': '👩‍🎓 मुद्दा उठाएं',
+      'dispute-initiator': `*ट्रेड् समर्थन* ${BotCommand.TRADE}{{ tradeId }}
+
+इस ट्रेड् पर एक मुद्दा उठाया गया है। ट्रेड् अस्थायी रूप से अवरुद्ध है। इसे हल करने के लिए कृपया @{{ legalUsername }} संपर्क करें।`,
+      'dispute-received': `*ट्रेड् समर्थन* ${BotCommand.TRADE}{{ tradeId }}
+
+उपयोगकर्ता ने इस व्यापार पर एक मुद्दा उठाया है।
+
+इसे हल करने के लिए कृपया @{{ legalUsername }} संपर्क करें।`,
+      'confirm-payment-received': `*भुगतान की पुष्टि*
+
+क्या आप वाकई खरीदार से *{{ fiatAmount }}* प्राप्त कर चुके हैं?`,
+      'confirm-payment-received-yes-cbbutton': 'हाँ',
+      'confirm-payment-received-no-cbbutton': 'नहीं',
+      'payment-released-buyer': `🚀 *{{ cryptoCurrency }} जमा किया गया है* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-Your wallet is credited with *{{ cryptoAmount }}* from this trade.`,
-      'payment-released-seller': `🚀 *Trade success* ${
+आपके बटुए को इस व्यापार से * {{cryptoAmount}} * का श्रेय दिया जाता है।`,
+      'payment-released-seller': `🚀 *सफल ट्रेड्* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-*{{ cryptoAmount }}* was sent to the buyer.`,
-      'give-rating': `🏅 *Rate this trade*
+{{{cryptoAmount}} * आपके वॉलेट से डेबिट किया और खरीदार को जारी किया।`,
+      'give-rating': `🏅  *ट्रेड् को रेट करें*
 
-Give your rating for this trade.`,
-      'give-review': `🗣 *Trade review*
+इस ट्रेड् के लिए अपनी रेटिंग दें।`,
+      'give-review': `🗣  *ट्रेड् की रिव्यू*
 
-Write your short review for this trade`,
-      'end-review': `*Added your review!*
+इस ट्रेड् के लिए एक छोटी रिव्यू लिखें`,
+      'end-review': `रिव्यू जोड़ी गई।
 
-🎉 _Invite your friends and family here so they can also have the best experience to buy/sell bitcoins (Use your referral link so you can earn from their trades)._
+🎉 अपने दोस्तों को आमंत्रित करें ताकि उन्हें भी सबसे अच्छा अनुभव हो, आप अपने ट्रेडों से फीस कमाने के लिए अपने रेफरल का उपयोग कर सकते हैं।
 
 {{ referralLink }}`,
-      'skip-review': 'Skip ➡️',
+      'skip-review': 'स्किप ➡️',
       rating: {
         [TradeRating.VERY_NEGATIVE]: '👎',
         [TradeRating.NEGATIVE]: '2 ⭐',
@@ -73,368 +97,359 @@ Write your short review for this trade`,
         [TradeRating.VERY_POSITIVE]: '4 ⭐',
         [TradeRating.EXCELLENT]: '5 🌟'
       },
-      'confirm-payment-sent': `*Confirm*
+      'confirm-payment-sent': `*भुगतान की पुष्टि करें*
 
-Are you sure you have sent *{{ fiatAmount }}* to the sellers *{{ paymentMethodType }}*?`,
-      'confirm-payment-sent-yes-cbbutton': 'Yes',
-      'confirm-payment-sent-no-cbbutton': 'No',
-      'payment-sent-buyer': `*🛎 Trade* ${BotCommand.TRADE}{{ tradeId }}
+क्या आपने *{{ fiatAmount }}* विक्रेताओं को भेजा है *{{ paymentMethodType }}*?`,
+      'confirm-payment-sent-yes-cbbutton': 'हाँ',
+      'confirm-payment-sent-no-cbbutton': 'नहीं',
+      'payment-sent-buyer': `*🛎 ट्रेड्* ${BotCommand.TRADE}{{ tradeId }}
 
-Seller has been notified. Please wait for the the seller to confirm your payment.
+विक्रेता को सूचित कर दिया गया है। विक्रेता द्वारा आपके भुगतान की पुष्टि के लिए कृपया प्रतीक्षा करें।
 
-❕If there is no confirmation you can contact *Trade support*.`,
-      'payment-sent-seller': `*🛎 Payment confirmed* ${
+मामले में, कोई पुष्टि नहीं है; आप 'मुद्दा उठा सकते हैं'।`,
+      'payment-sent-seller': `🛎  *भुगतान पूरा हुआ* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-The buyer has sent *{{ fiatAmount }}* to your *{{ paymentMethod }}*. Please confirm when you receive this transaction.
+खरीदार ने आपके *{{ paymentMethod }}* पे *{{ fiatAmount }}* भेजा है। भुगतान प्राप्त होने पर कृपया पुष्टि करें।
 
-❕If you have not received this transaction in some time you can contact *Trade support*.`,
-      'escrow-warn-seller': `*Info*
+यदि आपको भुगतान नहीं मिलता है, तो आप *मुद्दा उठा* सकते हैं।`,
+      'escrow-warn-seller': `*जानकारी*
 
-The seller is yet to make payment for the trade ${
+खरीदार को ट्रेड् के लिए भुगतान करना बाकी है। ${BotCommand.TRADE}{{ tradeId }}.
+
+आप हमारे *सपॉर्ट* से संपर्क कर सकते हैं यदि आपको लगता है कि कुछ गलत है, तो वे आपकी सहायता करेंगे।
+
+यदि *{{ paymentSendTimeout }} mins* में कोई पुष्टि प्राप्त नहीं होती है, तो अवरुद्ध राशि स्वचालित रूप से आपको जारी कर दी जाएगी।`,
+      'escrow-warn-buyer': `*ट्रेड् भुगतान अनुस्मारक*
+
+ट्रेड् के लिए भुगतान करना बाकी है ${
+        BotCommand.TRADE
+      }{{ tradeId }}. यदि आपने पहले ही भुगतान कर दिया है तो 'मैंने भुगतान किया है' पर क्लिक करें।
+
+⚠️ आपके पास इस भुगतान को करने के लिए *{{ paymentSendTimeout }} mins* बचे हैं। उसके बाद किया गया कोई भी भुगतान अमान्य होगा।`,
+      'escrow-closed-seller': `🤷‍♂️  *ट्रेड् बंद हो गया*
+
+खरीदार ने भुगतान नहीं किया और ट्रेड् के लिए भुगतान की पुष्टि करें। ${
         BotCommand.TRADE
       }{{ tradeId }}.
 
-You can contact our *support* if you think something is wrong, they will take care of this issue for you.
+आपका *{{ cryptoAmount }}* आपको वापस लौटा दिया गया है। इस ट्रेड् से संबंधित मुद्दों के लिए कृपया हमारे *सपॉर्ट* से संपर्क करें।`,
+      'escrow-closed-buyer': `🤷‍♂️  *ट्रेड् बंद हो गया*
 
-❕_If no confirmation is received in_ *{{ paymentSendTimeout }} mins*, _the blocked amount will be automatically released to you._`,
-      'escrow-warn-buyer': `*Reminder*
-
-You are yet to make the payment for the trade ${
+आपने विक्रेता को कोई भुगतान नहीं किया। ${
         BotCommand.TRADE
-      }{{ tradeId }}. Click the button below if you have already made the payment.
-
-⚠️ You have *{{ paymentSendTimeout }} mins* left to make this payment. Please note that any payment made after this time will be invalid.`,
-      'escrow-closed-seller': `*Trade closed*
-
-The buyer did not confirm any payment made to you for trade ${
+      }{{ tradeId }}. इस व्यापार से संबंधित मुद्दों के लिए, कृपया हमारे *सपॉर्ट* से संपर्क करें।`,
+      'cancel-trade-confirm': `क्या आप वाकई ट्रेड् को रद्द करना चाहते हैं? ${
         BotCommand.TRADE
-      }{{ tradeId }}.
+      }{{ tradeId }} *{{ fiatAmount }}* पर?
 
-Your *{{ cryptoAmount }}* has been returned back to you. For issues related to this trade please contact our *support*.`,
-      'escrow-closed-buyer': `*Trade closed*
-
-You did not make any payment to the seller for the trade ${
-        BotCommand.TRADE
-      }{{ tradeId }}. For issues related to this trade please contact our *support*.`,
-      'cancel-trade-confirm': `Are you sure you want to cancel the trade ${
-        BotCommand.TRADE
-      }{{ tradeId }} on *{{ fiatAmount }}*?
-
-⚠️ Never cancel if you have already paid the seller.`,
-      'cancel-trade-confirm-yes-cbbutton': 'yes',
-      'cancel-trade-confirm-no-cbbutton': 'no',
-      'cancel-trade-success': 'Yeh trade cancel ho gya hai.',
+⚠️ यदि आपने विक्रेता को पहले ही भुगतान कर दिया है तो कभी भी रद्द न करें।`,
+      'cancel-trade-confirm-yes-cbbutton': 'हाँ',
+      'cancel-trade-confirm-no-cbbutton': 'नहीं',
+      'cancel-trade-success': 'यह ट्रेड् आपके द्वारा रद्द कर दिया गया था।',
       'cancel-trade-not-canceled': '-',
-      'cancel-trade-fail': 'Yeh trade cancel ya fir expire ho gya hai.',
-      'cancel-trade-notify': `❗️User ne yeh trade ${
+      'cancel-trade-fail':
+        'ट्रेड् पहले ही रद्द कर दिया गया है या समाप्त हो गया है।',
+      'cancel-trade-notify': `❗️ ट्रेड् ${
         BotCommand.TRADE
-      }{{ tradeId }} cancel kar diya hai.`,
+      }{{ tradeId }} उपयोगकर्ता द्वारा रद्द कर दिया गया था।`,
       'trade-rejected-notify':
-        '❗ User ne yeh trade cancel kar diya hai. Aap aur ache deals dekh sakte hain Quick Buy / Sell option mein.',
-      'trade-rejected-success': 'You rejected this trade.',
-      'trade-accepted-seller-success': `🛎 *Trade Open* ${
+        'उपयोगकर्ता ने इस व्यापार को रद्द कर दिया। आप BTC खरीदें / बेचें  के तहत अन्य अच्छे ट्रेड् चुन सकते हैं।',
+      'trade-rejected-success': 'आपने इस व्यापार को अस्वीकार कर दिया।',
+      'trade-accepted-seller-success': `🛎 *ट्रेड खोला है* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-      User ko humne soochna de di hai ki aapko *{{ fiatPayAmount }}* de di jaaye *{{ paymentMethodName }} ke dwara*.
+उपयोगकर्ता को आपके *{{ paymentMethodName }} में *{{ fiatPayAmount }}* जमा करने के लिए सूचित किया गया है।
 
-[Telegram contact](tg://user?id={{ buyerUserId }})
+[तेल्लेग्राम् पे संपर्क करें](tg://user?id={{ buyerUserId }})
 
-❕Jab payment poora ho jaayega hum aapko soochit kar denge.`,
+जब यह भुगतान पूर्ण हो जाएगा, तो आपको सूचित किया जाएगा।`,
       'trade-accepted-buyer-no-payment-info':
-        'Send a message to seller for the payment details.',
-      'trade-accepted-buyer': `🛎 *Trade Accepted* ${
+        'भुगतान विवरण के लिए विक्रेता को संदेश भेजें।',
+      'trade-accepted-buyer': `🛎  *ट्रेड् स्वीकार कर लिया* ${
         BotCommand.TRADE
       }{{ tradeId }}
 
-Seller ke *{{ paymentMethodName }}* account pe *{{ fiatPayAmount }}* bhej dijiye, Payment confirm hone ke baad *{{ cryptoAmount }}* apke account mein credit ho jayega.
+{{ paymentMethodName }} के माध्यम से {{ fiatPayAmount }} का भुगतान करें, जब आपके भुगतान की पुष्टि हो जाएगी तो आपको *{{ cryptoAmount }}* प्राप्त होगा।
+
 *{{ paymentMethodName }}*
-Amount: *{{ fiatPayAmount }}*
-Payment reference: *T{{ tradeId }}*
+राशि: *{{ fiatPayAmount }}*
+भुगतान संदर्भ: *T{{ tradeId }}*
 {{ paymentDetails }}
 
-[Telegram contact](tg://user?id={{ buyerUserId }})
+[तेल्लेग्राम् पे संपर्क करें](tg://user?id={{ buyerUserId }})
 
-🔒 Humne yeh trade secure kar diya hai aapke liye. Aapko payment *{{ paymentSendTimeout }} mins* ke andar karna hoga.`,
-      'payment-received-cbbutton': '💵  Payment Received',
-      'payment-sent-cbbutton': '💸 Payment kar diya',
+🔒 यह ट्रेड् सुरक्षित है। भुगतान केवल *{{ paymentSendTimeout }} mins* के लिए मान्य है।`,
+      'payment-received-cbbutton': '💵  भुगतान प्राप्त',
+      'payment-sent-cbbutton': '💸  मैंने भुगतान किया है',
       'trade-accepted-fail':
-        '️❗️ Sorry. Trade complete hone mein koi error hai.',
+        '️माफ़ कीजिये। इस ट्रेड् को खोलने में एक त्रुटि हुई।',
 
       errors: {
         [TradeError.TRADE_EXISTS_ON_ORDER]:
-          '❌ Iss order pe trade open hai. Aap ek hi order pe multiple trades nhi daal sakte hai. Poorana trade cancel karke fir try karein.',
-        [TradeError.NOT_FOUND]: '❌ Sorry. Yeh trade mein kuch error hai.',
-        [TradeError.TRADE_EXPIRED]:
-          '❌ Yeh trade invalid ya expire ho chuka hai.',
+          '❗️ आपके पास इस आरडर पर पहले से मौजूद ट्रेड् है। आप एक ही क्रम के लिए कई ट्रेड नहीं रख सकते।',
+        [TradeError.NOT_FOUND]: '❗️ हमें यह ट्रेड् नहीं मिला।',
+        [TradeError.TRADE_EXPIRED]: '❗️ यह ट्रेड् अमान्य या समाप्त हो गया है।',
         [TradeError.INSUFFICIENT_BALANCE]:
-          '❌ You have insufficient balance to open this trade'
+          '❗️ इस ट्रेड् को खोलने के लिए आपके पास खाते में अपर्याप्त शेष है।'
       },
-      'init-get-confirm-buy': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
+      'init-get-confirm-buy': `🛎 *नया ट्रेड्* ${BotCommand.TRADE}{{ tradeId }}
 
 ${
         BotCommand.ACCOUNT
-      }{{ requestorAccountId }} ko *{{ fiatValue }}* mein *{{ cryptoCurrencyAmount }}* kharidne hai.
+      }{{ requestorAccountId }} {{ fixedRate }}  पे *{{ fiatValue }}* के लिए *{{ cryptoCurrencyAmount }}* खरीदना चाहते हैं।
 
-Kya aap trade karna chahenge?`,
-      'init-get-confirm-sell': `🛎 *New Trade* ${BotCommand.TRADE}{{ tradeId }}
+क्या आप इस ट्रेड् को स्वीकार करना चाहते हैं?`,
+      'init-get-confirm-sell': `🛎 *नया ट्रेड्* ${BotCommand.TRADE}{{ tradeId }}
 
 ${
         BotCommand.ACCOUNT
-      }{{ requestorAccountId }} ko *{{ fiatValue }}* mein *{{ cryptoCurrencyAmount }}* bech rha hai at rate {{ fixedRate }}.
+      }{{ requestorAccountId }} *{{ fiatValue }}* के लिए *{{ fixedRate }}* *{{ cryptoCurrencyAmount }}* बेचना चाहता है।
 
-Kya aap trade karna chahenge?`,
-      'trade-init-yes-cbbutton': 'Yes',
-      'trade-init-no-cbbutton': 'No',
-      'trade-init-no-response': `💤 *No Response*
+क्या आप इस ट्रेड् को स्वीकार करना चाहते हैं?`,
+      'trade-init-yes-cbbutton': 'हाँ',
+      'trade-init-no-cbbutton': 'नहीं',
+      'trade-init-no-response': `💤 *कोई जवाब नहीं*
 
-Yeh user abhi unavailable hai. Thodi der baad fir se try karein.`,
-      'trade-init-expired': `⏳ *Trade expire ho gya hai.*
+यह उपयोगकर्ता ऑफ़लाइन है। कृपया अन्य ट्रेडों का प्रयास करें।`,
+      'trade-init-expired': `⏳ *ट्रेड् समाप्त हो गया*
 
-Yeh trade request ${
+चूंकि आपने कोई जवाब नहीं दिया था, इसलिए ट्रेड् अनुरोध ${
         BotCommand.TRADE
-      }{{ tradeId }} expire ho gya aur no response milne par humne yeh trade cancel kar diya hai.
+      }{{ tradeId }} समाप्त हो गया है और रद्द कर दिया गया है।
 
-❕️ Aap yeh trade pause kar sakte hai agar koi reason se aap ko lagta hai ki aap busy hai. Hum user ko message ke dwara notify kar denge.`
+यदि आप ऑफ़लाइन हैं तो आप अपना ऑर्डर आसानी से रोक सकते हैं। यह अन्य व्यापारियों के लिए एक अच्छा अनुभव सुनिश्चित करता है।`
     },
-    'request-deposit-notify': `🛎 *New Match*
+    'request-deposit-notify': `🛎  *नया खरीदने का अनुरोध*
 
-Aapke order ${BotCommand.ORDER}{{ orderId }} pe ek new buy request hai.
+आपके पास अपने आरडर पर एक नया खरीदने का अनुरोध है ${
+      BotCommand.ORDER
+    }{{ orderId }}.
 
-*{{ requesterName }}* ne *{{ formattedCryptoValue }}* buy request daala hai*{{ formattedFiatValue }}*.
+*{{ requesterName }}* *{{ formattedFiatValue }}* के लिए *{{ formattedCryptoValue }}* खरीदना चाहते हैं।
 
-[Telegram contact](tg://user?id={{ requesterUserId }})
+[तेल्लेग्राम् पे संपर्क करें](tg://user?id={{ requesterUserId }})
 
-⚠️ Trade shuru karne se pehle apne wallet mein {{ cryptoCurrencyCode }} funds daale.`,
+⚠️ इस ट्रेड् को शुरू करने से पहले आपको आवश्यक BTC जमा करनी होगी।`,
     errors: {
-      [DealsError.ORDER_NOT_FOUND]: 'Order active nahi hai.',
+      [DealsError.ORDER_NOT_FOUND]: 'आरडर नहीं मिला।',
       [DealsError.SELF_OPEN_DEAL_REQUEST]:
-        'Aap apne order pe buy / sell request nahi daal sakte hain. Aur koi order pe request daalein.',
-      default: '❗️ Sorry. Kuch der baad fir se try karein.'
+        'आप अपने आरडर पर सौदा नहीं खोल सकते हैं!',
+      default: 'माफ़ कीजिये। एक त्रुटि हुई। बाद में पुन: प्रयास करें।'
     },
-    'next-cbbutton': 'next',
-    'prev-cbbutton': 'prev',
-    'show-buy-deals': `📉 *Quick Buy* ({{ currentPage}}/{{ totalPages }})
+    'next-cbbutton': 'अगला',
+    'prev-cbbutton': 'पिछला',
+    'show-buy-deals': `📉 *BTC खरीदें* ({{ currentPage}}/{{ totalPages }})
 
-Jo trade order ka price sahi lag rha hai, *buy* karne ke liye select karein,
+कृपया उस ऑर्डर का चयन करें जिसे आप खरीदना चाहते हैं।
 
-Har trade mein; *price / {{ cryptoCurrencyCode }}*, *payment method*, and *trader rating* display kiya jaa rha hai.`,
-    'show-sell-deals': `📈 *Quick Sell* ({{ currentPage}}/{{ totalPages }})
-
-Jo trade order ka price sahi lag rha hai, *sell* karne ke liye select karein,
-
-Har trade mein; *price / {{ cryptoCurrencyCode }}*, *payment method*, and *trader rating* display kiya jaa rha hai.
+*मूल्य / {{ cryptoCurrencyCode }}*, *भुगतान का तरीका*, और *व्यापारी रेटिंग* दिखाई गई हैं।
 `,
-    'show-buy-deal': `📉 *Buy {{ cryptoCurrencyCode }}* (${
+    'show-sell-deals': `📈 *BTC बेचें* ({{ currentPage}}/{{ totalPages }})
+
+उस ऑर्डर को चुनें जिसे आप बेचना चाहते हैं।
+
+*मूल्य / {{ cryptoCurrencyCode }}*, *भुगतान का तरीका*, और *क्रेता रेटिंग* दिखाए गई हैं।
+`,
+    'id-verified': 'सत्यापन: ✅ KYC सत्यापित',
+    'show-buy-deal': `📉 *{{ cryptoCurrencyCode }} खरीदें* (${
       BotCommand.ORDER
     }{{ orderId }})
 
-Yeh buy order ko set user *{{ realName }}* ne kiya hai.
-Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
-Rating:  {{ rating }} ⭐️
+यह सौदा *{{ realName }}* द्वारा किया गया है।
+{{ verificationText }}
+खाता आइडी: ${BotCommand.ACCOUNT}{{ accountId }}
+रेटिंग:  {{ rating }} ⭐️
 
-*Payment Details*:
+*भुगतान विवरण*:
 -----------------
-Payment Method: {{ paymentMethodName }}
-Terms: _{{ terms }}_
+भुगतान का तरीका: {{ paymentMethodName }}
+शर्तें: _{{ terms }}_
 
-*Trade Details*:
+*ट्रेड् विवरण*:
 ----------------
-Price: {{ rate }} / {{ cryptoCurrencyCode }}
-Buy Amount: {{ formattedAmount }}`,
-    'show-sell-deal': `📈 *Sell {{ cryptoCurrencyCode }}* (${
+मूल्य: {{ rate }} / {{ cryptoCurrencyCode }}
+राशि: {{ formattedAmount }}`,
+    'show-sell-deal': `📈 *{{ cryptoCurrencyCode }} बेचें* (${
       BotCommand.ORDER
     }{{ orderId }})
 
-This sell order is by *{{ realName }}*.
-Account ID: ${BotCommand.ACCOUNT}{{ accountId }}
-Rating:  {{ rating }} ⭐️
+यह विक्रय आरडर *{{ realName }}* द्वारा है।
+{{ verificationText }}
+खाता आइडी: ${BotCommand.ACCOUNT}{{ accountId }}
+रेटिंग:  {{ rating }} ⭐️
 
-*Payment Details*:
+*भुगतान विवरण*:
 -----------------
-Payment Method: {{ paymentMethodName }}
-Terms: _{{ terms }}_
+भुगतान का तरीका: {{ paymentMethodName }}
+शर्तें: _{{ terms }}_
 
-*Trade Details*:
+*ट्रेड् विवरण*:
 ----------------
-Price: {{ rate }} / {{ cryptoCurrencyCode }}
-Sell Amount: {{ formattedAmount }}`,
+मूल्य: {{ rate }} / {{ cryptoCurrencyCode }}
+राशि: {{ formattedAmount }}`,
 
-    'show-sell-insufficient-funds': `❗️ Trader ke account mein balance low hai. Trader ko message karke funds deposit karne ko kaho, uske baad yeh trade ko fir se start karein.`,
-    'request-buy-deal-deposit-cbbutton': '📲 Contact seller',
+    'show-sell-insufficient-funds': `ट्रेड् शुरू करने के लिए उपयोगकर्ता के खाते पर अपर्याप्त खाता शेष। विक्रेता को जमा करने का अनुरोध करें जिसके बाद ट्रेड् शुरू हो सकता है।`,
+    'request-buy-deal-deposit-cbbutton': '📲 विक्रेता से संपर्क करें',
 
-    'open-buy-deal-cbbutton': '🛎  Buy {{ cryptoCurrencyCode }} here',
-    'open-sell-deal-cbbutton': '🛎  Sell {{ cryptoCurrencyCode }} here',
-    'back-cbbutton': '⬅️  Back',
-    'user-reviews': '💬 user reviews',
-    'input-buy-amount': `💵 *Kitna buy karna chahenge?*
+    'open-buy-deal-cbbutton': '🛎 यहां से {{ cryptoCurrencyCode }} खरीदें',
+    'open-sell-deal-cbbutton': '🛎 यहां से {{ cryptoCurrencyCode }} बेचें',
+    'back-cbbutton': '⬅️ वापस',
+    'user-reviews': '💬 रिव्यूस',
+    'input-buy-amount': `💵  *खरीदने की राशि दर्ज करें*
 
-Buy Amount enter karein ({{ fiatCurrencyCode }} or {{ cryptoCurrencyCode }}):
+{{ FiatCurrencyCode }} राशि *{{ minFiatValue }}* और *{{ maxFiatValue }}* के बीच दर्ज करें।
 
-{{ fiatCurrencyCode }} amount ka limit: minimum: *{{ minFiatValue }}* aur maximum: *{{ maxFiatValue }}*.
+उदाहरण के लिए: 1000 {{ fiatCurrencyCode }}.`,
+    'input-sell-amount': `💵  *विक्रय की राशि दर्ज करें*
 
-{{ cryptoCurrencyCode }} amount ka limit: minimum: *{{ minCryptoValue }}* aur *{{ maxCryptoValue }}*.
+{{ FiatCurrencyCode }} राशि *{{ minFiatValue }}* और *{{ maxFiatValue }}* के बीच दर्ज करें।
 
-Amount enter karke last mein {{ cryptoCurrencyCode }} / {{ fiatCurrencyCode }} add karein.
+उदाहरण के लिए: 1000 {{ fiatCurrencyCode }}.`,
+    'input-payment-details': `*भुगतान विवरण*
 
-For example: 1000 {{ fiatCurrencyCode }}.`,
-    'input-sell-amount': `💵 *Kitna buy karna chahenge?*
+खरीदार को आपको पैसे भेजने के लिए *{{ paymentMethodType }}* नया भुगतान विवरण चुनें या जोड़ें।`,
+    'skip-input-payment-details': 'छोड़ें',
+    'add-payment-details': '➕ जोड़ें {{ paymentMethodName }}',
+    'confirm-input-buy-amount': `*इस ट्रेड को खोलें?*
 
-Sell Amount enter karein ({{ fiatCurrencyCode }} or {{ cryptoCurrencyCode }}):
+क्या आप *{{ cryptoValue }}*  को *{{ fiatValue }}* {{ rate }} दर पर खरीदना चाहते हैं?
 
-{{ fiatCurrencyCode }} amount ka limit: minimum: *{{ minFiatValue }}* aur maximum: *{{ maxFiatValue }}*.
+❕ *'हां'* पर क्लिक करने पर, आप ट्रेड की शर्तों से सहमत होते हैं।`,
 
-{{ cryptoCurrencyCode }} amount ka limit: minimum: *{{ minCryptoValue }}* aur *{{ maxCryptoValue }}*.
+    'confirm-input-sell-amount': `*इस ट्रेड को खोलें?*
 
-Amount enter karke last mein {{ cryptoCurrencyCode }} / {{ fiatCurrencyCode }} add karein.
+क्या आप सुनिश्चित हैं कि आप *{{ cryptoValue }}* को *{{ fiatValue }}* * कीमत पर * {{ rate }} * बेचना चाहते हैं?
 
-For example: 1000 {{ fiatCurrencyCode }}`,
-    'input-payment-details': `*Payment details*
+❕ *'हां'* पर क्लिक करने पर, आप ट्रेड की शर्तों से सहमत होते हैं।`,
+    'confirm-input-amount-yes-cbbutton': 'हाँ',
+    'confirm-input-amount-no-cbbutton': 'नहीं',
+    'show-open-deal-request': `📲 *निमंत्रण भेजा गया!*
 
-Select or add new payment details for *{{ paymentMethodType }}* for the buyer to send you the money.`,
-    'skip-input-payment-details': 'skip',
-    'add-payment-details': '➕ Add {{ paymentMethodName }}',
-    'confirm-input-buy-amount': `*Buy Trade open karna hai?*
+आपका अनुरोध भेज दिया गया है, यह सौदा विक्रेता द्वारा आवश्यक BTC जमा करने के बाद ही शुरू होगा।
 
-Kya aap yeh *buy trade confirm* karna chahenge? Buy Trade: *{{ fiatValue }}* mein *{{ cryptoValue }}* at the rate {{ rate }}?
+⚠️ महत्वपूर्ण: यहां जमा की पुष्टि होने से पहले कभी भी कोई भुगतान न करें। MegaDeals के बाहर कोई सौदा न करें, आप अपना पैसा खोने का जोखिम उठाते हैं।
 
-❕*'Yes'* select karne par, aap trade terms ko agree kar rahe hain`,
+*टेलीग्राम पर विक्रेता से संपर्क करें*: [Telegram contact](tg://user?id={{ telegramUserId }})`,
+    'show-open-deal-cancel': 'डील रद्द',
+    'trade-opened-message': 'ट्रेड अब सक्रिय है!',
+    'show-opened-trade': `*ट्रेड* ${BotCommand.TRADE}{{ tradeId }}
 
-    'confirm-input-sell-amount': `*Sell Trade open karna hai?*
-
-Kya aap yeh *sell trade confirm* karna chahenge? Sell Trade: *{{ cryptoValue }}* for *{{ fiatValue }}* at the rate *{{ rate }}*?
-
-❕*'Yes'* select karne par, aap trade terms ko agree kar rahe hain`,
-    'confirm-input-amount-yes-cbbutton': 'Yes',
-    'confirm-input-amount-no-cbbutton': 'No',
-    'show-open-deal-request': `📲 *Request sent!*
-
-    Aapka trade request send kar diya gya hai. Jab seller required {{ cryptoCurrencyCode }} funds deposit karega tab yeh trade start ho jayega.
-
-⚠️ *IMPORTANT*: Jab tak hum seller se {{ cryptoCurrencyCode }} funds deposit ka confirmation aapko nhi bhejte hain tab tak aap payment nhi start karna. MegaDeals app ke bahar trade and deals mat karna. Agar bot ke bahar trade karoge toh MegaDeals koi guarantee nhi dega. Aise cases mein, aapka money risk mein hoga.
-
-*Seller's telegram contact*: [Telegram contact](tg://user?id={{ telegramUserId }})`,
-    'show-open-deal-cancel': 'Deal canceled.',
-    'trade-opened-message': 'Trade is active now!',
-    'show-opened-trade': `*Trade* ${BotCommand.TRADE}{{ tradeId }}
-
-Waiting for ${
+${
       BotCommand.ACCOUNT
-    }{{ traderAccountId }}. Agar user trade confirmation {{ timeoutMinutes }} minutes mein nhi karega toh deal automatically cancel ho jayega.
+    }{{ traderAccountId }} के लिए इंतजार... यदि उपयोगकर्ता {{ timeoutMinutes }} मिनट के भीतर ट्रेड की शुरुआत की पुष्टि नहीं करता है, तो ट्रेड स्वचालित रूप से रद्द हो जाएगा।
 
-⚠️⚠️ *IMPORTANT*: Security reasons ke reasons se, MegaDeals app ke bahar trade nhi kariye.
+⚠️ महत्वपूर्ण: सुरक्षा कारणों से, मेगाडईल्स के बाहर कोई ट्रेड न करें।
 
-Aap kisi bhi time pe trade cancel kar sakte hain. *Payment karne ke baad* trade cancel karne se *aapka payment wapis nhi milega*. Isliye trade cancel karne se pehle soch ke steps uthaiyen.
+यदि आपने पहले ही भुगतान कर दिया है तो ट्रेड रद्द न करें।
 
 *Auto cancel in {{ timeoutMinutes }} minutes*`,
-    'cancel-trade-cbbutton': '🚫 Cancel trade'
+    'cancel-trade-cbbutton': '🚫 ट्रेड रद्द करें'
   },
 
   'my-orders': {
-    'my-sell-order-cbbutton': 'Sell order @ {{ rate }}',
-    'my-buy-order-cbbutton': 'Buy order @ {{ rate }}',
-    'buy-deal-cbbutton': '🛎 Buy trade - {{ cryptoAmount }}',
-    'sell-deal-cbbutton': '🛎 Sell trade - {{ cryptoAmount }}',
-    'deposit-cryptocurrency': '📩 Deposit {{ cryptoCurrencyCode }}',
-    'show-active-orders': `*Active Orders*
+    'my-sell-order-cbbutton': 'बेचने का आरडर @ {{ rate }}',
+    'my-buy-order-cbbutton': 'खरीदने का आरडर @ {{ rate }}',
+    'buy-deal-cbbutton': '🛎  BTC बेचने का ट्रेड - {{ cryptoAmount }}',
+    'sell-deal-cbbutton': '🛎  खरीदने का ट्रेड - {{ cryptoAmount }}',
+    'deposit-cryptocurrency': '📩 जमा {{ cryptoCurrencyCode }}',
+    'show-active-orders': `*सक्रिय आरडर*
 
-Aapka active and ongoing deals and orders ka list:
+आपके द्वारा चलाए गए ट्रेड और आरडर यहां दिखाए गए हैं।
 `,
-    'order-enabled': 'Aapka order ab *active* hai.',
-    'input-payment-details-field': `Apna *{{ fieldName }}* for *{{ paymentMethod}}* enter karein.`,
-    'order-disabled': `Aapka order *inactive* hai.
-Apna order fir se active karne ke liye; *'Active'* button pe click karein.`,
-    'show-orders': 'TODO: Show my orders',
+    'order-enabled': 'आपका आरडर अब सक्रिय है।',
+    'input-payment-details-field': `अपने *{{ fieldName }}* के लिए *{{ paymentMethod }}* लिखें`,
+    'order-disabled': `आपका आरडर निष्क्रिय है। इस आरडर को सक्षम करने के लिए *'सक्रिय'* बटन पर क्लिक करें।`,
+    'show-orders': 'TODO: मेरे आरडर दिखाओ',
 
-    'terms-not-added': 'None',
-    'my-buy-order-info': `*📗 My Buy Order* - ${BotCommand.ORDER}{{orderId}}
+    'terms-not-added': '--',
+    'my-buy-order-info': `📗  *खरीदने का आरडर* - ${BotCommand.ORDER}{{orderId}}
 
-*Status*: {{ status }}
-*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Min. amount*: {{ minAmount }}
-*Max. amount*: {{ maxAmount }}
-*Payment method*: {{ paymentMethod }}
+*स्टेटस*: {{ status }}
+*{{ cryptoCurrencyCode }} मूल्य*: {{ rate }}
+*न्यूनतम राशि*: {{ minAmount }}
+*अधिकतम राशि*: {{ maxAmount }}
+*भुगतान की जानकारी*: {{ paymentMethod }}
 
-Terms: _{{ terms }}_
+शर्तें: _{{ terms }}_
 
-*Link for your order*: {{ orderLink }}
-Anyone who clicks on this link can directly open a trade with you.
+*आरडर लिंक*: {{ orderLink }}
+इस लिंक को शेयर करें और अन्य उपयोगकर्ताओं के साथ सीधे एक सौदा खोलें।
 `,
-    'payment-info-not-added': 'Not added',
+    'payment-info-not-added': 'नहीं जोड़ा गया',
     'insufficient-sell-order-balance':
-      '⚠️ Infufficient balance. You need to deposit the equivalent minimum amount to start deals on this order.',
-    'my-sell-order-info': `*📕 My Sell Order* - ${BotCommand.ORDER}{{orderId}}
+      '⚠️ अपर्याप्त खाता शेष। इस आरडर पर ट्रेड् शुरू करने के लिए न्यूनतम राशि जमा करें.',
+    'my-sell-order-info': `*📕 बेचने का आरडर* - ${BotCommand.ORDER}{{orderId}}
 
-*Status*: {{ status }}
-*Rate {{ cryptoCurrencyCode }}*: {{ rate }}
-*Min. amount*: {{ minAmount }}
-*Max. amount*: {{ maxAmount }}
-*Payment method*: {{ paymentMethod }}
-*Payment Info*: {{ paymentInfo }}
+*स्टेटस*: {{ status }}
+*{{cryptoCurrencyCode}} मूल्य*: {{ rate }}
+*न्यूनतम राशि*: {{ minAmount }}
+*अधिकतम राशि*: {{ maxAmount }}
+*भुगतान का तरीका*: {{ paymentMethod }}
+*भुगतान की जानकारी*: {{ paymentInfo }}
 
-Terms: _{{ terms }}_
+शर्तें: _"{{ terms }}"_
 
-*Link for your order*: {{ orderLink }}
-Jo bhi iss link pe click karega woh aapke saath trade open kar sakta hai.`,
-    'edit-amount-cbbutton': '⚖️ Amount',
-    'edit-rate-cbbutton': '💸 Rate BTC',
-    'edit-terms-cbbutton': '📝 Terms',
+*आरडर लिंक*: {{ orderLink }}
+इस लिंक को शेयर करें और अन्य उपयोगकर्ताओं के साथ सीधे एक सौदा खोलें।
+`,
+    'edit-amount-cbbutton': '⚖️ राशि',
+    'edit-rate-cbbutton': '💸 BTC मूल्य बदलें',
+    'edit-terms-cbbutton': '📝 शर्तें',
     'edit-payment-method-cbbutton': '💳 Payment method',
-    'toggle-active-cbbutton': 'Active',
-    'delete-order-cbbutton': '🗑️ Delete!',
-    'edit-order': '✏️  Edit order',
-    'go-back-cbbutton': '⬅️  Back',
-    'order-edit-success': '✅ Your order is updated.',
-    'edit-payment-details': '📃 Update payment info',
-    'order-edit-rate': `*Rate {{ cryptoCurrencyCode }}*
+    'toggle-active-cbbutton': 'सक्रिय',
+    'delete-order-cbbutton': '🗑️ आरडर हटाएं!',
+    'edit-order': '✏️ आरडर संपादित करें',
+    'go-back-cbbutton': '⬅️ वापस',
+    'order-edit-success': '✅ आपका आरडर बदल दिया गया है',
+    'edit-payment-details': '📃 भुगतान जानकारी अपडेट करें',
+    'order-edit-rate': `*{{ CryptoCurrencyCode }} मूल्य सेट करें*
 
-    Iss order mein {{ cryptoCurrencyCode }} ka rate set karein. Aap margin pricing (in percentage %) OR fixed price set kar sakte hain.
+{{ CryptoCurrencyCode }} के लिए *{{ fiatCurrencyCode }}* में निर्धारित मूल्य दर्ज करें या मार्जिन मूल्य निर्धारित करने के लिए प्रतिशत (%) में दर्ज करें।
 
-Example: *2%* or *{{ marketRate }}*`,
-    'order-edit-terms': `📝 *Terms*
+उदाहरण: *{{ marketRate }}* or *2%*`,
+    'order-edit-terms': `📋 *शर्तें*
 
-Iss trade ka terms likhein. User ko order mein trade terms read karne ka option hai.`,
-    'order-delete-success': 'Order deleted'
+व्यापार के लिए अपनी शर्तें लिखें। यह आपके आरडर पर दिखाया जाएगा।`,
+    'order-delete-success': 'आदेश हटा दिया गया'
   },
 
   'create-order': {
-    show: `📊 *Create Order*
+    show: `📝 *आरडर बनाएँ*
 
-Select the order type.`,
-    'new-buy-order-cbbutton': '📗  New buy order',
-    'new-sell-order-cbbutton': '📕  New sell order',
-    'input-fixed-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
+आरडर  के प्रकार का चयन करें।`,
+    'new-buy-order-cbbutton': '📗  मैं BTC खरीदना चाहता हूं',
+    'new-sell-order-cbbutton': '📕  मैं BTC बेचना चाहता हूं',
+    'input-fixed-rate': `*💸 {{CryptoCurrencyCode}} मूल्य सेट करें*
 
-Order type select karein. Aapka orders baaki traders ko dikhega aur woh aapke saath {{ cryptoCurrencyCode }} buy / sell deal kar sakte hain. Traders ko Quick Buy / Sell mein aapka trade dikhega.
+{{ CryptoCurrencyCode }} के लिए *{{ fiatCurrencyCode }}* में एक निश्चित मूल्य दर्ज करें या मार्जिन मूल्य निर्धारित करने के लिए प्रतिशत (%) में दर्ज करें।
 
-Example: *{{ marketRate }}*
+उदाहरण: *{{ marketRate }}* or *2%*`,
+    'input-margin-rate': `*💸 {{CryptoCurrencyCode}} मूल्य सेट करें*
 
-Margin pricing set karne niche diye button pe click karein:`,
-    'input-margin-rate': `*💸 Rate {{ cryptoCurrencyCode }}*
+बाजार दरों के आधार पर एक मूल्य निर्धारित करने के लिए मार्जिन मूल्य का उपयोग करें। वर्तमान बाजार दर से ऊपर या नीचे बेचने के लिए + / - प्रतिशत (%) का उपयोग करें।
 
-Margin price pe buy / sell karne ke liye, enter your price (in %).
+वर्तमान बाजार दर: {{ marketRate }} ({{ marketRateSource }})
 
-Agar aap market price ke niche buy / sell karna chahte hai, toh negative (*-2%*) symbol use karein.
+उदाहरण: 3% or -2%`,
+    'use-margin-price-cbbutton': 'ℹ️ मार्जिन मूल्य निर्धारण के बारे में',
+    'use-fixed-price-cbbutton': '⬅️ मूल्य',
+    'back-cbbutton': '⬅️ वापस',
+    'input-amount-limits': `⚖️ *आरडर राशि*
 
-*Current BTC market rate*: {{ marketRate }} ({{ marketRateSource }})
+* {{FiatCurrencyCode}} * में आरडर राशि दर्ज करें।
 
-Example: *2%*`,
-    'use-margin-price-cbbutton': 'Use margin pricing (%) ➡️',
-    'use-fixed-price-cbbutton': '⬅️ Use fixed pricing',
-    'back-cbbutton': '⬅️  Back',
-    'input-amount-limits': `⚖️ *Order amount*
+उदाहरण: या तो 1000 या 500-1000 (न्यूनतम-अधिकतम सीमा)`,
+    'buy-order-created': '✅  BTC खरीदने के लिए आरडर बनाया गया है।',
+    'sell-order-created': '✅  BTC बेचने के लिए आरडर बनाया गया है।',
+    'create-error': '❗️  यह आरडर नहीं बन। बाद में पुन: प्रयास करें।',
+    'select-payment-method': `💳  *भुगतान का तरीका*
 
-Apna buy / sell amount daalein (in *{{ fiatCurrencyCode }}*):
-
-Example: *1000* or *500-1000* (set min-max limit)`,
-    'buy-order-created': '✅ Your *Buy Order* daal diya gya hai.',
-    'sell-order-created': '✅ Aapka *Sell Order* daal diya gya hai.',
-    'create-error': '❌ ❗️Sorry. Yeh order nhi update hua. Fir se try karein.',
-    'select-payment-method': `💳 *Payment Method*
-
-Apna payment method select karein`
+Select a payment method.`,
+    'my-pm-cbbutton': '{{ paymentMethodName }} - {{ paymentDetails }}',
+    'more-pm-cbbutton': 'और दिखाओ »'
   },
 
   'active-orders': {}

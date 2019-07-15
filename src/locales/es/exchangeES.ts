@@ -431,7 +431,7 @@ Escriba sus términos para el comercio. Esto se mostrará en su pedido.`,
   'create-order': {
     show: `📝 *Crear orden*
 
-Select the order type.`,
+Seleccione el tipo de orden.`,
     'new-buy-order-cbbutton': '📗  Quiero comprar',
     'new-sell-order-cbbutton': '📕  Quiero vender',
     'input-fixed-rate': `*💸 Establecer precio {{ cryptoCurrencyCode }}*

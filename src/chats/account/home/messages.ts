@@ -134,6 +134,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
     userId: number,
     accountID: string,
     telegramId: number,
+    firstName: string,
     dealCount: number,
     tradeVolume: number,
     cryptoCurrencyCode: CryptoCurrency,
@@ -147,6 +148,7 @@ export const AccountHomeMessage = (msg: TelegramBot.Message, user: User) => ({
       user.t(`${Namespace.Account}:home.dealer-account`, {
         accountId: accountID,
         telegramUserId: telegramId,
+        firstName: firstName,
         dealCount: dealCount,
         tradeVolume: dataFormatter.formatCryptoCurrency(tradeVolume),
         cryptoCurrencyCode: cryptoCurrencyCode,

@@ -52,9 +52,9 @@ _{{ review }}_
 
 {{ paymentMethods }} :💳 *طرق الدفع*`,
 
-    'dealer-account': `(${BotCommand.ACCOUNT}{{ accountId }}) *تفاصيل الحساب* 
+    'dealer-account': `(${BotCommand.ACCOUNT}{{ accountId }}) *تفاصيل الحساب*
 
-[Telegram contact](tg://user?id={{ telegramUserId }})
+[اتصل {{ firstName }}](tg://user?id={{ telegramUserId }})
 
 {{ dealCount }} :💵 الصفقات التجارية
 {{ tradeVolume }} {{ cryptoCurrencyCode }} :💎 حجم التجارة

@@ -16,6 +16,7 @@ export async function showUserAccount(
       accountInfo.userId,
       accountInfo.accountId,
       accountInfo.telegramId,
+      accountInfo.firstName,
       accountInfo.dealCount,
       accountInfo.tradeVolume,
       accountInfo.cryptoCurrencyCode,
@@ -36,6 +37,7 @@ async function getAccount(
   userId: number
   accountId: string
   telegramUsername: string
+  firstName: string
   telegramId: number
   dealCount: number
   tradeVolume: number
@@ -62,6 +64,7 @@ async function getAccount(
     userId: user.id,
     accountId,
     telegramUsername: user.telegramUser.username,
+    firstName: user.telegramUser.firstName,
     telegramId: user.telegramUser.id,
     dealCount: userStats.dealCount,
     tradeVolume: userStats.volume,

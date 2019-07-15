@@ -1,37 +1,35 @@
 import { BotCommand } from 'chats/types'
 
 export const signupHI = {
-  'choose-language': `Hello, *{{ name }}*!
+  'choose-language': `Hello!
 
- Mega Deals is a telegram bot that allows you to buy and sell bitcoins with your local currency privately and securely. 
- 
- To get started, choose the language for the app from the options listed below:`,
+You can use this bot to exchange bitcoins locally in your currency. आप इस बॉट का उपयोग अपनी मुद्रा में स्थानीय स्तर पर बिटकॉइन को एक्सचेंज करने के लिए कर सकते हैं।
 
-  'terms-and-conditions': `Aapne language 'Hindi' select kiya hai. Ab *✅ I Accept* pe click kare. *✅ I Accept* pe click karne se aap humare [Terms of Service](https://telegra.ph/Terms-of-Service-06-18) ko accept kar rahe hai.`,
+To get started, choose your *language* from options below.`,
 
-  'terms-agree-button': '✅ I Agree',
+  'terms-and-conditions': `हमारी [सेवा की शर्तें] पढ़ें(https://telegra.ph/Terms-of-Service-06-18), जारी रखने के लिए ✔️ *मुझे स्वीकार है* पर क्लिक करें`,
 
-  'select-currency': 'Aapka local currency kya hai?',
+  'terms-agree-button': '✔️ मुझे स्वीकार है',
 
-  'account-ready': `*Aapka MegaDeals account ready hai!*
+  'select-currency': 'अपनी स्थानीय मुद्रा का चयन करें.',
 
-*Account ID*: ${BotCommand.ACCOUNT}{{ accountID }}
-Your BTC address is {{ bitcoinAddress }}
+  'account-ready': `✅  *खाता बन गया है!*
 
-🔐*Apna account secure rakhein:*
-Telegram pe 2-step verification use karein: Settings > Privacy & Security > Two-step verification`,
+खाता आइडी: ${BotCommand.ACCOUNT}{{ accountID }}
+BTC अद्द्रेस्स्: *{{ bitcoinAddress }}*
 
-  'account-ready-generating-address': `**Aapka MegaDeals account ready hai!*
+🔐 अपनी सुरक्षा के लिए कृपया सेटिंग > प्राइव़ॅसि और सेटिंग्स में 2-चरणीय सत्यापन सक्षम करें`,
 
-  *Account ID*: ${BotCommand.ACCOUNT}{{ accountID }}
-  
-🔐*Apna account secure rakhein:*
-Telegram pe 2-step verification use karein: Settings > Privacy & Security > Two-step verification`,
-  'account-ready-continue-button': '🚀 Start trading',
-  'home-screen': `*Mega Deals*
+  'account-ready-generating-address': `✅  *खाता बन गया है!*
 
-💵 Exchange BTC-INR: Bitcoins kharide aur bechiye. Apne orders ko track karein.
-💼 My Wallet: Apna account balance check karein aur payment add karein.`,
+खाता आइडी: ${BotCommand.ACCOUNT}{{ accountID }}
+BTC अद्द्रेस्स्: *{{ bitcoinAddress }}*
+
+🔐 अपनी सुरक्षा के लिए कृपया सेटिंग > प्राइव़ॅसि और सेटिंग्स में 2-चरणीय सत्यापन सक्षम करें`,
+  'account-ready-continue-button': '🚀 ट्रेडिंग शुरू करें',
+  'home-screen': `🔷  *Megadeals*
+
+BTC को वापस लेने या जमा करने के लिए *वॉलेट* और ट्रेड् खोजने के लिए *एक्सचेंज* का उपयोग करें।`,
   'signup-error':
-    'Sorry! Kisi issue ke kaaran yeh request poora nhi hua. Kripya thodi baad try karein ya fir humare support team se chat karein @{{ supportBotUsername }}. 24/7 online.'
+    'माफ़ कीजिये! खाता बनाते समय एक त्रुटि हुई। हमसे संपर्क करें @{{ supportBotUsername }}। 24/7 समर्थन करते हैं।'
 }

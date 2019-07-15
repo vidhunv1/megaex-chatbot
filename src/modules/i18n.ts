@@ -35,6 +35,13 @@ import {
   walletES,
   accountES
 } from '../locales/es'
+import {
+  commonZH,
+  signupZH,
+  exchangeZH,
+  walletZH,
+  accountZH
+} from '../locales/zh'
 import { CONFIG } from '../config'
 
 export enum Namespace {
@@ -104,6 +111,13 @@ export class I18n {
             [Namespace.Exchange]: exchangeES,
             [Namespace.Wallet]: walletES,
             [Namespace.Account]: accountES
+          },
+          [LanguageISO[Language.CHINESE]]: {
+            [Namespace.Common]: commonZH,
+            [Namespace.Signup]: signupZH,
+            [Namespace.Exchange]: exchangeZH,
+            [Namespace.Wallet]: walletZH,
+            [Namespace.Account]: accountZH
           }
         }
       })

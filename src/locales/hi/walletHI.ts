@@ -4,159 +4,152 @@ import { TransferErrorType } from 'models'
 export const walletHI = {
   /* Home */
   home: {
-    wallet: `💼  *Bitcoin Wallet*
+    wallet: `💼  *बिटकॉइन वॉलेट*
 
-*Balance*:      {{ cryptoBalance }}
-   (Value:       {{ fiatBalance }})
-*Blocked*:       {{ blockedBalance }}
-    
-📗  Tx: ${BotCommand.TRANSACTIONS}
-    
-🤝 Invited: {{ referralCount }} users
-💰 Earnings: {{ earnings }}`,
+ खाते में शेष:    {{ cryptoBalance }}
+     मूल्य:    {{ fiatBalance }}
+ खाते में बंद:    {{ blockedBalance }}
 
-    'send-cryptocurrency-cbbutton': '⚡️  Send {{ cryptoCurrencyName }}',
-    'my-address': '📩  Deposit',
-    withdraw: '📤  Withdraw',
-    'transaction-credit': 'Credit',
-    'transaction-debit': 'Debit'
+   आमंत्रित संख्या:    {{ referralCount }} users
+          कमाई:    {{ earnings }}
+
+📒 ${BotCommand.TRANSACTIONS}`,
+
+    'send-cryptocurrency-cbbutton': '⚡️ भेजें',
+    'my-address': '📩  जमा करें',
+    withdraw: '📤  वापस लें',
+    'transaction-credit': 'क्रेडिट्',
+    'transaction-debit': 'डेबिट'
   },
 
   /* Deposit */
   deposit: {
     'show-address': `
-📩  *Deposit {{ cryptoCurrencyCode }}*
-    
-Use the {{ cryptoCurrencyC{{ cryptoCurrencyCode }} address se aap doosre BTC address pe BTC bhej aur withdraw kar sakte hain. BTC amount ko aapke account mein add kar diya jayega jab {{ confirmations }} side se pushti ho jaata hai.ode }} address below to deposit funds into your wallet.
-Funds will be available in your wallet after {{ confirmations }} network confirmation.
-    
-❕ Zaroori Soochna: Apne address pe sirf {{ cryptoCurrencyCode }} funds hi deposit karein`
+📩  *{{ cryptoCurrencyCode }} जमा करें*
+
+{{ confirmations }} नेटवर्क पुष्टिकरण के बाद आपके वॉलेट में फंड उपलब्ध होगा। अपने वॉलेट में धन जमा करने के लिए नीचे दिए {{ cryptoCurrencyCode }} अद्द्रेस्स् का उपयोग करें।
+
+नोट: * इस अद्द्रेस्स् पर केवल {{ cryptoCurrencyCode }} फंड * जमा करें।`
   },
 
   /* Send Coin */
   'send-coin': {
-    'input-amount': `⚡️ *Send {{ cryptoCurrencyName }}*:
-    
-Kitna Amount send karna chahenge? (only *in BTC or INR*) 
+    'input-amount': `⚡️ *भेजी जाने वाली राशि*
 
-One time link ko copy karke sirf unke saath share kijiye jisko aap {{ cryptoCurrencyName }} bhejna chahte hain.
-    
-*Available*: {{ cryptoCurrencyBalance }}
-*Value*: {{ fiatValue }})`,
-    confirm: `👁‍🗨*Confirm*
+राशि को {{{cryptoCurrencyCode}} * या * {{fiatCurrencyCode}} * में दर्ज करें।
 
-Is this correct? If yes, click on *"Confirm"*.:
+उदाहरण: {{ cryptoCurrencyBalance }}
 
-*Amount: {{ cryptoCurrencyAmount }}*
-(Value:   {{ fiatValue }})
+उपलब्ध: {{ cryptoCurrencyBalance }}
+    मूल्य: {{ fiatValue }}`,
+    confirm: `👁‍🗨*पुष्टि करें*
+
+क्या ये सही है? अगर सही है, तो *"पुष्टि करें"* पर क्लिक करें।:
+
+BTC राशि: {{ cryptoCurrencyAmount }}
+ मूल्य:  {{ fiatValue }})
 `,
-    'confirm-button': '✅ Confirm',
-    'insufficient-balance': `❌ *Error*
-  
-Insufficient funds. You need to add {{ cryptoCurrencyCode }} to your wallet to send this payment
+    'confirm-button': '✔️  पुष्टि करें',
+    'insufficient-balance': `❗️  *अपर्याप्त राशि*
 
-*Available balance*: {{ cryptoCurrencyBalance}}`,
-    'invalid-amount': `❌ *Error*
+यह भुगतान भेजने के लिए अपने वॉलेट में {{cryptoCurrencyCode}} जोड़ें।
 
-Please enter a valid amount.`,
+*उपलब्ध राशि*: {{ cryptoCurrencyBalance}}`,
+    'invalid-amount': `❗️  *राशि अमान्य*
+
+एक उचित राशि दर्ज करें।`,
     'error-creating-payment':
-      'Sorry. Payment process hone mein koi error hai. Please thodi der baad try karein.',
-    'show-created-link': `✅ *Generated Link*
+      'इस भुगतान को बनाने में एक त्रुटि हुई, कृपया बाद में पुनः प्रयास करें।',
+    'show-created-link': `✅  *चेक बनाया गया*
 
 {{ paymentLink }}
-One time link ko copy karke sirf unke saath share kijiye jisko aap {{ cryptoCurrencyName }} bhejna chahte hain. 
+इस लिंक को निजी तौर पर साझा करें। इस लिंक तक पहुंचने वाले किसी भी व्यक्ति को राशि मिल जाएगी।
 
-Yeh link *{{ expiryTime }} hours* mein expire ho jayega.`,
+यह लिंक *{{ expiryTime }} घंटे* में समाप्त हो जाएगा।`,
     'payment-link-expired':
-      'Yeh payment link *{{ cryptoValue }}* expire ho gya hai. Seller ko contact karein aur new payment link pe fir se try karein.',
+      'आपके द्वारा *{{ cryptoValue }}* का भुगतान लिंक समाप्त हो गया है।',
     'transfer-errors': {
       [TransferErrorType.ALREADY_CLAIMED]:
-        'Yeh payment link ko claim kar liya gya hai.',
+        'इस भुगतान लिंक का पहले से ही इस्तेमाल किया गया है।',
       [TransferErrorType.EXPIRED]:
-        'Yeh payment link ko claim kar liya gya hai.',
-      [TransferErrorType.INSUFFICIENT_BALANCE]: `User ke account mein balance low hai, user ko contact karein aur funds add karne ko notify karein uske baad naya payment link le.
+        'इस भुगतान लिंक की समय सीमा समाप्त हो गई है।',
+      [TransferErrorType.INSUFFICIENT_BALANCE]: `इस भुगतान के लिए उपयोगकर्ताओं के खाते में अपर्याप्त राशि है, आप इस भुगतान को पुनः प्राप्त करने के लिए उनसे संपर्क कर सकते हैं।
 
 *Contact*: @{{ linkCreatorUsername }}`,
-      [TransferErrorType.INVALID_CODE]: 'Yeh payment link invalid hai.',
-      [TransferErrorType.SELF_CLAIM]: `*Payment Link*
+      [TransferErrorType.INVALID_CODE]: 'यह भुगतान लिंक अमान्य है।',
+      [TransferErrorType.SELF_CLAIM]: `✅  *भुगतान लिंक*
 
-Amount: *{{ cryptoValue }}*
-One time link ko copy karke sirf unke saath share kijiye jisko aap {{ cryptoCurrencyName }} bhejna chahte hain. Iss link ko job bhi user click karega uske account pe payment credit ho jayega.
+राशि: *{{ cryptoValue }}*
+BTC भेजने के लिए निजी रूप से लिंक साझा करें। इस लिंक तक पहुंचने वाले किसी भी व्यक्ति को राशि मिल जाएगी।
 `,
       [TransferErrorType.TRANSACTION_ERROR]:
-        'Sorry. Error hai, thodi der baad fir try karein.'
+        'एक त्रुटि पाई गई। बाद में पुन: प्रयास करें।'
     },
     'payment-success': {
-      receiver: `🔔 *Credit*
+      receiver: `✅ *नया क्रेडिट*
 
-Aapke account pe @{{ senderUsername }} ne *{{ cryptoValueReceived }}* credit kar diya hai.`,
-      sender: `🔔 *Debit*
+आपको [{{ senderName }}](tg://user?id={{ senderTelgramId }}) से *{{ cryptoValueReceived }}* प्राप्त हुआ।`,
+      sender: `✅ *नया डेबिट*
 
-@{{ receiverUsername }} ne aapke payment link se *{{ cryptoValueSent }}* receive kiya hai.`
+[{{ receiverName }}](tg://user?id={{ receiverTelegramId }}) ने आपके भुगतान लिंक से *{{ cryptoValueSent }}* प्राप्त किया`
     }
   },
 
   /* Withdraw */
   withdraw: {
-    'input-amount': `*Amount enter karein*
+    'input-amount': `*BTC वापस ले*
 
-Withdraw amount *{{ cryptoCurrencyCode }}* enter karein.
-Example: {{ cryptoCurrencyBalance }}
-        
-*Available*: {{ cryptoCurrencyBalance }}
-*Value*:  {{ fiatValue }}`,
-    'input-address': `*Enter address*
+वापस लेने के लिए *{{ cryptoCurrencyCode }}* में राशि दर्ज करें।
+उदाहरण: 0.018291 BTC
 
-Enter the address of the {{ cryptoCurrencyName }} wallet you want to withdraw to.
+उपलब्ध: {{ cryptoCurrencyBalance }}
+मूल्य: {{ fiatValue }}`,
+    'input-address': `*BTC अद्द्रेस्स्*
+
+{{ CryptoCurrencyName }} वॉलेट का जिसपे दर्ज करें जिसपे आप वापस लेना चाहते हैं।
 `,
-    'insufficient-balance': `❌ *Error*
-  
-Aapke account mein funds low hai.
+    'insufficient-balance': `❗️ *अपर्याप्त फंड*
 
-*Available balance*: {{ cryptoCurrencyBalance}}
+वॉलेट में फंड बहुत कम हैं। फंड जोड़ें और पुन: प्रयास करें।
+
+*उपलब्ध शेष राशि*: {{ cryptoCurrencyBalance}}`,
+    'invalid-address': `❗️ *गलत अद्द्रेस्स्*
+
+*{{ CryptoCurrencyName }}* अद्द्रेस्स् की जांच करें और फिर से कोशिश करें।
 `,
-    'invalid-address': `❌ *Error*
-
-Yeh {{ cryptoCurrencyName }} address invalid hai.
-
-Valid address enter karein.
+    'less-than-min-error': `❗️ न्यूनतम निकासी राशि *{{ minWithdrawAmount }}* है.
 `,
-    'less-than-min-error': `❌ *Error*
+    'create-error': `एक त्रुटि पाई गई।
 
-    Minimum withdrawal amount *{{ minWithdrawAmount }}* hai.`,
-    'create-error': `An error occurred. 
-  
-Thodi der baad try karein. Agar aapko fir se error dikh rha hai toh support team @{{ supportUsername}} ko contact karein.`,
-    confirm: `*Verify*
+बाद में पुन: प्रयास करें। यदि आप अभी भी किसी समस्या का सामना कर रहे हैं, तो समर्थन @{{ supportUsername }} से संपर्क करें`,
+    confirm: `👁‍🗨  *विवरण सत्यापित करें*
 
-Kya yeh amount sahi hai? agar sahi hai to niche diye hue button *"Yes, I confirm"* pe click karein
-
-*To Address*: {{ toAddress }}
-*Amount: {{ cryptoCurrencyAmount }}*
-(Value:   {{ fiatValue }})
+BTC अद्द्रेस्स्: {{ toAddress }}
+    राशि: {{ cryptoCurrencyAmount }}
+     मूल्य: {{ fiatValue }})
 `,
-    'confirm-button': '✅ Confirm',
-    'create-success': `✅ *Withdrawal added*
+    'confirm-button': '✔️ पुष्टि करें',
+    'create-success': `⏳ *वापसी हो रहा...*
 
-Aapka BTC withdraw request abhi process ho rha hai. Please thodi der wait karein. Withdraw process poora hone par aapko notification mil jayega.
+आपका निकासी अनुरोध कतार में है। इसके संसाधित होने पर आपको एक सूचना प्राप्त होगी।
 
-❕Network fee of *{{ feeValue }}* will be used for this withdrawal.
-`,
-    'withdraw-processed': `🔔 *Withdrawal Processed*
+नेटवर्क शुल्क *{{ feeValue }}* का उपयोग किया जाएगा।`,
+    'withdraw-processed': `✅ *वापसी पूरी हुई*
 
-Aapke account se *{{ cryptoCurrencyAmount }}* withdraw process complete ho gya hai.
+आपकी *{{ cryptoCurrencyAmount }}* राशि की वापसी पूरी हो गई है।
 
 {{ withdrawalLink }}`
   },
 
   transaction: {
-    'new-incoming-tx': `🕘 *Incoming {{ cryptoCurrencyCode }}*
+    'new-incoming-tx': `🕘  *{{ cryptoCurrencyCode }} आ रहा है*
 
-Aapke account mein *{ cryptoCurrencyValue }}* jama ho gya hai. {{ requiredConfirmation }} side se pushti ho jaane par BTC amount ko aapke account mein add kar diya jayega.
+आपके पास *{{ cryptoCurrencyValue}}* का एक नया जमा हुआ है। नेटवर्क पर {{ cryptoCurrencyValue }} पुष्टिकरण के बाद जोड़ा जाएगा।
+
 txid: [{{ txid }}]({{ txUrl }})`,
-    'new-tx-confirmed': `📩 *{{ cryptoCurrencyCode }} received*
+    'new-tx-confirmed': `📩  आपने *{{ cryptoCurrencyCode }} प्राप्त किया*
 
-Aapke acccount mein *{{ cryptoCurrencyValue }}* add kar diya gya hai.`,
+*{{ cryptoCurrencyValue }}* वॉलेट में जोड़ दीया गया है।`,
     'source-name': {
       core: 'deposit',
       payment: 'payment',
