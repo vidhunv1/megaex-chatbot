@@ -43,7 +43,10 @@ export const ExchangeChat: ChatHandler = {
         return false
       }
       const trade = await Trade.findById(tradeId)
-      if (!trade) {
+      if (
+        !trade ||
+        (trade.buyerUserId != user.id && trade.sellerUserId != user.id)
+      ) {
         return false
       }
 

@@ -6,12 +6,12 @@ export const walletHI = {
   home: {
     wallet: `💼  *बिटकॉइन वॉलेट*
 
- खाते में शेष:    {{ cryptoBalance }}
-     मूल्य:    {{ fiatBalance }}
- खाते में बंद:    {{ blockedBalance }}
+खाते में शेष:    {{ cryptoBalance }}
+मूल्य:    {{ fiatBalance }}
+खाते में बंद:    {{ blockedBalance }}
 
-   आमंत्रित संख्या:    {{ referralCount }} users
-          कमाई:    {{ earnings }}
+आमंत्रित संख्या:    {{ referralCount }} users
+कमाई:    {{ earnings }}
 
 📒 ${BotCommand.TRANSACTIONS}`,
 

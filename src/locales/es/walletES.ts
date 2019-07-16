@@ -6,11 +6,11 @@ export const walletES = {
   home: {
     wallet: `💼  *Bitcoin Billetera*
 
- saldo:    {{ cryptoBalance }}
- Valor:    {{ fiatBalance }}
- Obstruido:    {{ blockedBalance }}
+saldo:    {{ cryptoBalance }}
+Valor:    {{ fiatBalance }}
+Obstruido:    {{ blockedBalance }}
 
-   Invitado:    {{ referralCount }} usuarios
+Invitado:    {{ referralCount }} usuarios
 Ganancias:    {{ earnings }}
 
 📒 ${BotCommand.TRANSACTIONS}`,

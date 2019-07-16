@@ -6,12 +6,12 @@ export const walletZH = {
   home: {
     wallet: `💼  *比特币 钱包*
 
- 账户余额:    {{ cryptoBalance }}
-      值:    {{ fiatBalance }}
-    阻止:    {{ blockedBalance }}
+账户余额:    {{ cryptoBalance }}
+值:    {{ fiatBalance }}
+阻止:    {{ blockedBalance }}
 
- 邀请:    {{ referralCount }} users
- 收益:    {{ earnings }}
+邀请:    {{ referralCount }} users
+收益:    {{ earnings }}
 
 📒 ${BotCommand.TRANSACTIONS}`,
 

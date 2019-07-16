@@ -6,12 +6,12 @@ export const walletRU = {
   home: {
     wallet: `💼  *BTC Бумажник*
 
- Остаток средств:    {{ cryptoBalance }}
-     Значение:    {{ fiatBalance }}
- блокированный:    {{ blockedBalance }}
+Остаток средств:    {{ cryptoBalance }}
+Значение:    {{ fiatBalance }}
+блокированный:    {{ blockedBalance }}
 
-   приглашенный:    {{ referralCount }} пользователи
-        прибыль:    {{ earnings }}
+приглашенный:    {{ referralCount }} пользователи
+прибыль:    {{ earnings }}
 
 📒 ${BotCommand.TRANSACTIONS}`,
 

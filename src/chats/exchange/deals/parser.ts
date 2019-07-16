@@ -7,10 +7,11 @@ import {
 } from '../ExchangeState'
 import * as _ from 'lodash'
 import { parseCurrencyAmount } from 'chats/utils/currency-utils'
-import { Order, TradeError, Trade, OrderType } from 'models'
+import { Order, TradeError, Trade, OrderType, Transaction } from 'models'
 import { dealUtils } from './dealUtils'
 import logger from 'modules/logger'
 import { Namespace } from 'modules/i18n'
+import { CryptoCurrency } from 'constants/currencies'
 
 export const DealsParser: Parser<ExchangeState> = async (
   msg,
@@ -181,11 +182,31 @@ export const DealsParser: Parser<ExchangeState> = async (
             order.user.exchangeRateSource
           ))
       }
+
+      const availableBalance = await getAvailableBalance(
+        order.userId,
+        order.cryptoCurrencyCode
+      )
+      const availableBalanceInFiat =
+        (await Order.convertToFixedRate(
+          order.rate,
+          order.rateType,
+          order.cryptoCurrencyCode,
+          order.fiatCurrencyCode,
+          order.user.exchangeRateSource
+        )) * availableBalance
+
+      let actualMaxAmount
+      if (order.orderType == OrderType.SELL) {
+        actualMaxAmount =
+          availableBalanceInFiat < order.maxFiatAmount
+            ? availableBalanceInFiat
+            : order.maxFiatAmount
+      } else {
+        actualMaxAmount = order.maxFiatAmount
+      }
       if (fiatValue != null) {
-        if (
-          fiatValue < order.minFiatAmount ||
-          fiatValue > order.maxFiatAmount
-        ) {
+        if (fiatValue < order.minFiatAmount || fiatValue > actualMaxAmount) {
           return state
         }
 
@@ -886,4 +907,11 @@ function nextDealsState(state: ExchangeState | null): ExchangeStateKey | null {
     default:
       return null
   }
+}
+
+async function getAvailableBalance(
+  userId: number,
+  currencyCode: CryptoCurrency
+) {
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }

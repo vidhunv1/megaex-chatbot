@@ -11,7 +11,8 @@ import {
   Trade,
   TelegramAccount,
   TradeStatus,
-  PaymentMethod
+  PaymentMethod,
+  Transaction
 } from 'models'
 import { DealsConfig } from './config'
 import { logger } from 'modules'
@@ -125,6 +126,29 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
 
       const { order } = orderInfo
 
+      const availableBalance = await getAvailableBalance(
+        order.userId,
+        order.cryptoCurrencyCode
+      )
+      const availableBalanceInFiat =
+        (await Order.convertToFixedRate(
+          order.rate,
+          order.rateType,
+          order.cryptoCurrencyCode,
+          order.fiatCurrencyCode,
+          order.user.exchangeRateSource
+        )) * availableBalance
+
+      let actualMaxAmount
+      if (order.orderType == OrderType.SELL) {
+        actualMaxAmount =
+          availableBalanceInFiat < order.maxFiatAmount
+            ? availableBalanceInFiat
+            : order.maxFiatAmount
+      } else {
+        actualMaxAmount = order.maxFiatAmount
+      }
+
       await DealsMessage(msg, user).inputDealAmount(
         order.orderType,
         order.fiatCurrencyCode,
@@ -137,7 +161,7 @@ export const DealsResponder: Responder<ExchangeState> = (msg, user, state) => {
         ),
         order.cryptoCurrencyCode,
         order.minFiatAmount,
-        order.maxFiatAmount
+        actualMaxAmount
       )
       return true
     },
@@ -666,4 +690,11 @@ async function getOrdersList(
   })
 
   return { orderList: mapOrders, totalOrders }
+}
+
+async function getAvailableBalance(
+  userId: number,
+  currencyCode: CryptoCurrency
+) {
+  return await Transaction.getAvailableBalance(userId, currencyCode)
 }
