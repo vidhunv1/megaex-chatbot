@@ -142,7 +142,7 @@ MegaDeals आपके स्थानीय मुद्रा के साथ
 
       // CNY
       [PaymentMethodType.ALIPAY]: 'AliPay',
-      [PaymentMethodType.WECHAT]: 'WeChay',
+      [PaymentMethodType.WECHAT]: 'WeChat',
 
       // ALL
       [PaymentMethodType.NATIONAL_BANK_TRANSFER]: 'नेशनल बैंक ट्रांसफर',

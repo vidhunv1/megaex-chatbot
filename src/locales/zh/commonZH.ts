@@ -141,7 +141,7 @@ MegaDeals 是一个安全的交换机器人用你的本地货币买/卖比特币
 
       // CNY
       [PaymentMethodType.ALIPAY]: 'AliPay',
-      [PaymentMethodType.WECHAT]: 'WeChay',
+      [PaymentMethodType.WECHAT]: 'WeChat',
 
       // ALL
       [PaymentMethodType.NATIONAL_BANK_TRANSFER]: '国家银行转账',

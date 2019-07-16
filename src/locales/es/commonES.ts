@@ -143,7 +143,7 @@ Megadeals es un robot de intercambio p2p seguro para comprar / vender bitcoins c
 
       // CNY
       [PaymentMethodType.ALIPAY]: 'AliPay',
-      [PaymentMethodType.WECHAT]: 'WeChay',
+      [PaymentMethodType.WECHAT]: 'WeChat',
 
       // ALL
       [PaymentMethodType.NATIONAL_BANK_TRANSFER]:

@@ -145,7 +145,7 @@ MegaDeals - это безопасный p2p-биржа для покупки / �
 
       // CNY
       [PaymentMethodType.ALIPAY]: 'AliPay',
-      [PaymentMethodType.WECHAT]: 'WeChay',
+      [PaymentMethodType.WECHAT]: 'WeChat',
 
       // ALL
       [PaymentMethodType.NATIONAL_BANK_TRANSFER]: 'National Bank Transfer',

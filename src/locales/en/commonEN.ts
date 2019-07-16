@@ -143,7 +143,7 @@ MegaDeals is a secure p2p exchange bot to buy / sell bitcoins with your local cu
 
       // CNY
       [PaymentMethodType.ALIPAY]: 'AliPay',
-      [PaymentMethodType.WECHAT]: 'WeChay',
+      [PaymentMethodType.WECHAT]: 'WeChat',
 
       // ALL
       [PaymentMethodType.NATIONAL_BANK_TRANSFER]: 'National Bank Transfer',

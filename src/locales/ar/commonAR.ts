@@ -107,7 +107,7 @@ https://megadeals.io
 
 ⚠️ هام: لا تفعل أي صفقات خارج هذا الروبوت ، فلن نتمكن من حماية واسترداد أموالك.
 
-ℹ️ *حول MegaDeals* 
+ℹ️ *حول MegaDeals*
 
 MegaDeals عبارة عن روبوت آمن لتبادل العملات لشراء وبيع عملات البيتكوين بعملتك المحلية.`
   },
@@ -142,7 +142,7 @@ MegaDeals عبارة عن روبوت آمن لتبادل العملات لشرا
 
       // CNY
       [PaymentMethodType.ALIPAY]: 'AliPay',
-      [PaymentMethodType.WECHAT]: 'WeChay',
+      [PaymentMethodType.WECHAT]: 'WeChat',
 
       // ALL
       [PaymentMethodType.NATIONAL_BANK_TRANSFER]: 'حوالة مصرفية وطنية',

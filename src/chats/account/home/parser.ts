@@ -93,7 +93,7 @@ export const AccountHomeParser: Parser<AccountState> = async (
         }
         if (msg.document) {
           const message = await Message.createMessage(
-            u.id,
+            user.id,
             userId,
             msg.document.file_id
           )
@@ -141,7 +141,7 @@ export const AccountHomeParser: Parser<AccountState> = async (
         } else if (msg.photo) {
           const photo = msg.photo[msg.photo.length - 1]
           const message = await Message.createMessage(
-            u.id,
+            user.id,
             userId,
             photo.file_id
           )
@@ -186,7 +186,7 @@ export const AccountHomeParser: Parser<AccountState> = async (
             }
           }
         } else if (msg.text) {
-          const message = await Message.createMessage(u.id, userId, msg.text)
+          const message = await Message.createMessage(user.id, userId, msg.text)
           await telegramHook.getWebhook.sendMessage(
             u.telegramUser.id,
             u.t(`${Namespace.Account}:home.new-message`, {
