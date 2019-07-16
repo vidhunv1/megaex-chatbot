@@ -192,7 +192,7 @@ export class Trade extends Model<Trade> {
     }[]
   > {
     const a = await Trade.sequelize.query(
-      `SELECT "t"."rating", "t"."reviews", "t"."cryptoAmount", "t"."cryptoCurrencyCode", "t"."ratingbyuserid", "TelegramAccount"."firstName" FROM (SELECT (CASE WHEN "buyerUserId"=(:userId) THEN "ratingBySeller" ELSE "ratingByBuyer" END) as rating, (CASE WHEN "buyerUserId"=(:userId) THEN "reviewBySeller" ELSE "reviewByBuyer" END) as reviews, "cryptoAmount", "cryptoCurrencyCode", (CASE WHEN "buyerUserId"=(:userId) THEN "sellerUserId" ELSE "buyerUserId" END) as ratingbyuserid FROM "Trades" where "buyerUserId"=(:userId) OR "sellerUserId" = (:userId)) AS t INNER JOIN "TelegramAccount" ON "TelegramAccount"."userId" = ratingbyuserid where t.rating IS NOT NULL OR t.reviews IS NOT NULL`,
+      `SELECT "t"."rating", "t"."reviews", "t"."cryptoAmount", "t"."cryptoCurrencyCode", "t"."ratingbyuserid", "TelegramAccount"."firstName" FROM (SELECT (CASE WHEN "buyerUserId"=(:userId) THEN "ratingBySeller" ELSE "ratingByBuyer" END) as rating, (CASE WHEN "buyerUserId"=(:userId) THEN "reviewBySeller" ELSE "reviewByBuyer" END) as reviews, "cryptoAmount", "cryptoCurrencyCode", (CASE WHEN "buyerUserId"=(:userId) THEN "sellerUserId" ELSE "buyerUserId" END) as ratingbyuserid, id FROM "Trades" where "buyerUserId"=(:userId) OR "sellerUserId" = (:userId)) AS t INNER JOIN "TelegramAccount" ON "TelegramAccount"."userId" = ratingbyuserid where t.rating IS NOT NULL OR t.reviews IS NOT NULL ORDER BY t.id desc`,
       {
         replacements: {
           userId: userId
