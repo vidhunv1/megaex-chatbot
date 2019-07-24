@@ -19,15 +19,8 @@ export const dataFormatter = {
   formatCryptoCurrency: (
     amount: number,
     currency?: CryptoCurrency,
-    locale = 'en-US'
+    _locale = 'en-US'
   ) => {
-    return amount.toLocaleString(locale, {
-      currency,
-      currencyDisplay: 'name',
-      style: currency ? 'currency' : 'decimal',
-      minimumFractionDigits: 7,
-      maximumFractionDigits: 7,
-      useGrouping: false
-    })
+    return amount + ' ' + currency
   }
 }
