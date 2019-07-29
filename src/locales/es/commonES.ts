@@ -45,10 +45,11 @@ Comenzaré a enviar alertas de tarifas BTC aquí.
     home: `🔷 *Megadeals*
 
 _La forma rápida y sencilla de intercambiar bitcoins localmente en tu moneda._
-https://megadeals.io
+https://megax.in
 
 *Estado*: Online
-*Retiro de BTC*: {{ btcWithdrawalFee }}
+*Tarifas de retiradas*: {{ btcWithdrawalFee }}
+*min retirada*: {{ btcWithdrawalMin }}
 *Cuota de tomador*: {{ takerFeePercentage }}% (Fee for quick buy / quick sell trades)
 *Cuota de fabricante*: {{ makerFeePercentage }}%
 *Comisión de referencia*: {{ referralComission }}% del canon total.`,

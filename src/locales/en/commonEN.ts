@@ -45,10 +45,11 @@ I will start sending BTC rate alerts here.
     home: `🔷 *Megadeals*
 
 _The fast and simple way to exchange bitcoins locally in your currency._
-https://megadeals.io
+https://megax.in
 
 *Status*: Online
-*BTC withdrawal*: {{ btcWithdrawalFee }}
+*Withdraw fees*: {{ btcWithdrawalFee }}
+*Min withdrawal*: {{ btcWithdrawalMin }}
 *Taker fee*: {{ takerFeePercentage }}% (Fee for quick buy / quick sell trades)
 *Maker fee*: {{ makerFeePercentage }}%
 *Referral comission*: {{ referralComission }}% of the total trade fee.`,

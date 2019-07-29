@@ -12,7 +12,6 @@ const getFee = async (): Promise<number> => {
       BtcCommands.ESTIMATE_SMART_FEE,
       [6, 'ECONOMICAL']
     )
-    console.log('RES: ' + JSON.stringify(btcResult))
     if (!btcResult.result.errors && !btcResult.error) {
       return btcResult.result.feerate
     }

@@ -159,6 +159,10 @@ export const CommonChat: ChatHandler = {
             await cryptoCurrencyInfo[CryptoCurrency.BTC].getFee(),
             CryptoCurrency.BTC
           ),
+          btcWithdrawalMin: dataFormatter.formatCryptoCurrency(
+            cryptoCurrencyInfo[CryptoCurrency.BTC].minWithdrawalAmount,
+            CryptoCurrency.BTC
+          ),
           takerFeePercentage: 0,
           makerFeePercentage: CONFIG.MAKER_FEES_PERCENTAGE,
           referralComission: CONFIG.REFERRAL_COMISSION_PERCENTAGE

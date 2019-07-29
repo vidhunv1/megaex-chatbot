@@ -44,10 +44,11 @@ export const commonZH = {
     home: `🔷 *Megadeals*
 
 _在您的货币本地交换比特币的快速而简单的方法._
-https://megadeals.io
+https://megax.in
 
 *状态*: 线上
-*BTC 退出*: {{ btcWithdrawalFee }}
+*提取费用*: {{ btcWithdrawalFee }}
+*最小退出*: {{ btcWithdrawalMin }}
 *接受者 费用*: {{ takerFeePercentage }}% (费用 快买 / 快卖 交易)
 *制作者 费用*: {{ makerFeePercentage }}%
 *推荐佣金*: {{ referralComission }}% 总交易费用.`,
