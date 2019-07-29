@@ -17,7 +17,7 @@ import { CONFIG } from '../../config'
 import { showUserAccount } from 'chats/account/utils'
 import { showOrder } from 'chats/exchange/deals/utils'
 import { dataFormatter } from 'utils/dataFormatter'
-import { CryptoCurrency } from 'constants/currencies'
+import { CryptoCurrency, cryptoCurrencyInfo } from 'constants/currencies'
 import { ReferralStateKey, ReferralState } from 'chats/account/referral'
 
 export const CommonChat: ChatHandler = {
@@ -149,11 +149,14 @@ export const CommonChat: ChatHandler = {
       //   )
       // }
 
+      console.log(
+        'FEE: ' + (await cryptoCurrencyInfo[CryptoCurrency.BTC].getFee())
+      )
       await telegramHook.getWebhook.sendMessage(
         msg.chat.id,
         user.t('info.home', {
           btcWithdrawalFee: dataFormatter.formatCryptoCurrency(
-            parseFloat(CONFIG.BTC_FEES),
+            await cryptoCurrencyInfo[CryptoCurrency.BTC].getFee(),
             CryptoCurrency.BTC
           ),
           takerFeePercentage: 0,

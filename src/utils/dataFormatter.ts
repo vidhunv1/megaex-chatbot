@@ -1,4 +1,8 @@
-import { CryptoCurrency, FiatCurrency } from 'constants/currencies'
+import {
+  CryptoCurrency,
+  FiatCurrency,
+  cryptoCurrencyInfo
+} from 'constants/currencies'
 
 export const dataFormatter = {
   formatFiatCurrency: (
@@ -21,6 +25,9 @@ export const dataFormatter = {
     currency?: CryptoCurrency,
     _locale = 'en-US'
   ) => {
-    return amount + ' ' + currency
+    const precision = cryptoCurrencyInfo[CryptoCurrency.BTC].precision
+    const m = Math.pow(10, precision)
+    const safeAmount = parseInt(amount * m + '') / m
+    return safeAmount + (currency ? ' ' + currency : '')
   }
 }

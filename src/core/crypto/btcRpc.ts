@@ -8,6 +8,7 @@ import logger from 'modules/logger'
 export enum BtcCommands {
   GET_NEW_ADDRESS = 'getnewaddress',
   GET_TRANSACTION = 'gettransaction',
+  ESTIMATE_SMART_FEE = 'estimatesmartfee',
   LIST_RECEIVED_BY_ADDRESS = 'listreceivedbyaddress'
 }
 
@@ -15,6 +16,7 @@ interface BtcParams {
   [BtcCommands.GET_NEW_ADDRESS]: [string] // account address
   [BtcCommands.GET_TRANSACTION]: [string] // in-wallet transaction id
   [BtcCommands.LIST_RECEIVED_BY_ADDRESS]: [number] // min-confirmations
+  [BtcCommands.ESTIMATE_SMART_FEE]: [number, 'ECONOMICAL' | 'CONSERVATIVE'] // [block, feeType]
 }
 
 interface BtcResult {
@@ -48,6 +50,11 @@ interface BtcResult {
     label: string
     txids: [string]
   }[]
+  [BtcCommands.ESTIMATE_SMART_FEE]: {
+    feerate: number
+    blocks: number
+    errors: any
+  }
 }
 
 export class BtcRpc {

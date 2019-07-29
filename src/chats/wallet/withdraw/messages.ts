@@ -175,7 +175,7 @@ export const WithdrawMessage = (msg: TelegramBot.Message, user: User) => ({
   },
 
   async showCreatedWithdrawalSuccess(currencyCode: CryptoCurrency) {
-    const fees = cryptoCurrencyInfo[currencyCode].fee
+    const fees = await cryptoCurrencyInfo[currencyCode].getFee()
     await telegramHook.getWebhook.sendMessage(
       msg.chat.id,
       user.t(`${Namespace.Wallet}:withdraw.create-success`, {

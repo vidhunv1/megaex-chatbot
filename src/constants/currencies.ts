@@ -1,24 +1,46 @@
+import btcRPC, { BtcCommands } from 'core/crypto/btcRpc'
+import logger from 'modules/logger'
 import { CONFIG } from '../config'
 
 export enum CryptoCurrency {
   BTC = 'BTC'
 }
 
+const getFee = async (): Promise<number> => {
+  try {
+    const btcResult = await btcRPC.btcRpcCall<BtcCommands.ESTIMATE_SMART_FEE>(
+      BtcCommands.ESTIMATE_SMART_FEE,
+      [6, 'ECONOMICAL']
+    )
+    console.log('RES: ' + JSON.stringify(btcResult))
+    if (!btcResult.result.errors && !btcResult.error) {
+      return btcResult.result.feerate
+    }
+
+    return +CONFIG.BTC_FEES
+  } catch (e) {
+    logger.error('BTC core HTTP error, estimate smart fee')
+    throw e
+  }
+}
+
 export const cryptoCurrencyInfo: Record<
   CryptoCurrency,
   {
     confirmations: number
-    fee: number
+    getFee: () => Promise<number>
     minWithdrawalAmount: number
     minBuyAmount: number
     getTxUrl: (txid: string) => string
+    precision: number
   }
 > = {
   [CryptoCurrency.BTC]: {
     confirmations: 1,
-    fee: parseFloat(CONFIG.BTC_FEES),
-    minWithdrawalAmount: 0.001,
+    getFee: getFee,
+    minWithdrawalAmount: 0.0005,
     minBuyAmount: 0.00025,
+    precision: 8,
     getTxUrl: (txid: string) => `https://live.blockcypher.com/btc/tx/${txid}/`
   }
 }
