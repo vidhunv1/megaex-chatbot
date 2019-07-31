@@ -44,6 +44,6 @@ export const CONFIG = {
   REFERRAL_COMISSION_PERCENTAGE: getEnv('REFERRAL_COMISSION_PERCENTAGE'),
 
   VERIFY_IDENTITY_URL: 'https://megadeals.io/verify-id',
-  TELEGRAM_COMMUNITY: 'https://t.me/joinchat/LPty60zNRdw0hvoNwzYj0g',
+  TELEGRAM_COMMUNITY: 'https://t.me/megax_official',
   HOW_TO_GUIDE: 'https://telegra.ph/Megadeals-Guide-07-01'
 }

@@ -42,7 +42,7 @@ Comenzaré a enviar alertas de tarifas BTC aquí.
 ----------------`
   },
   info: {
-    home: `🔷 *Megadeals*
+    home: `🔷 *MegaX*
 
 _La forma rápida y sencilla de intercambiar bitcoins localmente en tu moneda._
 https://megax.in
@@ -53,7 +53,7 @@ https://megax.in
 *Cuota de tomador*: {{ takerFeePercentage }}% (Fee for quick buy / quick sell trades)
 *Cuota de fabricante*: {{ makerFeePercentage }}%
 *Comisión de referencia*: {{ referralComission }}% del canon total.`,
-    'join-group-cbbutton': '👥 Únete a nuestra comunidad',
+    'join-group-cbbutton': '📣 MegaX canal de anuncio',
     'referral-cbbutton': '🤝 Invitar a la referencia',
     'verify-account-cbbutton': '🆔 Verificar KYC',
     'guide-cbbutton': '📖 Cómo utilizar?',

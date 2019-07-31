@@ -41,7 +41,7 @@ export const commonZH = {
 ----------------`
   },
   info: {
-    home: `🔷 *Megadeals*
+    home: `🔷 *MegaX*
 
 _在您的货币本地交换比特币的快速而简单的方法._
 https://megax.in
@@ -52,7 +52,7 @@ https://megax.in
 *接受者 费用*: {{ takerFeePercentage }}% (费用 快买 / 快卖 交易)
 *制作者 费用*: {{ makerFeePercentage }}%
 *推荐佣金*: {{ referralComission }}% 总交易费用.`,
-    'join-group-cbbutton': '👥 加入我们的社区',
+    'join-group-cbbutton': '📣 MegaX 公告频道',
     'referral-cbbutton': '🤝 邀请推荐',
     'verify-account-cbbutton': '🆔 验证KYC',
     'guide-cbbutton': '📖 如何使用?',

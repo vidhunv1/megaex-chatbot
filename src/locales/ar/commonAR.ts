@@ -41,7 +41,7 @@ export const commonAR = {
 ----------------`
   },
   info: {
-    home: `🔷 *Megadeals*
+    home: `🔷 *MegX*
 
 _طريقة سريعة وبسيطة لتبادل عملات البيتكوين محليًا بعملتك._
 https://megadeals.io
@@ -51,7 +51,7 @@ https://megadeals.io
 *رسوم الاخذ*: {{ takerFeePercentage }}% (رسوم شراء سريع / بيع سريع)
 *رسوم صانع*: {{ makerFeePercentage }}%
 *لجنة الإحالة*: {{ referralComission }}% من إجمالي رسوم التجارة.`,
-    'join-group-cbbutton': '👥  انضم إلى مجتمعنا',
+    'join-group-cbbutton': '📣 قناة الإعلان MegaX',
     'referral-cbbutton': '🤝 دعوة الإحالة',
     'verify-account-cbbutton': '🆔 التحقق',
     'guide-cbbutton': '📖 كيف تستعمل؟',
