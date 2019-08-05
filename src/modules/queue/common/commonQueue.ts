@@ -1,10 +1,11 @@
-import { CommonJob, CommonQueueName } from './types'
+import { CommonJob, CommonQueueName, TelegramButton } from './types'
 import logger from 'modules/logger'
 import { Channel } from 'amqplib'
 import * as _ from 'lodash'
 import { User, TelegramAccount } from 'models'
 import { telegramHook } from 'modules'
 import { keyboardMainMenu } from 'chats/common'
+import { InlineKeyboardButton } from 'node-telegram-bot-api'
 
 export class CommonQueue {
   static instance?: CommonQueue = undefined
@@ -72,12 +73,31 @@ export class CommonQueue {
                   message = params.message.text
                 }
 
+                const buttons: InlineKeyboardButton[][] = []
+                if (params.message.button) {
+                  params.message.button.forEach((bb: TelegramButton[]) => {
+                    const t: InlineKeyboardButton[] = []
+                    bb.forEach((b) => {
+                      t.push({
+                        text: b.title,
+                        url: b.url
+                      })
+                    })
+                    buttons.push(t)
+                  })
+                }
+
                 await telegramHook.getWebhook.sendMessage(
                   user.telegramUser.id,
                   `${title}\n\n${message}`,
                   {
                     parse_mode: 'Markdown',
-                    reply_markup: keyboardMainMenu(user)
+                    reply_markup:
+                      buttons.length > 0
+                        ? {
+                            inline_keyboard: buttons
+                          }
+                        : keyboardMainMenu(user)
                   }
                 )
 
