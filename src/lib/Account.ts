@@ -9,9 +9,9 @@ export const ACCOUNT_CACHE_EXPIRY = 60 * 60
 export class Account {
   telegramId: number
   telegramMessage: TelegramBot.Message['from']
-  /* 
+  /*
     NOTE:
-    telegramMessage contains info for creating new account. 
+    telegramMessage contains info for creating new account.
     If you are sure the user exists in DB then only telegram ID needs to be passed
    */
   constructor(
@@ -85,9 +85,7 @@ export class Account {
           const t = await newT.create()
           t.user.id = t.userId
 
-          // create all wallets for user
-          const wallets = new Wallet({ userId: t.user.id })
-          await wallets.createAll()
+          await Wallet.createAll(t.user.id)
 
           tAccount = t
         } catch (e) {

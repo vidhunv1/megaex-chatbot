@@ -3,7 +3,8 @@ import logger from 'modules/logger'
 import { CONFIG } from '../config'
 
 export enum CryptoCurrency {
-  BTC = 'BTC'
+  BTC = 'BTC',
+  ETH = 'ETH'
 }
 
 const getFee = async (): Promise<number> => {
@@ -41,6 +42,14 @@ export const cryptoCurrencyInfo: Record<
     minBuyAmount: 0.00025,
     precision: 8,
     getTxUrl: (txid: string) => `https://live.blockcypher.com/btc/tx/${txid}/`
+  },
+  [CryptoCurrency.ETH]: {
+    confirmations: 12,
+    getFee: async () => 0.001,
+    minBuyAmount: 0.005,
+    minWithdrawalAmount: 0.05,
+    precision: 8,
+    getTxUrl: (txid: string) => `https://etherscan.io/tx/${txid}`
   }
 }
 

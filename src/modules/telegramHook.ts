@@ -28,7 +28,9 @@ export class TelegramHook {
       })
 
       this.bot.setWebHook(
-        `${CONFIG.WEBHOOK_URL}:${CONFIG.WEBHOOK_PORT}/bot${CONFIG.TELEGRAM_ACCESS_TOKEN}`
+        `${CONFIG.WEBHOOK_URL}:${CONFIG.WEBHOOK_PORT}/bot${
+          CONFIG.TELEGRAM_ACCESS_TOKEN
+        }`
       )
     }
 

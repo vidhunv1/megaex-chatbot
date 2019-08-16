@@ -11,8 +11,9 @@ import {
 } from 'sequelize-typescript'
 import { User } from './User'
 import { logger } from '../modules'
-import { CryptoCurrency } from '../constants/currencies'
+import { CryptoCurrency } from '../constants'
 import btcRpc, { BtcCommands } from 'core/crypto/btcRpc'
+import ethWallet from 'core/crypto/ethWallet'
 import { amqp } from 'modules'
 
 @Table({ timestamps: true, tableName: 'Wallets', paranoid: true })
@@ -40,33 +41,44 @@ export class Wallet extends Model<Wallet> {
   currencyCode!: CryptoCurrency
 
   // calling this will create all wallets for the userId
-  async createAll(): Promise<boolean | null> {
+  static async createAll(userId: number): Promise<boolean | null> {
     try {
       await Wallet.create<Wallet>(
-        { userId: this.userId, currencyCode: CryptoCurrency.BTC },
+        { userId: userId, currencyCode: CryptoCurrency.BTC },
+        {}
+      )
+      await Wallet.create<Wallet>(
+        { userId: userId, currencyCode: CryptoCurrency.ETH },
         {}
       )
 
       try {
         const res = await btcRpc.btcRpcCall<BtcCommands.GET_NEW_ADDRESS>(
           BtcCommands.GET_NEW_ADDRESS,
-          [this.userId + '']
+          [userId + '']
         )
         if (!res.result) {
-          throw new Error('Generate wallet error response')
+          throw new Error('Generate BTC wallet error response')
+        }
+        await Wallet.updateNewAddress(userId, CryptoCurrency.BTC, res.result)
+
+        const ethAddress = await ethWallet.generateAddress()
+        if (!ethAddress) {
+          throw new Error('Generate ETH wallet errror response')
         }
 
-        await Wallet.updateNewAddress(
-          this.userId,
-          CryptoCurrency.BTC,
-          res.result
-        )
+        await Wallet.updateNewAddress(userId, CryptoCurrency.ETH, ethAddress)
       } catch (e) {
         logger.error('Error generating wallet address: ' + e)
         // Add to generate address queue
         await amqp.walletQ.genAddressToQ({
           currency: CryptoCurrency.BTC,
-          userId: this.userId + ''
+          userId: userId + ''
+        })
+
+        await amqp.walletQ.genAddressToQ({
+          currency: CryptoCurrency.ETH,
+          userId: userId + ''
         })
       }
       return true
