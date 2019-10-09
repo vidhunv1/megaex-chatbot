@@ -113,7 +113,7 @@ Referral fees: {{ referralFeesPercentage }}%
 
 Earn bitcoins with every trade your referral makes. You will get {{ referralFeesPercentage }}% of the trade fee.
 
-For example: If your referral trades 1 BTC you will make 0.004 BTC of the 0.008 BTC we take as fee.
+For example: If your referral trades 1 BTC you will earn 0.004 BTC from the trading fee of 0.008 BTC.
 
 Processed and credited instantly to your wallet. No limitations and no expiry date.
 
@@ -125,7 +125,7 @@ Copy the message below and share it. 👇`
 
 This Account ID is invalid. Please check the ID you've entered and try again.`,
 
-    'update-success': 'changed',
+    'update-success': 'Changed.',
     'username-show': `👤 *Enter Account ID*
 
 Only english letters and numbers between 3 and 15 characters.
@@ -157,7 +157,7 @@ Currently active: *{{ language }}*`,
     'currency-cbbutton': '💵 Currency',
     'language-cbbutton': '🌎 Language',
     'rate-source-cbbutton': '📊 Rate source',
-    'show-settings': `⚙️ Settings
+    'show-settings': `⚙️ *Settings*
 
 What do you want to edit?`,
     'username-cbbutton': '👤  Change Account ID'
